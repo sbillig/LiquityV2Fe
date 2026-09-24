@@ -1,0 +1,17 @@
+{
+  "scope": "TroveManager storage and data calculation helpers only; no complete TroveManager implementation yet",
+  "command": "LIQUITY_TEST_ARTIFACTS=build/tm-data-validation forge test --match-contract TroveDataParityTest -vv",
+  "compiler_revision": "ce277a26962d60fa0c5fa58ef2219313a922903b",
+  "sources_sha256": {
+    "src/trove_data_harness.fe": "890e10d2f3eafda1e67c8efca361912b28ecba2d9c840bbb305c6bf6939d9865",
+    "src/trove_data.fe": "bd222aa4439145800dd2f21753eb491db50ec87f98e9470a6cc2208f9e96040c",
+    "src/constants.fe": "ccff0f9125fa5887b28837019b3db50117be2306149706bb9c31e7240eeb95cc",
+    "src/types.fe": "2f055d45e4f7fb1505589b6186e8fa18d9fc417d656e31faef74576f613e1dcf",
+    "src/liquity_math.fe": "4a417676713031ab13ad03cf47e880695649630a51183e1179a6d817a28e12e1"
+  },
+  "artifacts_sha256": {
+    "build/tm-data-validation/TroveDataHarness.runtime.bin": "b90deef371f02c4f666bd4d9497e7461871d79ed3f7bc3d1d5701d6780334cd6",
+    "build/tm-data-validation/TroveDataHarness.bin": "9b6832c8a33660d91d86ba155939b5d98da263f4cd35c0c1efc74cbbe7b15638",
+    "build/tm-data-validation/TroveDataHarness.abi.json": "2a35296196a5b8cb813081656653d83b30b54e162d536b5705e167eacae328e3"
+  }
+}

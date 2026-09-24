@@ -6,10 +6,10 @@ are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **118 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **130 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/stability-pool.json`;
-the complete log is `tests/results/stability-pool.log`.
+compiler and reference hashes are recorded in `tests/results/trove-core.json`;
+the complete log is `tests/results/trove-core.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -44,8 +44,10 @@ PoolSystem connects real Fe pools, registry and BOLDToken. StabilityPoolSystem
 also connects the actual Fe StabilityPool, exercising real interest minting,
 offsets and claims. Both tests drive BO/TM-side operations and do not establish
 a complete borrowing/liquidation deployment.
-TroveChange and LatestTroveData ABI support are integrated; LatestBatchData is
-currently only a field definition.
+TroveChange, LatestTroveData and LatestBatchData ABI support are integrated.
+TroveManager shared data/state helpers pass 12 differential tests covering interest,
+redistribution, shares, packed writes and indexed removal; the public manager is
+still pending.
 
 `port_status.json` retains all 102 core/helper sources; `governance_status.json`
 retains all 27 governance sources. Unused generic SVG/JSON/Utils/baseSVG entry
@@ -84,7 +86,7 @@ Native storage borrows cannot span external calls; raw handles/copies preserve
 storage access ordering without weakening compiler checks. Any newly authored
 compiler fix needs its own branch, regression tests and newsfragment.
 
-Temporary TroveManager work after this checkpoint: `/tmp/liquity-next-trove-data.fe`
-contains the storage/interest calculation draft; `/tmp/liquity-next-types.fe` adds
-LatestBatchData ABI support and zero constructors. Neither is yet integrated or
-validated. All of TroveManager.sol and ITroveManager/ITroveEvents have been read.
+TroveManager hook drafts are in `/tmp/liquity-next-trove-hooks.fe` and
+`/tmp/liquity-next-trove-events.fe`, with isolated project
+`/tmp/liquity-tm-hooks-project` and test draft
+`/tmp/liquity-next-TroveHooksParity.t.sol`. They are not part of this checkpoint.

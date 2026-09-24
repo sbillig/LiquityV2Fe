@@ -30,3 +30,8 @@ pub use metadata_geometry
 pub use collateral_registry
 
 pub use stability_pool
+
+pub use trove_data
+pub use trove_data_harness
+
+pub use trove_state

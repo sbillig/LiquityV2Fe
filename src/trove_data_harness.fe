@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: MIT
+// Test-only access to shared TroveManager arithmetic; not a protocol manager.
+use std::abi::sol
+use std::evm::{Address, Ctx, RawMem, RawStorage}
+use super::trove_data as data
+use super::trove_state as state
+use super::types::{LatestTroveData, LatestBatchData, TroveChange}
+use super::liquity_math as math
+pub msg TroveDataHarnessMsg {
+    #[selector = sol("updateBatch(uint256,address,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,uint256,bool)")]
+    UpdateBatch { id: u256, manager: Address, change: TroveChange, new_debt: u256, batch_coll: u256, batch_debt: u256, check_ratio: bool },
+    #[selector = sol("removeShares(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    RemoveShares { id: u256, coll: u256, debt: u256, change: TroveChange, manager: Address, batch_coll: u256, batch_debt: u256 },
+    #[selector = sol("removeId(uint256,uint256)")]
+    RemoveId { id: u256, len: u256 },
+
+    #[selector = sol("getLatestTroveData(uint256)")]
+    LatestTrove { id: u256 } -> LatestTroveData,
+    #[selector = sol("getLatestBatchData(address)")]
+    LatestBatch { manager: Address } -> LatestBatchData,
+    #[selector = sol("getTroveAnnualInterestRate(uint256)")]
+    AnnualRate { id: u256 } -> u256,
+    #[selector = sol("getCurrentICR(uint256,uint256)")]
+    CurrentICR { id: u256, price: u256 } -> u256,
+    #[selector = sol("getTroveStatus(uint256)")]
+    Status { id: u256 } -> u8,
+    #[selector = sol("Troves(uint256)")]
+    Troves { id: u256 } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256),
+    #[selector = sol("rewardSnapshots(uint256)")]
+    RewardSnapshots { id: u256 } -> (u256, u256),
+    #[selector = sol("newStake(uint256)")]
+    NewStake { coll: u256 } -> u256,
+    #[selector = sol("updateStake(uint256,uint256)")]
+    UpdateStake { id: u256, coll: u256 } -> u256,
+    #[selector = sol("updateRewards(uint256)")]
+    UpdateRewards { id: u256 },
+    #[selector = sol("interestPeriod(uint256)")]
+    InterestPeriod { last: u256 } -> u256,
+}
+pub contract TroveDataHarness {
+    init() {}
+    recv TroveDataHarnessMsg {
+        UpdateBatch { id, manager, change, new_debt, batch_coll, batch_debt, check_ratio } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+            state::update_batch_shares(id, manager, change, new_debt, batch_coll, batch_debt, check_ratio)
+        }
+        RemoveShares { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+            state::remove_batch_shares(id, coll, debt, change, manager, batch_coll, batch_debt)
+        }
+        RemoveId { id, len } uses (mem: mut RawMem, storage: mut RawStorage) { state::remove_trove_id(id, len) }
+
+        LatestTrove { id } -> LatestTroveData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_trove(id) }
+        LatestBatch { manager } -> LatestBatchData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_batch(manager) }
+        AnnualRate { id } -> u256 uses (mem: mut RawMem, storage: RawStorage) { data::annual_rate(id) }
+        CurrentICR { id, price } -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+            let t = data::latest_trove(id)
+            math::compute_cr(t.entire_coll, t.entire_debt, price)
+        }
+        Status { id } -> u8 uses (mem: mut RawMem, storage: RawStorage) { data::load_trove(id).status }
+        Troves { id } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let t = data::load_trove(id)
+            (t.debt, t.coll, t.stake, t.status, t.array_index, t.last_debt_update, t.last_rate_adjustment, t.annual_rate, t.batch_manager, t.batch_shares)
+        }
+        RewardSnapshots { id } -> (u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let slot = data::reward_slot(id)
+            (storage.sload(slot), storage.sload(slot + 1))
+        }
+        NewStake { coll } -> u256 uses (storage: RawStorage) { data::new_stake(coll) }
+        UpdateStake { id, coll } -> u256 uses (mem: mut RawMem, storage: mut RawStorage) { data::update_stake(id, coll) }
+        UpdateRewards { id } uses (mem: mut RawMem, storage: mut RawStorage) { data::update_rewards(id) }
+        InterestPeriod { last } -> u256 uses (ctx: Ctx, storage: RawStorage) { data::interest_period(last) }
+    }
+}

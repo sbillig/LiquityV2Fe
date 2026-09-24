@@ -1,0 +1,14 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.55s
+Compiler run successful!
+
+Ran 6 tests for tests/TroveDataParity.t.sol:TroveDataParityTest
+[PASS] testBatchUsesSeparateRoundingAndStakeRedistribution() (gas: 201038)
+[PASS] testFuzzBatchData(uint96,uint96,uint96,uint96,uint64,uint64,uint32,uint64) (runs: 1024, μ: 110385, ~: 110464)
+[PASS] testFuzzIndividualData(uint256,uint96,uint96,uint96,uint64,uint32,uint64,uint8) (runs: 1024, μ: 74497, ~: 73712)
+[PASS] testFuzzInterestPeriod(uint256,uint256) (runs: 1024, μ: 11084, ~: 11190)
+[PASS] testFuzzStakeUpdate(uint256,uint256,uint256,uint256,uint256) (runs: 1024, μ: 116773, ~: 120659)
+[PASS] testIndividualInterestRedistributionAndShutdown() (gas: 265428)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 225.54ms (459.34ms CPU time)
+
+Ran 1 test suite in 226.36ms (225.54ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

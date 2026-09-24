@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: BUSL-1.1
+// TroveManager packed writes, indexed arrays and exact batch-share accounting.
+use core::num::IntDowncast
+use std::evm::{Address, Ctx, RawMem, RawStorage, revert_error}
+use std::evm::panic::{Panic, PANIC_INDEX_OUT_OF_BOUNDS}
+use std::evm::packed::keccak_packed
+use super::trove_data as data
+use super::types::TroveChange
+use super::constants::MAX_BATCH_SHARES_RATIO
+#[error]
+pub struct BatchSharesRatioTooHigh {}
+pub fn set_bits(_ slot: u256, _ shift: u256, _ mask: u256, _ value: u256) uses (storage: mut RawStorage) {
+    storage.sstore(slot: slot, value: (storage.sload(slot) & ~(mask << shift)) | ((value & mask) << shift))
+}
+pub fn set_status(_ id: u256, _ status: u8) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::trove_slot(id) + 3, 0, 255, status as u256) }
+pub fn set_trove_index(_ id: u256, _ index: u64) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::trove_slot(id) + 3, 8, data::MASK64, index as u256) }
+pub fn set_trove_debt_time(_ id: u256, _ time: u256) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::trove_slot(id) + 3, 72, data::MASK64, time) }
+pub fn set_trove_rate_time(_ id: u256, _ time: u256) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::trove_slot(id) + 3, 136, data::MASK64, time) }
+pub fn set_batch_index(_ manager: Address, _ index: u64) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::batch_slot(manager) + 2, 0, data::MASK64, index as u256) }
+pub fn set_batch_debt_time(_ manager: Address, _ time: u256) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::batch_slot(manager) + 2, 64, data::MASK64, time) }
+pub fn set_batch_rate_time(_ manager: Address, _ time: u256) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::batch_slot(manager) + 2, 128, data::MASK64, time) }
+pub fn set_manager(_ id: u256, _ manager: Address) uses (mem: mut RawMem, storage: mut RawStorage) { set_bits(data::trove_slot(id) + 5, 0, data::MASK160, manager.inner) }
+#[arithmetic(unchecked)]
+fn array_slot(_ root: u256, _ index: u256) -> u256 uses (mem: mut RawMem) { keccak_packed(root) + index }
+pub fn array_get(_ root: u256, _ index: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+    if index >= storage.sload(root) { revert_error(Panic::from(PANIC_INDEX_OUT_OF_BOUNDS)) }
+    storage.sload(array_slot(root, index))
+}
+pub fn array_push(_ root: u256, _ value: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+    let len = storage.sload(root)
+    storage.sstore(slot: root, value: len + 1)
+    storage.sstore(slot: array_slot(root, len), value: value)
+}
+pub fn remove_trove_id(_ id: u256, _ len: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+    let index = data::load_trove(id).array_index
+    let last = len - 1
+    let moved = array_get(data::TROVE_IDS, last)
+    if (index as u256) >= storage.sload(data::TROVE_IDS) { revert_error(Panic::from(PANIC_INDEX_OUT_OF_BOUNDS)) }
+    storage.sstore(slot: array_slot(data::TROVE_IDS, index as u256), value: moved)
+    set_trove_index(moved, index)
+    let actual_len = storage.sload(data::TROVE_IDS)
+    storage.sstore(slot: array_slot(data::TROVE_IDS, actual_len - 1), value: 0)
+    storage.sstore(slot: data::TROVE_IDS, value: actual_len - 1)
+}
+pub fn update_batch_shares(_ id: u256, _ manager: Address, _ change: TroveChange, _ new_debt: u256, _ batch_coll: u256, _ batch_debt: u256, _ check_ratio: bool)
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+    let batch = data::batch_slot(manager)
+    let trove = data::trove_slot(id)
+    let shares = storage.sload(batch + 5)
+    let mut increase = change.debt_increase + change.upfront_fee + change.applied_redist_bold_debt_gain
+    let mut decrease: u256 = 0
+    if increase > change.debt_decrease { increase -= change.debt_decrease }
+    else { decrease = change.debt_decrease - increase
+        increase = 0
+    }
+    if increase == 0 && decrease == 0 { storage.sstore(slot: batch, value: batch_debt) }
+    else if increase > 0 {
+        let delta = if batch_debt == 0 { increase } else {
+            // Keep the multiplication first, even when the ratio check is disabled.
+            if shares * MAX_BATCH_SHARES_RATIO < batch_debt && check_ratio { revert_error(BatchSharesRatioTooHigh {}) }
+            shares * increase / batch_debt
+        }
+        storage.sstore(slot: trove + 6, value: storage.sload(trove + 6) + delta)
+        storage.sstore(slot: batch, value: batch_debt + increase)
+        storage.sstore(slot: batch + 5, value: shares + delta)
+    } else if decrease > 0 {
+        if new_debt == 0 {
+            storage.sstore(slot: batch, value: batch_debt - decrease)
+            storage.sstore(slot: batch + 5, value: shares - storage.sload(trove + 6))
+            storage.sstore(slot: trove + 6, value: 0)
+        } else {
+            let delta = shares * decrease / batch_debt
+            storage.sstore(slot: trove + 6, value: storage.sload(trove + 6) - delta)
+            storage.sstore(slot: batch, value: batch_debt - decrease)
+            storage.sstore(slot: batch + 5, value: shares - delta)
+        }
+    }
+    set_batch_debt_time(manager, ctx.timestamp())
+    let mut coll_increase = change.coll_increase + change.applied_redist_coll_gain
+    let mut coll_decrease: u256 = 0
+    if coll_increase > change.coll_decrease { coll_increase -= change.coll_decrease }
+    else { coll_decrease = change.coll_decrease - coll_increase
+        coll_increase = 0
+    }
+    if coll_increase == 0 && coll_decrease == 0 { storage.sstore(slot: batch + 1, value: batch_coll) }
+    else if coll_increase > 0 { storage.sstore(slot: batch + 1, value: batch_coll + coll_increase) }
+    else if coll_decrease > 0 { storage.sstore(slot: batch + 1, value: batch_coll - coll_decrease) }
+}
+pub fn remove_batch_shares(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256)
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+    let t = data::load_trove(id)
+    let decrease_debt = debt - change.upfront_fee - change.applied_redist_bold_debt_gain
+    let decrease_coll = coll - change.applied_redist_coll_gain
+    let batch = data::batch_slot(manager)
+    storage.sstore(slot: batch + 5, value: storage.sload(batch + 5) - t.batch_shares)
+    storage.sstore(slot: batch, value: batch_debt - decrease_debt)
+    storage.sstore(slot: batch + 1, value: batch_coll - decrease_coll)
+    set_batch_debt_time(manager, ctx.timestamp())
+    set_manager(id, Address::zero())
+    storage.sstore(slot: data::trove_slot(id) + 6, value: 0)
+}

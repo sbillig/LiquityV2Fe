@@ -536,9 +536,16 @@
     ]
   },
   "contracts/src/TroveManager.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial",
+    "fe": [
+      "src/trove_data.fe",
+      "src/trove_state.fe"
+    ],
+    "verification": [
+      "tests/TroveDataParity.t.sol",
+      "tests/results/trove-core.log"
+    ],
+    "notes": "Shared storage, interest, redistribution, stakes and batch-share accounting verified. Public manager operations remain pending."
   },
   "contracts/src/TroveNFT.sol": {
     "status": "implemented_differential_tests_pass",
