@@ -1,0 +1,21 @@
+use std::abi::sol
+use std::evm::{RawMem, RawStorage}
+use super::governance_list as list
+pub msg ListMsg {
+    #[selector = sol("item(uint256)")]
+    Item { id: u256 } -> (u256, u256, u256, u256),
+    #[selector = sol("ends()")]
+    Ends -> (u256, u256),
+    #[selector = sol("contains(uint256)")]
+    Contains { id: u256 } -> bool,
+    #[selector = sol("insert(uint256,uint256,uint256,uint256)")]
+    Insert { id: u256, lqty: u256, offset: u256, after: u256 },
+}
+pub contract GovernanceListHarness {
+    recv ListMsg {
+        Item { id } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(0, id) }
+        Ends -> (u256, u256) uses (mem: mut RawMem, storage: RawStorage) { (list::head(0), list::tail(0)) }
+        Contains { id } -> bool uses (mem: mut RawMem, storage: RawStorage) { list::contains(0, id) }
+        Insert { id, lqty, offset, after } uses (mem: mut RawMem, storage: mut RawStorage) { list::insert(0, id, lqty, offset, after) }
+    }
+}

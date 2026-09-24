@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+use core::num::IntDowncast
+pub fn abs(_ value: i256) -> u256 {
+    if value < 0 { (-value).downcast_truncate() } else { value.downcast_truncate() }
+}
+pub fn add(_ a: u256, _ b: i256) -> u256 {
+    if b < 0 { a - abs(b) } else { a + b.downcast_truncate() }
+}
+pub fn sub(_ a: u256, _ b: i256) -> u256 {
+    if b < 0 { a + abs(b) } else { a - b.downcast_truncate() }
+}
+pub fn max(_ a: u256, _ b: u256) -> u256 { if a > b { a } else { b } }
+pub fn lqty_to_votes(_ amount: u256, _ timestamp: u256, _ offset: u256) -> u256 {
+    let product = amount * timestamp
+    if product > offset { product - offset } else { 0 }
+}

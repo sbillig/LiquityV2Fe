@@ -1,0 +1,23 @@
+use std::abi::sol
+use super::governance_math as math
+pub msg MathMsg {
+    #[selector = sol("abs(int256)")]
+    Abs { value: i256 } -> u256,
+    #[selector = sol("add(uint256,int256)")]
+    Add { a: u256, b: i256 } -> u256,
+    #[selector = sol("sub(uint256,int256)")]
+    Sub { a: u256, b: i256 } -> u256,
+    #[selector = sol("max(uint256,uint256)")]
+    Max { a: u256, b: u256 } -> u256,
+    #[selector = sol("votes(uint256,uint256,uint256)")]
+    Votes { amount: u256, timestamp: u256, offset: u256 } -> u256,
+}
+pub contract GovernanceMathHarness {
+    recv MathMsg {
+        Abs { value } -> u256 { math::abs(value) }
+        Add { a, b } -> u256 { math::add(a, b) }
+        Sub { a, b } -> u256 { math::sub(a, b) }
+        Max { a, b } -> u256 { math::max(a, b) }
+        Votes { amount, timestamp, offset } -> u256 { math::lqty_to_votes(amount, timestamp, offset) }
+    }
+}

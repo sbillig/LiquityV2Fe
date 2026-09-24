@@ -92,3 +92,10 @@ pub use hybrid_helpers_v2
 pub use quote_calls
 pub use balancer_flash_loan
 pub use balancer_errors
+pub use user_proxy
+pub use user_proxy_factory
+pub use user_proxy_errors
+pub use governance_math
+pub use governance_math_harness
+pub use governance_list
+pub use governance_list_harness

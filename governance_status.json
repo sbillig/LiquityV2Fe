@@ -20,14 +20,25 @@
     "verification": []
   },
   "src/UserProxy.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/user_proxy.fe",
+      "src/user_proxy_errors.fe"
+    ],
+    "verification": [
+      "tests/UserProxyParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/UserProxyFactory.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/user_proxy_factory.fe"
+    ],
+    "verification": [
+      "tests/UserProxyParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/interfaces/IBribeInitiative.sol": {
     "status": "pending",
@@ -85,24 +96,44 @@
     "verification": []
   },
   "src/interfaces/IUserProxy.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/user_proxy.fe"
+    ],
+    "verification": [
+      "tests/UserProxyParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/interfaces/IUserProxyFactory.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/user_proxy_factory.fe"
+    ],
+    "verification": [
+      "tests/UserProxyParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/utils/DoubleLinkedList.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_list.fe"
+    ],
+    "verification": [
+      "tests/GovernanceListParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/utils/Math.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_math.fe"
+    ],
+    "verification": [
+      "tests/GovernanceMathParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   },
   "src/utils/MultiDelegateCall.sol": {
     "status": "pending",
@@ -130,8 +161,13 @@
     "verification": []
   },
   "src/utils/VotingPower.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_math.fe"
+    ],
+    "verification": [
+      "tests/GovernanceMathParity.t.sol",
+      "tests/results/governance-foundation.log"
+    ]
   }
 }

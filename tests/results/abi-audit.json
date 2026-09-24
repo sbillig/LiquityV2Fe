@@ -678,6 +678,39 @@
     ],
     "function_count": 3
   },
+  "UserProxy": {
+    "runtime_bytes": 4923,
+    "initcode_bytes_before_arguments": 5256,
+    "compiler_abi_sha256": "de1a5566a2b174ce338307ac9ced92e8d5dda9f32fcc0b83fb7a4e08438edb76",
+    "reference_artifact_sha256": "42b1355971ca1fbefd1a6756082c3718130aa13643dcd22ebde9ae751a4692c3",
+    "protocol_abi_sha256": "1719ebc37fc0904adc12a80b5b2b7f3f2fefaeae72a8dfab330d1abcbd48559b",
+    "metadata_refinements": [
+      "stakeViaPermit: numeric selector preserves Solidity lazy calldata validation; wire signature and malformed fields covered by differential tests",
+      "staked: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "stake: static tuple has identical flat runtime encoding",
+      "unstake: static tuple has identical flat runtime encoding",
+      "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 8
+  },
+  "UserProxyFactory": {
+    "runtime_bytes": 1189,
+    "initcode_bytes_before_arguments": 6902,
+    "compiler_abi_sha256": "8e4e4ed71237f3b07d0f73f0065ee958143a6b28eb1f1aaaa567b88cd66d71e5",
+    "reference_artifact_sha256": "66b0025618cdd5605f7bce807d7630197db8acd3ff80d5a55bfa06702b4df429",
+    "protocol_abi_sha256": "267b2665363225959e7ed45c61147333e7f15dd6b17c0cf1da57737f37bdbdb6",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 3
+  },
   "LeverageWETHZapperLeverage": {
     "implementation_companion": true,
     "runtime_bytes": 10606,

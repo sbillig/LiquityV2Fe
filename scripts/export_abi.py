@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan', 'UserProxy', 'UserProxyFactory']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'UserProxy': ('STATICCALL', {'staked()'}),
     'RedemptionHelper': ('SLOAD and empty revert', {'addresses(uint256)'}),
     'DebtInFrontHelper': ('STATICCALL', {'getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)', 'getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)'}),
     'HintHelpers': ('STATICCALL', {
@@ -49,6 +50,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'UserProxy': {'stake', 'unstake'},
     'HybridCurveUniV3ExchangeHelpers': {'getCollFromBold'},
     'GasCompZapper': {'removeManagerReceiverOf'},
     'LeverageWETHZapper': {'removeManagerReceiverOf'},
@@ -87,6 +89,9 @@ for contract in CONTRACTS:
     compiled = json.loads(fe_path.read_text())
     reference = json.loads(sol_path.read_text())['abi']
     refinements = []
+    if contract == 'UserProxy':
+        compiled.append(copy.deepcopy(next(e for e in reference if e.get('name') == 'stakeViaPermit')))
+        refinements.append('stakeViaPermit: numeric selector preserves Solidity lazy calldata validation; wire signature and malformed fields covered by differential tests')
     if contract == 'BorrowerOperations':
         for companion in ['BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
             module_abi = json.loads((ROOT / 'build' / (companion + '.abi.json')).read_text())
@@ -134,7 +139,7 @@ for contract in CONTRACTS:
             assert entry['stateMutability'] == 'pure'
             entry['stateMutability'] = 'nonpayable'
             refinements.append(entry['name'] + ': pure implementation of the reference no-op callback; nonpayable value guard retained')
-        if contract in {'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper'} and entry['type'] == 'fallback':
+        if contract in {'UserProxy', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper'} and entry['type'] == 'fallback':
             assert entry['stateMutability'] == 'payable'
             entry['type'] = 'receive'
             refinements.append('receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior')

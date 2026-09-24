@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{RawMem, RawStorage, revert_error}
+use std::evm::packed::keccak_packed
+#[error]
+pub struct IdIsZero {}
+#[error]
+pub struct ItemNotInList {}
+#[error]
+pub struct ItemInList {}
+pub fn slot(_ root: u256, _ id: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((id, root)) }
+pub fn item(_ root: u256, _ id: u256) -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+    let s = slot(root, id)
+    (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+}
+pub fn prev(_ root: u256, _ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(slot(root, id) + 2) }
+pub fn next(_ root: u256, _ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(slot(root, id) + 3) }
+pub fn head(_ root: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { prev(root, 0) }
+pub fn tail(_ root: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { next(root, 0) }
+pub fn contains(_ root: u256, _ id: u256) -> bool uses (mem: mut RawMem, storage: RawStorage) {
+    if id == 0 { revert_error(IdIsZero {}) }
+    prev(root, id) != 0 || next(root, id) != 0 || tail(root) == id
+}
+pub fn insert(_ root: u256, _ id: u256, _ lqty: u256, _ offset: u256, _ after: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+    if contains(root, id) { revert_error(ItemInList {}) }
+    if after != 0 && !contains(root, after) { revert_error(ItemNotInList {}) }
+    let before = prev(root, after)
+    storage.sstore(slot: slot(root, before) + 3, value: id)
+    storage.sstore(slot: slot(root, after) + 2, value: id)
+    let s = slot(root, id)
+    storage.sstore(slot: s + 2, value: before)
+    storage.sstore(slot: s + 3, value: after)
+    storage.sstore(slot: s, value: lqty)
+    storage.sstore(slot: s + 1, value: offset)
+}

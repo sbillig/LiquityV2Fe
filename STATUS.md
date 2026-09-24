@@ -6,10 +6,10 @@ complete multi-branch workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **264 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **274 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/flash-helpers.json`;
-the complete log is `tests/results/flash-helpers.log`.
+compiler and reference hashes are recorded in `tests/results/governance-foundation.json`;
+the complete log is `tests/results/governance-foundation.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -129,7 +129,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Integrate the prepared governance proxies and utilities; implement Governance and initiatives.
+1. Implement Governance and integrate/validate the prepared initiatives.
 2. Remaining helper/library interfaces.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -170,3 +170,62 @@ logs: `/tmp/liquity-governance-build`, `/tmp/liquity-governance-parity.log`.
 These governance changes are not yet integrated into the root checkpoint.
 The main Governance contract, initiatives, and remaining governance utilities
 still require porting and connected validation. No new compiler fix was needed.
+
+The governance foundation is integrated and included in the root checkpoint:
+UserProxy, UserProxyFactory, Math/VotingPower and DoubleLinkedList. All ten
+foundation tests, the full combined suite and the ABI audit pass.
+
+BribeInitiative is now prepared separately in `/tmp/liquity-governance-project`
+(`bribe_initiative.fe`, `bribe_state.fe`, `bribe_errors.fe`). Three initial parity
+tests in `/tmp/liquity-governance-inspect/test/BribeInitiativeParity.t.sol` pass:
+fuzzed two-user distribution/conservation, allocation history and revert order,
+and malformed claim arrays. It uses a separate `governance_token.fe` helper for
+the pinned OpenZeppelin 5 custom errors; all three token-helper parity tests pass,
+including arbitrary return/revert data, optional bools and missing code.
+The isolated ABI audit now includes BribeInitiative and passes. Its unused
+AddressInsufficientBalance error is declaration-only because token calls carry
+zero ETH. Authorization-only hooks preserve the nonpayable guard despite Fe's
+view capability metadata. Logs: `/tmp/liquity-bribe-parity.log` and
+`/tmp/liquity-governance-token-parity.log`. Bribe integration still needs broader
+batch rollback/reentrancy, event/storage and Curve gauge extension validation.
+These sources must stay outside root until the active foundation run is recorded.
+
+The isolated initiative work now also includes `curve_gauge_rewards.fe`.
+Bribe deposit/claim behavior is shared through helpers in `bribe_initiative.fe`;
+the extension adds the reference remainder at storage slot 4, threshold queuing,
+balance cap, approval and gauge callback. All 20 tests in the isolated governance
+project pass after rebuilding the current source (`/tmp/liquity-governance-all-prepared.log`).
+This includes four Bribe tests (event bytes/order and batch/token failure atomic
+rollback added), three Curve gauge tests (threshold/cap, authorization/rollback,
+zero duration and arithmetic boundaries), three OZ5 token tests and the ten
+foundation tests. The ABI audit passes for UserProxy, UserProxyFactory,
+BribeInitiative and CurveV2GaugeRewards. Broader reentrancy/storage validation,
+UniV4MerklRewards and main Governance implementation remain pending; do not
+claim initiative completion solely from these initial tests.
+
+UniV4MerklRewards is now prepared in the isolated governance project
+(`merkl_rewards.fe`, `merkl_errors.fe`). Four differential tests cover exact
+640-byte campaign data, approval/conditions setup, campaign tuple fields,
+thresholds, uint32 timestamp/duration truncation, authorization/no-op hooks,
+claim assertions, weight-sum overflow and threshold-before-timestamp-overflow
+ordering. All 24 isolated governance tests pass together in
+`/tmp/liquity-governance-all-prepared.log`; the five-contract ABI audit passes.
+Specific Merkl test log: `/tmp/liquity-merkl-parity.log`. Main Governance and
+remaining utilities are still unimplemented. Initiative integration and broader
+connected/reentrancy verification are still required.
+The prepared recorder `/tmp/liquity-record-governance-foundation.py` will record
+the running 274-test root checkpoint only after the full test/ABI log proves
+success; it also updates the foundation inventory without marking Governance
+or initiatives complete.
+
+Governance snapshot/status calculations are prepared separately in
+`governance_snapshots.fe`, exercised through `GovernanceSnapshotHarness` against
+actual Solidity Governance. Three tests pass (`/tmp/liquity-governance-snapshot-parity.log`):
+fuzzed epoch/snapshot updates, threshold overflow and initiative-status precedence.
+They compare return/revert bytes and global/initiative storage slots after writes.
+The authoritative Solidity storage layout is `/tmp/liquity-governance-storage.json`:
+reentrancy slot 0, owner slot 1, accrued BOLD 2, global snapshot 3–4, initiative
+snapshots mapping 5, global state 6–7, users mapping 8, initiatives mapping 9,
+allocations nested mapping 10 and registration mapping 11. The module is only one
+part of Governance; staking/allocation/registration/claim orchestration, hooks,
+reentrancy and multicall are still required before the contract is complete.

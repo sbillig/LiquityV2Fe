@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: MIT
+use std::abi::DynString
+use std::evm::RawMem
+pub fn caller() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x5573657250726f78793a2063616c6c65722d6e6f742d7374616b696e67563200)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 31))
+}
+pub fn owner() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x5573657250726f78793a206f776e65722d6e6f742d73656e6465720000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 27))
+}
+pub fn eth() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x5573657250726f78793a206574682d6661696c00000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 19))
+}
