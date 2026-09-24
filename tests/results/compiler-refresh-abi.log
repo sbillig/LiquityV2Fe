@@ -1,0 +1,21 @@
+PASS  [0.0001s] missing_actual_bytes_rejected
+PASS  [0.0000s] missing_length_word_rejected
+PASS  [0.0000s] overflowing_length_rejected
+PASS  [0.0002s] unpadded_strings
+PASS  [0.0002s] unpadded_bytes_all_decode_paths
+PASS  [0.0001s] unpadded_array_all_decode_paths_reencode_aligned
+PASS  [0.0001s] short_string_all_decode_paths_respect_input_extent
+PASS  [0.0000s] deeply_nested_array_clears_partial_padding
+PASS  [0.0000s] largest_padded_dynamic_payload_span_is_accepted
+PASS  [0.0001s] partially_padded_array_all_decode_paths_clear_padding
+PASS  [0.0000s] padded_dynamic_payload_size_overflow_is_rejected
+PASS  [0.0000s] full_input_with_overflowing_padded_size_is_rejected
+PASS  [0.0003s] aligned_and_empty_bytes
+PASS  [0.0003s] missing_nested_bytes_rejected
+PASS  [0.0003s] canonical_array_keeps_full_span
+PASS  [0.0004s] dirty_padding_is_cleared
+PASS  [0.0004s] unpadded_nested_bytes
+PASS  [0.0380s] every_byte_boundary_preserves_data_and_clears_padding
+PASS  [0.0887s] calldata_roundtrips_with_any_trailing_padding
+
+test result: ok. 19 passed; 0 failed

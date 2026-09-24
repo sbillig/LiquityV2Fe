@@ -116,7 +116,7 @@ recorder require the exact pinned tree and all input commits as ancestors.
   original compiler hashes. The port's erroneous constants were corrected and all
   source literals were checked for excessive width.
 - Published branch: [fix/reject-oversized-integer-literals](https://github.com/argotorg/fe/tree/fix/reject-oversized-integer-literals),
-  pushed to upstream at the user's request on 2026-09-24. No PR opened yet.
+  pushed to upstream at the user's request on 2026-09-24; merged upstream as PR #1595.
 - Duplicate check: no matching open PR among the 39 open PRs checked. Historical
   [PR #247](https://github.com/argotorg/fe/pull/247) addressed the same bound in
   the old analyzer and was merged on 2021-02-15; it should be referenced in a
@@ -168,5 +168,20 @@ worktree produced the same integration tree `0d1d3cedde2c9305c0d9219ee9de866e88d
   inputs plus the valid 31-byte boundary, including an associated const and UTF-8.
 - Newsfragment: `newsfragments/+invalid-constant-types.bugfix.md`.
 - Both regression tests and formatting pass. A built debug CLI reports error
-  3-0033 for the original String<33> reproducer. Full HIR tests remain running.
+  3-0033 for the original String<33> reproducer. The full HIR suite stops at
+  `non_regular_recursive_effect_handle_views_are_rejected` (layout root coverage
+  assertion); the exact same test and assertion fail on the unchanged base
+  commit. This is a pre-existing failure, not a passing full-suite claim.
+  Logs and hashes: `tests/results/compiler-string-constants.*` and associated logs.
 - Not merged into the protocol release compiler; valid port code does not need it.
+
+## Latest upstream refresh
+
+Upstream master is now `f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d`, including
+#1587, #1595 and #1597 (CLZ/CTZ and Osaka test harness). Local integration
+`0617639002e12e599fd7bfb68bd2722215c8a935` retains the other pinned fixes.
+A fresh replay from the new base produces the identical tree
+`17b20419e39a12c49b0e09d5b67053812c16504e`. Release build and 27 targeted execution tests pass (19 ABI, four CLZ/CTZ,
+four payable returns). Proof: `tests/results/compiler-refresh.json`. The new
+full protocol validation is still running. Solidity differential tests
+remain on Cancun. The string constant diagnostic branch is still separate.

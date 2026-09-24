@@ -1,0 +1,32 @@
+   Compiling fe-parser v26.3.0 (/tmp/fe-string-constant-baseline/crates/parser)
+   Compiling fe-trace-facts-macros v26.3.0 (/tmp/fe-string-constant-baseline/crates/trace-facts-macros)
+   Compiling fe-hir v26.3.0 (/tmp/fe-string-constant-baseline/crates/hir)
+   Compiling fe-dataflow v26.3.0 (/tmp/fe-string-constant-baseline/crates/fe-dataflow)
+   Compiling fe-common v26.3.0 (/tmp/fe-string-constant-baseline/crates/common)
+   Compiling fe-test-utils v26.3.0 (/tmp/fe-string-constant-baseline/crates/test-utils)
+   Compiling fe-trace-facts v26.3.0 (/tmp/fe-string-constant-baseline/crates/trace-facts)
+   Compiling fe-resolver v26.3.0 (/tmp/fe-string-constant-baseline/crates/resolver)
+   Compiling fe-driver v26.3.0 (/tmp/fe-string-constant-baseline/crates/driver)
+    Finished `test` profile [unoptimized] target(s) in 51.74s
+     Running tests/layout_evidence.rs (target/debug/deps/layout_evidence-4b78cef7cc35aa0f)
+
+running 1 test
+test non_regular_recursive_effect_handle_views_are_rejected ... FAILED
+
+failures:
+
+---- non_regular_recursive_effect_handle_views_are_rejected stdout ----
+
+thread 'non_regular_recursive_effect_handle_views_are_rejected' (4184559) panicked at crates/hir/src/analysis/ty/layout_holes.rs:507:5:
+assertion `left == right` failed: layout instantiation root uses must exactly cover the instantiated type
+  left: [LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>)]
+ right: [LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>), LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>), LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    non_regular_recursive_effect_handle_views_are_rejected
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 55 filtered out; finished in 1.47s
+
+error: test failed, to rerun pass `-p fe-hir --test layout_evidence`

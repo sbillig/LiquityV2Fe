@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynString, Bytes}
+use std::evm::RawMem
+use super::metadata_json as json
+pub msg JsonMsg {
+    #[selector = sol("property(string,string,bool)")]
+    Property { key: DynString, value: DynString, last: bool } -> DynString,
+    #[selector = sol("property(string,string)")]
+    PropertyMore { key: DynString, value: DynString } -> DynString,
+    #[selector = sol("object(string,string)")]
+    Object { key: DynString, value: DynString } -> DynString,
+    #[selector = sol("xmlImage(string)")]
+    Image { value: DynString } -> DynString,
+    #[selector = sol("encode(bytes)")]
+    Encode { value: Bytes } -> DynString,
+    #[selector = sol("formattedMetadata(string,string,string,string)")]
+    Format { name: DynString, description: DynString, svg: DynString, attributes: DynString } -> DynString,
+}
+pub contract MetadataJsonHarness {
+    recv JsonMsg {
+        Property { key, value, last } -> DynString uses (mem: mut RawMem) { json::property(key, value, last) }
+        PropertyMore { key, value } -> DynString uses (mem: mut RawMem) { json::property(key, value, false) }
+        Object { key, value } -> DynString uses (mem: mut RawMem) { json::object(key, value) }
+        Image { value } -> DynString uses (mem: mut RawMem) { json::xml_image(value) }
+        Encode { value } -> DynString uses (mem: mut RawMem) { super::metadata_string::base64(DynString::from_payload(source: value.payload_span())) }
+        Format { name, description, svg, attributes } -> DynString uses (mem: mut RawMem) { json::formatted_metadata(name, description, svg, attributes) }
+    }
+}

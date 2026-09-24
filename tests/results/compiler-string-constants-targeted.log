@@ -1,0 +1,11 @@
+   Compiling fe-hir v26.3.0 (/tmp/fe-string-constants/crates/hir)
+   Compiling fe-driver v26.3.0 (/tmp/fe-string-constants/crates/driver)
+    Finished `test` profile [unoptimized] target(s) in 6.34s
+     Running tests/invalid_string_constants.rs (toolchain/fe/target/debug/deps/invalid_string_constants-9f2b3672cf29a0e0)
+
+running 2 tests
+test maximum_inline_string_constant_is_valid ... ok
+test oversized_string_constants_report_type_errors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.96s
+

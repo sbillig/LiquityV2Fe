@@ -1,0 +1,6 @@
+PASS  [0.0002s] bit_counts_are_const
+PASS  [0.0003s] bit_count_cases
+PASS  [0.0004s] every_bit_position
+PASS  [0.0005s] bit_counts_runtime
+
+test result: ok. 4 passed; 0 failed

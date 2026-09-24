@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynString}
+use std::evm::{Address, Call, RawMem}
+use super::metadata_base_svg as base
+pub msg BaseSvgMsg {
+ #[selector = sol("svgProps()")]
+ M0 {  } -> DynString,
+ #[selector = sol("baseElements(address)")]
+ M1 { reader: Address } -> DynString,
+ #[selector = sol("leverageLogo()")]
+ M2 {  } -> DynString,
+ #[selector = sol("boldLogo(address)")]
+ M3 { reader: Address } -> DynString,
+ #[selector = sol("staticTextEls()")]
+ M4 {  } -> DynString,
+ #[selector = sol("formattedDynamicEl(string,uint256,uint256)")]
+ M5 { value: DynString, x: u256, y: u256 } -> DynString,
+ #[selector = sol("formattedIdEl(string)")]
+ M6 { id: DynString } -> DynString,
+ #[selector = sol("formattedAddressEl(address)")]
+ M7 { value: Address } -> DynString,
+ #[selector = sol("collLogo(string,address)")]
+ M8 { name: DynString, reader: Address } -> DynString,
+ #[selector = sol("statusEl(string)")]
+ M9 { value: DynString } -> DynString,
+ #[selector = sol("dynamicTextEls(uint256,uint256,uint256)")]
+ M10 { debt: u256, coll: u256, interest: u256 } -> DynString,
+}
+pub contract MetadataBaseSvgHarness {
+ recv BaseSvgMsg {
+  M0 {  } -> DynString uses (mem: mut RawMem) { base::svg_props() }
+  M1 { reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::base_elements(reader) }
+  M2 {  } -> DynString uses (mem: mut RawMem) { base::leverage_logo() }
+  M3 { reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::bold_logo(reader) }
+  M4 {  } -> DynString uses (mem: mut RawMem) { base::static_text_els() }
+  M5 { value, x, y } -> DynString uses (mem: mut RawMem) { base::formatted_dynamic_el(value,x,y) }
+  M6 { id } -> DynString uses (mem: mut RawMem) { base::formatted_id_el(id) }
+  M7 { value } -> DynString uses (mem: mut RawMem) { base::formatted_address_el(value) }
+  M8 { name, reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::coll_logo(name,reader) }
+  M9 { value } -> DynString uses (mem: mut RawMem) { base::status_el(value) }
+  M10 { debt, coll, interest } -> DynString uses (mem: mut RawMem) { base::dynamic_text_els(debt,coll,interest) }
+ }
+}

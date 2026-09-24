@@ -1,0 +1,15 @@
+{
+  "fix_commit": "35502252d6f7873e9bd1928388633319145c871b",
+  "base_commit": "3dd15a62124fb75370c7931c4ee040d8566a3649",
+  "targeted_tests_passed": 2,
+  "cli": "Diagnostic 3-0033 replaces panic",
+  "full_hir_suite": "failed at pre-existing layout_evidence test; remaining test binaries after this failure were not run",
+  "baseline_reproduction": "Same failing assertion on unmodified base commit",
+  "logs_sha256": {
+    "tests/results/compiler-string-constants-targeted.log": "f1b26046371cb3b1ad6f9c3866b95dccccad06f0bd46a03efd1d683b63640f20",
+    "tests/results/compiler-string-constants-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/results/compiler-string-constants-hir.log": "89ca8cdf11b8c8db197d1d12d8bb762c7a5269c1de74ac3b3eeca3d016d87e9a",
+    "tests/results/compiler-string-constants-cli.log": "d8c91216f9695e168b17e020f8a9f1e2937cb1f6b2acf06049d5c4b2b93c76d0",
+    "tests/results/compiler-string-constants-baseline-layout.log": "030ac2330c00b16629b0f58b4460ba790959f2ba220d5db7a64dda6fb7afe317"
+  }
+}

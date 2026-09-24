@@ -1,0 +1,52 @@
+{
+  "result": "passed",
+  "evm_tests": 13,
+  "fuzz_runs": 1024,
+  "command": "forge test --root /tmp/liquity-metadata-utils-inspect -vv",
+  "recorded_at_utc": "2026-09-24T21:39:09.770375+00:00",
+  "compiler_revision": "27976c7df7d0fca487f2c80f26241c9021dfa04c",
+  "note": "Artifacts built before the compiler refresh; new root full validation required. Obsolete single SVG harness artifacts excluded.",
+  "sources_sha256": {
+    "metadata_base_svg_harness.fe": "586c792a383408939f35f1c6213d1aea3d92c4b7e464abbb535436ef0ce403f6",
+    "metadata_json_harness.fe": "0d81403c3f5e2271c6a64d9a7bb4cd05d62533eb07458cad0131490befc902d8",
+    "fixed_asset_reader.fe": "d289bfa8a6776fc5bcedcd349311fe7b8b2963895645206018b3ccf85517a650",
+    "metadata_json.fe": "2443a8f344706033ad0d85c2fbb82d380c9d80bd46899dc7d4d00ff321f1cc08",
+    "revert_texts.fe": "a0a410e2b8803e54310749bc915a06687155d2b371cb122e48c99ad6de80127a",
+    "metadata_utils.fe": "803c74633e5a92644cf31e23a42fce7c8b9d1f6e8ff7fec851a2bf88e78b703e",
+    "lib.fe": "0c6db422d2d1adaa40474349858e1308e241a853182238d776c3ab5cea29ab5a",
+    "metadata_svg_harness.fe": "75f16e9cb01dbef6594f1acb592056fbccab33774065fa1c59bade529ce56ff9",
+    "metadata_svg.fe": "de6bc17b1ae77d5fa8e715c977a1ae38e6d5892a5d33b271429e1a5d409a228c",
+    "metadata_literals.fe": "7ad256ff222de69bb0a8e33a273d32a65af285beb110fab0b91a2ad9a0e918c1",
+    "metadata_utils_harness.fe": "7ebdfe7a474726a177f870c7a7b9491968949e0219e4e0123697e018a7dbcdf7",
+    "metadata_concat.fe": "745662d609e2b4ea9ea40a0a3d97a869223128da04ef077a494c50dd4f280e67",
+    "metadata_base_svg.fe": "ccf9b93f1d5b2b05d84a0e6b206f1fe5fe003c9bedc93d0928a3ffd1b56386fd",
+    "metadata_string.fe": "b25cbbc7605f0560486b18114d6b7a26ea225cad66aa577c0ecdf5af0a4ee187"
+  },
+  "tests_sha256": {
+    "MetadataSvgParity.t.sol": "e07abca90d9db1d6623083f0ac34d0e15d7d29ea2b033e37df5b42954463df1f",
+    "MetadataUtilsParity.t.sol": "024d9b72110e5df46162e73b52f545fea6e67208a9f5273bf6d1d14585ab8fa8",
+    "MetadataJsonParity.t.sol": "43c905c9a94f83cf2b803e83c2b863b28a42eccba4a67854f59dff7ae9ffae68",
+    "MetadataBaseSvgParity.t.sol": "35820c189217a839ac622bc63cfe7322d1c6d8f1f076b0e48d77ea004e14b083"
+  },
+  "artifacts_sha256": {
+    "MetadataJsonHarness.bin": "54707ae14d36f45e49556523681f1086da15a37d4c179198838bc41f8e428063",
+    "MetadataUtilsHarness.runtime.bin": "7729b52f7ffd57ea746126d1b3542c6d87e31edabac1ebadbeca1cb79f6c5c00",
+    "MetadataUtilsHarness.bin": "c2454f84bf9f971cdd3a541bcb7b5835613eebc943ae63d04c3c21048be1830d",
+    "MetadataSvgHarnessB.runtime.bin": "6aeea6ec9702c886b7ffaf48c5de7b8f2ffc21a318099ba9f8f0e11021b59466",
+    "MetadataUtilsHarness.abi.json": "85596f5dd617ab753c346fcf898367630d586762a41b3de81781b54b466d9533",
+    "MetadataBaseSvgHarness.bin": "2ff68adda004cf25a05948442e6cf2e0c21ba90ec7a8fe78a8b270acf4b61c81",
+    "MetadataSvgHarnessA.bin": "e16645cc19f7aa644b5fcd92e82e969c0094ffd2dc34271f0209c9575f0052e2",
+    "MetadataJsonHarness.abi.json": "5eb277c9301f8bb4c91f286eaeb8da2af528d3d4040184370666710c29f70a10",
+    "FixedAssetReader.bin": "562e9b1fd5ec0f92e6491ffa85e0e12beb129f94c1b726fafc095ae45c442381",
+    "FixedAssetReader.abi.json": "767e6bca899c8bf94c086a5e759231fbe7451decd062c0fbe4ea5edc492e7373",
+    "MetadataSvgHarnessB.abi.json": "14ab1afa1ee4da0d1c19777c9394470717be0f35c72bcdfa23ec860853f8b729",
+    "MetadataSvgHarnessA.abi.json": "14c60f1dbc06174e5b7d760b9e2a27437fa6d3212fc828f344a9175cce95fd8f",
+    "MetadataSvgHarnessB.bin": "8911f35431c6f022eee014d3c7539d147ca7a5cbc7a38995c618196e39c4a831",
+    "MetadataBaseSvgHarness.runtime.bin": "b3b532f6e4874e1e32f1d0836b88d8237a6533f3894b72381cb2e6d375d11e78",
+    "MetadataSvgHarnessA.runtime.bin": "dd34ceff27d0a311e7a893a45b41dfeeecee52a5f85dad0c078c6f0a853baaa4",
+    "MetadataBaseSvgHarness.abi.json": "b1dd2f55c3010eaaf407881ab9e1a26664ddbb298d0c1a9b24669aa95b5fa888",
+    "MetadataJsonHarness.runtime.bin": "f95f56ec12d0aa2b43b23b1a3dd2461a8af1d6d503e1247c86408bff7fa1e06e",
+    "FixedAssetReader.runtime.bin": "a07f564124132f7cbad01f9189c79fd6bdff42af0eedffa49d48e4d4ff8f3819"
+  },
+  "log_sha256": "a6efcb6c08dd7cac44a05382d07120c0604cbf4e1fadcb56e0dd74240ce56bf3"
+}

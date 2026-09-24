@@ -1,0 +1,644 @@
+   Compiling fe-hir v26.3.0 (/tmp/fe-string-constants/crates/hir)
+    Finished `test` profile [unoptimized] target(s) in 30.60s
+     Running unittests src/lib.rs (toolchain/fe/target/debug/deps/fe_hir-f5d56dde52d7695f)
+
+running 202 tests
+test analysis::semantic::borrowck::availability::tests::ownership_join_and_composition_cover_two_cell_executions ... ok
+test analysis::semantic::borrowck::control::tests::empty_cycles_have_repeated_values_and_solve_without_returning ... ok
+test analysis::semantic::borrowck::control::tests::parameter_only_cycle_tracks_block_parameters_and_solves ... ok
+test analysis::semantic::borrowck::summary::tests::returning_native_summary_invariant_checks_required_enum_payloads ... ok
+test analysis::semantic::borrowck::check::tests::generic_opaque_handles_preserve_declared_address_spaces ... ok
+test analysis::semantic::borrowck::inventory::tests::fresh_cell_discovery_does_not_manufacture_native_input_loans ... ok
+test analysis::semantic::capability::footprint::tests::physical_footprints_cover_all_bounded_concrete_interval_overlaps ... ok
+test analysis::semantic::capability::footprint::tests::physical_footprints_keep_unknown_and_overflowing_ranges_conservative ... ok
+test analysis::semantic::capability::loan::tests::loan_facts_grow_when_only_parent_relations_change ... ok
+test analysis::semantic::capability::loan::tests::parent_matching_requires_exact_family_arguments_and_holder_guards ... ok
+test analysis::semantic::capability::loan::tests::loan_families_abstract_and_instantiate_regions_and_guarded_parent_occurrences ... ok
+test analysis::semantic::capability::region::tests::certified_reinitialization_overapproximates_three_concrete_cells ... ok
+test analysis::semantic::capability::loan::tests::views_preserve_guarded_authority_without_becoming_active_loans ... ok
+test analysis::semantic::capability::region::tests::coverage_and_reinitialization_preserve_disjoint_members ... ok
+test analysis::semantic::capability::region::tests::enum_storage_overlap_never_establishes_coverage ... ok
+test analysis::semantic::capability::region::tests::provider_regions_distinguish_complete_bindings_with_the_same_provider_index ... ok
+test analysis::semantic::capability::region::tests::symbolic_slot_and_referent_indices_share_one_constraint_solver ... ok
+test analysis::semantic::capability::source::tests::all_dereference_indices_share_the_region_guard_solver ... ok
+test analysis::semantic::capability::source::tests::recursive_sources_widen_without_inventing_coverage_or_disjointness ... ok
+test analysis::semantic::capability::source::tests::stored_handle_slots_are_distinct_from_each_followed_referent ... ok
+test analysis::semantic::capability::source::tests::substitution_reaches_every_slot_and_dereference_without_capturing_indices ... ok
+test analysis::semantic::capability::region::tests::region_unions_use_complete_root_identity_and_obey_lattice_laws ... ok
+test analysis::semantic::capability::state::tests::a_family_write_cannot_capture_an_unbound_source_index ... ok
+test analysis::semantic::capability::state::tests::a_guarded_family_write_specializes_an_exact_input_referent ... ok
+test analysis::semantic::capability::state::tests::conditional_and_ambiguous_stores_keep_unwritten_contents ... ok
+test analysis::semantic::capability::state::tests::family_writes_keep_input_slot_and_destination_array_binders_independent ... ok
+test analysis::semantic::capability::state::tests::dynamic_stores_partition_array_members_and_exact_overwrites_remove_old_handles ... ok
+test analysis::semantic::capability::state::tests::joins_include_storage_contents_and_are_independent_of_predecessor_order ... ok
+test analysis::semantic::capability::state::tests::loop_feedback_separates_old_selectors_from_current_execution ... ok
+test analysis::semantic::borrowck::availability::tests::operation_operands_reject_duplicate_moves_in_verified_normalized_ir ... ok
+test analysis::semantic::capability::state::tests::missing_capability_storage_is_an_error_and_failed_writes_are_atomic ... ok
+test analysis::semantic::capability::state::tests::opaque_contents_preserve_families_without_manufacturing_native_loans ... ok
+test analysis::semantic::capability::state::tests::outer_borrow_tracks_contents_without_conflating_handle_slot_and_referent ... ok
+test analysis::semantic::capability::state::tests::opaque_field_writes_preserve_disjoint_capability_fields ... ok
+test analysis::semantic::borrowck::availability::tests::operation_operands_respect_guarded_regions_and_availability_phases ... ok
+test analysis::semantic::borrowck::check::tests::opaque_memory_effects_preserve_returned_address_identity ... ok
+test analysis::semantic::capability::state::tests::raw_overwrites_invalidate_exact_pointer_cells_and_remain_opaque ... ok
+test analysis::semantic::borrowck::access::tests::literal_birth_actions_match_the_explicit_constant_contract ... ok
+test analysis::semantic::capability::state::tests::storage_families_cannot_own_unrelated_binders - should panic ... ok
+test analysis::semantic::capability::state::tests::simultaneous_poststates_join_overlaps_without_update_order ... ok
+test analysis::semantic::capability::state::tests::simultaneous_disjoint_poststates_replace_exactly_and_fail_atomically ... ok
+test analysis::semantic::capability::state::tests::symbolic_external_referents_preserve_member_identity_and_followed_handle_identity ... ok
+test analysis::semantic::capability::state::tests::typed_reachable_storage_can_be_read_but_never_overwritten_exactly ... ok
+test analysis::semantic::capability::state::tests::uncertain_member_write_preserves_old_handles_and_scopes_unknown_sources ... ok
+test analysis::semantic::capability::state::tests::unknown_alias_stores_retain_origins_across_offsets_and_respect_address_spaces ... ok
+test analysis::semantic::capability::tests::allocation_birth_selects_guarded_full_families_and_only_their_own_bytes ... ok
+test analysis::semantic::capability::tests::enum_exclusivity_is_scoped_to_a_value_occurrence ... ok
+test analysis::semantic::capability::tests::complementary_guard_partitions_have_one_canonical_union ... ok
+test analysis::semantic::capability::state::tests::symbolic_array_writes_are_pointwise_and_can_select_a_diagonal ... ok
+test analysis::semantic::capability::tests::contextual_payload_mapping_reports_variant_fields_and_nested_array_binders ... ok
+test analysis::semantic::capability::tests::exact_updates_preserve_product_siblings_and_sparse_remainders ... ok
+test analysis::semantic::capability::tests::enum_union_substitution_reorders_and_identifies_choice_decisions ... ok
+test analysis::semantic::borrowck::check::tests::caller_enum_guards_use_actual_occurrences_in_parameterless_summaries ... ok
+test analysis::semantic::capability::tests::independently_built_and_nested_arrays_are_alpha_canonical ... ok
+test analysis::semantic::capability::tests::existential_region_witnesses_are_fresh_for_independent_enum_selections ... ok
+test analysis::semantic::capability::tests::indexed_enum_guards_recombine_across_equality_partitions ... ok
+test analysis::semantic::capability::tests::lexical_binders_are_canonical_scoped_and_namespaced ... ok
+test analysis::semantic::borrowck::summary::tests::signature_fallback_covers_checked_result_effect_and_poststate_contracts ... ok
+test analysis::semantic::capability::tests::occurrence_substitution_rechecks_colliding_enum_choices ... ok
+test analysis::semantic::capability::tests::opaque_handle_origins_preserve_copies_but_never_imply_fresh_storage ... ok
+test analysis::semantic::borrowck::summary::tests::core_signature_summaries_respect_native_and_copied_transport ... ok
+test analysis::semantic::capability::tests::out_of_bounds_array_operations_have_no_reachable_capability_effect ... ok
+test analysis::semantic::capability::tests::payload_mapping_masks_overwritten_default_members_before_observing_sources ... ok
+test analysis::semantic::capability::tests::payload_mapping_preserves_structure_and_uses_checked_substitution ... ok
+test analysis::semantic::capability::tests::physical_offsets_do_not_prove_disjoint_wide_accesses ... ok
+test analysis::semantic::borrowck::summary::tests::signature_fallback_preserves_both_mutation_and_consumption ... ok
+test analysis::semantic::capability::tests::region_projection_keeps_witnesses_observed_by_indexed_choices ... ok
+test analysis::semantic::borrowck::summary::tests::summary_verification_rejects_invalid_sources_and_authority ... ok
+test analysis::semantic::borrowck::summary::tests::signature_fallback_represents_native_results_and_corrupted_contents ... ok
+test analysis::semantic::borrowck::check::tests::opaque_native_summaries_preserve_query_order_and_provisional_recovery ... ok
+test analysis::name_resolution::method_selection::tests::address_wordrepr_method_resolves_across_std_modules ... ok
+test analysis::semantic::capability::tests::structural_summary_mapping_retains_nested_sources_and_exact_array_overrides ... ok
+test analysis::semantic::capability::tests::substitution_is_simultaneous_and_composes_without_capture ... ok
+test analysis::semantic::capability::tests::summary_alternatives_own_unknown_indices_under_array_members ... ok
+test analysis::name_resolution::method_selection::tests::storage_map_address_value_uses_wordrepr_impl ... ok
+test analysis::semantic::capability::tests::admitted_generic_array_parameters_have_capability_shapes ... ok
+test analysis::name_resolution::method_selection::tests::address_has_wordrepr_impl_in_std_trait_env ... ok
+test analysis::semantic::capability::tests::variant_collisions_are_checked_after_substitution_and_equality ... ok
+test analysis::semantic::capability::tests::nested_generic_families_specialize_shapes_and_capability_types_together ... ok
+test analysis::semantic::capability::tests::allocation_birth_selection_commutes_with_index_substitution ... ok
+test analysis::semantic::ctfe::machine::tests::raw_core_numeric_edges_keep_evm_word_semantics ... ok
+test analysis::semantic::capability::tests::referent_views_preserve_projected_storage_authority_and_nested_handle_origins ... ok
+test analysis::semantic::ctfe::machine::tests::unverified_semantic_value_cannot_enter_machine_storage ... ok
+test analysis::semantic::capability::tests::semantic_shapes_separate_borrow_targets_from_view_contents ... ok
+test analysis::semantic::capability::tests::opaque_handle_specialization_keeps_payload_and_shape_contracts_aligned ... ok
+test analysis::semantic::borrowck::availability::tests::allocation_feedback_can_overlap_the_next_current_member ... ok
+test analysis::semantic::borrowck::check::tests::recursive_opaque_memory_effects_have_finite_summaries ... ok
+test analysis::semantic::capability::tests::specializing_an_empty_array_keeps_its_direct_view_capability ... ok
+test analysis::semantic::capability::tests::symbolic_array_updates_and_projections_commute_with_specialization ... ok
+test analysis::semantic::ctfe::machine::tests::replay_root_rejects_live_reference_input_before_creating_a_frame ... ok
+test analysis::semantic::capability::tests::symbolic_lengths_do_not_hide_capability_structure ... ok
+test analysis::semantic::ctfe::machine::tests::blocked_attempt_discards_nested_reference_writes ... ok
+test analysis::semantic::ctfe::machine::tests::typed_use_value_reads_referent_and_forward_keeps_reference ... ok
+test analysis::semantic::ctfe::request::tests::verified_value_rejects_wrong_scalar_and_aggregate_payloads ... ok
+test analysis::semantic::capability::tests::guard_unions_obey_boolean_laws_and_substitution ... ok
+test analysis::ty::canonical::tests::canonical_extract_identity_handles_preseeded_tables ... ok
+test analysis::ty::canonical::tests::canonicalize_solution_fresh_vars_do_not_collide_with_query_vars ... ok
+test analysis::ty::const_ty::tests::dependent_constant_type_round_trip_preserves_term_and_nested_description ... ok
+test analysis::ty::const_ty::tests::signed_constant_type_round_trip_preserves_value ... ok
+test analysis::ty::const_ty::tests::specializing_nested_description_produces_verified_value ... ok
+test analysis::ty::decision_tree::tests::test_necessity_matrix_api ... ok
+test analysis::semantic::normalized::normalize::tests::handle_repacks_require_compatible_referents ... ok
+test analysis::ty::layout_holes::tests::collect_unique_app_bound_structural_holes_accepts_use_site_holes ... ok
+test analysis::ty::layout_holes::tests::collect_unique_app_bound_structural_holes_rejects_alias_template_holes - should panic ... ok
+test analysis::semantic::normalized::normalize::tests::branch_results_are_ssa_block_parameters ... ok
+test analysis::ty::layout_holes::tests::layout_root_identity_is_separate_from_trace_and_structural_landings ... ok
+test analysis::ty::layout_holes::tests::equated_layout_holes_merge_per_argument ... ok
+test analysis::ty::layout_holes::tests::layout_view_permutation_matching_handles_overlapping_lineages ... ok
+test analysis::ty::layout_holes::tests::layout_shape_key_preserves_repeated_placeholder_identity ... ok
+test analysis::ty::layout_holes::tests::reanchor_template_holes_changes_identity_and_preserves_sharing ... ok
+test analysis::ty::layout_holes::tests::substitute_layout_placeholders_by_placeholder_reuses_mapped_placeholder ... ok
+test analysis::ty::layout_holes::tests::substitute_layout_placeholders_by_placeholder_leaves_unmatched_and_respects_policy ... ok
+test analysis::semantic::normalized::normalize::tests::mutable_index_rereads_produce_distinct_values ... ok
+test analysis::semantic::normalized::normalize::tests::same_type_capability_cast_is_an_exact_forward ... ok
+test analysis::semantic::normalized::normalize::tests::native_call_results_keep_the_declared_carrier_before_contextual_copy_reads ... ok
+test analysis::semantic::normalized::normalize::tests::native_pointer_reads_load_the_carrier_before_copying_its_referent ... ok
+test analysis::semantic::capability::tests::symbolic_bounds_preserve_const_identity_and_specialize_as_unsigned_comparisons ... ok
+test analysis::semantic::normalized::normalize::tests::scalar_expressions_require_runtime_scalar_operator_signatures ... ok
+test analysis::semantic::normalized::normalize::tests::layout_plan_verifier_requires_exact_statement_provenance ... ok
+test analysis::ty::layout_holes::tests::template_hole_identity_includes_assumptions ... ok
+test analysis::semantic::normalized::normalize::tests::verifier_rejects_boundary_type_and_mutability_mismatches ... ok
+test analysis::ty::scratch::tests::with_materialized_extracts_query_back_to_original ... ok
+test analysis::ty::scratch::tests::with_materialized_extracts_values_derived_from_query ... ok
+test analysis::ty::scratch::tests::with_materialized_rejects_scratch_only_vars ... ok
+test analysis::ty::pattern_types::tests::pattern_match_expected_ty_strips_capabilities ... ok
+test analysis::ty::provider::tests::local_ingot_named_std_cannot_define_integer_backed_handles ... ok
+test analysis::ty::provider::tests::provider_layout_distinguishes_missing_target_and_unresolved_space ... ok
+test analysis::semantic::normalized::normalize::tests::scalar_casts_reject_capabilities_and_invalid_repacks ... ok
+test analysis::ty::provider::tests::provider_layout_rejects_an_incomplete_adt_target ... ok
+test analysis::ty::trait_lower::tests::lower_trait_ref_cycle_initial_returns_cycle ... ok
+test analysis::ty::provider::tests::provider_layout_rejects_multiple_matching_impls_even_when_outputs_match ... ok
+test analysis::ty::provider::tests::provider_layout_rejects_a_residual_generic_target ... ok
+test analysis::ty::provider::tests::provider_layout_rejects_an_unreduced_projection_target ... ok
+test analysis::ty::provider::tests::provider_layout_uses_one_generic_impl_instance_for_target_and_space ... ok
+test analysis::ty::trait_def::tests::resolved_impl_instance_preserves_default_assoc_template_and_concrete_args ... ok
+test analysis::ty::trait_def::tests::trait_env_collects_overlapping_constrained_impls_without_cycle ... ok
+test analysis::ty::provider::tests::unresolved_arguments_do_not_turn_plain_types_into_handles ... ok
+test analysis::ty::trait_lower::layout_hole_tests::omitted_trait_hole_defaults_keep_distinct_path_arg_identity ... ok
+test analysis::ty::trait_resolution::table_solver::tests::completion_mapping_preserves_engine_stop_reasons ... ok
+test analysis::ty::trait_resolution::table_solver::tests::type_depth_growth_budget_includes_its_boundary ... ok
+test analysis::semantic::capability::tests::guard_projection_agrees_with_finite_witness_enumeration ... ok
+test analysis::ty::tests::copy_prefilter_preserves_explicit_copy_struct ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_constraints_elaborate_callable_trait_key_holes ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_constraints_canonicalize_omitted_const_expr_defaults ... ok
+test analysis::ty::tests::copy_prefilter_rejects_concrete_noncopy_struct ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_constraints_elaborate_distinct_callable_type_key_holes ... ok
+test analysis::semantic::normalized::normalize::tests::borrow_activation_distinguishes_receiver_reservations_from_explicit_borrows ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_provider_constraints_include_concrete_type_key_bounds ... ok
+test analysis::ty::trait_resolution::tests::implementation_selection_does_not_discard_inference_answers_from_assumptions ... ok
+test analysis::ty::trait_resolution::tests::implementation_selection_preserves_competing_impls_with_an_assumption ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_constraints_preserve_repeated_callable_type_key_identity ... ok
+test analysis::ty::trait_resolution::constraint::tests::function_decl_constraints_instantiate_concrete_abi_trait_args ... ok
+test core::hir_def::module_tree::tests::module_tree ... ok
+test core::hir_def::module_tree::tests::module_tree_cross_ingot_no_panic ... ok
+test core::hir_def::scope_graph::tests::enum_record_fields ... ok
+test core::hir_def::scope_graph::tests::item_tree ... ok
+test core::hir_def::scope_graph::tests::msg_variant_fields ... ok
+test core::span::expr::tests::aug_assign ... ok
+test analysis::ty::trait_resolution::tests::tablesolve_allows_initially_deep_finite_queries ... ok
+test analysis::ty::trait_resolution::tests::solver_query_includes_assumptions ... ok
+test core::span::item::tests::enum_span ... ok
+test core::span::item::tests::fn_span ... ok
+test core::span::item::tests::mod_span ... ok
+test core::span::item::tests::struct_span ... ok
+test core::span::item::tests::incomplete_recv_arm_span_resolve_does_not_panic ... ok
+test core::span::item::tests::top_mod_span ... ok
+test core::span::item::tests::type_alias_span ... ok
+test core::span::item::tests::use_span ... ok
+test projection::tests::test_alias_constant_indices ... ok
+test projection::tests::test_alias_dynamic_indices ... ok
+test projection::tests::test_alias_must ... ok
+test projection::tests::test_alias_no_different_fields ... ok
+test projection::tests::test_alias_prefix ... ok
+test projection::tests::test_concat ... ok
+test projection::tests::test_empty_path ... ok
+test projection::tests::test_is_prefix_of ... ok
+test projection::tests::test_last_const_index ... ok
+test projection::tests::test_last_field_index ... ok
+test projection::tests::test_path_parent ... ok
+test projection::tests::test_path_push ... ok
+test projection::tests::test_strip_leading_deref ... ok
+test projection::tests::test_strip_prefix ... ok
+test projection::tests::test_without_first ... ok
+test core::span::item::tests::use_span_desugared ... ok
+test core::visitor::tests::visitor ... ok
+test analysis::ty::trait_resolution::constraint::tests::effect_constraints_resolve_assoc_type_keys_and_provider_slots ... ok
+test analysis::semantic::capability::tests::indexed_enum_guard_laws_are_independent_of_construction_order ... ok
+test analysis::ty::trait_resolution::tests::implementation_selection_uses_assumptions_for_obligations ... ok
+test analysis::ty::pattern_types::tests::projected_pattern_child_carrier_types_preserve_destructuring_policy ... ok
+test analysis::semantic::capability::tests::guard_conjunction_obeys_lattice_laws_and_concrete_models ... ok
+test analysis::ty::ty_check::smir_lowering_readiness_tests::unrelated_diagnostic_does_not_hide_an_incomplete_lowering_plan ... ok
+test analysis::ty::trait_resolution::tests::target_search_finds_an_answer_beyond_the_ambiguity_cutoff ... ok
+test analysis::ty::trait_resolution::tests::tablesolve_propagates_bindings_between_impl_constraints ... ok
+test analysis::semantic::borrowck::control::tests::feedback_matches_graph_oracles_for_all_four_block_graphs_and_entries ... ok
+test analysis::ty::trait_resolution::tests::tablesolve_classifies_cycles_and_distinct_implementors ... ok
+test analysis::ty::ty_check::smir_lowering_readiness_tests::incomplete_match_pattern_dominates_invalid_pattern_in_any_arm_order ... ok
+test analysis::semantic::borrowck::availability::tests::birth_composition_preserves_histories_choices_and_exit_moves ... ok
+test analysis::ty::trait_resolution::constraint::tests::method_where_clause_resolves_with_parent_constraints ... ok
+test analysis::ty::trait_resolution::tests::tablesolve_preserves_answers_when_growth_limit_stops_search ... ok
+test analysis::semantic::capability::tests::structural_join_laws_hold_for_independently_constructed_sparse_arrays ... ok
+test analysis::ty::trait_resolution::tests::tablesolve_bounds_growing_seedless_cycles ... ok
+test analysis::semantic::capability::tests::sparse_arrays_match_concrete_execution_for_small_lengths_and_selector_valuations has been running for over 60 seconds
+test analysis::semantic::capability::tests::sparse_arrays_match_concrete_execution_for_small_lengths_and_selector_valuations ... ok
+
+test result: ok. 202 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 96.66s
+
+     Running tests/arithmetic_attr.rs (toolchain/fe/target/debug/deps/arithmetic_attr-cce2ef2fc5a8c143)
+
+running 1 test
+test test_db_analysis_pipeline_reports_arithmetic_attr_errors ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+
+     Running tests/attr_semantics.rs (toolchain/fe/target/debug/deps/attr_semantics-9c0d4fa924df51fa)
+
+running 16 tests
+test unroll_never_attr_prevents_unrolling ... ok
+test empty_payable_attr_parens_do_not_mark_init_payable ... ok
+test expr_valued_loop_unroll_attr_does_not_apply_hint ... ok
+test empty_loop_unroll_attr_parens_do_not_apply_hint ... ok
+test invalid_payable_init_attr_does_not_mark_init_payable ... ok
+test empty_inline_attr_parens_stay_invalid ... ok
+test expr_valued_inline_attr_stays_invalid ... ok
+test malformed_payable_does_not_mask_valid_init_payable_attr ... ok
+test manual_contract_root_attr_parses_valid_forms ... ok
+test invalid_payable_recv_arm_attr_does_not_mark_arm_payable ... ok
+test direct_code_region_intrinsics_record_semantic_refs ... ok
+test array_repeat_lowering_preserves_repeat_expr_through_normalization ... ok
+test generic_array_repeat_with_symbolic_len_normalizes_as_repeat ... ok
+test mut_self_aug_assign_receivers_lower_as_borrow_calls ... ok
+test code_region_intrinsics_lower_to_semantic_code_region_exprs ... ok
+test create_contract_generic_forwarding_preserves_manual_root_refs ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.46s
+
+     Running tests/body_references.rs (toolchain/fe/target/debug/deps/body_references-956e6fd823275927)
+
+running 8 tests
+test body_references__file_module_use ... ok
+test body_references__pattern_paths ... ok
+test body_references__simple_paths ... ok
+test body_references__locals ... ok
+test body_references__enum_variants ... ok
+test body_references__trait_impl ... ok
+test body_references__generic_trait_method ... ok
+test body_references__field_method ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.05s
+
+     Running tests/const_param_assumptions.rs (toolchain/fe/target/debug/deps/const_param_assumptions-f74424232c935da4)
+
+running 1 test
+test const_param_types_use_assumptions_for_lowering ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s
+
+     Running tests/constraints.rs (toolchain/fe/target/debug/deps/constraints-05eaf9e60141d922)
+
+running 16 tests
+test free_function_call_constraints_defer_through_if_join ... ok
+test free_function_call_constraints_processed_to_a_fixed_point ... ok
+test free_function_calls_check_instantiated_constraints_without_effects ... ok
+test free_function_call_constraints_defer_through_array_literals ... ok
+test free_function_call_constraints_accept_if_join_after_inference ... ok
+test free_function_calls_accept_satisfied_constraints_without_effects ... ok
+test free_function_call_constraints_accept_array_literals_after_inference ... ok
+test free_function_call_constraints_diagnose_generic_body_bounds ... ok
+test constraints_standalone__inherent_impl_repeated_self_type_bound ... ok
+test deferred_method_call_constraints_substitute_self_assoc_bounds ... ok
+test deferred_method_call_constraint_solution_disambiguates_return_type ... ok
+test method_call_constraints_accept_if_join_after_inference ... ok
+test constraints_standalone__specialized ... ok
+test method_call_constraints_defer_through_if_join ... ok
+test constraints_standalone__trait_header_assoc_projection_recursive_bound ... ok
+test constraints_standalone__deep_assoc_bounds has been running for over 60 seconds
+test constraints_standalone__deep_assoc_bounds ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 60.50s
+
+     Running tests/contract_layout_report.rs (toolchain/fe/target/debug/deps/contract_layout_report-5d2fd66fd87d6a4d)
+
+running 4 tests
+test report_distinguishes_inline_fields_from_explicit_and_inferred_parameters ... ok
+test report_keeps_address_spaces_independent ... ok
+test report_labels_shared_parameters_and_mutually_exclusive_variants ... ok
+test report_preserves_array_geometry_and_enum_overlays ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.82s
+
+     Running tests/contract_recv.rs (toolchain/fe/target/debug/deps/contract_recv-c3fe1cb22c2a6743)
+
+running 1 test
+test recv_file_module_reports_diagnostic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.06s
+
+     Running tests/corelib.rs (toolchain/fe/target/debug/deps/corelib-9f68c6d4fc8ae910)
+
+running 22 tests
+test runtime_string_literals_can_infer_dynstring_from_return_type ... ok
+test runtime_sol_selector_still_accepts_string_literals ... ok
+test ingot_analysis_accepts_concrete_encode_decode_call_bounds ... ok
+test long_runtime_string_literals_can_infer_dynstring_from_return_type ... ok
+test standalone_root_exported_core_and_std_helpers_resolve ... ok
+test solver_proves_core_abi_traits_for_u256_and_sol ... ok
+test implicit_ref_load_returns_are_not_treated_as_forwarded_params ... ok
+test const_fn_plus1_body_stays_usize_in_isolation ... ok
+test string_literal_types_use_decoded_utf8_bytes ... ok
+test mir_analysis_accepts_concrete_encode_decode_call_bounds ... ok
+test generic_call_specializes_abi_trait_bounds_to_concrete_args ... ok
+test long_string_literals_can_pick_up_dynstring_api_from_later_use ... ok
+test mem_slice_by_value_access_requires_copy_elements ... ok
+test long_sol_signature_literals_remain_compile_time_only ... ok
+test solver_proves_encode_for_fixed_bool_arrays ... ok
+test string_literals_can_pick_up_dynstring_api_from_later_use ... ok
+test invalid_string_escapes_do_not_become_semantic_strings ... ok
+test builtin_core_calls_have_semantic_lowerings ... ok
+test analyze_corelib has been running for over 60 seconds
+test analyze_corelib_under_release_profile has been running for over 60 seconds
+test analyze_stdlib has been running for over 60 seconds
+test analyze_stdlib_under_release_profile has been running for over 60 seconds
+test analyze_corelib_under_release_profile ... ok
+test analyze_corelib ... ok
+test analyze_stdlib_under_release_profile ... ok
+test analyze_stdlib ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 469.94s
+
+     Running tests/decision_tree.rs (toolchain/fe/target/debug/deps/decision_tree-bbe36d03b4f54e14)
+
+running 9 tests
+test decision_tree_generation__nested_enum ... ok
+test decision_tree_generation__wildcard ... ok
+test decision_tree_generation__with_bindings ... ok
+test decision_tree_generation__nested_wildcard ... ok
+test decision_tree_generation__stress_patterns ... ok
+test decision_tree_generation__simple_enum ... ok
+test decision_tree_generation__empty_enum ... ok
+test decision_tree_generation__tuple_decomposition_correctness ... ok
+test decision_tree_generation__advanced_bindings ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.28s
+
+     Running tests/def_analysis.rs (toolchain/fe/target/debug/deps/def_analysis-ed445d4c59b4a70e)
+
+running 1 test
+test def_analysis_standalone__self_constraints ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s
+
+     Running tests/default_trait_methods.rs (toolchain/fe/target/debug/deps/default_trait_methods-37c70b69a003429d)
+
+running 5 tests
+test semantic_callee_key_uses_std_create2_default_body ... ok
+test test_roots_keep_std_create2_as_a_body_backed_trait_call ... ok
+test std_create2_raw_calls_the_low_level_extern_create2 ... ok
+test large_by_value_array_args_test_root_keeps_body_backed_create2 ... ok
+test resolve_trait_method_instance_uses_inherited_default_body ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.32s
+
+     Running tests/desugar.rs (toolchain/fe/target/debug/deps/desugar-54564504464f62a1)
+
+running 11 tests
+test hir_desugar__error_basic ... ok
+test hir_desugar__error_multiple_fields ... ok
+test hir_desugar__event_field_name_collisions ... ok
+test hir_desugar__msg_nested_decode ... ok
+test hir_desugar__msg ... ok
+test hir_desugar__event_newtype_fields ... ok
+test hir_desugar__event_only_indexed ... ok
+test hir_desugar__event_mixed_data ... ok
+test hir_desugar__event_indexed_bool_int ... ok
+test hir_desugar__event_transfer ... ok
+test hir_desugar__event_many_fields ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.57s
+
+     Running tests/early_path_resolution.rs (toolchain/fe/target/debug/deps/early_path_resolution-ddfc7171461539bd)
+
+running 6 tests
+test early_path_resolution_standalone__alias_res ... ok
+test early_path_resolution_standalone__scoped_import ... ok
+test early_path_resolution_standalone__trait_path ... ok
+test early_path_resolution_standalone__generic_param ... ok
+test early_path_resolution_standalone__nested_block ... ok
+test early_path_resolution_standalone__enum_self_variant ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.75s
+
+     Running tests/effect_binding_resolution.rs (toolchain/fe/target/debug/deps/effect_binding_resolution-c452d41880ef3e9e)
+
+running 3 tests
+test labeled_effect_bindings_keep_the_declared_name ... ok
+test contract_level_effect_bindings_forward_to_the_root_provider ... ok
+test contract_field_effect_bindings_resolve_to_storage_providers ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.03s
+
+     Running tests/effect_key_normalization.rs (toolchain/fe/target/debug/deps/effect_key_normalization-e079fabc18d068ed)
+
+running 115 tests
+test concrete_type_keyed_with_bindings_do_not_accept_wrong_explicit_keys ... ok
+test concrete_layout_hole_type_keyed_bindings_shadow_outer_exact_providers ... ok
+test conflicting_function_trait_effect_forwarding_does_not_accept_both_calls ... ok
+test concrete_layout_hole_trait_keyed_bindings_prefer_inner_identity_matches ... ok
+test concrete_layout_hole_trait_keyed_bindings_shadow_outer_exact_providers ... ok
+test concrete_layout_hole_type_keyed_bindings_prefer_inner_identity_matches ... ok
+test conflicting_function_type_effect_forwarding_does_not_accept_both_calls ... ok
+test contract_named_type_effects_do_not_overmatch_rigid_hidden_layout_params ... ok
+test family_fallback_considers_same_frame_keyed_and_unkeyed_candidates_together ... ok
+test contract_named_trait_effects_specialize_to_known_root_provider ... ok
+test free_function_calls_accept_satisfied_effect_inferred_constraints ... ok
+test contract_named_trait_effects_specialize_matching_known_root_provider ... ok
+test free_function_calls_check_effect_inferred_constraints ... ok
+test contract_named_type_effects_forward_repeated_layout_hole_aliases ... ok
+test contract_named_trait_effects_forward_repeated_layout_hole_aliases ... ok
+test contract_named_effects_with_omitted_layout_hole_keys_seed_specialized_witnesses ... ok
+test function_type_effect_params_can_specialize_distinct_hidden_layout_params_once ... ok
+test contract_named_trait_effects_seed_forwarding_witnesses ... ok
+test function_trait_effect_params_forward_repeated_layout_hole_aliases ... ok
+test function_trait_effect_params_can_specialize_distinct_hidden_layout_params_once ... ok
+test impl_method_effect_keys_match_with_omitted_const_expr_defaults ... ok
+test function_type_effect_params_forward_repeated_layout_hole_aliases ... ok
+test free_function_effect_bindings_keep_explicit_memory_address_space ... ok
+test impl_method_effect_keys_match_with_substituted_omitted_const_expr_defaults ... ok
+test forwarded_inherent_method_calls_keep_effect_provider_generic_slots ... ok
+test inferred_type_keyed_with_bindings_shadow_outer_providers ... ok
+test forwarded_assoc_normalized_effect_params_seed_rigid_witnesses ... ok
+test family_fallback_keyed_lookup_requires_an_actual_witness_match ... ok
+test inferred_keyed_with_bindings_shadow_outer_providers ... ok
+test free_function_effect_calls_monomorphize_distinct_provider_bindings ... ok
+test by_ref_trait_provider_storage_bug_fixture_keeps_callables_on_all_typed_calls ... ok
+test instantiated_keyed_with_bindings_shadow_outer_providers ... ok
+test invalid_keyed_with_bindings_shadow_same_frame_unkeyed_providers ... ok
+test invalid_omitted_nested_trait_key_barrier_shadows_outer_exact_provider ... ok
+test instantiated_keyed_with_bindings_take_precedence_over_same_frame_unkeyed_providers ... ok
+test impl_method_effect_keys_match_after_assoc_normalization ... ok
+test generic_inherent_method_calls_keep_effect_provider_generic_slots ... ok
+test invalid_omitted_type_key_barrier_shadows_outer_exact_provider ... ok
+test invalid_keyed_with_bindings_shadow_outer_providers ... ok
+test keyed_trait_effects_do_not_accept_capability_wrapped_targets ... ok
+test keyed_trait_effects_do_not_accept_target_type_only_matches ... ok
+test keyed_with_bindings_take_precedence_over_same_frame_unkeyed_providers ... ok
+test effect_handle_values_preserve_direct_carrier_roles_without_constructor_calls ... ok
+test keyed_with_trait_bindings_accept_schematic_providers_via_keyed_witnesses ... ok
+test keyed_trait_effects_use_provider_type_for_with_bindings ... ok
+test keyed_type_with_bindings_commit_explicit_keys_before_later_inference ... ok
+test keyed_trait_with_bindings_require_stable_provider_types ... ok
+test keyed_wrapper_type_effect_candidates_commit_specialized_wrapper_solutions ... ok
+test keyed_with_trait_bindings_normalize_layout_holes ... ok
+test impl_trait_method_typed_body_instantiation_substitutes_self ... ok
+test function_effect_bindings_use_instantiated_provider_bindings ... ok
+test layout_hole_trait_identity_matching_preserves_repeated_placeholder_equality ... ok
+test handle_typed_effect_bindings_use_by_value_transport ... ok
+test layout_hole_trait_keyed_with_bindings_shadow_outer_providers ... ok
+test impl_trait_method_self_paths_preserve_binding_ty_after_instantiation ... ok
+test layout_hole_type_keyed_with_bindings_take_precedence_over_same_frame_unkeyed_providers ... ok
+test keyed_wrapper_type_witnesses_preserve_by_value_transport ... ok
+test layout_hole_trait_keyed_with_bindings_take_precedence_over_same_frame_unkeyed_providers ... ok
+test impl_method_effect_keys_match_after_trait_const_normalization ... ok
+test layout_hole_type_keyed_with_bindings_shadow_outer_providers ... ok
+test layout_hole_type_identity_matching_preserves_repeated_placeholder_equality ... ok
+test layout_hole_type_keyed_with_bindings_reject_repeated_placeholder_mismatches ... ok
+test inherent_method_calls_keep_effect_provider_generic_slots ... ok
+test impl_sum_semantic_body_uses_self_binding_directly ... ok
+test keyed_with_trait_bindings_normalize_assoc_requirements ... ok
+test omitted_layout_hole_type_keys_store_specialized_with_bindings ... ok
+test invalid_projection_type_key_barrier_falls_back_to_conservative_family_barrier ... ok
+test omitted_layout_hole_trait_keys_keep_hidden_provider_params_rigid ... ok
+test invalid_projection_trait_key_barrier_falls_back_to_conservative_family_barrier ... ok
+test non_rigid_omitted_type_keyed_with_bindings_are_rejected ... ok
+test omitted_layout_hole_trait_keys_store_specialized_with_witnesses ... ok
+test omitted_layout_hole_type_keys_with_hidden_provider_params_are_rejected ... ok
+test keyed_wrapper_type_effects_renormalize_projection_targets_after_later_proofs ... ok
+test permuted_assoc_binding_order_keeps_exact_keyed_precedence ... ok
+test method_calls_prefer_same_frame_explicit_keyed_trait_bindings ... ok
+test ordinary_calls_use_keyed_trait_effect_witnesses_with_layout_holes ... ok
+test poisoned_layout_hole_type_keys_do_not_shadow_outer_exact_providers ... ok
+test method_calls_keep_invalid_keyed_trait_bindings_from_reaching_outer_providers ... ok
+test poisoned_layout_hole_trait_keys_do_not_shadow_outer_exact_witnesses ... ok
+test local_effect_handle_calls_preserve_concrete_provider_spaces ... ok
+test normalized_keyed_with_bindings_take_precedence_after_assoc_normalization ... ok
+test repeated_function_trait_effect_forwarding_reuses_the_same_specialization ... ok
+test repeated_function_type_effect_forwarding_reuses_the_same_specialization ... ok
+test non_precise_invalid_nested_tuple_alias_type_barriers_fall_back_to_conservative_same_family_barriers ... ok
+test non_precise_invalid_tuple_alias_type_barriers_fall_back_to_conservative_same_family_barriers ... ok
+test schematic_type_keyed_with_bindings_do_not_accept_wrong_explicit_keys ... ok
+test ordinary_calls_use_keyed_type_effects_after_assoc_normalization ... ok
+test ordinary_calls_use_keyed_type_effects_after_trait_const_normalization ... ok
+test schematic_type_keyed_with_bindings_accept_consistent_explicit_keys ... ok
+test projected_handle_places_use_projected_provider_spaces ... ok
+test unkeyed_trait_effect_candidates_accept_stable_providers ... ok
+test ordinary_calls_use_keyed_trait_effect_witnesses_after_trait_const_normalization ... ok
+test ordinary_calls_use_keyed_trait_effect_witnesses_after_assoc_normalization ... ok
+test unkeyed_trait_effect_candidates_commit_unique_solver_solutions ... ok
+test nested_storage_map_effect_forwarding_keeps_concrete_hidden_layout_args ... ok
+test unkeyed_trait_effect_candidates_use_folded_provider_types ... ok
+test unkeyed_trait_effect_candidates_do_not_accept_ambiguous_solver_results ... ok
+test schematic_type_keyed_with_bindings_do_not_accept_wrong_explicit_keys_via_provider_wrappers ... ok
+test keyed_with_trait_const_bindings_shadow_outer_providers ... ok
+test unkeyed_wrapper_type_effect_candidates_commit_specialized_wrapper_solutions ... ok
+test projected_storage_map_effect_forwarding_keeps_concrete_hidden_layout_args ... ok
+test unresolved_outer_inference_type_queries_use_family_fallback ... ok
+test unresolved_outer_inference_trait_queries_use_family_fallback ... ok
+test wrapper_type_effect_candidates_accept_stable_specialized_providers ... ok
+test with_bound_plain_effect_params_specialize_to_memory_capabilities ... ok
+test storage_map_effect_forwarding_keeps_concrete_hidden_layout_args ... ok
+test root_semantic_instance_keys_are_closed_under_root_provider_subst ... ok
+test keyed_with_trait_bindings_normalize_trait_const_requirements ... ok
+test root_effect_handle_bindings_specialize_provider_targets_to_underlying_values ... ok
+test root_effect_bindings_specialize_rawmem_to_evm ... ok
+test zero_effect_arg_method_calls_finalize_under_forwarded_witnesses ... ok
+test use_ctx_semantic_body_keeps_receiver_as_effect_binding_local ... ok
+test unkeyed_wrapper_type_effects_renormalize_projection_targets_after_later_proofs ... ok
+test ordinary_calls_use_forwarded_trait_const_effect_params ... ok
+test root_trait_effect_bindings_specialize_call_to_concrete_evm ... ok
+
+test result: ok. 115 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 44.04s
+
+     Running tests/generic_default_metadata.rs (toolchain/fe/target/debug/deps/generic_default_metadata-5e13aaaca8fb2306)
+
+running 13 tests
+test type_alias_explicit_const_args_still_validate_type_mismatches ... ok
+test trait_generic_args_still_validate_const_type_mismatches ... ok
+test metadata_only_default_const_args_validate_adt_defaults ... ok
+test type_alias_explicit_const_holes_validate_with_expected_const_type ... ok
+test metadata_only_default_const_args_validate_type_alias_defaults ... ok
+test type_alias_effect_keys_keep_omitted_const_expr_defaults_unevaluated ... ok
+test typed_body_preserves_metadata_only_const_defaults ... ok
+test scoped_field_instantiation_does_not_capture_unrelated_outer_args ... ok
+test omitted_const_expr_defaults_unify_with_explicit_defaults ... ok
+test type_alias_instantiation_does_not_capture_unrelated_outer_args ... ok
+test type_effect_keys_keep_omitted_const_expr_defaults_unevaluated ... ok
+test metadata_default_const_args_capture_prior_generic_bindings ... ok
+test type_alias_omitted_const_expr_defaults_unify_with_explicit_defaults ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.67s
+
+     Running tests/import.rs (toolchain/fe/target/debug/deps/import-32aa57737d44deef)
+
+running 8 tests
+test import_standalone__glob_chain ... ok
+test import_standalone__glob_shadow ... ok
+test import_standalone__multiple_domains ... ok
+test import_standalone__std_import ... ok
+test import_standalone__glob_mutual_dep ... ok
+test import_standalone__cycle_glob ... ok
+test import_standalone__use_depends_glob ... ok
+test std_evm_import_is_available ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.75s
+
+     Running tests/invalid_string_constants.rs (toolchain/fe/target/debug/deps/invalid_string_constants-9f2b3672cf29a0e0)
+
+running 2 tests
+test maximum_inline_string_constant_is_valid ... ok
+test oversized_string_constants_report_type_errors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.77s
+
+     Running tests/layout_evidence.rs (toolchain/fe/target/debug/deps/layout_evidence-4b78cef7cc35aa0f)
+
+running 56 tests
+test ambiguous_runtime_const_layout_sources_are_rejected ... ok
+test ambiguous_input_components_do_not_invent_an_output_witness ... ok
+test equal_specialized_args_preserve_formal_const_binding_identity ... ok
+test equal_specialized_args_preserve_call_binding_identity_without_output_context ... ok
+test abstract_layout_expressions_without_concrete_evidence_are_rejected ... ok
+test compile_time_call_outputs_materialize_without_runtime_call_evidence ... ok
+test constructors_preserve_roots_and_array_repeat_uses_zero_stride ... ok
+test equal_specialized_args_preserve_output_witness_identity ... ok
+test distinct_occurrence_families_never_coalesce_after_substitution ... ok
+test array_construction_supports_affine_and_dense_layout_maps ... ok
+test derived_layout_values_do_not_reify_their_const_dependencies ... ok
+test fresh_call_arguments_do_not_borrow_layout_evidence_from_siblings ... ok
+test finite_effect_target_chain_can_rejoin_an_older_permutation_family ... ok
+test indexed_stores_supply_layout_context_to_fresh_values ... ok
+test indexed_stores_produce_layout_map_updates ... ok
+test contract_fields_materialize_allocator_strides ... ok
+test layout_evidence_uses_one_descriptor_local_per_component ... ok
+test effect_layout_evidence_is_defined_at_entry ... ok
+test mixed_compile_time_and_runtime_components_use_canonical_abi_order ... ok
+test indexed_assignment_prepares_destination_before_output_witness_call ... ok
+test one_evaluation_satisfies_a_single_element_output_layout_family ... ok
+test one_evaluation_cannot_satisfy_an_arbitrary_output_layout_family ... ok
+test contextual_method_call_outputs_preserve_caller_layout_identity ... ok
+test output_only_generic_layout_params_are_supplied_by_output_witness ... ok
+test non_regular_recursive_effect_handle_views_are_rejected ... FAILED
+test output_witness_worklist_propagates_through_enum_extraction ... ok
+test output_witness_worklist_composes_nested_array_struct_and_enum_paths ... ok
+test one_value_cannot_consume_two_distinct_output_witness_projections ... ok
+test output_witness_worklist_propagates_through_whole_and_field_stores ... ok
+test output_witness_worklist_propagates_through_indexed_stores ... ok
+test output_witnesses_flow_into_constructed_array_elements ... ok
+test projections_use_the_selected_occurrence_rank ... ok
+test calls_pass_and_return_complete_affine_evidence ... ok
+test provider_whole_array_stores_supply_ranked_context ... ok
+test provider_backed_field_places_use_the_semantic_root_type ... ok
+test recursive_runtime_layout_calls_do_not_form_a_signature_cycle ... ok
+test runtime_layout_calls_survive_semantic_const_folding ... ok
+test runtime_const_uses_bind_one_explicit_layout_input_port ... ok
+test schema_view_rebasing_rejects_same_shaped_unrelated_roots ... ok
+test provider_stores_supply_layout_context_to_fresh_values ... ok
+test sibling_runtime_const_layout_sources_are_rejected ... ok
+test control_flow_selects_layout_evidence_with_the_value ... ok
+test effect_handle_values_use_declared_target_evidence ... ok
+test verifier_rejects_wrong_map_shapes_ports_and_indices ... ok
+test zero_length_arrays_do_not_require_runtime_layout_evidence ... ok
+test inherited_impl_const_params_preserve_formal_layout_identity ... ok
+test verifier_rejects_component_identity_corruption ... ok
+test verifier_requires_branch_definitions_on_every_path ... ok
+test effect_value_arguments_select_the_callee_layout_view ... ok
+test effect_handle_providers_carry_physical_and_target_views ... ok
+test mutable_inferred_root_payloads_can_form_repeated_layout_maps ... ok
+test mutually_recursive_effect_handle_views_have_stable_evidence ... ok
+test permuted_recursive_effect_handle_views_have_stable_evidence ... ok
+test specialized_array_enum_leaf_methods_bind_runtime_layout_consts ... ok
+test self_recursive_effect_handle_view_uses_one_component_set ... ok
+test layout_evidence_covers_existing_forwarding_matrix has been running for over 60 seconds
+test layout_evidence_covers_existing_forwarding_matrix ... ok
+
+failures:
+
+---- non_regular_recursive_effect_handle_views_are_rejected stdout ----
+
+thread 'non_regular_recursive_effect_handle_views_are_rejected' (4172763) panicked at crates/hir/src/analysis/ty/layout_holes.rs:507:5:
+assertion `left == right` failed: layout instantiation root uses must exactly cover the instantiated type
+  left: [LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>)]
+ right: [LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>), LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>), LayoutRootId(Id(f001), PhantomData<&salsa::interned::Value<fe_hir::analysis::ty::const_ty::LayoutRootId<'_>>>)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    non_regular_recursive_effect_handle_views_are_rejected
+
+test result: FAILED. 55 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 162.98s
+
+error: test failed, to rerun pass `-p fe-hir --test layout_evidence`

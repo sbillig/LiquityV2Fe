@@ -6,10 +6,10 @@ complete multi-branch workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **331 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **351 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/governance.json`;
-the complete log is `tests/results/governance.log`.
+compiler and reference hashes are recorded in `tests/results/metadata-multibranch.json`;
+the complete log is `tests/results/metadata-multibranch.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -288,3 +288,108 @@ shutdown isolation, actual price feeds, protocol interest routed to Governance
 and bribe claims. The six tests supplement the 331-test full checkpoint; a new
 complete test.sh run has not yet been made after their addition. A reproducible
 non-test deployment command and broader stateful invariants remain outstanding.
+
+## Metadata utilities, randomized branch actions and compiler refresh
+
+Prepared JSON/SVG/Utils/baseSVG suites pass all 13 tests, with 1,024 runs per
+fuzz test. Sources and normalized tests are now integrated. Exact CSS spacing,
+all SVG overloads, numeric/revert boundaries, arbitrary UTF-8 bytes, base SVG
+elements and asset-reader failures are covered. Proof: metadata-utilities-prepared.
+
+A new three-branch test passes 1,024 random 24-action sequences against Solidity.
+Actions include collateral/debt changes, rate changes, pending debt application,
+SP deposits/withdrawals and redemptions; time advances between actions. Each step
+checks conservation, shared supply, return/revert bytes and trove/depositor state.
+Proof: multibranch-stateful-prepared. It is now integrated in root.
+
+Compiler release now uses upstream/master f1f89a9dd plus pinned fixes at
+061763900, tree 17b20419. Fresh merge replay matches. Dedicated ABI (19),
+CLZ/CTZ (4) and payable return (4) execution tests pass. String-constant full
+HIR tests encountered a layout assertion also reproduced on the unchanged base;
+see compiler-string-constants evidence. Root full validation is starting against
+all these changes. Freeze root sources/tests/scripts/compiler until it finishes
+and record the resulting proof immediately.
+
+## Prepared runnable local deployment
+
+/tmp/liquity-local-deployment now deploys the actual Fe bytecodes through ordinary
+transactions to Anvil (Cancun, normal code/initcode limits). It includes three
+branches, shared BOLD/registry, Governance and BribeInitiative, original NFT assets
+and renderer, and query/redemption helpers. DevToken/DevOracle/DevRate/DevStaking
+are explicitly external local fixtures. Deployment and smoke succeeded: six
+troves, SP deposits, full NFT rendering, real interest to Governance, bribe claims,
+LQTY exit, redemptions, liquidation and shutdown, with conservation checks.
+Proof: /tmp/liquity-local-deployment/validation.json and smoke-result.json.
+Anvil session 42806 is ours, port 18545; leave unrelated services alone. The smoke
+intentionally shuts down one branch. This script is not yet root-integrated and
+uses copied artifacts from the earlier validated compiler checkpoint. It still
+needs a portable runner, remaining zappers/exchanges deployment/configuration,
+and replay with the refreshed root artifacts after session 57870 finishes.
+Root remains frozen while the full test.sh run is in flight.
+
+## Prepared complete interface bindings
+
+/tmp/liquity-interface-project contains 65 actual interfaces (517 methods,
+61 events, two errors) extracted from all pinned interface source files. An
+earlier count of 66 included concrete MetadataNFT and was corrected. Full
+integer widths use std ABI wrappers. Twenty-five large static records use
+explicit field codecs; their roundtrip harness passes 1,024 differential fuzz
+runs plus truncated/invalid scalar inputs. All 62 callable-interface selector
+tests pass against Solidity methodIdentifiers. Proof is
+/tmp/liquity-interface-validation.json; index /tmp/liquity-interface-index.json.
+No interface sources are integrated into root yet. The generator scripts in
+/tmp still need portable packaging; InterfaceRecordParity.verified.t.sol
+preserves the strengthened final tests (draft generator has weaker assertions).
+Decoder implementations advance the cursor before decoding through immutable
+ByteInput because nested mutable generic decode_payload calls triggered a
+compiler borrow conflict; no compiler change was needed.
+
+Portable local deployment was rechecked with run.py --smoke, using a separately
+started/stopped Anvil on port 18546. Evidence is now
+/tmp/liquity-local-deployment-portable-check/validation.json, which pins the
+portable runner sources and all artifacts. Old deployment validation hashes
+predate runtime.py/run.py and should not be used for those updated scripts.
+Root session 57870 has passed its two Fe tests and is building O1 artifacts.
+Continue waiting on the same handle and record its proof before root changes.
+
+## Full local deployment extension prepared
+
+/tmp/liquity-local-deployment-v2 now deploys all four zapper types, Curve/Uni/Hybrid
+exchanges, both quote-helper generations, the Fe Balancer adapter, Constants,
+and Curve/Merkl initiatives in addition to the existing three-branch system.
+The complete smoke run passes in /tmp/liquity-local-deployment-batch2-check: all
+zappers open/close; all leveraged adapter routes open/up/down/flash-close; batch
+join/fee/rate/pending-debt/exit; NFTs; SP; all governance reward routes; liquidation,
+redemptions and shutdown; conservation throughout. Its validation.json pins the
+portable scripts, fixture sources, artifacts and transaction reports. This uses
+the earlier copied artifact checkpoint until root build 57870 finishes.
+
+The external DevBalancerVault and DevDistributionCreator fixtures are installed
+at the canonical addresses required by the unchanged reference interfaces. All
+Fe protocol contracts use ordinary deployments, with normal EVM size limits.
+Demo governance uses one-day epochs: the added batch interest time jump made
+the former 100-second demo epochs expire idle initiatives before voting. The
+1-day config passes the complete combined workflow. External token/oracle/market
+fixtures remain explicitly marked in the deployment manifest. Initial standalone
+Anvil session 42806 (PID4193928, port18545) has been terminated; portable runners
+stop only their own Anvil children automatically.
+
+Portable interface generators are prepared in /tmp/liquity-interface-package/scripts.
+They rebuild ABIs from pinned hashes and reproduce all 65 source modules exactly.
+Generated selector/record harness Fe files match the verified sources; regenerated
+Solidity record tests pass (including canonical scalar failures and 1,024 fuzz runs).
+Hierarchical interfaces module packaging passes Fe check. Nominal TroveId and the
+remaining SVG namespace constants (as owned-string functions) are prepared and
+Fe-checked in /tmp/liquity-port-extras-project. None is root-integrated yet.
+
+## Refreshed complete protocol checkpoint
+
+Session 57870 completed successfully: 351 EVM tests, two Fe tests, reference
+checks, all O1 builds and ABI/size audit. Proof was recorded immediately in
+tests/results/metadata-multibranch.json before source changes. The full local
+deployment/transaction smoke also passes against these exact refreshed artifacts:
+/tmp/liquity-local-deployment-refreshed-check/validation.json. It recorded 128
+deployment transactions, 94 zapper/batch transactions and 61 core/governance
+transactions; the largest used 8,943,184 gas. Root source freeze is now lifted
+for integration of the prepared interfaces, ID/namespace helpers and local runner.
+Upstream master was rechecked and remains f1f89a9dd.

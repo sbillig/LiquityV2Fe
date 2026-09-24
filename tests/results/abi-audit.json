@@ -143,8 +143,8 @@
     "function_count": 23
   },
   "TroveNFT": {
-    "runtime_bytes": 10444,
-    "initcode_bytes_before_arguments": 14406,
+    "runtime_bytes": 9923,
+    "initcode_bytes_before_arguments": 13781,
     "compiler_abi_sha256": "a8ee70a4b75f8af8db2eea8cdd82cb678371e518b0b44baa274ec430fabe14c5",
     "reference_artifact_sha256": "f02f1563e72003e334011bdae41cc645e04582b3d2bd466721390d853e07c369",
     "protocol_abi_sha256": "acf38ba50ddc9ddf7c0b51037fcfc21259ce65aed1a450129536fe042008e60f",
@@ -181,8 +181,8 @@
     "function_count": 3
   },
   "MetadataNFT": {
-    "runtime_bytes": 23721,
-    "initcode_bytes_before_arguments": 42596,
+    "runtime_bytes": 22572,
+    "initcode_bytes_before_arguments": 41308,
     "compiler_abi_sha256": "b2af857607a89a4cc6652d8f027d8ec729780cbaaf108e2a70bb2ed34e6346bc",
     "reference_artifact_sha256": "f7b30a56f0b42086ee8b32435e0443259920ee627e6a302deedf95efb001ea04",
     "protocol_abi_sha256": "9f7267bfd9c73a4e2a131a1c003c6d1310a73c24b064f29815a5e1aea6904747",
@@ -659,8 +659,8 @@
     "function_count": 10
   },
   "BalancerFlashLoan": {
-    "runtime_bytes": 5724,
-    "initcode_bytes_before_arguments": 5744,
+    "runtime_bytes": 5556,
+    "initcode_bytes_before_arguments": 5576,
     "compiler_abi_sha256": "32bc31cd296e16d4caf8f809241cbc8a80199b411432599e78690195ab521136",
     "reference_artifact_sha256": "67aa07f127039a04c345a04c4190dd43eb0f8a11840c066b0632bd2d10ca38b8",
     "protocol_abi_sha256": "4aa0aa930c56899137855ad37c08c9388d994db3aa35f0d1d038ce237b6bad5a",
@@ -851,10 +851,10 @@
   },
   "MetadataGeometry": {
     "implementation_companion": true,
-    "runtime_bytes": 18538,
-    "initcode_bytes_before_arguments": 18558,
-    "runtime_sha256": "cfaf9200d7200b77cfb5a327f9cac4d1ca5ae424aa7e84881cd9d9956a78bcd0",
-    "initcode_sha256": "7d5e436219e432583fe9e913cc1152b27d58e0084d928319b97f2e4671c7297d"
+    "runtime_bytes": 18370,
+    "initcode_bytes_before_arguments": 18390,
+    "runtime_sha256": "6e5a89661434f701d9f60e50e63345942debcf2689cbe4d0cec83079cbd354ea",
+    "initcode_sha256": "1ebc824ff32fc677e1c7b05dad55729b4cf22af71af2365a23e2d830c0a867e7"
   },
   "TroveOperations": {
     "implementation_companion": true,

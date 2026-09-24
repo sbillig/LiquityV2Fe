@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynString, DynArray}
+use std::evm::RawMem
+use super::metadata_utils as utils
+pub msg UtilsMsg {
+    #[selector = sol("toLocale(string)")]
+    M0 { value: DynString } -> DynString,
+    #[selector = sol("toLocaleString(uint256,uint8,uint8)")]
+    M1 { value: u256, divisor: u8, precision: u8 } -> DynString,
+    #[selector = sol("setCssVar(string,string)")]
+    M2 { key: DynString, value: DynString } -> DynString,
+    #[selector = sol("getCssVar(string)")]
+    M3 { key: DynString } -> DynString,
+    #[selector = sol("getDefURL(string)")]
+    M4 { key: DynString } -> DynString,
+    #[selector = sol("white_a(uint256)")]
+    M5 { alpha: u256 } -> DynString,
+    #[selector = sol("black_a(uint256)")]
+    M6 { alpha: u256 } -> DynString,
+    #[selector = sol("rgba(uint256,uint256,uint256,uint256)")]
+    M7 { r: u256, g: u256, b: u256, a: u256 } -> DynString,
+    #[selector = sol("cssBraces(string,string)")]
+    M8 { key: DynString, value: DynString } -> DynString,
+    #[selector = sol("cssBraces(string[],string[])")]
+    M9 { keys: DynArray<DynString>, values: DynArray<DynString> } -> DynString,
+    #[selector = sol("points(uint256[2][])")]
+    M10 { values: DynArray<[u256; 2]> } -> DynString,
+    #[selector = sol("points(uint256[2][],uint256)")]
+    M11 { values: DynArray<[u256; 2]>, precision: u256 } -> DynString,
+    #[selector = sol("stringsEqual(string,string)")]
+    M12 { a: DynString, b: DynString } -> bool,
+    #[selector = sol("utfStringLength(string)")]
+    M13 { value: DynString } -> u256,
+    #[selector = sol("toString(uint256,uint256)")]
+    M14 { value: u256, precision: u256 } -> DynString,
+}
+pub contract MetadataUtilsHarness {
+    recv UtilsMsg {
+        M0 { value } -> DynString uses (mem: mut RawMem) { utils::to_locale(value) }
+        M1 { value, divisor, precision } -> DynString uses (mem: mut RawMem) { super::metadata_string::locale(value, divisor, precision) }
+        M2 { key, value } -> DynString uses (mem: mut RawMem) { utils::set_css_var(key, value) }
+        M3 { key } -> DynString uses (mem: mut RawMem) { utils::get_css_var(key) }
+        M4 { key } -> DynString uses (mem: mut RawMem) { utils::get_def_url(key) }
+        M5 { alpha } -> DynString uses (mem: mut RawMem) { utils::white_a(alpha) }
+        M6 { alpha } -> DynString uses (mem: mut RawMem) { utils::black_a(alpha) }
+        M7 { r, g, b, a } -> DynString uses (mem: mut RawMem) { utils::rgba(r,g,b,a) }
+        M8 { key, value } -> DynString uses (mem: mut RawMem) { utils::css_braces(key,value) }
+        M9 { keys, values } -> DynString uses (mem: mut RawMem) { utils::css_braces_many(keys,values) }
+        M10 { values } -> DynString uses (mem: mut RawMem) { utils::points(values,false,0) }
+        M11 { values, precision } -> DynString uses (mem: mut RawMem) { utils::points(values,true,precision) }
+        M12 { a, b } -> bool uses (mem: mut RawMem) { utils::strings_equal(a,b) }
+        M13 { value } -> u256 uses (mem: mut RawMem) { utils::utf_string_length(value) }
+        M14 { value, precision } -> DynString uses (mem: mut RawMem) { utils::to_string(value,precision) }
+    }
+}

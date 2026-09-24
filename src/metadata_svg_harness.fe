@@ -1,0 +1,112 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynString}
+use std::evm::RawMem
+pub msg SvgMsg {
+    #[selector = sol("el(string,string)")]
+    A0 { tag: DynString, props: DynString } -> DynString,
+    #[selector = sol("el(string,string,string)")]
+    A1 { tag: DynString, props: DynString, children: DynString } -> DynString,
+    #[selector = sol("prop(string,string,bool)")]
+    A2 { key: DynString, value: DynString, last: bool } -> DynString,
+    #[selector = sol("prop(string,string)")]
+    A3 { key: DynString, value: DynString } -> DynString,
+    #[selector = sol("g(string,string)")]
+    A4 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("text(string,string)")]
+    A5 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("filter(string,string)")]
+    A6 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("radialGradient(string,string)")]
+    A7 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("linearGradient(string,string)")]
+    A8 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("line(string)")]
+    A9 { props: DynString } -> DynString,
+    #[selector = sol("line(string,string)")]
+    A10 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("ellipse(string)")]
+    A11 { props: DynString } -> DynString,
+    #[selector = sol("ellipse(string,string)")]
+    A12 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("polygon(string)")]
+    A13 { props: DynString } -> DynString,
+    #[selector = sol("polygon(string,string)")]
+    A14 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("polyline(string)")]
+    A15 { props: DynString } -> DynString,
+    #[selector = sol("polyline(string,string)")]
+    A16 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("rect(string)")]
+    A17 { props: DynString } -> DynString,
+    #[selector = sol("rect(string,string)")]
+    A18 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("circle(string)")]
+    A19 { props: DynString } -> DynString,
+    #[selector = sol("circle(string,string)")]
+    A20 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("animateTransform(string)")]
+    A21 { props: DynString } -> DynString,
+    #[selector = sol("animate(string)")]
+    A22 { props: DynString } -> DynString,
+    #[selector = sol("_svg(string,string)")]
+    A23 { props: DynString, children: DynString } -> DynString,
+    #[selector = sol("style(string,string)")]
+    A24 { title: DynString, props: DynString } -> DynString,
+    #[selector = sol("path(string)")]
+    A25 { d: DynString } -> DynString,
+    #[selector = sol("path(string,string)")]
+    A26 { d: DynString, props: DynString } -> DynString,
+    #[selector = sol("path(string,string,string)")]
+    A27 { d: DynString, props: DynString, children: DynString } -> DynString,
+    #[selector = sol("circle(string,string,string)")]
+    A28 { cx: DynString, cy: DynString, r: DynString } -> DynString,
+    #[selector = sol("circle(string,string,string,string)")]
+    A29 { cx: DynString, cy: DynString, r: DynString, children: DynString } -> DynString,
+    #[selector = sol("circle(string,string,string,string,string)")]
+    A30 { cx: DynString, cy: DynString, r: DynString, props: DynString, children: DynString } -> DynString,
+    #[selector = sol("cdata(string)")]
+    A31 { content: DynString } -> DynString,
+    #[selector = sol("gradientStop(uint256,string,string)")]
+    A32 { offset: u256, color: DynString, props: DynString } -> DynString,
+}
+pub contract MetadataSvgHarnessA {
+    recv {
+        SvgMsg::A0 { tag, props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::el_2(tag, props) }
+        SvgMsg::A1 { tag, props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::el_3(tag, props, children) }
+        SvgMsg::A2 { key, value, last } -> DynString uses (mem: mut RawMem) { super::metadata_svg::prop_3(key, value, last) }
+        SvgMsg::A3 { key, value } -> DynString uses (mem: mut RawMem) { super::metadata_svg::prop_2(key, value) }
+        SvgMsg::A4 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::g_2(props, children) }
+        SvgMsg::A5 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::text_2(props, children) }
+        SvgMsg::A6 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::filter_2(props, children) }
+        SvgMsg::A7 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::radialGradient_2(props, children) }
+        SvgMsg::A8 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::linearGradient_2(props, children) }
+        SvgMsg::A9 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::line_1(props) }
+        SvgMsg::A10 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::line_2(props, children) }
+        SvgMsg::A11 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::ellipse_1(props) }
+        SvgMsg::A12 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::ellipse_2(props, children) }
+        SvgMsg::A13 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::polygon_1(props) }
+        SvgMsg::A14 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::polygon_2(props, children) }
+        SvgMsg::A15 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::polyline_1(props) }
+        SvgMsg::A16 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::polyline_2(props, children) }
+    }
+}
+pub contract MetadataSvgHarnessB {
+    recv {
+        SvgMsg::A17 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::rect_1(props) }
+        SvgMsg::A18 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::rect_2(props, children) }
+        SvgMsg::A19 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::circle_1(props) }
+        SvgMsg::A20 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::circle_2(props, children) }
+        SvgMsg::A21 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::animateTransform_1(props) }
+        SvgMsg::A22 { props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::animate_1(props) }
+        SvgMsg::A23 { props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::svg_2(props, children) }
+        SvgMsg::A24 { title, props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::style_2(title, props) }
+        SvgMsg::A25 { d } -> DynString uses (mem: mut RawMem) { super::metadata_svg::path_1(d) }
+        SvgMsg::A26 { d, props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::path_2(d, props) }
+        SvgMsg::A27 { d, props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::path_3(d, props, children) }
+        SvgMsg::A28 { cx, cy, r } -> DynString uses (mem: mut RawMem) { super::metadata_svg::circle_3(cx, cy, r) }
+        SvgMsg::A29 { cx, cy, r, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::circle_4(cx, cy, r, children) }
+        SvgMsg::A30 { cx, cy, r, props, children } -> DynString uses (mem: mut RawMem) { super::metadata_svg::circle_5(cx, cy, r, props, children) }
+        SvgMsg::A31 { content } -> DynString uses (mem: mut RawMem) { super::metadata_svg::cdata_1(content) }
+        SvgMsg::A32 { offset, color, props } -> DynString uses (mem: mut RawMem) { super::metadata_svg::gradientStop_3(offset, color, props) }
+    }
+}

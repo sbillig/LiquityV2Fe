@@ -173,4 +173,44 @@ contract MultiBranchSystemTest is MultiBranchFixture {
  function testMultiBranchProtocolInterestToGovernanceAndBribes() public {
   realFeeds=true;withGovernance=true;require(protocolYield(true)==protocolYield(false),"complete protocol yield parity");
  }
+
+ function sequenceAction(Network memory n,uint choice,uint branch) internal returns(bytes32) {
+   System memory s=n.branches[branch];uint trove=id(ALICE,1);uint amount=(choice>>16)%6000e18;
+   uint action=(choice>>8)%9;bytes memory data;address target=address(s.bo);
+   if(action==0)data=abi.encodeCall(s.bo.addColl,(trove,amount/1000));
+   else if(action==1)data=abi.encodeCall(s.bo.withdrawColl,(trove,amount/1000));
+   else if(action==2)data=abi.encodeCall(s.bo.withdrawBold,(trove,amount,type(uint).max));
+   else if(action==3)data=abi.encodeCall(s.bo.repayBold,(trove,amount));
+   else if(action==4){target=address(s.sp);data=abi.encodeCall(s.sp.provideToSP,(amount,choice%2==0));}
+   else if(action==5){target=address(s.sp);data=abi.encodeCall(s.sp.withdrawFromSP,(amount,choice%2==0));}
+   else if(action==6)data=abi.encodeCall(s.bo.applyPendingDebt,(trove,0,0));
+   else if(action==7)data=abi.encodeCall(s.bo.adjustTroveInterestRate,(trove,1e16+(choice>>64)%20e16,0,0,type(uint).max));
+   else {target=address(n.registry);data=abi.encodeCall(n.registry.redeemCollateral,(amount/10,0,1e18));}
+   vm.prank(ALICE);(bool ok,bytes memory result)=target.call(data);
+   return keccak256(abi.encode(action,branch,ok,result));
+ }
+ function statefulSequence(bool fe,bytes32 seed) internal returns(bytes32 h) {
+  TimeVm(address(vm)).warp(1000);Network memory n=network(fe);
+  for(uint i;i<3;i++) {
+   open(n.branches[i],1,ALICE,20e18,5e16);open(n.branches[i],2,BOB,10e18,8e16);
+   n.branches[i].coll.mint(ALICE,100e18);
+   vm.prank(ALICE);n.branches[i].sp.provideToSP(500e18,false);
+  }
+  h=checkpoint(n);
+  for(uint step;step<24;step++) {
+   seed=keccak256(abi.encode(seed,step));uint choice=uint(seed);uint branch=choice%3;
+   TimeVm(address(vm)).warp(block.timestamp+1+(choice>>128)%2 days);
+   for(uint i;i<3;i++)setPrice(n.branches[i],2000e18);
+   bytes32 actionResult=sequenceAction(n,choice,branch);
+   h=keccak256(abi.encode(h,actionResult,checkpoint(n)));
+   uint trove=id(ALICE,1);
+   for(uint i;i<3;i++) {
+    h=keccak256(abi.encode(h,n.branches[i].manager.getLatestTroveData(trove),n.branches[i].manager.getLatestTroveData(id(BOB,2))));
+    h=keccak256(abi.encode(h,n.branches[i].sp.getCompoundedBoldDeposit(ALICE),n.branches[i].sp.getDepositorCollGain(ALICE),n.branches[i].sp.getDepositorYieldGain(ALICE)));
+   }
+  }
+ }
+ function testFuzzMultiBranchStatefulAccounting(bytes32 seed) public {
+  realFeeds=true;require(statefulSequence(true,seed)==statefulSequence(false,seed),"stateful multi-branch parity");
+ }
 }

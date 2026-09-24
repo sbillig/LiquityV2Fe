@@ -1,0 +1,78 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.11s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+ --> test/MetadataBaseSvgParity.t.sol:6:2:
+  |
+6 |  function svgProps() external view returns(string memory) { return baseSVG._svgProps(); }
+  |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+ --> test/MetadataBaseSvgParity.t.sol:8:2:
+  |
+8 |  function leverageLogo() external view returns(string memory) { return baseSVG._leverageLogo(); }
+  |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:10:2:
+   |
+10 |  function staticTextEls() external view returns(string memory) { return baseSVG._staticTextEls(); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:11:2:
+   |
+11 |  function formattedDynamicEl(string  ... G._formattedDynamicEl(value,x,y); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:12:2:
+   |
+12 |  function formattedIdEl(string memory id) external view returns(string memory) { return baseSVG._formattedIdEl(id); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:13:2:
+   |
+13 |  function formattedAddressEl(address value) external view returns(string memory) { return baseSVG._formattedAddressEl(value); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:15:2:
+   |
+15 |  function statusEl(string memory value) external view returns(string memory) { return baseSVG._statusEl(value); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MetadataBaseSvgParity.t.sol:16:2:
+   |
+16 |  function dynamicTextEls(uint256 deb ... namicTextEls(debt,coll,interest); }
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 3 tests for test/MetadataJsonParity.t.sol:MetadataJsonParityTest
+[PASS] testEmptyAndRawQuoteBytes() (gas: 486620)
+[PASS] testFuzzAllPropertiesAndEncoding(string,string,bool) (runs: 1024, μ: 340329, ~: 338347)
+[PASS] testFuzzFormattedMetadata(string,string,string,string) (runs: 1024, μ: 433165, ~: 432086)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.55s (4.37s CPU time)
+
+Ran 2 tests for test/MetadataSvgParity.t.sol:MetadataSvgParityTest
+[PASS] testEmptyAndWhitespace() (gas: 9011128)
+[PASS] testFuzzEverySvgOverload(string,string,string,uint256,bool) (runs: 1024, μ: 4577784, ~: 4577190)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 14.34s (14.41s CPU time)
+
+Ran 4 tests for test/MetadataUtilsParity.t.sol:MetadataUtilsParityTest
+[PASS] testBoundariesAndInvalidUtf8() (gas: 28979725)
+[PASS] testFuzzArrays(string[],string[],uint256[2][],uint256) (runs: 1024, μ: 78195492, ~: 45667733)
+[PASS] testFuzzNumeric(uint256,uint256,uint8,uint8,uint256,uint256,uint256) (runs: 1024, μ: 922208, ~: 527853)
+[PASS] testFuzzStrings(string,string) (runs: 1024, μ: 302757, ~: 300514)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 43.08s (53.38s CPU time)
+
+Ran 4 tests for test/MetadataBaseSvgParity.t.sol:MetadataBaseSvgParityTest
+[PASS] testAssetFailuresAndEmpty() (gas: 221820)
+[PASS] testFuzzAssets(string,string,string,string) (runs: 1024, μ: 327700, ~: 311775)
+[PASS] testFuzzFormatting(string,uint256,uint256,address,uint256) (runs: 1024, μ: 2342779, ~: 2325910)
+[PASS] testStaticElements() (gas: 366536)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 48.05s (49.02s CPU time)
+
+Ran 4 test suites in 48.06s (108.02s CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)

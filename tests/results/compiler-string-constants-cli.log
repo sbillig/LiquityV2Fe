@@ -1,0 +1,8 @@
+error[3-0033]: string type exceeds inline capacity
+  ┌─ src/lib.fe:1:18
+  │
+1 │ pub const VALUE: String<33> = "xmlns=\"http://www.w3.org/1999/xhtml\""
+  │                  ^^^^^^^^^^ `String<33>` exceeds the current inline limit of `String<31>`
+  │
+  = strings currently use one word of storage: 1 length byte and 31 payload bytes
+

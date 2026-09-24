@@ -133,3 +133,11 @@ pub use governance_actions_module
 pub use governance_forward
 pub use governance_multicall
 pub use governance_multicall_harness
+pub use metadata_json
+pub use metadata_json_harness
+pub use metadata_svg
+pub use metadata_svg_harness
+pub use metadata_utils
+pub use metadata_utils_harness
+pub use metadata_base_svg
+pub use metadata_base_svg_harness

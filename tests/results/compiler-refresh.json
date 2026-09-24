@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-09-24T21:58:03.421637+00:00",
+  "compiler_revision": "0617639002e12e599fd7bfb68bd2722215c8a935",
+  "compiler_tree": "17b20419e39a12c49b0e09d5b67053812c16504e",
+  "upstream_master": "f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d",
+  "compiler_binary_sha256": "c5830553038cb169726a4a1400418d224bc581198ac0d675b9f51c497bfa88de",
+  "tests": {
+    "unpadded_abi": 19,
+    "clz_ctz": 4,
+    "payable_return": 4
+  },
+  "fresh_merge_replay_tree": "17b20419e39a12c49b0e09d5b67053812c16504e",
+  "logs_sha256": {
+    "tests/results/compiler-refresh-abi.log": "e211aed1fc3aab4a8ee642b0da70d849700c3f0dafec6fb41bde6cd747cec703",
+    "tests/results/compiler-refresh-clz.log": "39d43f3814908a5136a32445ec075bfefa250affea13ec6ae011be2668090f0f",
+    "tests/results/compiler-refresh-payable.log": "1b1897389cee28941bb666527823d3284ce4044eb7aba4c8e00953baff9b115d"
+  }
+}
