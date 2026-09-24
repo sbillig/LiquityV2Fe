@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{Bytes, Uint24}
+use std::evm::{Address, RawMem}
+// Uniswap v3 path: address (20 bytes), fee (3 bytes), address, optional second hop.
+pub fn path(_ usdc: Address, _ weth: Address, _ coll: Address, _ fee_uw: Uint24, _ fee_wc: Uint24, _ reverse: bool) -> Bytes uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(96)
+    let single = weth == coll
+    let first = if reverse { coll } else { usdc }
+    let last = if reverse { usdc } else { coll }
+    let first_fee = if reverse && !single { fee_wc.val } else { fee_uw.val }
+    let second_fee = if reverse { fee_uw.val } else { fee_wc.val }
+    mem.mstore(addr: p, value: first.inner << 96)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 20), value: (first_fee as u256) << 232)
+    if single {
+        mem.mstore(addr: core::ptr::offset_bytes(p, 23), value: last.inner << 96)
+        Bytes::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 43))
+    } else {
+        mem.mstore(addr: core::ptr::offset_bytes(p, 23), value: weth.inner << 96)
+        mem.mstore(addr: core::ptr::offset_bytes(p, 43), value: (second_fee as u256) << 232)
+        mem.mstore(addr: core::ptr::offset_bytes(p, 46), value: last.inner << 96)
+        Bytes::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 66))
+    }
+}

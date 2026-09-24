@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Call, Ctx, RawMem}
+use super::token_calls::{TokenMsg, safe_transfer, safe_transfer_from}
+use super::leftovers_sweep::BalanceMsg
+pub msg CurveCalls {
+    #[selector = sol("approve(address,uint256)")]
+    Approve { spender: Address, amount: u256 } -> bool,
+    #[selector = sol("exchange(uint256,uint256,uint256,uint256)")]
+    Exchange { input: u256, output: u256, amount: u256, minimum: u256 } -> u256,
+}
+pub msg CurveExchangeMsg {
+    #[selector = sol("collToken()")]
+    Coll -> Address,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("curvePool()")]
+    Pool -> Address,
+    #[selector = sol("COLL_TOKEN_INDEX()")]
+    CollIndex -> u256,
+    #[selector = sol("BOLD_TOKEN_INDEX()")]
+    BoldIndex -> u256,
+    #[selector = sol("swapFromBold(uint256,uint256)")]
+    FromBold { amount: u256, minimum: u256 },
+    #[selector = sol("swapToBold(uint256,uint256)")]
+    ToBold { amount: u256, minimum: u256 } -> u256,
+}
+pub contract CurveExchange {
+    coll: Address,
+    bold: Address,
+    pool: Address,
+    coll_index: u256,
+    bold_index: u256,
+    init(collateral: Address, bold_token: Address, curve_pool: Address, collateral_index: u256, bold_token_index: u256)
+    uses (mut coll, mut bold, mut pool, mut coll_index, mut bold_index) {
+        coll = collateral
+        bold = bold_token
+        pool = curve_pool
+        coll_index = collateral_index
+        bold_index = bold_token_index
+    }
+    recv CurveExchangeMsg {
+        Coll -> Address uses (coll) { coll }
+        Bold -> Address uses (bold) { bold }
+        Pool -> Address uses (pool) { pool }
+        CollIndex -> u256 uses (coll_index) { coll_index }
+        BoldIndex -> u256 uses (bold_index) { bold_index }
+        FromBold { amount, minimum } uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let initial = bold.static(BalanceMsg::Balance { account: ctx.address() })
+            let ignored_transfer = bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
+            let ignored_approval = bold.call(CurveCalls::Approve { spender: pool, amount })
+            let output = pool.call(CurveCalls::Exchange { input: bold_index, output: coll_index, amount, minimum })
+            safe_transfer(coll, ctx.caller(), output)
+            let current = bold.static(BalanceMsg::Balance { account: ctx.address() })
+            if current > initial {
+                let ignored_return = bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: current - initial })
+            }
+        }
+        ToBold { amount, minimum } -> u256 uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let initial = coll.static(BalanceMsg::Balance { account: ctx.address() })
+            safe_transfer_from(coll, ctx.caller(), ctx.address(), amount)
+            let ignored_approval = coll.call(CurveCalls::Approve { spender: pool, amount })
+            let output = pool.call(CurveCalls::Exchange { input: coll_index, output: bold_index, amount, minimum })
+            let ignored_transfer = bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: output })
+            let current = coll.static(BalanceMsg::Balance { account: ctx.address() })
+            if current > initial { safe_transfer(coll, ctx.caller(), current - initial) }
+            output
+        }
+    }
+}

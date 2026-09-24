@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, Uint160}
+pub fn sqrt(_ n: u256) -> u256 {
+    if n == 0 { return 0 }
+    // Start above the true square root, including odd bit lengths.
+    let mut bits = n
+    let mut x: u256 = 1
+    while bits > 0 { bits = bits >> 2
+        x = x << 1 }
+    while true {
+        let y = (x + n / x) / 2
+        if y >= x { return x }
+        x = y
+    }
+    0
+}
+pub fn to_sqrt(_ price: u256) -> u256 {
+    let result = if price > (1 << 64) {
+        sqrt(price / 1000000000000000000) << 96
+    } else {
+        sqrt((price << 192) / 1000000000000000000)
+    }
+    result & ((1 << 160) - 1)
+}
+pub fn from_sqrt(_ value: u256) -> u256 {
+    if value >> 160 != 0 { std::evm::revert(()) }
+    let squared = value * value
+    if squared > 115_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000 {
+        ((squared >> 96) * 1000000000000000000) >> 96
+    } else {
+        (squared * 1000000000000000000) >> 192
+    }
+}
+pub msg PriceConverterMsg {
+    #[selector = sol("priceToSqrtPriceX96(uint256)")]
+    ToSqrt { price: u256 } -> Uint160,
+    #[selector = sol("sqrtPriceX96ToPrice(uint160)")]
+    FromSqrt { value: Uint160 } -> u256,
+}
+pub contract UniPriceConverter {
+    recv PriceConverterMsg {
+        ToSqrt { price } -> Uint160 { Uint160 { val: to_sqrt(price) } }
+        FromSqrt { value } -> u256 { from_sqrt(value.val) }
+    }
+}

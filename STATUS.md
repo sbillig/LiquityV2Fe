@@ -6,10 +6,10 @@ workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **227 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **244 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/zappers.json`;
-the complete log is `tests/results/zappers.log`.
+compiler and reference hashes are recorded in `tests/results/exchanges.json`;
+the complete log is `tests/results/exchanges.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -68,6 +68,10 @@ Implemented and differentially tested:
   behavior. Eight parity tests and two actual connected protocol lifecycles pass.
   Fixed constructor-created companions preserve the original constructor and
   EVM size limits; see ZAPPERS_DEPLOYMENT.md.
+- CurveExchange, UniV3Exchange, UniPriceConverter and HybridCurveUniV3Exchange:
+  exact-input/output swaps, refunds, packed paths, fee/index widths, price rounding
+  and checked arithmetic. Thirteen differential tests and four actual connected
+  Curve/UniV3 leverage lifecycles pass; the quote helpers remain separate below.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -125,7 +129,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Integrate the prepared exchange modules; implement exchange helpers and flash-loan provider.
+1. Integrate the prepared quote helpers and Balancer flash-loan provider.
 2. Remaining helper/library interfaces.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -141,8 +145,20 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-CurveExchange, UniV3Exchange, UniPriceConverter and HybridCurveUniV3Exchange
-are prepared separately in `/tmp/liquity-exchange-project`. Thirteen parity
-tests and four actual connected Curve/UniV3 leverage lifecycles pass in
-`/tmp/liquity-zapper-inspect`; the isolated ABI audit also passes. They are not
-yet integrated into the root checkpoint above. No new compiler fix was needed.
+HybridCurveUniV3ExchangeHelpers and its V2 variant are prepared separately in
+`/tmp/liquity-quote-only-project` (the current, minimal build project). The source
+copies in `/tmp/liquity-helper-project` are synchronized. Five differential tests
+in `/tmp/liquity-zapper-inspect/test/HybridHelpersParity.t.sol` pass, including
+both quote directions, signed indices, packed paths, deviation arithmetic,
+malformed dynamic results and exact memory-allocation panic boundaries. The
+boundary test covers both helper versions, both path lengths, both returned
+arrays and additional trailing return bytes. The isolated ABI audit passes.
+Artifacts: `/tmp/liquity-helper-build`; logs are copied into tests/results.
+BalancerFlashLoan is prepared in `/tmp/liquity-balancer-project`, with artifacts
+in `/tmp/liquity-balancer-build`. Seven parity tests and eight connected actual
+Balancer/Curve/UniV3 leverage lifecycles pass. They cover WETH and LST, normal
+closing and flash-loan closing. Only the external vault and trading venues are
+mocked; the provider, exchanges, zappers and protocol are actual Fe contracts.
+The isolated Balancer ABI audit passes. These additions are not yet included in
+the root checkpoint above.
+No new compiler fix was needed during the exchange work.

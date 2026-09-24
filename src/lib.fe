@@ -82,3 +82,8 @@ pub use leverage_lst_zapper
 pub use leverage_weth_zapper_module
 pub use leverage_lst_zapper_module
 pub use zapper_forward
+pub use curve_exchange
+pub use uni_price_converter
+pub use uni_v3_exchange
+pub use hybrid_path
+pub use hybrid_exchange

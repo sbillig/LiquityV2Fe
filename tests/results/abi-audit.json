@@ -565,6 +565,65 @@
     ],
     "function_count": 29
   },
+  "CurveExchange": {
+    "runtime_bytes": 3656,
+    "initcode_bytes_before_arguments": 4082,
+    "compiler_abi_sha256": "327ba1b1d47b2ca12ed712524b7881d8c3f8ed6e5362bfc8321f314229aeeafd",
+    "reference_artifact_sha256": "b9c51c0db92d6612da945427ea354cc14d98eb19e37673b496cd59b5bfff3883",
+    "protocol_abi_sha256": "333b3816ddb4499ea04d014bf43deb3e0a5ec5f48022800ad3feca6ea6fe785b",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 7
+  },
+  "UniV3Exchange": {
+    "runtime_bytes": 4881,
+    "initcode_bytes_before_arguments": 5290,
+    "compiler_abi_sha256": "a7602857a2b456f921697a628eef647c8d462f89820a668c4424d07ffb2e4e18",
+    "reference_artifact_sha256": "763e471bd8326b57c92dfc4994139d5745b2872cec61e1b2ff037778cdd34206",
+    "protocol_abi_sha256": "b6bac3bc5ccd3af10b816006d1df5b8c988f27e7aef409c33122f52f85393c78",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 9
+  },
+  "UniPriceConverter": {
+    "runtime_bytes": 435,
+    "initcode_bytes_before_arguments": 455,
+    "compiler_abi_sha256": "a5c4a2ea50766cd0bf5bf6400d3f67a71288fa8ac9c36a0766004dec2a838899",
+    "reference_artifact_sha256": "3e13b2a036630b9f24da24c9e7707bb26909e5a30364b4944a52ca961480e500",
+    "protocol_abi_sha256": "bc6460f3d12626d202b85a289fd830651cebebf9811e16433f4d983f8eee8aee",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 2
+  },
+  "HybridCurveUniV3Exchange": {
+    "runtime_bytes": 5918,
+    "initcode_bytes_before_arguments": 7122,
+    "compiler_abi_sha256": "2de535045f9b55253e5f4defd6f0d3bcfd0312f89a5f90526c20e82a9eb80e54",
+    "reference_artifact_sha256": "9c22cb60c392edd70fd360547421ef99ae0cf0b7b1baae5af3455dd704424d5c",
+    "protocol_abi_sha256": "9814afbc42ec5f9a53fd2e0343ea0bbb2a570d14a949a39697ba73f3adb77c86",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 12
+  },
   "LeverageWETHZapperLeverage": {
     "implementation_companion": true,
     "runtime_bytes": 10606,

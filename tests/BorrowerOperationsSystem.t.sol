@@ -23,6 +23,31 @@ contract LeverageSystemMarkets is IExchange {
  function swapToBold(uint amount,uint minimum) external returns(uint){coll.transferFrom(msg.sender,address(this),amount);bold.transfer(msg.sender,minimum);return minimum;}
  function sendBold(address receiver,uint amount) external {bold.transfer(receiver,amount);}
 }
+import {CurveExchange} from "../reference/bold/contracts/src/Zappers/Modules/Exchanges/CurveExchange.sol";
+import {UniV3Exchange} from "../reference/bold/contracts/src/Zappers/Modules/Exchanges/UniV3Exchange.sol";
+import {ISwapRouter} from "../reference/bold/contracts/src/Zappers/Modules/Exchanges/UniswapV3/ISwapRouter.sol";
+import {IERC20,SafeERC20} from "../reference/bold/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+contract ExchangeSystemMarket {
+ using SafeERC20 for IERC20;
+ BorrowerSystemCollateral public coll;IERC20 public bold;
+ constructor(BorrowerSystemCollateral c,IERC20 b){coll=c;bold=b;}
+ function exchange(uint i,uint j,uint amount,uint minimum) external returns(uint){
+  require(i<2&&j==1-i);bool fromBold=i==1;
+  uint output=fromBold?amount/2000:amount*2000;require(output>=minimum,"minimum");
+  if(fromBold){bold.safeTransferFrom(msg.sender,address(this),amount);coll.mint(msg.sender,output);}
+  else{coll.transferFrom(msg.sender,address(this),amount);bold.safeTransfer(msg.sender,output);}
+  return output;
+ }
+ function exactOutputSingle(ISwapRouter.ExactOutputSingleParams calldata p) external returns(uint){
+  require(p.tokenIn==address(bold)&&p.tokenOut==address(coll)&&p.fee==3000&&p.deadline==block.timestamp&&p.sqrtPriceLimitX96==0,"parameters");
+  uint input=p.amountOut*2000;require(input<=p.amountInMaximum);bold.safeTransferFrom(msg.sender,address(this),input);coll.mint(p.recipient,p.amountOut);return input;
+ }
+ function exactInputSingle(ISwapRouter.ExactInputSingleParams calldata p) external returns(uint){
+  require(p.tokenIn==address(coll)&&p.tokenOut==address(bold)&&p.fee==3000&&p.deadline==block.timestamp&&p.sqrtPriceLimitX96==0,"parameters");
+  uint output=p.amountIn*2000;require(output>=p.amountOutMinimum);coll.transferFrom(msg.sender,address(this),p.amountIn);bold.safeTransfer(p.recipient,output);return output;
+ }
+ function returnBold(address receiver) external {bold.safeTransfer(receiver,bold.balanceOf(address(this)));}
+}
 interface ZapperSystemVm {function deal(address,uint) external;}
 import {RedemptionHelper} from "../reference/bold/contracts/src/RedemptionHelper.sol";
 import {CollateralRegistry} from "../reference/bold/contracts/src/CollateralRegistry.sol";
@@ -335,4 +360,33 @@ contract BorrowerOperationsSystemTest {
  }
  function testActualLeverageWETH() public {compareLeverage(false);}
  function testActualLeverageLST() public {compareLeverage(true);}
+ function runActualExchange(bool fe,bool lst,bool uni) internal returns(bytes32){
+  System memory s=makeWithWeth(fe,false,false,lst);open(s,2,BOB,10e18,6e16);
+  LeverageSystemMarkets flash=new LeverageSystemMarkets(s.coll,s.bold);ExchangeSystemMarket market=new ExchangeSystemMarket(s.coll,IERC20(address(s.bold)));
+  bytes memory exchangeCode=fe?code(uni?"UniV3Exchange":"CurveExchange",true):(uni?type(UniV3Exchange).creationCode:type(CurveExchange).creationCode);
+  address exchange=deploy(bytes.concat(exchangeCode,uni?abi.encode(s.coll,s.bold,uint24(3000),market):abi.encode(s.coll,s.bold,market,uint(0),uint(1))));
+  bytes memory zapperCode=fe?code(lst?"LeverageLSTZapper":"LeverageWETHZapper",true):(lst?type(LeverageLSTZapper).creationCode:type(LeverageWETHZapper).creationCode);
+  ILeverageZapper z=ILeverageZapper(deploy(bytes.concat(zapperCode,abi.encode(s.registry,flash,exchange))));
+  ZapperSystemVm(address(vm)).deal(ALICE,100e18);ZapperSystemVm(address(vm)).deal(address(s.weth),1000e18);
+  if(lst){s.coll.mint(ALICE,20e18);vm.prank(ALICE);s.coll.approve(address(z),type(uint).max);}
+  ILeverageZapper.OpenLeveragedTroveParams memory p=ILeverageZapper.OpenLeveragedTroveParams(ALICE,1,20e18,1e18,3000e18,0,0,5e16,address(0),type(uint).max,address(0),address(0),address(0));
+  vm.prank(ALICE);z.openLeveragedTroveWithRawETH{value:375e14+(lst?0:20e18)}(p);
+  uint trove=uint(keccak256(abi.encode(address(z),ALICE,uint(keccak256(abi.encode(ALICE,uint(1)))))));
+  require(s.manager.getLatestTroveData(trove).entireColl==21e18-1,"open collateral");
+  vm.prank(ALICE);z.leverUpTrove(ILeverageZapper.LeverUpTroveParams(trove,1e17,500e18,type(uint).max));
+  vm.prank(ALICE);z.leverDownTrove(ILeverageZapper.LeverDownTroveParams(trove,1e17,199e18));
+  require(s.manager.getLatestTroveData(trove).entireColl==21e18-2,"adjust collateral");conserve(s);
+  market.returnBold(ALICE);vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+  vm.prank(ALICE);s.bold.approve(address(z),type(uint).max);vm.prank(ALICE);WETHZapper(payable(address(z))).closeTroveToRawETH(trove);conserve(s);
+  require(s.bold.balanceOf(address(z))==0&&s.coll.balanceOf(address(z))==0&&s.bold.balanceOf(exchange)==0&&s.coll.balanceOf(exchange)==0,"residual balances");
+  return keccak256(abi.encode(ALICE.balance,s.coll.balanceOf(ALICE),s.bold.balanceOf(ALICE),s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.sorted.getSize()));
+ }
+ function compareActualExchange(bool lst,bool uni) internal {
+  TimeVm(address(vm)).warp(1000);bytes32 actual=runActualExchange(true,lst,uni);
+  TimeVm(address(vm)).warp(1000);bytes32 expected=runActualExchange(false,lst,uni);require(actual==expected,"connected exchange parity");
+ }
+ function testActualCurveWETH() public {compareActualExchange(false,false);}
+ function testActualCurveLST() public {compareActualExchange(true,false);}
+ function testActualUniWETH() public {compareActualExchange(false,true);}
+ function testActualUniLST() public {compareActualExchange(true,true);}
 }

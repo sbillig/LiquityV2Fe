@@ -880,14 +880,27 @@
     "verification": []
   },
   "contracts/src/Zappers/Modules/Exchanges/CurveExchange.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/curve_exchange.fe"
+    ],
+    "verification": [
+      "tests/CurveExchangeParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/exchanges.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3Exchange.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/hybrid_exchange.fe",
+      "src/hybrid_path.fe"
+    ],
+    "verification": [
+      "tests/HybridExchangeParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/exchanges.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol": {
     "status": "pending",
@@ -900,9 +913,16 @@
     "verification": []
   },
   "contracts/src/Zappers/Modules/Exchanges/UniV3Exchange.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/uni_v3_exchange.fe",
+      "src/uni_price_converter.fe"
+    ],
+    "verification": [
+      "tests/UniV3ExchangeParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/exchanges.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/INonfungiblePositionManager.sol": {
     "status": "pending",
@@ -935,9 +955,15 @@
     "verification": []
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/UniPriceConverter.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/uni_price_converter.fe"
+    ],
+    "verification": [
+      "tests/UniV3ExchangeParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/exchanges.log"
+    ]
   },
   "contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IFlashLoanRecipient.sol": {
     "status": "pending",

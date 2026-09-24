@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: MIT
+use core::num::IntDowncast
+use std::abi::{sol, Bytes, Uint24}
+use std::evm::{Address, Call, Ctx, RawMem}
+use super::token_calls::{TokenMsg, safe_transfer_from}
+use super::leftovers_sweep::{snapshot, return_leftovers, InitialBalances}
+use super::curve_exchange::CurveCalls
+use super::hybrid_path::path
+pub msg HybridCalls {
+    #[selector = sol("exchange(int128,int128,uint256,uint256)")]
+    Exchange { input: i128, output: i128, amount: u256, minimum: u256 } -> u256,
+    #[selector = sol("exactInput((bytes,address,uint256,uint256,uint256))")]
+    Input { p: (Bytes, Address, u256, u256, u256) } -> u256,
+}
+pub struct Config { pub coll: Address, pub bold: Address, pub usdc: Address, pub weth: Address, pub pool: Address, pub usdc_index: u128, pub bold_index: u128, pub fee_uw: Uint24, pub fee_wc: Uint24, pub router: Address }
+impl Copy for Config {}
+fn initial(_ cfg: Config) -> InitialBalances uses (ctx: Ctx, call: mut Call) {
+    let last = if cfg.coll != cfg.weth { cfg.coll } else { Address::zero() }
+    snapshot([cfg.bold, cfg.usdc, cfg.weth, last], ctx.caller())
+}
+pub msg HybridExchangeMsg {
+    #[selector = sol("collToken()")]
+    Coll -> Address,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("USDC()")]
+    Usdc -> Address,
+    #[selector = sol("WETH()")]
+    Weth -> Address,
+    #[selector = sol("curvePool()")]
+    Pool -> Address,
+    #[selector = sol("USDC_INDEX()")]
+    UsdcIndex -> u128,
+    #[selector = sol("BOLD_TOKEN_INDEX()")]
+    BoldIndex -> u128,
+    #[selector = sol("feeUsdcWeth()")]
+    FeeUW -> Uint24,
+    #[selector = sol("feeWethColl()")]
+    FeeWC -> Uint24,
+    #[selector = sol("uniV3Router()")]
+    Router -> Address,
+    #[selector = sol("swapFromBold(uint256,uint256)")]
+    FromBold { amount: u256, minimum: u256 },
+    #[selector = sol("swapToBold(uint256,uint256)")]
+    ToBold { amount: u256, minimum: u256 } -> u256,
+}
+pub contract HybridCurveUniV3Exchange {
+    cfg: Config,
+    init(coll: Address, bold: Address, usdc: Address, weth: Address, pool: Address, usdc_index: u128, bold_index: u128, fee_uw: Uint24, fee_wc: Uint24, router: Address) uses (mut cfg) {
+        cfg = Config { coll, bold, usdc, weth, pool, usdc_index, bold_index, fee_uw, fee_wc, router }
+    }
+    recv HybridExchangeMsg {
+        Coll -> Address uses (cfg) { cfg.coll }
+        Bold -> Address uses (cfg) { cfg.bold }
+        Usdc -> Address uses (cfg) { cfg.usdc }
+        Weth -> Address uses (cfg) { cfg.weth }
+        Pool -> Address uses (cfg) { cfg.pool }
+        UsdcIndex -> u128 uses (cfg) { cfg.usdc_index }
+        BoldIndex -> u128 uses (cfg) { cfg.bold_index }
+        FeeUW -> Uint24 uses (cfg) { cfg.fee_uw }
+        FeeWC -> Uint24 uses (cfg) { cfg.fee_wc }
+        Router -> Address uses (cfg) { cfg.router }
+        FromBold { amount, minimum } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let balances = initial(cfg)
+            let ignored_transfer = cfg.bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
+            let ignored_approval = cfg.bold.call(CurveCalls::Approve { spender: cfg.pool, amount })
+            let intermediate = cfg.pool.call(HybridCalls::Exchange { input: cfg.bold_index.downcast_truncate(), output: cfg.usdc_index.downcast_truncate(), amount, minimum: 0 })
+            let ignored_usdc_approval = cfg.usdc.call(CurveCalls::Approve { spender: cfg.router, amount: intermediate })
+            let route = path(cfg.usdc, cfg.weth, cfg.coll, cfg.fee_uw, cfg.fee_wc, false)
+            let ignored_swap = cfg.router.call(HybridCalls::Input { p: (route, ctx.caller(), ctx.timestamp(), intermediate, minimum) })
+            return_leftovers(balances)
+        }
+        ToBold { amount, minimum } -> u256 uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let balances = initial(cfg)
+            safe_transfer_from(cfg.coll, ctx.caller(), ctx.address(), amount)
+            let ignored_approval = cfg.coll.call(CurveCalls::Approve { spender: cfg.router, amount })
+            let route = path(cfg.usdc, cfg.weth, cfg.coll, cfg.fee_uw, cfg.fee_wc, true)
+            let intermediate = cfg.router.call(HybridCalls::Input { p: (route, ctx.address(), ctx.timestamp(), amount, 0) })
+            let ignored_usdc_approval = cfg.usdc.call(CurveCalls::Approve { spender: cfg.pool, amount: intermediate })
+            let output = cfg.pool.call(HybridCalls::Exchange { input: cfg.usdc_index.downcast_truncate(), output: cfg.bold_index.downcast_truncate(), amount: intermediate, minimum })
+            let ignored_transfer = cfg.bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: output })
+            return_leftovers(balances)
+            output
+        }
+    }
+}

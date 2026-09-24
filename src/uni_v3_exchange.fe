@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, Uint24, Uint160}
+use std::evm::{Address, Call, Ctx, RawMem}
+use super::token_calls::{TokenMsg, safe_transfer_from}
+use super::leftovers_sweep::{snapshot, return_leftovers}
+use super::curve_exchange::CurveCalls
+use super::uni_price_converter::{PriceConverterMsg, to_sqrt, from_sqrt}
+pub msg UniCalls {
+    #[selector = sol("exactOutputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))")]
+    Output { p: (Address, Address, Uint24, Address, u256, u256, u256, Uint160) } -> u256,
+    #[selector = sol("exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))")]
+    Input { p: (Address, Address, Uint24, Address, u256, u256, u256, Uint160) } -> u256,
+}
+pub msg UniExchangeMsg {
+    #[selector = sol("collToken()")]
+    Coll -> Address,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("uniV3Router()")]
+    Router -> Address,
+    #[selector = sol("fee()")]
+    Fee -> Uint24,
+    #[selector = sol("swapFromBold(uint256,uint256)")]
+    FromBold { amount: u256, minimum: u256 },
+    #[selector = sol("swapToBold(uint256,uint256)")]
+    ToBold { amount: u256, minimum: u256 } -> u256,
+    #[selector = sol("priceToSqrtPrice(address,address,uint256)")]
+    PriceToSqrt { bold: Address, coll: Address, price: u256 } -> Uint160,
+}
+pub contract UniV3Exchange {
+    coll: Address,
+    bold: Address,
+    fee: Uint24,
+    router: Address,
+    init(collateral: Address, bold_token: Address, pool_fee: Uint24, uni_router: Address)
+    uses (mut coll, mut bold, mut fee, mut router) {
+        coll = collateral
+        bold = bold_token
+        fee = pool_fee
+        router = uni_router
+    }
+    recv {
+        UniExchangeMsg::Coll {} -> Address uses (coll) { coll }
+        UniExchangeMsg::Bold {} -> Address uses (bold) { bold }
+        UniExchangeMsg::Router {} -> Address uses (router) { router }
+        UniExchangeMsg::Fee {} -> Uint24 uses (fee) { fee }
+        UniExchangeMsg::FromBold { amount, minimum } uses (coll, bold, fee, router, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let initial = snapshot([coll, bold, Address::zero(), Address::zero()], ctx.caller())
+            let ignored_transfer = bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
+            let ignored_approval = bold.call(CurveCalls::Approve { spender: router, amount })
+            let ignored_swap = router.call(UniCalls::Output { p: (bold, coll, fee, ctx.caller(), ctx.timestamp(), minimum, amount, Uint160 { val: 0 }) })
+            return_leftovers(initial)
+        }
+        UniExchangeMsg::ToBold { amount, minimum } -> u256 uses (coll, bold, fee, router, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let initial = snapshot([coll, bold, Address::zero(), Address::zero()], ctx.caller())
+            safe_transfer_from(coll, ctx.caller(), ctx.address(), amount)
+            let ignored_approval = coll.call(CurveCalls::Approve { spender: router, amount })
+            let output = router.call(UniCalls::Input { p: (coll, bold, fee, ctx.caller(), ctx.timestamp(), amount, minimum, Uint160 { val: 0 }) })
+            return_leftovers(initial)
+            output
+        }
+        UniExchangeMsg::PriceToSqrt { bold, coll, price } -> Uint160 {
+            let adjusted = if bold.inner < coll.inner { 1000000000000000000000000000000000000 / price } else { price }
+            Uint160 { val: to_sqrt(adjusted) }
+        }
+        PriceConverterMsg::ToSqrt { price } -> Uint160 { Uint160 { val: to_sqrt(price) } }
+        PriceConverterMsg::FromSqrt { value } -> u256 { from_sqrt(value.val) }
+    }
+}

@@ -1,0 +1,60 @@
+Compiling 11 files with Solc 0.8.24
+Solc 0.8.24 finished in 6.41s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> tests/BorrowerOperationsSystem.t.sol:345:3:
+    |
+345 |   uint id=uint(keccak256(abi.encode(address(z),ALICE,uint(keccak256(abi.encode(ALICE,uint(1)))))));
+    |   ^^^^^^^
+Note: The shadowed declaration is here:
+   --> tests/BorrowerOperationsSystem.t.sol:156:5:
+    |
+156 |     function id(address owner,uint index) internal pure returns(uint){return uint(keccak256(abi.encode(owner,owner,index)));}
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+   --> tests/ActivePoolParity.t.sol:110:5:
+    |
+110 |     function testGetters() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 13 tests for tests/BorrowerOperationsSystem.t.sol:BorrowerOperationsSystemTest
+[PASS] testActualBorrowingLiquidationRedemptionAndShutdown() (gas: 76893772)
+[PASS] testActualCurveLST() (gas: 92063987)
+[PASS] testActualCurveWETH() (gas: 90926170)
+[PASS] testActualFeePredictionsAndSortedGetter() (gas: 84461330)
+[PASS] testActualGasCompZapperLifecycle() (gas: 83341519)
+[PASS] testActualIndividualAndBatchClosing() (gas: 74380942)
+[PASS] testActualLeverageLST() (gas: 88732054)
+[PASS] testActualLeverageWETH() (gas: 87595776)
+[PASS] testActualOracleFailureShutsDownBorrowingAndManager() (gas: 74689731)
+[PASS] testActualRedemptionHelperAndCollateralRegistry() (gas: 81535687)
+[PASS] testActualUniLST() (gas: 92706544)
+[PASS] testActualUniWETH() (gas: 91528617)
+[PASS] testActualWETHZapperLifecycle() (gas: 82214775)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 38.80ms (316.11ms CPU time)
+
+Ran 4 tests for tests/CurveExchangeParity.t.sol:CurveExchangeParityTest
+[PASS] testBothDirectionsAndUnspentInput() (gas: 8900077)
+[PASS] testFuzzSwapAndRefund(uint96,uint96) (runs: 1024, μ: 4544972, ~: 4553918)
+[PASS] testOptionalCollateralReturnsAndFalseRollback() (gas: 4459737)
+[PASS] testSlippageAndPoolFailureRollback() (gas: 4475493)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 493.65ms (498.25ms CPU time)
+
+Ran 6 tests for tests/UniV3ExchangeParity.t.sol:UniV3ExchangeParityTest
+[PASS] testBothDirectionsAndRefunds() (gas: 10151547)
+[PASS] testConstructorFeeWidth() (gas: 159243)
+[PASS] testConverterBoundariesAndNoncanonicalABI() (gas: 425651)
+[PASS] testFuzzPriceConversions(uint256,uint160,bool) (runs: 1025, μ: 4882272, ~: 4882162)
+[PASS] testFuzzSwapAndRefund(uint96,uint96,uint24) (runs: 1024, μ: 5186616, ~: 5198646)
+[PASS] testRollbackAndOptionalReturns() (gas: 5233789)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 554.79ms (926.04ms CPU time)
+
+Ran 3 tests for tests/HybridExchangeParity.t.sol:HybridExchangeParityTest
+[PASS] testBothBranchesDirectionsAndLeftovers() (gas: 15874938)
+[PASS] testFuzzPathsFeesAndSignedIndices(bool,uint128,uint24,uint24,uint96) (runs: 1024, μ: 7907763, ~: 7508553)
+[PASS] testRollbackAcrossBothMarketsAndOptionalReturns() (gas: 8379107)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 917.72ms (926.59ms CPU time)
+
+Ran 4 test suites in 918.95ms (2.00s CPU time): 26 tests passed, 0 failed, 0 skipped (26 total tests)
