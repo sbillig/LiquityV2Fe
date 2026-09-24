@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IHintHelpers.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IHintHelpers {
+    // Solidity: view
+    #[selector = sol("forcePredictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)")]
+    ForcePredictAdjustInterestRateUpfrontFee { coll_index: u256, trove_id: u256, new_interest_rate: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getApproxHint(uint256,uint256,uint256,uint256)")]
+    GetApproxHint { coll_index: u256, interest_rate: u256, num_trials: u256, input_random_seed: u256 } -> (u256, u256, u256),
+    // Solidity: view
+    #[selector = sol("predictAdjustBatchInterestRateUpfrontFee(uint256,address,uint256)")]
+    PredictAdjustBatchInterestRateUpfrontFee { coll_index: u256, batch_address: Address, new_interest_rate: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("predictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)")]
+    PredictAdjustInterestRateUpfrontFee { coll_index: u256, trove_id: u256, new_interest_rate: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("predictAdjustTroveUpfrontFee(uint256,uint256,uint256)")]
+    PredictAdjustTroveUpfrontFee { coll_index: u256, trove_id: u256, debt_increase: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("predictJoinBatchInterestRateUpfrontFee(uint256,uint256,address)")]
+    PredictJoinBatchInterestRateUpfrontFee { coll_index: u256, trove_id: u256, batch_address: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("predictOpenTroveUpfrontFee(uint256,uint256,uint256)")]
+    PredictOpenTroveUpfrontFee { coll_index: u256, borrowed_amount: u256, interest_rate: u256 } -> u256,
+}

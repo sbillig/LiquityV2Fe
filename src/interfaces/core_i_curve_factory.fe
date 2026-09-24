@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/Curve/ICurveFactory.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynString, sol}
+use std::evm::Address
+pub msg ICurveFactory {
+    // Solidity: nonpayable
+    #[selector = sol("deploy_pool(string,string,address[2],uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)")]
+    DeployPool { name: DynString, symbol: DynString, coins: [Address; 2], implementation_id: u256, a: u256, gamma: u256, mid_fee: u256, out_fee: u256, fee_gamma: u256, allowed_extra_profit: u256, adjustment_step: u256, ma_exp_time: u256, initial_price: u256 } -> Address,
+}

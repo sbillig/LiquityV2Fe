@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+// Nominal representation of Types/TroveId.sol. The wire value remains uint256.
+use core::ops::Eq
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+use std::abi::{Sol, SolCompat}
+pub struct TroveId { pub value: u256 }
+impl Copy for TroveId {}
+impl Eq for TroveId { fn eq(self, _ other: TroveId) -> bool { self.value == other.value } }
+pub const TROVE_ID_ZERO: TroveId = TroveId { value: 0 }
+// SortedTroves.sol defines ROOT_NODE_ID = 0.
+pub const TROVE_ID_END_OF_LIST: TroveId = TroveId { value: 0 }
+impl TroveId {
+    pub fn wrap(_ value: u256) -> Self { Self { value } }
+    pub fn unwrap(self) -> u256 { self.value }
+    pub fn is_end_of_list(self) -> bool { self == TROVE_ID_END_OF_LIST }
+    pub fn is_not_end_of_list(self) -> bool { !self.is_end_of_list() }
+}
+pub fn equals(_ a: TroveId, _ b: TroveId) -> bool { a == b }
+pub fn not_equals(_ a: TroveId, _ b: TroveId) -> bool { a != b }
+impl SolCompat for TroveId { type S = String<7>
+    const SOL_TYPE: Self::S = "uint256" }
+impl AbiSize for TroveId { const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for TroveId {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 32, input.len()) }
+}
+impl Decode<Sol> for TroveId {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self { Self { value: d.read_word() } }
+}
+impl Encode<Sol> for TroveId { fn encode(own self, _ ptr: *u8) { <u256 as Encode<Sol>>::encode(self.value, ptr) } }

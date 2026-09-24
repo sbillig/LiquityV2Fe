@@ -1,0 +1,108 @@
+// SPDX-License-Identifier: MIT
+use super::gov_i_user_proxy::PermitParams as R24
+use super::gov_i_initiative::InitiativeState as R23
+use super::gov_i_initiative::Allocation as R22
+use super::gov_i_governance::InitiativeState as R21
+use super::gov_i_governance::PermitParams as R20
+use super::core_i_swap_router::ExactOutputSingleParams as R19
+use super::core_i_swap_router::ExactInputSingleParams as R18
+use super::core_i_quoter_v2::QuoteExactOutputSingleParams as R17
+use super::core_i_quoter_v2::QuoteExactInputSingleParams as R16
+use super::core_i_nonfungible_position_manager::MintParams as R15
+use super::core_i_nonfungible_position_manager::IncreaseLiquidityParams as R14
+use super::core_i_nonfungible_position_manager::DecreaseLiquidityParams as R13
+use super::core_i_zapper::OpenTroveParams as R12
+use super::core_i_leverage_zapper::OpenTroveParams as R11
+use super::core_i_leverage_zapper::OpenLeveragedTroveParams as R10
+use super::core_i_flash_loan_receiver::OpenLeveragedTroveParams as R9
+use super::core_i_metadata_n_f_t::TroveData as R8
+use super::core_i_trove_manager::TroveChange as R7
+use super::core_i_trove_manager::LatestTroveData as R6
+use super::core_i_trove_manager::LatestBatchData as R5
+use super::core_i_redemption_helper::SimulationContext as R4
+use super::core_i_multi_trove_getter::CombinedTroveData as R3
+use super::core_i_borrower_operations::OpenTroveAndJoinInterestBatchManagerParams as R2
+use super::core_i_addresses_registry::AddressVars as R1
+use super::core_i_active_pool::TroveChange as R0
+use std::abi::sol
+pub msg RecordRoundtripMsg {
+    #[selector = sol("echo0((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Echo0 { value: R0 } -> R0,
+    #[selector = sol("echo1((address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address))")]
+    Echo1 { value: R1 } -> R1,
+    #[selector = sol("echo2((address,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Echo2 { value: R2 } -> R2,
+    #[selector = sol("echo3((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,uint256,uint256))")]
+    Echo3 { value: R3 } -> R3,
+    #[selector = sol("echo4((address,address,bool,uint256,uint256,uint256,uint256,uint256))")]
+    Echo4 { value: R4 } -> R4,
+    #[selector = sol("echo5((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Echo5 { value: R5 } -> R5,
+    #[selector = sol("echo6((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Echo6 { value: R6 } -> R6,
+    #[selector = sol("echo7((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Echo7 { value: R7 } -> R7,
+    #[selector = sol("echo8((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
+    Echo8 { value: R8 } -> R8,
+    #[selector = sol("echo9((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Echo9 { value: R9 } -> R9,
+    #[selector = sol("echo10((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Echo10 { value: R10 } -> R10,
+    #[selector = sol("echo11((address,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Echo11 { value: R11 } -> R11,
+    #[selector = sol("echo12((address,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Echo12 { value: R12 } -> R12,
+    #[selector = sol("echo13((uint256,uint128,uint256,uint256,uint256))")]
+    Echo13 { value: R13 } -> R13,
+    #[selector = sol("echo14((uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Echo14 { value: R14 } -> R14,
+    #[selector = sol("echo15((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))")]
+    Echo15 { value: R15 } -> R15,
+    #[selector = sol("echo16((address,address,uint256,uint24,uint160))")]
+    Echo16 { value: R16 } -> R16,
+    #[selector = sol("echo17((address,address,uint256,uint24,uint160))")]
+    Echo17 { value: R17 } -> R17,
+    #[selector = sol("echo18((address,address,uint24,address,uint256,uint256,uint256,uint160))")]
+    Echo18 { value: R18 } -> R18,
+    #[selector = sol("echo19((address,address,uint24,address,uint256,uint256,uint256,uint160))")]
+    Echo19 { value: R19 } -> R19,
+    #[selector = sol("echo20((address,address,uint256,uint256,uint8,bytes32,bytes32))")]
+    Echo20 { value: R20 } -> R20,
+    #[selector = sol("echo21((uint256,uint256,uint256,uint256,uint256))")]
+    Echo21 { value: R21 } -> R21,
+    #[selector = sol("echo22((uint256,uint256,uint256,uint256,uint256))")]
+    Echo22 { value: R22 } -> R22,
+    #[selector = sol("echo23((uint256,uint256,uint256,uint256,uint256))")]
+    Echo23 { value: R23 } -> R23,
+    #[selector = sol("echo24((address,address,uint256,uint256,uint8,bytes32,bytes32))")]
+    Echo24 { value: R24 } -> R24,
+}
+pub contract InterfaceRecordRoundtrip {
+    recv RecordRoundtripMsg {
+        Echo0 { value } -> R0 { value }
+        Echo1 { value } -> R1 { value }
+        Echo2 { value } -> R2 { value }
+        Echo3 { value } -> R3 { value }
+        Echo4 { value } -> R4 { value }
+        Echo5 { value } -> R5 { value }
+        Echo6 { value } -> R6 { value }
+        Echo7 { value } -> R7 { value }
+        Echo8 { value } -> R8 { value }
+        Echo9 { value } -> R9 { value }
+        Echo10 { value } -> R10 { value }
+        Echo11 { value } -> R11 { value }
+        Echo12 { value } -> R12 { value }
+        Echo13 { value } -> R13 { value }
+        Echo14 { value } -> R14 { value }
+        Echo15 { value } -> R15 { value }
+        Echo16 { value } -> R16 { value }
+        Echo17 { value } -> R17 { value }
+        Echo18 { value } -> R18 { value }
+        Echo19 { value } -> R19 { value }
+        Echo20 { value } -> R20 { value }
+        Echo21 { value } -> R21 { value }
+        Echo22 { value } -> R22 { value }
+        Echo23 { value } -> R23 { value }
+        Echo24 { value } -> R24 { value }
+    }
+}

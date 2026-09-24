@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/ILQTYStaking.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ILQTYStaking {
+    // Solidity: view
+    #[selector = sol("getPendingETHGain(address)")]
+    GetPendingETHGain { user: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getPendingLUSDGain(address)")]
+    GetPendingLUSDGain { user: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("increaseF_ETH(uint256)")]
+    IncreaseFETH { e_t_h_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("increaseF_LUSD(uint256)")]
+    IncreaseFLUSD { l_q_t_y_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setAddresses(address,address,address,address,address)")]
+    SetAddresses { lqty_token_address: Address, lusd_token_address: Address, trove_manager_address: Address, borrower_operations_address: Address, active_pool_address: Address },
+    // Solidity: nonpayable
+    #[selector = sol("stake(uint256)")]
+    Stake { l_q_t_yamount: u256 },
+    // Solidity: view
+    #[selector = sol("stakes(address)")]
+    Stakes { user: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("totalLQTYStaked()")]
+    TotalLQTYStaked {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("unstake(uint256)")]
+    Unstake { l_q_t_yamount: u256 },
+}
+#[event]
+pub struct ActivePoolAddressSet {
+    pub active_pool_address: Address,
+}
+#[event]
+pub struct BorrowerOperationsAddressSet {
+    pub borrower_operations_address: Address,
+}
+#[event]
+pub struct EtherSent {
+    pub account: Address,
+    pub amount: u256,
+}
+#[event]
+pub struct F_ETHUpdated {
+    pub f__e_t_h: u256,
+}
+#[event]
+pub struct F_LUSDUpdated {
+    pub f__l_u_s_d: u256,
+}
+#[event]
+pub struct LQTYTokenAddressSet {
+    pub lqty_token_address: Address,
+}
+#[event]
+pub struct LUSDTokenAddressSet {
+    pub lusd_token_address: Address,
+}
+#[event]
+pub struct StakeChanged {
+    #[indexed]
+    pub staker: Address,
+    pub new_stake: u256,
+}
+#[event]
+pub struct StakerSnapshotsUpdated {
+    pub staker: Address,
+    pub f__e_t_h: u256,
+    pub f__l_u_s_d: u256,
+}
+#[event]
+pub struct StakingGainsWithdrawn {
+    #[indexed]
+    pub staker: Address,
+    pub l_u_s_d_gain: u256,
+    pub e_t_h_gain: u256,
+}
+#[event]
+pub struct TotalLQTYStakedUpdated {
+    pub total_l_q_t_y_staked: u256,
+}
+#[event]
+pub struct TroveManagerAddressSet {
+    pub trove_manager: Address,
+}

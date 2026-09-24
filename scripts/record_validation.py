@@ -46,7 +46,9 @@ report = {
     'upstream_master': manifest['compiler']['upstream_master'],
     'compiler_binary_sha256': digest(ROOT / 'toolchain/fe/target/release/fe'),
     'compiler_dirty': '',
-    'sources_sha256': hashes((ROOT / 'src').glob('*.fe')),
+    'sources_sha256': hashes((ROOT / 'src').rglob('*.fe')),
+    'configuration_sha256': hashes(ROOT / name for name in ['fe.toml', 'foundry.toml', 'remappings.txt', 'interface-index.json']),
+    'deployment_sources_sha256': hashes(list((ROOT / 'tools/local_demo').glob('*.py')) + list((ROOT / 'tools/local_demo/src').glob('*.sol')) + [ROOT / 'tools/local_demo/foundry.toml']),
     'tests_sha256': hashes((ROOT / 'tests').glob('*.sol')),
     'scripts_sha256': hashes(p for p in (ROOT / 'scripts').iterdir() if p.is_file()),
     # Isolated experiments under build/*-validation are outside this suite.

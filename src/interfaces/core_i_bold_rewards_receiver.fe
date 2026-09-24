@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IBoldRewardsReceiver.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IBoldRewardsReceiver {
+    // Solidity: nonpayable
+    #[selector = sol("triggerBoldRewards(uint256)")]
+    TriggerBoldRewards { bold_yield: u256 },
+}

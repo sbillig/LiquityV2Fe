@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ITroveNFT.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, Bytes4, DynString, sol}
+use std::evm::Address
+pub msg ITroveNFT {
+    // Solidity: nonpayable
+    #[selector = sol("approve(address,uint256)")]
+    Approve { to: Address, token_id: u256 },
+    // Solidity: view
+    #[selector = sol("balanceOf(address)")]
+    BalanceOf { owner: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("burn(uint256)")]
+    Burn { trove_id: u256 },
+    // Solidity: view
+    #[selector = sol("getApproved(uint256)")]
+    GetApproved { token_id: u256 } -> Address,
+    // Solidity: view
+    #[selector = sol("isApprovedForAll(address,address)")]
+    IsApprovedForAll { owner: Address, operator: Address } -> bool,
+    // Solidity: nonpayable
+    #[selector = sol("mint(address,uint256)")]
+    Mint { owner: Address, trove_id: u256 },
+    // Solidity: view
+    #[selector = sol("name()")]
+    Name {  } -> DynString,
+    // Solidity: view
+    #[selector = sol("ownerOf(uint256)")]
+    OwnerOf { token_id: u256 } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("safeTransferFrom(address,address,uint256)")]
+    SafeTransferFrom8 { from: Address, to: Address, token_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("safeTransferFrom(address,address,uint256,bytes)")]
+    SafeTransferFrom9 { from: Address, to: Address, token_id: u256, data: Bytes },
+    // Solidity: nonpayable
+    #[selector = sol("setApprovalForAll(address,bool)")]
+    SetApprovalForAll { operator: Address, approved: bool },
+    // Solidity: view
+    #[selector = sol("supportsInterface(bytes4)")]
+    SupportsInterface { interface_id: Bytes4 } -> bool,
+    // Solidity: view
+    #[selector = sol("symbol()")]
+    Symbol {  } -> DynString,
+    // Solidity: view
+    #[selector = sol("tokenURI(uint256)")]
+    TokenURI { token_id: u256 } -> DynString,
+    // Solidity: nonpayable
+    #[selector = sol("transferFrom(address,address,uint256)")]
+    TransferFrom { from: Address, to: Address, token_id: u256 },
+}
+#[event]
+pub struct Approval {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub approved: Address,
+    #[indexed]
+    pub token_id: u256,
+}
+#[event]
+pub struct ApprovalForAll {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub operator: Address,
+    pub approved: bool,
+}
+#[event]
+pub struct Transfer {
+    #[indexed]
+    pub from: Address,
+    #[indexed]
+    pub to: Address,
+    #[indexed]
+    pub token_id: u256,
+}

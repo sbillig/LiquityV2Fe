@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IStabilityPoolEvents.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+// Marker-only interface; Solidity declares no callable methods.
+pub struct IStabilityPoolEvents {}
+#[event]
+pub struct B_Updated {
+    pub b: u256,
+    pub scale: u256,
+}
+#[event]
+pub struct DepositOperation {
+    #[indexed]
+    pub depositor: Address,
+    pub operation: u8,
+    pub deposit_loss_since_last_operation: u256,
+    pub top_up_or_withdrawal: i256,
+    pub yield_gain_since_last_operation: u256,
+    pub yield_gain_claimed: u256,
+    pub eth_gain_since_last_operation: u256,
+    pub eth_gain_claimed: u256,
+}
+#[event]
+pub struct DepositUpdated {
+    #[indexed]
+    pub depositor: Address,
+    pub new_deposit: u256,
+    pub stashed_coll: u256,
+    pub snapshot_p: u256,
+    pub snapshot_s: u256,
+    pub snapshot_b: u256,
+    pub snapshot_scale: u256,
+}
+#[event]
+pub struct P_Updated {
+    pub p: u256,
+}
+#[event]
+pub struct S_Updated {
+    pub s: u256,
+    pub scale: u256,
+}
+#[event]
+pub struct ScaleUpdated {
+    pub current_scale: u256,
+}
+#[event]
+pub struct StabilityPoolBoldBalanceUpdated {
+    pub new_balance: u256,
+}
+#[event]
+pub struct StabilityPoolCollBalanceUpdated {
+    pub new_balance: u256,
+}

@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Interfaces/IFlashLoanProvider.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, sol}
+use std::evm::Address
+pub msg IFlashLoanProvider {
+    // Solidity: nonpayable
+    #[selector = sol("makeFlashLoan(address,uint256,uint8,bytes)")]
+    MakeFlashLoan { token: Address, amount: u256, operation: u8, user_data: Bytes },
+    // Solidity: view
+    #[selector = sol("receiver()")]
+    Receiver {  } -> Address,
+}

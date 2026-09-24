@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IInterestRouter.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+// Marker-only interface; Solidity declares no callable methods.
+pub struct IInterestRouter {}

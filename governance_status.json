@@ -10,7 +10,8 @@
     "verification": [
       "tests/BribeInitiativeParity.t.sol",
       "tests/GovernanceTokenParity.t.sol",
-      "tests/results/initiatives.log"
+      "tests/results/initiatives.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/CurveV2GaugeRewards.sol": {
@@ -23,7 +24,8 @@
     "verification": [
       "tests/CurveGaugeRewardsParity.t.sol",
       "tests/BribeInitiativeParity.t.sol",
-      "tests/results/initiatives.log"
+      "tests/results/initiatives.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/Governance.sol": {
@@ -52,7 +54,8 @@
       "tests/GovernanceWholeVotingParity.t.sol",
       "tests/GovernanceBribeLifecycle.t.sol",
       "tests/GovernanceRewardsLifecycle.t.sol",
-      "tests/results/governance.log"
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
     ],
     "deployment": "Original seven constructor arguments plus three fixed module addresses; see GOVERNANCE_DEPLOYMENT.md."
   },
@@ -64,7 +67,8 @@
     ],
     "verification": [
       "tests/MerklRewardsParity.t.sol",
-      "tests/results/initiatives.log"
+      "tests/results/initiatives.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/UserProxy.sol": {
@@ -75,7 +79,8 @@
     ],
     "verification": [
       "tests/UserProxyParity.t.sol",
-      "tests/results/governance-foundation.log"
+      "tests/results/governance-foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/UserProxyFactory.sol": {
@@ -85,97 +90,207 @@
     ],
     "verification": [
       "tests/UserProxyParity.t.sol",
-      "tests/results/governance-foundation.log"
+      "tests/results/governance-foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/interfaces/IBribeInitiative.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/bribe_initiative.fe"
+      "src/bribe_initiative.fe",
+      "src/interfaces/gov_i_bribe_initiative.fe"
     ],
     "verification": [
       "tests/BribeInitiativeParity.t.sol",
-      "tests/results/initiatives.log"
-    ]
+      "tests/results/initiatives.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ICurveStableswapFactoryNG.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_curve_stableswap_factory_n_g.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ICurveStableswapNG.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_curve_stableswap_n_g.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IDistributionCreator.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_distribution_creator.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IGovernance.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_governance.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IInitiative.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/bribe_initiative.fe",
       "src/curve_gauge_rewards.fe",
-      "src/merkl_rewards.fe"
+      "src/merkl_rewards.fe",
+      "src/interfaces/gov_i_initiative.fe"
     ],
     "verification": [
       "tests/BribeInitiativeParity.t.sol",
       "tests/CurveGaugeRewardsParity.t.sol",
       "tests/MerklRewardsParity.t.sol",
-      "tests/results/initiatives.log"
-    ]
+      "tests/results/initiatives.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ILQTY.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_l_q_t_y.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ILQTYStaking.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_l_q_t_y_staking.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ILUSD.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_l_u_s_d.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/ILiquidityGauge.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_liquidity_gauge.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IMultiDelegateCall.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/gov_i_multi_delegate_call.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IUserProxy.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/user_proxy.fe"
+      "src/user_proxy.fe",
+      "src/interfaces/gov_i_user_proxy.fe"
     ],
     "verification": [
       "tests/UserProxyParity.t.sol",
-      "tests/results/governance-foundation.log"
-    ]
+      "tests/results/governance-foundation.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/interfaces/IUserProxyFactory.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/user_proxy_factory.fe"
+      "src/user_proxy_factory.fe",
+      "src/interfaces/gov_i_user_proxy_factory.fe"
     ],
     "verification": [
       "tests/UserProxyParity.t.sol",
-      "tests/results/governance-foundation.log"
-    ]
+      "tests/results/governance-foundation.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "src/utils/DoubleLinkedList.sol": {
     "status": "implemented_differential_tests_pass",
@@ -184,7 +299,8 @@
     ],
     "verification": [
       "tests/GovernanceListParity.t.sol",
-      "tests/results/governance-foundation.log"
+      "tests/results/governance-foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/utils/Math.sol": {
@@ -194,33 +310,71 @@
     ],
     "verification": [
       "tests/GovernanceMathParity.t.sol",
-      "tests/results/governance-foundation.log"
+      "tests/results/governance-foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "src/utils/MultiDelegateCall.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_multicall.fe"
+    ],
+    "verification": [
+      "tests/GovernanceMulticallParity.t.sol",
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Utility behavior integrated into Governance; implementation and tests were reviewed against the pinned source."
   },
   "src/utils/Ownable.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_owner.fe"
+    ],
+    "verification": [
+      "tests/GovernanceInitializationParity.t.sol",
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Utility behavior integrated into Governance; implementation and tests were reviewed against the pinned source."
   },
   "src/utils/SafeCallMinGas.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_hooks.fe"
+    ],
+    "verification": [
+      "tests/GovernanceHooksParity.t.sol",
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Utility behavior integrated into Governance; implementation and tests were reviewed against the pinned source."
   },
   "src/utils/Types.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/user_proxy.fe",
+      "src/governance_math.fe"
+    ],
+    "verification": [
+      "tests/GovernanceStakingParity.t.sol",
+      "tests/GovernanceMathParity.t.sol",
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Utility behavior integrated into Governance; implementation and tests were reviewed against the pinned source."
   },
   "src/utils/UniqueArray.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/governance_voting.fe"
+    ],
+    "verification": [
+      "tests/GovernanceVotingParity.t.sol",
+      "tests/results/governance.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Utility behavior integrated into Governance; implementation and tests were reviewed against the pinned source."
   },
   "src/utils/VotingPower.sol": {
     "status": "implemented_differential_tests_pass",
@@ -229,7 +383,8 @@
     ],
     "verification": [
       "tests/GovernanceMathParity.t.sol",
-      "tests/results/governance-foundation.log"
+      "tests/results/governance-foundation.log",
+      "tests/results/complete-port.json"
     ]
   }
 }

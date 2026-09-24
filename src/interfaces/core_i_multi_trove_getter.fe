@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IMultiTroveGetter.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IMultiTroveGetter {
+    // Solidity: view
+    #[selector = sol("getDebtPerInterestRateAscending(uint256,uint256,uint256)")]
+    GetDebtPerInterestRateAscending { coll_index: u256, start_id: u256, max_iterations: u256 } -> (DynArray<(Address, u256, u256)>, u256),
+    // Solidity: view
+    #[selector = sol("getMultipleSortedTroves(uint256,int256,uint256)")]
+    GetMultipleSortedTroves { coll_index: u256, start_idx: i256, count: u256 } -> DynArray<CombinedTroveData>,
+}
+pub struct CombinedTroveData {
+    pub id: u256,
+    pub entire_debt: u256,
+    pub entire_coll: u256,
+    pub redist_bold_debt_gain: u256,
+    pub redist_coll_gain: u256,
+    pub accrued_interest: u256,
+    pub recorded_debt: u256,
+    pub annual_interest_rate: u256,
+    pub accrued_batch_management_fee: u256,
+    pub last_interest_rate_adj_time: u256,
+    pub stake: u256,
+    pub last_debt_update_time: u256,
+    pub interest_batch_manager: Address,
+    pub batch_debt_shares: u256,
+    pub snapshot_e_t_h: u256,
+    pub snapshot_bold_debt: u256,
+}
+impl AbiSize for CombinedTroveData { const HEAD_SIZE: u256 = 512
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for CombinedTroveData {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 512, input.len()) }
+}
+impl Decode<Sol> for CombinedTroveData {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 512, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let id = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let entire_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let entire_coll = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let redist_bold_debt_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let redist_coll_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let accrued_interest = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let annual_interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let accrued_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let last_interest_rate_adj_time = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
+        let stake = <u256 as Decode<Sol>>::decode_from(input, pos + 320)
+        let last_debt_update_time = <u256 as Decode<Sol>>::decode_from(input, pos + 352)
+        let interest_batch_manager = <Address as Decode<Sol>>::decode_from(input, pos + 384)
+        let batch_debt_shares = <u256 as Decode<Sol>>::decode_from(input, pos + 416)
+        let snapshot_e_t_h = <u256 as Decode<Sol>>::decode_from(input, pos + 448)
+        let snapshot_bold_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 480)
+        Self { id, entire_debt, entire_coll, redist_bold_debt_gain, redist_coll_gain, accrued_interest, recorded_debt, annual_interest_rate, accrued_batch_management_fee, last_interest_rate_adj_time, stake, last_debt_update_time, interest_batch_manager, batch_debt_shares, snapshot_e_t_h, snapshot_bold_debt }
+    }
+}
+impl Encode<Sol> for CombinedTroveData {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.id, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.entire_debt, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.entire_coll, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.redist_coll_gain, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.accrued_interest, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.recorded_debt, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.accrued_batch_management_fee, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, core::ptr::offset_bytes(ptr, 288))
+        <u256 as Encode<Sol>>::encode(self.stake, core::ptr::offset_bytes(ptr, 320))
+        <u256 as Encode<Sol>>::encode(self.last_debt_update_time, core::ptr::offset_bytes(ptr, 352))
+        <Address as Encode<Sol>>::encode(self.interest_batch_manager, core::ptr::offset_bytes(ptr, 384))
+        <u256 as Encode<Sol>>::encode(self.batch_debt_shares, core::ptr::offset_bytes(ptr, 416))
+        <u256 as Encode<Sol>>::encode(self.snapshot_e_t_h, core::ptr::offset_bytes(ptr, 448))
+        <u256 as Encode<Sol>>::encode(self.snapshot_bold_debt, core::ptr::offset_bytes(ptr, 480))
+    }
+}

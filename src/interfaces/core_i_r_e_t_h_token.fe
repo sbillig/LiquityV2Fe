@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IRETHToken.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IRETHToken {
+    // Solidity: view
+    #[selector = sol("getExchangeRate()")]
+    GetExchangeRate {  } -> u256,
+}

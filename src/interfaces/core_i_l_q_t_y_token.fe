@@ -1,0 +1,59 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ILQTYToken.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes32, sol}
+use std::evm::Address
+pub msg ILQTYToken {
+    // Solidity: view
+    #[selector = sol("DOMAIN_SEPARATOR()")]
+    DOMAINSEPARATOR {  } -> Bytes32,
+    // Solidity: view
+    #[selector = sol("allowance(address,address)")]
+    Allowance { owner: Address, spender: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("approve(address,uint256)")]
+    Approve { spender: Address, amount: u256 } -> bool,
+    // Solidity: view
+    #[selector = sol("balanceOf(address)")]
+    BalanceOf { account: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getDeploymentStartTime()")]
+    GetDeploymentStartTime {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getLpRewardsEntitlement()")]
+    GetLpRewardsEntitlement {  } -> u256,
+    // Solidity: view
+    #[selector = sol("nonces(address)")]
+    Nonces { owner: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")]
+    Permit { owner: Address, spender: Address, value: u256, deadline: u256, v: u8, r: Bytes32, s: Bytes32 },
+    // Solidity: nonpayable
+    #[selector = sol("sendToLQTYStaking(address,uint256)")]
+    SendToLQTYStaking { sender: Address, amount: u256 },
+    // Solidity: view
+    #[selector = sol("totalSupply()")]
+    TotalSupply {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("transfer(address,uint256)")]
+    Transfer { to: Address, amount: u256 } -> bool,
+    // Solidity: nonpayable
+    #[selector = sol("transferFrom(address,address,uint256)")]
+    TransferFrom { from: Address, to: Address, amount: u256 } -> bool,
+}
+#[event]
+pub struct Approval {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub spender: Address,
+    pub value: u256,
+}
+#[event]
+pub struct Transfer {
+    #[indexed]
+    pub from: Address,
+    #[indexed]
+    pub to: Address,
+    pub value: u256,
+}

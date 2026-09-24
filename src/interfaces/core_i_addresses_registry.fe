@@ -1,0 +1,157 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IAddressesRegistry.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IAddressesRegistry {
+    // Solidity: nonpayable
+    #[selector = sol("BCR()")]
+    BCR {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("CCR()")]
+    CCR {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("LIQUIDATION_PENALTY_REDISTRIBUTION()")]
+    LIQUIDATIONPENALTYREDISTRIBUTION {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("LIQUIDATION_PENALTY_SP()")]
+    LIQUIDATIONPENALTYSP {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("MCR()")]
+    MCR {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("SCR()")]
+    SCR {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("WETH()")]
+    WETH {  } -> Address,
+    // Solidity: view
+    #[selector = sol("activePool()")]
+    ActivePool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("boldToken()")]
+    BoldToken {  } -> Address,
+    // Solidity: view
+    #[selector = sol("borrowerOperations()")]
+    BorrowerOperations {  } -> Address,
+    // Solidity: view
+    #[selector = sol("collSurplusPool()")]
+    CollSurplusPool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("collToken()")]
+    CollToken {  } -> Address,
+    // Solidity: view
+    #[selector = sol("collateralRegistry()")]
+    CollateralRegistry {  } -> Address,
+    // Solidity: view
+    #[selector = sol("defaultPool()")]
+    DefaultPool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("gasPoolAddress()")]
+    GasPoolAddress {  } -> Address,
+    // Solidity: view
+    #[selector = sol("hintHelpers()")]
+    HintHelpers {  } -> Address,
+    // Solidity: view
+    #[selector = sol("interestRouter()")]
+    InterestRouter {  } -> Address,
+    // Solidity: view
+    #[selector = sol("metadataNFT()")]
+    MetadataNFT {  } -> Address,
+    // Solidity: view
+    #[selector = sol("multiTroveGetter()")]
+    MultiTroveGetter {  } -> Address,
+    // Solidity: view
+    #[selector = sol("priceFeed()")]
+    PriceFeed {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("setAddresses((address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address))")]
+    SetAddresses { vars: AddressVars },
+    // Solidity: view
+    #[selector = sol("sortedTroves()")]
+    SortedTroves {  } -> Address,
+    // Solidity: view
+    #[selector = sol("stabilityPool()")]
+    StabilityPool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("troveManager()")]
+    TroveManager {  } -> Address,
+    // Solidity: view
+    #[selector = sol("troveNFT()")]
+    TroveNFT {  } -> Address,
+}
+pub struct AddressVars {
+    pub coll_token: Address,
+    pub borrower_operations: Address,
+    pub trove_manager: Address,
+    pub trove_n_f_t: Address,
+    pub metadata_n_f_t: Address,
+    pub stability_pool: Address,
+    pub price_feed: Address,
+    pub active_pool: Address,
+    pub default_pool: Address,
+    pub gas_pool_address: Address,
+    pub coll_surplus_pool: Address,
+    pub sorted_troves: Address,
+    pub interest_router: Address,
+    pub hint_helpers: Address,
+    pub multi_trove_getter: Address,
+    pub collateral_registry: Address,
+    pub bold_token: Address,
+    pub w_e_t_h: Address,
+}
+impl AbiSize for AddressVars { const HEAD_SIZE: u256 = 576
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for AddressVars {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 576, input.len()) }
+}
+impl Decode<Sol> for AddressVars {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 576, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let coll_token = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let borrower_operations = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let trove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 64)
+        let trove_n_f_t = <Address as Decode<Sol>>::decode_from(input, pos + 96)
+        let metadata_n_f_t = <Address as Decode<Sol>>::decode_from(input, pos + 128)
+        let stability_pool = <Address as Decode<Sol>>::decode_from(input, pos + 160)
+        let price_feed = <Address as Decode<Sol>>::decode_from(input, pos + 192)
+        let active_pool = <Address as Decode<Sol>>::decode_from(input, pos + 224)
+        let default_pool = <Address as Decode<Sol>>::decode_from(input, pos + 256)
+        let gas_pool_address = <Address as Decode<Sol>>::decode_from(input, pos + 288)
+        let coll_surplus_pool = <Address as Decode<Sol>>::decode_from(input, pos + 320)
+        let sorted_troves = <Address as Decode<Sol>>::decode_from(input, pos + 352)
+        let interest_router = <Address as Decode<Sol>>::decode_from(input, pos + 384)
+        let hint_helpers = <Address as Decode<Sol>>::decode_from(input, pos + 416)
+        let multi_trove_getter = <Address as Decode<Sol>>::decode_from(input, pos + 448)
+        let collateral_registry = <Address as Decode<Sol>>::decode_from(input, pos + 480)
+        let bold_token = <Address as Decode<Sol>>::decode_from(input, pos + 512)
+        let w_e_t_h = <Address as Decode<Sol>>::decode_from(input, pos + 544)
+        Self { coll_token, borrower_operations, trove_manager, trove_n_f_t, metadata_n_f_t, stability_pool, price_feed, active_pool, default_pool, gas_pool_address, coll_surplus_pool, sorted_troves, interest_router, hint_helpers, multi_trove_getter, collateral_registry, bold_token, w_e_t_h }
+    }
+}
+impl Encode<Sol> for AddressVars {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.coll_token, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.borrower_operations, core::ptr::offset_bytes(ptr, 32))
+        <Address as Encode<Sol>>::encode(self.trove_manager, core::ptr::offset_bytes(ptr, 64))
+        <Address as Encode<Sol>>::encode(self.trove_n_f_t, core::ptr::offset_bytes(ptr, 96))
+        <Address as Encode<Sol>>::encode(self.metadata_n_f_t, core::ptr::offset_bytes(ptr, 128))
+        <Address as Encode<Sol>>::encode(self.stability_pool, core::ptr::offset_bytes(ptr, 160))
+        <Address as Encode<Sol>>::encode(self.price_feed, core::ptr::offset_bytes(ptr, 192))
+        <Address as Encode<Sol>>::encode(self.active_pool, core::ptr::offset_bytes(ptr, 224))
+        <Address as Encode<Sol>>::encode(self.default_pool, core::ptr::offset_bytes(ptr, 256))
+        <Address as Encode<Sol>>::encode(self.gas_pool_address, core::ptr::offset_bytes(ptr, 288))
+        <Address as Encode<Sol>>::encode(self.coll_surplus_pool, core::ptr::offset_bytes(ptr, 320))
+        <Address as Encode<Sol>>::encode(self.sorted_troves, core::ptr::offset_bytes(ptr, 352))
+        <Address as Encode<Sol>>::encode(self.interest_router, core::ptr::offset_bytes(ptr, 384))
+        <Address as Encode<Sol>>::encode(self.hint_helpers, core::ptr::offset_bytes(ptr, 416))
+        <Address as Encode<Sol>>::encode(self.multi_trove_getter, core::ptr::offset_bytes(ptr, 448))
+        <Address as Encode<Sol>>::encode(self.collateral_registry, core::ptr::offset_bytes(ptr, 480))
+        <Address as Encode<Sol>>::encode(self.bold_token, core::ptr::offset_bytes(ptr, 512))
+        <Address as Encode<Sol>>::encode(self.w_e_t_h, core::ptr::offset_bytes(ptr, 544))
+    }
+}

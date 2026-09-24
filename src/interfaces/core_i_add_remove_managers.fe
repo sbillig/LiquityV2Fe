@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IAddRemoveManagers.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IAddRemoveManagers {
+    // Solidity: view
+    #[selector = sol("addManagerOf(uint256)")]
+    AddManagerOf { trove_id: u256 } -> Address,
+    // Solidity: view
+    #[selector = sol("removeManagerReceiverOf(uint256)")]
+    RemoveManagerReceiverOf { trove_id: u256 } -> (Address, Address),
+    // Solidity: nonpayable
+    #[selector = sol("setAddManager(uint256,address)")]
+    SetAddManager { trove_id: u256, manager: Address },
+    // Solidity: nonpayable
+    #[selector = sol("setRemoveManager(uint256,address)")]
+    SetRemoveManager { trove_id: u256, manager: Address },
+    // Solidity: nonpayable
+    #[selector = sol("setRemoveManagerWithReceiver(uint256,address,address)")]
+    SetRemoveManagerWithReceiver { trove_id: u256, manager: Address, receiver: Address },
+}

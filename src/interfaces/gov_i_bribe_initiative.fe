@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/IBribeInitiative.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, sol}
+use std::evm::Address
+pub msg IBribeInitiative {
+    // Solidity: view
+    #[selector = sol("bold()")]
+    Bold {  } -> Address,
+    // Solidity: view
+    #[selector = sol("bribeByEpoch(uint256)")]
+    BribeByEpoch { epoch: u256 } -> (u256, u256, u256),
+    // Solidity: view
+    #[selector = sol("bribeToken()")]
+    BribeToken {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("claimBribes((uint256,uint256,uint256)[])")]
+    ClaimBribes { claim_data: DynArray<(u256, u256, u256)> } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("claimedBribeAtEpoch(address,uint256)")]
+    ClaimedBribeAtEpoch { user: Address, epoch: u256 } -> bool,
+    // Solidity: nonpayable
+    #[selector = sol("depositBribe(uint256,uint256,uint256)")]
+    DepositBribe { bold_amount: u256, bribe_token_amount: u256, epoch: u256 },
+    // Solidity: view
+    #[selector = sol("getMostRecentTotalEpoch()")]
+    GetMostRecentTotalEpoch {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getMostRecentUserEpoch(address)")]
+    GetMostRecentUserEpoch { user: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("governance()")]
+    Governance {  } -> Address,
+    // Solidity: view
+    #[selector = sol("lqtyAllocatedByUserAtEpoch(address,uint256)")]
+    LqtyAllocatedByUserAtEpoch { user: Address, epoch: u256 } -> (u256, u256, u256, u256),
+    // Solidity: view
+    #[selector = sol("totalLQTYAllocatedByEpoch(uint256)")]
+    TotalLQTYAllocatedByEpoch { epoch: u256 } -> (u256, u256, u256, u256),
+}
+#[event]
+pub struct ClaimBribe {
+    pub user: Address,
+    pub epoch: u256,
+    pub bold_amount: u256,
+    pub bribe_token_amount: u256,
+}
+#[event]
+pub struct DepositBribe {
+    pub depositor: Address,
+    pub bold_amount: u256,
+    pub bribe_token_amount: u256,
+    pub epoch: u256,
+}
+#[event]
+pub struct ModifyLQTYAllocation {
+    pub user: Address,
+    pub epoch: u256,
+    pub lqty_allocated: u256,
+    pub offset: u256,
+}
+#[event]
+pub struct ModifyTotalLQTYAllocation {
+    pub epoch: u256,
+    pub total_l_q_t_y_allocated: u256,
+    pub offset: u256,
+}

@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGPool.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, sol}
+use std::evm::Address
+pub msg ICurveStableswapNGPool {
+    // Solidity: nonpayable
+    #[selector = sol("add_liquidity(uint256[],uint256)")]
+    AddLiquidity { amounts: DynArray<u256>, min_mint_amount: u256 } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("exchange(int128,int128,uint256,uint256)")]
+    Exchange { i: i128, j: i128, dx: u256, min_dy: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("get_dx(int128,int128,uint256)")]
+    GetDx { i: i128, j: i128, dy: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("get_dy(int128,int128,uint256)")]
+    GetDy { i: i128, j: i128, dx: u256 } -> u256,
+}

@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Factory.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Int24, Uint24, sol}
+use std::evm::Address
+pub msg IUniswapV3Factory {
+    // Solidity: nonpayable
+    #[selector = sol("createPool(address,address,uint24)")]
+    CreatePool { token_a: Address, token_b: Address, fee: Uint24 } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("enableFeeAmount(uint24,int24)")]
+    EnableFeeAmount { fee: Uint24, tick_spacing: Int24 },
+    // Solidity: view
+    #[selector = sol("feeAmountTickSpacing(uint24)")]
+    FeeAmountTickSpacing { fee: Uint24 } -> Int24,
+    // Solidity: view
+    #[selector = sol("getPool(address,address,uint24)")]
+    GetPool { token_a: Address, token_b: Address, fee: Uint24 } -> Address,
+    // Solidity: view
+    #[selector = sol("owner()")]
+    Owner {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("setOwner(address)")]
+    SetOwner { owner: Address },
+}
+#[event]
+pub struct FeeAmountEnabled {
+    #[indexed]
+    pub fee: Uint24,
+    #[indexed]
+    pub tick_spacing: Int24,
+}
+#[event]
+pub struct OwnerChanged {
+    #[indexed]
+    pub old_owner: Address,
+    #[indexed]
+    pub new_owner: Address,
+}
+#[event]
+pub struct PoolCreated {
+    #[indexed]
+    pub token0: Address,
+    #[indexed]
+    pub token1: Address,
+    #[indexed]
+    pub fee: Uint24,
+    pub tick_spacing: Int24,
+    pub pool: Address,
+}

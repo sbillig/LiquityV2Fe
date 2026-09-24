@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/ILiquidityGauge.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ILiquidityGauge {
+    // Solidity: nonpayable
+    #[selector = sol("add_reward(address,address)")]
+    AddReward { reward_token: Address, distributor: Address },
+    // Solidity: nonpayable
+    #[selector = sol("deposit_reward_token(address,uint256,uint256)")]
+    DepositRewardToken { reward_token: Address, amount: u256, epoch: u256 },
+}

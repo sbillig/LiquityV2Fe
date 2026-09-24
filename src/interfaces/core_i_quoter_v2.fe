@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/UniswapV3/IQuoterV2.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, DynArray, Sol, Uint160, Uint24, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IQuoterV2 {
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactInput(bytes,uint256)")]
+    QuoteExactInput { path: Bytes, amount_in: u256 } -> (u256, DynArray<Uint160>, DynArray<u32>, u256),
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactInputSingle((address,address,uint256,uint24,uint160))")]
+    QuoteExactInputSingle { params: QuoteExactInputSingleParams } -> (u256, Uint160, u32, u256),
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactOutput(bytes,uint256)")]
+    QuoteExactOutput { path: Bytes, amount_out: u256 } -> (u256, DynArray<Uint160>, DynArray<u32>, u256),
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactOutputSingle((address,address,uint256,uint24,uint160))")]
+    QuoteExactOutputSingle { params: QuoteExactOutputSingleParams } -> (u256, Uint160, u32, u256),
+}
+pub struct QuoteExactInputSingleParams {
+    pub token_in: Address,
+    pub token_out: Address,
+    pub amount_in: u256,
+    pub fee: Uint24,
+    pub sqrt_price_limit_x96: Uint160,
+}
+impl AbiSize for QuoteExactInputSingleParams { const HEAD_SIZE: u256 = 160
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for QuoteExactInputSingleParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
+}
+impl Decode<Sol> for QuoteExactInputSingleParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 160, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let token_in = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let token_out = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let amount_in = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let fee = <Uint24 as Decode<Sol>>::decode_from(input, pos + 96)
+        let sqrt_price_limit_x96 = <Uint160 as Decode<Sol>>::decode_from(input, pos + 128)
+        Self { token_in, token_out, amount_in, fee, sqrt_price_limit_x96 }
+    }
+}
+impl Encode<Sol> for QuoteExactInputSingleParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.token_in, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.token_out, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.amount_in, core::ptr::offset_bytes(ptr, 64))
+        <Uint24 as Encode<Sol>>::encode(self.fee, core::ptr::offset_bytes(ptr, 96))
+        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, core::ptr::offset_bytes(ptr, 128))
+    }
+}
+pub struct QuoteExactOutputSingleParams {
+    pub token_in: Address,
+    pub token_out: Address,
+    pub amount: u256,
+    pub fee: Uint24,
+    pub sqrt_price_limit_x96: Uint160,
+}
+impl AbiSize for QuoteExactOutputSingleParams { const HEAD_SIZE: u256 = 160
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for QuoteExactOutputSingleParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
+}
+impl Decode<Sol> for QuoteExactOutputSingleParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 160, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let token_in = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let token_out = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let fee = <Uint24 as Decode<Sol>>::decode_from(input, pos + 96)
+        let sqrt_price_limit_x96 = <Uint160 as Decode<Sol>>::decode_from(input, pos + 128)
+        Self { token_in, token_out, amount, fee, sqrt_price_limit_x96 }
+    }
+}
+impl Encode<Sol> for QuoteExactOutputSingleParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.token_in, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.token_out, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.amount, core::ptr::offset_bytes(ptr, 64))
+        <Uint24 as Encode<Sol>>::encode(self.fee, core::ptr::offset_bytes(ptr, 96))
+        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, core::ptr::offset_bytes(ptr, 128))
+    }
+}

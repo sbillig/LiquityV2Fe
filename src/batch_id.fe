@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: MIT
+// Nominal representation of Types/BatchId.sol; its wire value remains address.
+use core::ops::Eq
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+use std::abi::{Sol, SolCompat}
+use std::evm::Address
+pub struct BatchId { pub value: Address }
+impl Copy for BatchId {}
+impl Eq for BatchId { fn eq(self, _ other: BatchId) -> bool { self.value == other.value } }
+pub const BATCH_ID_ZERO: BatchId = BatchId { value: Address { inner: 0 } }
+impl BatchId {
+    pub fn wrap(_ value: Address) -> Self { Self { value } }
+    pub fn unwrap(self) -> Address { self.value }
+    pub fn is_zero(self) -> bool { self == BATCH_ID_ZERO }
+    pub fn is_not_zero(self) -> bool { !self.is_zero() }
+}
+pub fn equals(_ a: BatchId, _ b: BatchId) -> bool { a == b }
+pub fn not_equals(_ a: BatchId, _ b: BatchId) -> bool { a != b }
+impl SolCompat for BatchId { type S = String<7>
+    const SOL_TYPE: Self::S = "address" }
+impl AbiSize for BatchId { const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for BatchId {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 32, input.len()) }
+}
+impl Decode<Sol> for BatchId {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let value = d.read_word()
+        if value >> 160 != 0 { std::evm::revert(()) }
+        Self { value: Address { inner: value } }
+    }
+}
+impl Encode<Sol> for BatchId { fn encode(own self, _ ptr: *u8) { <Address as Encode<Sol>>::encode(self.value, ptr) } }

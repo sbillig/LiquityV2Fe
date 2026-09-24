@@ -1,0 +1,705 @@
+use core::message::MsgVariant
+use std::abi::Sol
+#[test]
+fn selectors_core_aggregator_v3_interface() {
+    assert!(<super::core_aggregator_v3_interface::AggregatorV3Interface::Decimals as MsgVariant<Sol>>::SELECTOR == 0x313ce567)
+    assert!(<super::core_aggregator_v3_interface::AggregatorV3Interface::LatestRoundData as MsgVariant<Sol>>::SELECTOR == 0xfeaf968c)
+}
+#[test]
+fn selectors_core_i_active_pool() {
+    assert!(<super::core_i_active_pool::IActivePool::AccountForReceivedColl as MsgVariant<Sol>>::SELECTOR == 0x2bcbcbcb)
+    assert!(<super::core_i_active_pool::IActivePool::AggBatchManagementFees as MsgVariant<Sol>>::SELECTOR == 0xf6e413f5)
+    assert!(<super::core_i_active_pool::IActivePool::AggRecordedDebt as MsgVariant<Sol>>::SELECTOR == 0x8d5c1d4c)
+    assert!(<super::core_i_active_pool::IActivePool::AggWeightedBatchManagementFeeSum as MsgVariant<Sol>>::SELECTOR == 0x10a985c1)
+    assert!(<super::core_i_active_pool::IActivePool::AggWeightedDebtSum as MsgVariant<Sol>>::SELECTOR == 0x42635a95)
+    assert!(<super::core_i_active_pool::IActivePool::BorrowerOperationsAddress as MsgVariant<Sol>>::SELECTOR == 0xb7f8cf9b)
+    assert!(<super::core_i_active_pool::IActivePool::CalcPendingAggBatchManagementFee as MsgVariant<Sol>>::SELECTOR == 0x4ba89fa1)
+    assert!(<super::core_i_active_pool::IActivePool::CalcPendingAggInterest as MsgVariant<Sol>>::SELECTOR == 0x3db6c94a)
+    assert!(<super::core_i_active_pool::IActivePool::CalcPendingSPYield as MsgVariant<Sol>>::SELECTOR == 0xfa160c05)
+    assert!(<super::core_i_active_pool::IActivePool::DefaultPoolAddress as MsgVariant<Sol>>::SELECTOR == 0xaac1846f)
+    assert!(<super::core_i_active_pool::IActivePool::GetBoldDebt as MsgVariant<Sol>>::SELECTOR == 0x45507998)
+    assert!(<super::core_i_active_pool::IActivePool::GetCollBalance as MsgVariant<Sol>>::SELECTOR == 0x0367b302)
+    assert!(<super::core_i_active_pool::IActivePool::GetNewApproxAvgInterestRateFromTroveChange as MsgVariant<Sol>>::SELECTOR == 0x85fe37a3)
+    assert!(<super::core_i_active_pool::IActivePool::HasBeenShutDown as MsgVariant<Sol>>::SELECTOR == 0x06ff8dfb)
+    assert!(<super::core_i_active_pool::IActivePool::InterestRouter as MsgVariant<Sol>>::SELECTOR == 0xd0ee2ace)
+    assert!(<super::core_i_active_pool::IActivePool::LastAggUpdateTime as MsgVariant<Sol>>::SELECTOR == 0x759f9dec)
+    assert!(<super::core_i_active_pool::IActivePool::MintAggInterest as MsgVariant<Sol>>::SELECTOR == 0x1bfa0d7b)
+    assert!(<super::core_i_active_pool::IActivePool::MintAggInterestAndAccountForTroveChange as MsgVariant<Sol>>::SELECTOR == 0x71d4eb21)
+    assert!(<super::core_i_active_pool::IActivePool::MintBatchManagementFeeAndAccountForChange as MsgVariant<Sol>>::SELECTOR == 0xdd9fbcb8)
+    assert!(<super::core_i_active_pool::IActivePool::ReceiveColl as MsgVariant<Sol>>::SELECTOR == 0x83b60e4d)
+    assert!(<super::core_i_active_pool::IActivePool::SendColl as MsgVariant<Sol>>::SELECTOR == 0x9f4e511e)
+    assert!(<super::core_i_active_pool::IActivePool::SendCollToDefaultPool as MsgVariant<Sol>>::SELECTOR == 0xc2283f1f)
+    assert!(<super::core_i_active_pool::IActivePool::SetShutdownFlag as MsgVariant<Sol>>::SELECTOR == 0x6d8f962d)
+    assert!(<super::core_i_active_pool::IActivePool::ShutdownTime as MsgVariant<Sol>>::SELECTOR == 0x58569081)
+    assert!(<super::core_i_active_pool::IActivePool::StabilityPool as MsgVariant<Sol>>::SELECTOR == 0x048c661d)
+    assert!(<super::core_i_active_pool::IActivePool::TroveManagerAddress as MsgVariant<Sol>>::SELECTOR == 0x5a4d28bb)
+}
+#[test]
+fn selectors_core_i_add_remove_managers() {
+    assert!(<super::core_i_add_remove_managers::IAddRemoveManagers::AddManagerOf as MsgVariant<Sol>>::SELECTOR == 0x70986fe1)
+    assert!(<super::core_i_add_remove_managers::IAddRemoveManagers::RemoveManagerReceiverOf as MsgVariant<Sol>>::SELECTOR == 0x0e01617c)
+    assert!(<super::core_i_add_remove_managers::IAddRemoveManagers::SetAddManager as MsgVariant<Sol>>::SELECTOR == 0xd3695fa5)
+    assert!(<super::core_i_add_remove_managers::IAddRemoveManagers::SetRemoveManager as MsgVariant<Sol>>::SELECTOR == 0x292a3f0b)
+    assert!(<super::core_i_add_remove_managers::IAddRemoveManagers::SetRemoveManagerWithReceiver as MsgVariant<Sol>>::SELECTOR == 0xd6491eaf)
+}
+#[test]
+fn selectors_core_i_addresses_registry() {
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::BCR as MsgVariant<Sol>>::SELECTOR == 0x88f471a5)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::CCR as MsgVariant<Sol>>::SELECTOR == 0x5733d58f)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::LIQUIDATIONPENALTYREDISTRIBUTION as MsgVariant<Sol>>::SELECTOR == 0x1170f2d4)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::LIQUIDATIONPENALTYSP as MsgVariant<Sol>>::SELECTOR == 0x370619be)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::MCR as MsgVariant<Sol>>::SELECTOR == 0x794e5724)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::SCR as MsgVariant<Sol>>::SELECTOR == 0x58d5a961)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::WETH as MsgVariant<Sol>>::SELECTOR == 0xad5c4648)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::ActivePool as MsgVariant<Sol>>::SELECTOR == 0x7f7dde4a)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::BoldToken as MsgVariant<Sol>>::SELECTOR == 0x630afce5)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::BorrowerOperations as MsgVariant<Sol>>::SELECTOR == 0x77553ad4)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::CollSurplusPool as MsgVariant<Sol>>::SELECTOR == 0xcda775f9)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::CollToken as MsgVariant<Sol>>::SELECTOR == 0x31b8c946)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::CollateralRegistry as MsgVariant<Sol>>::SELECTOR == 0xd330fadd)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::DefaultPool as MsgVariant<Sol>>::SELECTOR == 0x3cc74225)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::GasPoolAddress as MsgVariant<Sol>>::SELECTOR == 0xfe9d0323)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::HintHelpers as MsgVariant<Sol>>::SELECTOR == 0x78bef5ce)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::InterestRouter as MsgVariant<Sol>>::SELECTOR == 0xd0ee2ace)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::MetadataNFT as MsgVariant<Sol>>::SELECTOR == 0xee3ca8ad)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::MultiTroveGetter as MsgVariant<Sol>>::SELECTOR == 0x1ff75dc6)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::PriceFeed as MsgVariant<Sol>>::SELECTOR == 0x741bef1a)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::SetAddresses as MsgVariant<Sol>>::SELECTOR == 0x105fd803)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::SortedTroves as MsgVariant<Sol>>::SELECTOR == 0xae918754)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::StabilityPool as MsgVariant<Sol>>::SELECTOR == 0x048c661d)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::TroveManager as MsgVariant<Sol>>::SELECTOR == 0x3d83908a)
+    assert!(<super::core_i_addresses_registry::IAddressesRegistry::TroveNFT as MsgVariant<Sol>>::SELECTOR == 0x059e0113)
+}
+#[test]
+fn selectors_core_i_bold_rewards_receiver() {
+    assert!(<super::core_i_bold_rewards_receiver::IBoldRewardsReceiver::TriggerBoldRewards as MsgVariant<Sol>>::SELECTOR == 0xaffb4669)
+}
+#[test]
+fn selectors_core_i_bold_token() {
+    assert!(<super::core_i_bold_token::IBoldToken::DOMAINSEPARATOR as MsgVariant<Sol>>::SELECTOR == 0x3644e515)
+    assert!(<super::core_i_bold_token::IBoldToken::Allowance as MsgVariant<Sol>>::SELECTOR == 0xdd62ed3e)
+    assert!(<super::core_i_bold_token::IBoldToken::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::core_i_bold_token::IBoldToken::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::core_i_bold_token::IBoldToken::Burn as MsgVariant<Sol>>::SELECTOR == 0x9dc29fac)
+    assert!(<super::core_i_bold_token::IBoldToken::Decimals as MsgVariant<Sol>>::SELECTOR == 0x313ce567)
+    assert!(<super::core_i_bold_token::IBoldToken::Eip712Domain as MsgVariant<Sol>>::SELECTOR == 0x84b0196e)
+    assert!(<super::core_i_bold_token::IBoldToken::Mint as MsgVariant<Sol>>::SELECTOR == 0x40c10f19)
+    assert!(<super::core_i_bold_token::IBoldToken::Name as MsgVariant<Sol>>::SELECTOR == 0x06fdde03)
+    assert!(<super::core_i_bold_token::IBoldToken::Nonces as MsgVariant<Sol>>::SELECTOR == 0x7ecebe00)
+    assert!(<super::core_i_bold_token::IBoldToken::Permit as MsgVariant<Sol>>::SELECTOR == 0xd505accf)
+    assert!(<super::core_i_bold_token::IBoldToken::ReturnFromPool as MsgVariant<Sol>>::SELECTOR == 0x20c582be)
+    assert!(<super::core_i_bold_token::IBoldToken::SendToPool as MsgVariant<Sol>>::SELECTOR == 0xbb997bac)
+    assert!(<super::core_i_bold_token::IBoldToken::SetBranchAddresses as MsgVariant<Sol>>::SELECTOR == 0x01458d0b)
+    assert!(<super::core_i_bold_token::IBoldToken::SetCollateralRegistry as MsgVariant<Sol>>::SELECTOR == 0x34fd38f9)
+    assert!(<super::core_i_bold_token::IBoldToken::Symbol as MsgVariant<Sol>>::SELECTOR == 0x95d89b41)
+    assert!(<super::core_i_bold_token::IBoldToken::TotalSupply as MsgVariant<Sol>>::SELECTOR == 0x18160ddd)
+    assert!(<super::core_i_bold_token::IBoldToken::Transfer as MsgVariant<Sol>>::SELECTOR == 0xa9059cbb)
+    assert!(<super::core_i_bold_token::IBoldToken::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+}
+#[test]
+fn selectors_core_i_borrower_operations() {
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::CCR as MsgVariant<Sol>>::SELECTOR == 0x5733d58f)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::MCR as MsgVariant<Sol>>::SELECTOR == 0x794e5724)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SCR as MsgVariant<Sol>>::SELECTOR == 0x58d5a961)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::ActivePool as MsgVariant<Sol>>::SELECTOR == 0x7f7dde4a)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::AddColl as MsgVariant<Sol>>::SELECTOR == 0x59f54f40)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::AddManagerOf as MsgVariant<Sol>>::SELECTOR == 0x70986fe1)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::AdjustTrove as MsgVariant<Sol>>::SELECTOR == 0x84e5253c)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::AdjustTroveInterestRate as MsgVariant<Sol>>::SELECTOR == 0x26f4e252)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::AdjustZombieTrove as MsgVariant<Sol>>::SELECTOR == 0xdcfbd293)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::ApplyPendingDebt as MsgVariant<Sol>>::SELECTOR == 0xba5f47a6)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::CheckBatchManagerExists as MsgVariant<Sol>>::SELECTOR == 0x85c44a1a)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::ClaimCollateral as MsgVariant<Sol>>::SELECTOR == 0x6f0b0c1c)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::CloseTrove as MsgVariant<Sol>>::SELECTOR == 0x5aa6d461)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::GetEntireBranchColl as MsgVariant<Sol>>::SELECTOR == 0x3ecaaa3f)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::GetEntireBranchDebt as MsgVariant<Sol>>::SELECTOR == 0x105b403b)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::GetInterestBatchManager as MsgVariant<Sol>>::SELECTOR == 0x4ed1bd5d)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::GetInterestIndividualDelegateOf as MsgVariant<Sol>>::SELECTOR == 0x4c1306b3)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::HasBeenShutDown as MsgVariant<Sol>>::SELECTOR == 0x06ff8dfb)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::InterestBatchManagerOf as MsgVariant<Sol>>::SELECTOR == 0xa0df5cd5)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::KickFromBatch as MsgVariant<Sol>>::SELECTOR == 0x2e09a69c)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::LowerBatchManagementFee as MsgVariant<Sol>>::SELECTOR == 0xad9be127)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::OnLiquidateTrove as MsgVariant<Sol>>::SELECTOR == 0x8fef27ab)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::OpenTrove as MsgVariant<Sol>>::SELECTOR == 0x9cb90ba6)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::OpenTroveAndJoinInterestBatchManager as MsgVariant<Sol>>::SELECTOR == 0xc440844f)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::RegisterBatchManager as MsgVariant<Sol>>::SELECTOR == 0xbcb266c0)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::RemoveFromBatch as MsgVariant<Sol>>::SELECTOR == 0xf9ef19ca)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::RemoveInterestIndividualDelegate as MsgVariant<Sol>>::SELECTOR == 0x53eb2885)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::RemoveManagerReceiverOf as MsgVariant<Sol>>::SELECTOR == 0x0e01617c)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::RepayBold as MsgVariant<Sol>>::SELECTOR == 0x5cd067cf)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetAddManager as MsgVariant<Sol>>::SELECTOR == 0xd3695fa5)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetBatchManagerAnnualInterestRate as MsgVariant<Sol>>::SELECTOR == 0x570fb750)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetInterestBatchManager as MsgVariant<Sol>>::SELECTOR == 0x9537f001)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetInterestIndividualDelegate as MsgVariant<Sol>>::SELECTOR == 0xc6ac2465)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetRemoveManager as MsgVariant<Sol>>::SELECTOR == 0x292a3f0b)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SetRemoveManagerWithReceiver as MsgVariant<Sol>>::SELECTOR == 0xd6491eaf)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::Shutdown as MsgVariant<Sol>>::SELECTOR == 0xfc0e74d1)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::ShutdownFromOracleFailure as MsgVariant<Sol>>::SELECTOR == 0x82e43a49)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::SwitchBatchManager as MsgVariant<Sol>>::SELECTOR == 0xd5479cd4)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::WithdrawBold as MsgVariant<Sol>>::SELECTOR == 0x90de348a)
+    assert!(<super::core_i_borrower_operations::IBorrowerOperations::WithdrawColl as MsgVariant<Sol>>::SELECTOR == 0x580de360)
+}
+#[test]
+fn selectors_core_i_coll_surplus_pool() {
+    assert!(<super::core_i_coll_surplus_pool::ICollSurplusPool::AccountSurplus as MsgVariant<Sol>>::SELECTOR == 0x3f10abab)
+    assert!(<super::core_i_coll_surplus_pool::ICollSurplusPool::ClaimColl as MsgVariant<Sol>>::SELECTOR == 0xb32beb5b)
+    assert!(<super::core_i_coll_surplus_pool::ICollSurplusPool::GetCollBalance as MsgVariant<Sol>>::SELECTOR == 0x0367b302)
+    assert!(<super::core_i_coll_surplus_pool::ICollSurplusPool::GetCollateral as MsgVariant<Sol>>::SELECTOR == 0x9b56d6c9)
+}
+#[test]
+fn selectors_core_i_collateral_registry() {
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::BaseRate as MsgVariant<Sol>>::SELECTOR == 0x1f68f20a)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::BoldToken as MsgVariant<Sol>>::SELECTOR == 0x630afce5)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetEffectiveRedemptionFeeInBold as MsgVariant<Sol>>::SELECTOR == 0xc3bfd842)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetRedemptionFeeWithDecay as MsgVariant<Sol>>::SELECTOR == 0xd5b35635)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetRedemptionRate as MsgVariant<Sol>>::SELECTOR == 0x2b11551a)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetRedemptionRateForRedeemedAmount as MsgVariant<Sol>>::SELECTOR == 0x63f1134e)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetRedemptionRateWithDecay as MsgVariant<Sol>>::SELECTOR == 0xc52861f2)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetToken as MsgVariant<Sol>>::SELECTOR == 0xe4b50cb8)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::GetTroveManager as MsgVariant<Sol>>::SELECTOR == 0x0bc17feb)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::LastFeeOperationTime as MsgVariant<Sol>>::SELECTOR == 0xd380a37c)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::RedeemCollateral as MsgVariant<Sol>>::SELECTOR == 0xab6d53bd)
+    assert!(<super::core_i_collateral_registry::ICollateralRegistry::TotalCollaterals as MsgVariant<Sol>>::SELECTOR == 0x30504b6f)
+}
+#[test]
+fn selectors_core_i_community_issuance() {
+    assert!(<super::core_i_community_issuance::ICommunityIssuance::IssueLQTY as MsgVariant<Sol>>::SELECTOR == 0x46ad34d9)
+    assert!(<super::core_i_community_issuance::ICommunityIssuance::SendLQTY as MsgVariant<Sol>>::SELECTOR == 0x614d2ab6)
+    assert!(<super::core_i_community_issuance::ICommunityIssuance::SetAddresses as MsgVariant<Sol>>::SELECTOR == 0x90107afe)
+}
+#[test]
+fn selectors_core_i_debt_in_front_helper() {
+    assert!(<super::core_i_debt_in_front_helper::IDebtInFrontHelper::CollateralRegistry as MsgVariant<Sol>>::SELECTOR == 0xd330fadd)
+    assert!(<super::core_i_debt_in_front_helper::IDebtInFrontHelper::GetDebtBetweenInterestRateAndTrove as MsgVariant<Sol>>::SELECTOR == 0x4b9bd0a0)
+    assert!(<super::core_i_debt_in_front_helper::IDebtInFrontHelper::GetDebtBetweenInterestRates as MsgVariant<Sol>>::SELECTOR == 0x70db7c75)
+    assert!(<super::core_i_debt_in_front_helper::IDebtInFrontHelper::HintHelpers as MsgVariant<Sol>>::SELECTOR == 0x78bef5ce)
+}
+#[test]
+fn selectors_core_i_default_pool() {
+    assert!(<super::core_i_default_pool::IDefaultPool::ActivePoolAddress as MsgVariant<Sol>>::SELECTOR == 0xb08bc722)
+    assert!(<super::core_i_default_pool::IDefaultPool::DecreaseBoldDebt as MsgVariant<Sol>>::SELECTOR == 0xc1623dbc)
+    assert!(<super::core_i_default_pool::IDefaultPool::GetBoldDebt as MsgVariant<Sol>>::SELECTOR == 0x45507998)
+    assert!(<super::core_i_default_pool::IDefaultPool::GetCollBalance as MsgVariant<Sol>>::SELECTOR == 0x0367b302)
+    assert!(<super::core_i_default_pool::IDefaultPool::IncreaseBoldDebt as MsgVariant<Sol>>::SELECTOR == 0x057e3588)
+    assert!(<super::core_i_default_pool::IDefaultPool::ReceiveColl as MsgVariant<Sol>>::SELECTOR == 0x83b60e4d)
+    assert!(<super::core_i_default_pool::IDefaultPool::SendCollToActivePool as MsgVariant<Sol>>::SELECTOR == 0x3d5dae7a)
+    assert!(<super::core_i_default_pool::IDefaultPool::TroveManagerAddress as MsgVariant<Sol>>::SELECTOR == 0x5a4d28bb)
+}
+#[test]
+fn selectors_core_i_hint_helpers() {
+    assert!(<super::core_i_hint_helpers::IHintHelpers::ForcePredictAdjustInterestRateUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0xa3bc9672)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::GetApproxHint as MsgVariant<Sol>>::SELECTOR == 0x1c2feb32)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::PredictAdjustBatchInterestRateUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0xa5937ba5)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::PredictAdjustInterestRateUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0x1cfc19ee)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::PredictAdjustTroveUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0x3a0b1dfa)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::PredictJoinBatchInterestRateUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0x9e6bd07a)
+    assert!(<super::core_i_hint_helpers::IHintHelpers::PredictOpenTroveUpfrontFee as MsgVariant<Sol>>::SELECTOR == 0x663224be)
+}
+#[test]
+fn selectors_core_i_l_q_t_y_staking() {
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::GetPendingBoldGain as MsgVariant<Sol>>::SELECTOR == 0x7aa74aa3)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::GetPendingETHGain as MsgVariant<Sol>>::SELECTOR == 0x8b9345ad)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::IncreaseFETH as MsgVariant<Sol>>::SELECTOR == 0x1e3e2a1a)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::IncreaseFBold as MsgVariant<Sol>>::SELECTOR == 0x456ba881)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::SetAddresses as MsgVariant<Sol>>::SELECTOR == 0x5dd68acd)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::Stake as MsgVariant<Sol>>::SELECTOR == 0xa694fc3a)
+    assert!(<super::core_i_l_q_t_y_staking::ILQTYStaking::Unstake as MsgVariant<Sol>>::SELECTOR == 0x2e17de78)
+}
+#[test]
+fn selectors_core_i_l_q_t_y_token() {
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::DOMAINSEPARATOR as MsgVariant<Sol>>::SELECTOR == 0x3644e515)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::Allowance as MsgVariant<Sol>>::SELECTOR == 0xdd62ed3e)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::GetDeploymentStartTime as MsgVariant<Sol>>::SELECTOR == 0x3c84b7c2)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::GetLpRewardsEntitlement as MsgVariant<Sol>>::SELECTOR == 0x974f5590)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::Nonces as MsgVariant<Sol>>::SELECTOR == 0x7ecebe00)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::Permit as MsgVariant<Sol>>::SELECTOR == 0xd505accf)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::SendToLQTYStaking as MsgVariant<Sol>>::SELECTOR == 0xf3a2568b)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::TotalSupply as MsgVariant<Sol>>::SELECTOR == 0x18160ddd)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::Transfer as MsgVariant<Sol>>::SELECTOR == 0xa9059cbb)
+    assert!(<super::core_i_l_q_t_y_token::ILQTYToken::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+}
+#[test]
+fn selectors_core_i_liquity_base() {
+    assert!(<super::core_i_liquity_base::ILiquityBase::ActivePool as MsgVariant<Sol>>::SELECTOR == 0x7f7dde4a)
+    assert!(<super::core_i_liquity_base::ILiquityBase::GetEntireBranchColl as MsgVariant<Sol>>::SELECTOR == 0x3ecaaa3f)
+    assert!(<super::core_i_liquity_base::ILiquityBase::GetEntireBranchDebt as MsgVariant<Sol>>::SELECTOR == 0x105b403b)
+}
+#[test]
+fn selectors_core_i_mainnet_price_feed() {
+    assert!(<super::core_i_mainnet_price_feed::IMainnetPriceFeed::EthUsdOracle as MsgVariant<Sol>>::SELECTOR == 0x8a97f9c9)
+    assert!(<super::core_i_mainnet_price_feed::IMainnetPriceFeed::FetchPrice as MsgVariant<Sol>>::SELECTOR == 0x0fdb11cf)
+    assert!(<super::core_i_mainnet_price_feed::IMainnetPriceFeed::FetchRedemptionPrice as MsgVariant<Sol>>::SELECTOR == 0xb5b65cef)
+    assert!(<super::core_i_mainnet_price_feed::IMainnetPriceFeed::LastGoodPrice as MsgVariant<Sol>>::SELECTOR == 0x0490be83)
+    assert!(<super::core_i_mainnet_price_feed::IMainnetPriceFeed::PriceSource as MsgVariant<Sol>>::SELECTOR == 0x20531bc9)
+}
+#[test]
+fn selectors_core_i_multi_trove_getter() {
+    assert!(<super::core_i_multi_trove_getter::IMultiTroveGetter::GetDebtPerInterestRateAscending as MsgVariant<Sol>>::SELECTOR == 0xd1a4629c)
+    assert!(<super::core_i_multi_trove_getter::IMultiTroveGetter::GetMultipleSortedTroves as MsgVariant<Sol>>::SELECTOR == 0x27addfca)
+}
+#[test]
+fn selectors_core_i_price_feed() {
+    assert!(<super::core_i_price_feed::IPriceFeed::FetchPrice as MsgVariant<Sol>>::SELECTOR == 0x0fdb11cf)
+    assert!(<super::core_i_price_feed::IPriceFeed::FetchRedemptionPrice as MsgVariant<Sol>>::SELECTOR == 0xb5b65cef)
+    assert!(<super::core_i_price_feed::IPriceFeed::LastGoodPrice as MsgVariant<Sol>>::SELECTOR == 0x0490be83)
+}
+#[test]
+fn selectors_core_i_r_e_t_h_price_feed() {
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::EthUsdOracle as MsgVariant<Sol>>::SELECTOR == 0x8a97f9c9)
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::FetchPrice as MsgVariant<Sol>>::SELECTOR == 0x0fdb11cf)
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::FetchRedemptionPrice as MsgVariant<Sol>>::SELECTOR == 0xb5b65cef)
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::LastGoodPrice as MsgVariant<Sol>>::SELECTOR == 0x0490be83)
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::PriceSource as MsgVariant<Sol>>::SELECTOR == 0x20531bc9)
+    assert!(<super::core_i_r_e_t_h_price_feed::IRETHPriceFeed::REthEthOracle as MsgVariant<Sol>>::SELECTOR == 0x03f04756)
+}
+#[test]
+fn selectors_core_i_r_e_t_h_token() {
+    assert!(<super::core_i_r_e_t_h_token::IRETHToken::GetExchangeRate as MsgVariant<Sol>>::SELECTOR == 0xe6aa216c)
+}
+#[test]
+fn selectors_core_i_redemption_helper() {
+    assert!(<super::core_i_redemption_helper::IRedemptionHelper::RedeemCollateral as MsgVariant<Sol>>::SELECTOR == 0xc8c52fb7)
+    assert!(<super::core_i_redemption_helper::IRedemptionHelper::SimulateRedemption as MsgVariant<Sol>>::SELECTOR == 0xdfa397d7)
+    assert!(<super::core_i_redemption_helper::IRedemptionHelper::TruncateRedemption as MsgVariant<Sol>>::SELECTOR == 0x2b9f137c)
+}
+#[test]
+fn selectors_core_i_sorted_troves() {
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Batches as MsgVariant<Sol>>::SELECTOR == 0xe2ea2658)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::BorrowerOperationsAddress as MsgVariant<Sol>>::SELECTOR == 0xb7f8cf9b)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Contains as MsgVariant<Sol>>::SELECTOR == 0xc34052e0)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::FindInsertPosition as MsgVariant<Sol>>::SELECTOR == 0x62c4c516)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::GetFirst as MsgVariant<Sol>>::SELECTOR == 0x1e223143)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::GetLast as MsgVariant<Sol>>::SELECTOR == 0x4d622831)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::GetNext as MsgVariant<Sol>>::SELECTOR == 0x07aba33d)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::GetPrev as MsgVariant<Sol>>::SELECTOR == 0x1037a5f4)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::GetSize as MsgVariant<Sol>>::SELECTOR == 0xde8fa431)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Insert as MsgVariant<Sol>>::SELECTOR == 0x843aa0db)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::InsertIntoBatch as MsgVariant<Sol>>::SELECTOR == 0x36aa4c6a)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::IsBatchedNode as MsgVariant<Sol>>::SELECTOR == 0x2dbf554c)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::IsEmpty as MsgVariant<Sol>>::SELECTOR == 0x681fe70c)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::IsEmptyBatch as MsgVariant<Sol>>::SELECTOR == 0x0364aefb)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Nodes as MsgVariant<Sol>>::SELECTOR == 0x1c53c280)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::ReInsert as MsgVariant<Sol>>::SELECTOR == 0x94586b4e)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::ReInsertBatch as MsgVariant<Sol>>::SELECTOR == 0x1c403f59)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Remove as MsgVariant<Sol>>::SELECTOR == 0x4cc82215)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::RemoveFromBatch as MsgVariant<Sol>>::SELECTOR == 0xf4761259)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::Size as MsgVariant<Sol>>::SELECTOR == 0x949d225d)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::TroveManager as MsgVariant<Sol>>::SELECTOR == 0x3d83908a)
+    assert!(<super::core_i_sorted_troves::ISortedTroves::ValidInsertPosition as MsgVariant<Sol>>::SELECTOR == 0x353d67a0)
+}
+#[test]
+fn selectors_core_i_stability_pool() {
+    assert!(<super::core_i_stability_pool::IStabilityPool::P as MsgVariant<Sol>>::SELECTOR == 0x8b8fbd92)
+    assert!(<super::core_i_stability_pool::IStabilityPool::PPRECISION as MsgVariant<Sol>>::SELECTOR == 0x2479533d)
+    assert!(<super::core_i_stability_pool::IStabilityPool::ActivePool as MsgVariant<Sol>>::SELECTOR == 0x7f7dde4a)
+    assert!(<super::core_i_stability_pool::IStabilityPool::BoldToken as MsgVariant<Sol>>::SELECTOR == 0x630afce5)
+    assert!(<super::core_i_stability_pool::IStabilityPool::ClaimAllCollGains as MsgVariant<Sol>>::SELECTOR == 0x9288902d)
+    assert!(<super::core_i_stability_pool::IStabilityPool::CurrentScale as MsgVariant<Sol>>::SELECTOR == 0xa4e59ac8)
+    assert!(<super::core_i_stability_pool::IStabilityPool::Deposits as MsgVariant<Sol>>::SELECTOR == 0xfc7e286d)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetCollBalance as MsgVariant<Sol>>::SELECTOR == 0x0367b302)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetCompoundedBoldDeposit as MsgVariant<Sol>>::SELECTOR == 0x065f566d)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetDepositorCollGain as MsgVariant<Sol>>::SELECTOR == 0x47ea8354)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetDepositorYieldGain as MsgVariant<Sol>>::SELECTOR == 0xdaed0a9b)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetDepositorYieldGainWithPending as MsgVariant<Sol>>::SELECTOR == 0x76a10213)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetEntireBranchColl as MsgVariant<Sol>>::SELECTOR == 0x3ecaaa3f)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetEntireBranchDebt as MsgVariant<Sol>>::SELECTOR == 0x105b403b)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetTotalBoldDeposits as MsgVariant<Sol>>::SELECTOR == 0xf71c6940)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetYieldGainsOwed as MsgVariant<Sol>>::SELECTOR == 0x02f90015)
+    assert!(<super::core_i_stability_pool::IStabilityPool::GetYieldGainsPending as MsgVariant<Sol>>::SELECTOR == 0x560ee5df)
+    assert!(<super::core_i_stability_pool::IStabilityPool::Offset as MsgVariant<Sol>>::SELECTOR == 0x335525ad)
+    assert!(<super::core_i_stability_pool::IStabilityPool::ProvideToSP as MsgVariant<Sol>>::SELECTOR == 0xaeb4b970)
+    assert!(<super::core_i_stability_pool::IStabilityPool::ScaleToB as MsgVariant<Sol>>::SELECTOR == 0xbcf242b7)
+    assert!(<super::core_i_stability_pool::IStabilityPool::ScaleToS as MsgVariant<Sol>>::SELECTOR == 0x71a37bc2)
+    assert!(<super::core_i_stability_pool::IStabilityPool::StashedColl as MsgVariant<Sol>>::SELECTOR == 0x7b4c6287)
+    assert!(<super::core_i_stability_pool::IStabilityPool::TriggerBoldRewards as MsgVariant<Sol>>::SELECTOR == 0xaffb4669)
+    assert!(<super::core_i_stability_pool::IStabilityPool::TroveManager as MsgVariant<Sol>>::SELECTOR == 0x3d83908a)
+    assert!(<super::core_i_stability_pool::IStabilityPool::WithdrawFromSP as MsgVariant<Sol>>::SELECTOR == 0xcfddf5f5)
+}
+#[test]
+fn selectors_core_i_trove_manager() {
+    assert!(<super::core_i_trove_manager::ITroveManager::Troves as MsgVariant<Sol>>::SELECTOR == 0xa411219c)
+    assert!(<super::core_i_trove_manager::ITroveManager::ActivePool as MsgVariant<Sol>>::SELECTOR == 0x7f7dde4a)
+    assert!(<super::core_i_trove_manager::ITroveManager::BatchLiquidateTroves as MsgVariant<Sol>>::SELECTOR == 0xef49a6b4)
+    assert!(<super::core_i_trove_manager::ITroveManager::BorrowerOperations as MsgVariant<Sol>>::SELECTOR == 0x77553ad4)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetCurrentICR as MsgVariant<Sol>>::SELECTOR == 0xc067e95c)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetEntireBranchColl as MsgVariant<Sol>>::SELECTOR == 0x3ecaaa3f)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetEntireBranchDebt as MsgVariant<Sol>>::SELECTOR == 0x105b403b)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetLatestBatchData as MsgVariant<Sol>>::SELECTOR == 0x613cacae)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetLatestTroveData as MsgVariant<Sol>>::SELECTOR == 0xaad3f404)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetTroveAnnualInterestRate as MsgVariant<Sol>>::SELECTOR == 0x5ef3b8bf)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetTroveFromTroveIdsArray as MsgVariant<Sol>>::SELECTOR == 0x1ef11b62)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetTroveIdsCount as MsgVariant<Sol>>::SELECTOR == 0x4aff96e1)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetTroveStatus as MsgVariant<Sol>>::SELECTOR == 0xe47bfaf1)
+    assert!(<super::core_i_trove_manager::ITroveManager::GetUnbackedPortionPriceAndRedeemability as MsgVariant<Sol>>::SELECTOR == 0x4ea15f37)
+    assert!(<super::core_i_trove_manager::ITroveManager::LastZombieTroveId as MsgVariant<Sol>>::SELECTOR == 0x01540287)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnAdjustTrove as MsgVariant<Sol>>::SELECTOR == 0x1d7be800)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnAdjustTroveInsideBatch as MsgVariant<Sol>>::SELECTOR == 0x1cf74075)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnAdjustTroveInterestRate as MsgVariant<Sol>>::SELECTOR == 0x0f830693)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnApplyTroveInterest as MsgVariant<Sol>>::SELECTOR == 0xb5a672c2)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnCloseTrove as MsgVariant<Sol>>::SELECTOR == 0x735ab2a4)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnLowerBatchManagerAnnualFee as MsgVariant<Sol>>::SELECTOR == 0xca0ca8d2)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnOpenTrove as MsgVariant<Sol>>::SELECTOR == 0xb0141775)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnOpenTroveAndJoinBatch as MsgVariant<Sol>>::SELECTOR == 0x1ca2d7d9)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnRegisterBatchManager as MsgVariant<Sol>>::SELECTOR == 0x499b069f)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnRemoveFromBatch as MsgVariant<Sol>>::SELECTOR == 0xbf49e649)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnSetBatchManagerAnnualInterestRate as MsgVariant<Sol>>::SELECTOR == 0x6daed000)
+    assert!(<super::core_i_trove_manager::ITroveManager::OnSetInterestBatchManager as MsgVariant<Sol>>::SELECTOR == 0xb3e16c30)
+    assert!(<super::core_i_trove_manager::ITroveManager::RedeemCollateral as MsgVariant<Sol>>::SELECTOR == 0xf8a239e8)
+    assert!(<super::core_i_trove_manager::ITroveManager::RewardSnapshots as MsgVariant<Sol>>::SELECTOR == 0x5d648588)
+    assert!(<super::core_i_trove_manager::ITroveManager::SetTroveStatusToActive as MsgVariant<Sol>>::SELECTOR == 0x38116fa3)
+    assert!(<super::core_i_trove_manager::ITroveManager::Shutdown as MsgVariant<Sol>>::SELECTOR == 0xfc0e74d1)
+    assert!(<super::core_i_trove_manager::ITroveManager::ShutdownTime as MsgVariant<Sol>>::SELECTOR == 0x58569081)
+    assert!(<super::core_i_trove_manager::ITroveManager::SortedTroves as MsgVariant<Sol>>::SELECTOR == 0xae918754)
+    assert!(<super::core_i_trove_manager::ITroveManager::StabilityPool as MsgVariant<Sol>>::SELECTOR == 0x048c661d)
+    assert!(<super::core_i_trove_manager::ITroveManager::TroveNFT as MsgVariant<Sol>>::SELECTOR == 0x059e0113)
+    assert!(<super::core_i_trove_manager::ITroveManager::UrgentRedemption as MsgVariant<Sol>>::SELECTOR == 0xc2020f04)
+}
+#[test]
+fn selectors_core_i_trove_n_f_t() {
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::Burn as MsgVariant<Sol>>::SELECTOR == 0x42966c68)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::GetApproved as MsgVariant<Sol>>::SELECTOR == 0x081812fc)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::IsApprovedForAll as MsgVariant<Sol>>::SELECTOR == 0xe985e9c5)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::Mint as MsgVariant<Sol>>::SELECTOR == 0x40c10f19)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::Name as MsgVariant<Sol>>::SELECTOR == 0x06fdde03)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::OwnerOf as MsgVariant<Sol>>::SELECTOR == 0x6352211e)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::SafeTransferFrom8 as MsgVariant<Sol>>::SELECTOR == 0x42842e0e)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::SafeTransferFrom9 as MsgVariant<Sol>>::SELECTOR == 0xb88d4fde)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::SetApprovalForAll as MsgVariant<Sol>>::SELECTOR == 0xa22cb465)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::SupportsInterface as MsgVariant<Sol>>::SELECTOR == 0x01ffc9a7)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::Symbol as MsgVariant<Sol>>::SELECTOR == 0x95d89b41)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::TokenURI as MsgVariant<Sol>>::SELECTOR == 0xc87b56dd)
+    assert!(<super::core_i_trove_n_f_t::ITroveNFT::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+}
+#[test]
+fn selectors_core_i_w_e_t_h() {
+    assert!(<super::core_i_w_e_t_h::IWETH::Allowance as MsgVariant<Sol>>::SELECTOR == 0xdd62ed3e)
+    assert!(<super::core_i_w_e_t_h::IWETH::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::core_i_w_e_t_h::IWETH::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::core_i_w_e_t_h::IWETH::Decimals as MsgVariant<Sol>>::SELECTOR == 0x313ce567)
+    assert!(<super::core_i_w_e_t_h::IWETH::Deposit as MsgVariant<Sol>>::SELECTOR == 0xd0e30db0)
+    assert!(<super::core_i_w_e_t_h::IWETH::Name as MsgVariant<Sol>>::SELECTOR == 0x06fdde03)
+    assert!(<super::core_i_w_e_t_h::IWETH::Symbol as MsgVariant<Sol>>::SELECTOR == 0x95d89b41)
+    assert!(<super::core_i_w_e_t_h::IWETH::TotalSupply as MsgVariant<Sol>>::SELECTOR == 0x18160ddd)
+    assert!(<super::core_i_w_e_t_h::IWETH::Transfer as MsgVariant<Sol>>::SELECTOR == 0xa9059cbb)
+    assert!(<super::core_i_w_e_t_h::IWETH::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+    assert!(<super::core_i_w_e_t_h::IWETH::Withdraw as MsgVariant<Sol>>::SELECTOR == 0x2e1a7d4d)
+}
+#[test]
+fn selectors_core_i_w_s_t_e_t_h() {
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::GetStETHByWstETH as MsgVariant<Sol>>::SELECTOR == 0xbb2952fc)
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::GetWstETHByStETH as MsgVariant<Sol>>::SELECTOR == 0xb0e38900)
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::StEthPerToken as MsgVariant<Sol>>::SELECTOR == 0x035faf82)
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::TokensPerStEth as MsgVariant<Sol>>::SELECTOR == 0x9576a0c8)
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::Unwrap as MsgVariant<Sol>>::SELECTOR == 0xde0e9a3e)
+    assert!(<super::core_i_w_s_t_e_t_h::IWSTETH::Wrap as MsgVariant<Sol>>::SELECTOR == 0xea598cb0)
+}
+#[test]
+fn selectors_core_i_w_s_t_e_t_h_price_feed() {
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::EthUsdOracle as MsgVariant<Sol>>::SELECTOR == 0x8a97f9c9)
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::FetchPrice as MsgVariant<Sol>>::SELECTOR == 0x0fdb11cf)
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::FetchRedemptionPrice as MsgVariant<Sol>>::SELECTOR == 0xb5b65cef)
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::LastGoodPrice as MsgVariant<Sol>>::SELECTOR == 0x0490be83)
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::PriceSource as MsgVariant<Sol>>::SELECTOR == 0x20531bc9)
+    assert!(<super::core_i_w_s_t_e_t_h_price_feed::IWSTETHPriceFeed::StEthUsdOracle as MsgVariant<Sol>>::SELECTOR == 0xd69e820d)
+}
+#[test]
+fn selectors_core_i_metadata_n_f_t() {
+    assert!(<super::core_i_metadata_n_f_t::IMetadataNFT::Uri as MsgVariant<Sol>>::SELECTOR == 0x60135ccc)
+}
+#[test]
+fn selectors_core_i_exchange() {
+    assert!(<super::core_i_exchange::IExchange::SwapFromBold as MsgVariant<Sol>>::SELECTOR == 0xfa52ed82)
+    assert!(<super::core_i_exchange::IExchange::SwapToBold as MsgVariant<Sol>>::SELECTOR == 0xd9b0f56e)
+}
+#[test]
+fn selectors_core_i_exchange_helpers() {
+    assert!(<super::core_i_exchange_helpers::IExchangeHelpers::GetCollFromBold as MsgVariant<Sol>>::SELECTOR == 0x6916f5ae)
+}
+#[test]
+fn selectors_core_i_exchange_helpers_v2() {
+    assert!(<super::core_i_exchange_helpers_v2::IExchangeHelpersV2::QuoteExactInput as MsgVariant<Sol>>::SELECTOR == 0x25b1445c)
+    assert!(<super::core_i_exchange_helpers_v2::IExchangeHelpersV2::QuoteExactOutput as MsgVariant<Sol>>::SELECTOR == 0xdad1ef35)
+}
+#[test]
+fn selectors_core_i_flash_loan_provider() {
+    assert!(<super::core_i_flash_loan_provider::IFlashLoanProvider::MakeFlashLoan as MsgVariant<Sol>>::SELECTOR == 0x5fa54dd2)
+    assert!(<super::core_i_flash_loan_provider::IFlashLoanProvider::Receiver as MsgVariant<Sol>>::SELECTOR == 0xf7260d3e)
+}
+#[test]
+fn selectors_core_i_flash_loan_receiver() {
+    assert!(<super::core_i_flash_loan_receiver::IFlashLoanReceiver::ReceiveFlashLoanOnCloseTroveFromCollateral as MsgVariant<Sol>>::SELECTOR == 0xce525841)
+    assert!(<super::core_i_flash_loan_receiver::IFlashLoanReceiver::ReceiveFlashLoanOnLeverDownTrove as MsgVariant<Sol>>::SELECTOR == 0xbcc9e60e)
+    assert!(<super::core_i_flash_loan_receiver::IFlashLoanReceiver::ReceiveFlashLoanOnLeverUpTrove as MsgVariant<Sol>>::SELECTOR == 0x1d02c42e)
+    assert!(<super::core_i_flash_loan_receiver::IFlashLoanReceiver::ReceiveFlashLoanOnOpenLeveragedTrove as MsgVariant<Sol>>::SELECTOR == 0x5b47b69d)
+}
+#[test]
+fn selectors_core_i_leverage_zapper() {
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::CloseTroveFromCollateral as MsgVariant<Sol>>::SELECTOR == 0xade8971a)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::Exchange as MsgVariant<Sol>>::SELECTOR == 0xd2f7265a)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::FlashLoanProvider as MsgVariant<Sol>>::SELECTOR == 0x639af6d0)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::LeverDownTrove as MsgVariant<Sol>>::SELECTOR == 0xd7cf1f24)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::LeverUpTrove as MsgVariant<Sol>>::SELECTOR == 0x2e59d86b)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::LeverageRatioToCollateralRatio as MsgVariant<Sol>>::SELECTOR == 0xb6ce0cc5)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::OpenLeveragedTroveWithRawETH as MsgVariant<Sol>>::SELECTOR == 0xfacb886f)
+    assert!(<super::core_i_leverage_zapper::ILeverageZapper::OpenTroveWithRawETH as MsgVariant<Sol>>::SELECTOR == 0xf926c2d2)
+}
+#[test]
+fn selectors_core_i_zapper() {
+    assert!(<super::core_i_zapper::IZapper::CloseTroveFromCollateral as MsgVariant<Sol>>::SELECTOR == 0xade8971a)
+    assert!(<super::core_i_zapper::IZapper::Exchange as MsgVariant<Sol>>::SELECTOR == 0xd2f7265a)
+    assert!(<super::core_i_zapper::IZapper::FlashLoanProvider as MsgVariant<Sol>>::SELECTOR == 0x639af6d0)
+    assert!(<super::core_i_zapper::IZapper::OpenTroveWithRawETH as MsgVariant<Sol>>::SELECTOR == 0xf926c2d2)
+}
+#[test]
+fn selectors_core_i_curve_factory() {
+    assert!(<super::core_i_curve_factory::ICurveFactory::DeployPool as MsgVariant<Sol>>::SELECTOR == 0xc955fa04)
+}
+#[test]
+fn selectors_core_i_curve_pool() {
+    assert!(<super::core_i_curve_pool::ICurvePool::AddLiquidity as MsgVariant<Sol>>::SELECTOR == 0x0b4c7e4d)
+    assert!(<super::core_i_curve_pool::ICurvePool::Exchange as MsgVariant<Sol>>::SELECTOR == 0x5b41b908)
+    assert!(<super::core_i_curve_pool::ICurvePool::GetDy as MsgVariant<Sol>>::SELECTOR == 0x556d6e9f)
+}
+#[test]
+fn selectors_core_i_curve_stableswap_n_g_factory() {
+    assert!(<super::core_i_curve_stableswap_n_g_factory::ICurveStableswapNGFactory::DeployPlainPool as MsgVariant<Sol>>::SELECTOR == 0x5bcd3d83)
+}
+#[test]
+fn selectors_core_i_curve_stableswap_n_g_pool() {
+    assert!(<super::core_i_curve_stableswap_n_g_pool::ICurveStableswapNGPool::AddLiquidity as MsgVariant<Sol>>::SELECTOR == 0xb72df5de)
+    assert!(<super::core_i_curve_stableswap_n_g_pool::ICurveStableswapNGPool::Exchange as MsgVariant<Sol>>::SELECTOR == 0x3df02124)
+    assert!(<super::core_i_curve_stableswap_n_g_pool::ICurveStableswapNGPool::GetDx as MsgVariant<Sol>>::SELECTOR == 0x67df02ca)
+    assert!(<super::core_i_curve_stableswap_n_g_pool::ICurveStableswapNGPool::GetDy as MsgVariant<Sol>>::SELECTOR == 0x5e0d443f)
+}
+#[test]
+fn selectors_core_i_nonfungible_position_manager() {
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::Burn as MsgVariant<Sol>>::SELECTOR == 0x42966c68)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::Collect as MsgVariant<Sol>>::SELECTOR == 0xfc6f7865)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::CreateAndInitializePoolIfNecessary as MsgVariant<Sol>>::SELECTOR == 0x13ead562)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::DecreaseLiquidity as MsgVariant<Sol>>::SELECTOR == 0x0c49ccbe)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::IncreaseLiquidity as MsgVariant<Sol>>::SELECTOR == 0x219f5d17)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::Mint as MsgVariant<Sol>>::SELECTOR == 0x88316456)
+    assert!(<super::core_i_nonfungible_position_manager::INonfungiblePositionManager::Positions as MsgVariant<Sol>>::SELECTOR == 0x99fbab88)
+}
+#[test]
+fn selectors_core_i_pool_initializer() {
+    assert!(<super::core_i_pool_initializer::IPoolInitializer::CreateAndInitializePoolIfNecessary as MsgVariant<Sol>>::SELECTOR == 0x13ead562)
+}
+#[test]
+fn selectors_core_i_quoter_v2() {
+    assert!(<super::core_i_quoter_v2::IQuoterV2::QuoteExactInput as MsgVariant<Sol>>::SELECTOR == 0xcdca1753)
+    assert!(<super::core_i_quoter_v2::IQuoterV2::QuoteExactInputSingle as MsgVariant<Sol>>::SELECTOR == 0xc6a5026a)
+    assert!(<super::core_i_quoter_v2::IQuoterV2::QuoteExactOutput as MsgVariant<Sol>>::SELECTOR == 0x2f80bb1d)
+    assert!(<super::core_i_quoter_v2::IQuoterV2::QuoteExactOutputSingle as MsgVariant<Sol>>::SELECTOR == 0xbd21704a)
+}
+#[test]
+fn selectors_core_i_swap_router() {
+    assert!(<super::core_i_swap_router::ISwapRouter::ExactInput as MsgVariant<Sol>>::SELECTOR == 0xc04b8d59)
+    assert!(<super::core_i_swap_router::ISwapRouter::ExactInputSingle as MsgVariant<Sol>>::SELECTOR == 0x414bf389)
+    assert!(<super::core_i_swap_router::ISwapRouter::ExactOutput as MsgVariant<Sol>>::SELECTOR == 0xf28c0498)
+    assert!(<super::core_i_swap_router::ISwapRouter::ExactOutputSingle as MsgVariant<Sol>>::SELECTOR == 0xdb3e2198)
+}
+#[test]
+fn selectors_core_i_uniswap_v3_factory() {
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::CreatePool as MsgVariant<Sol>>::SELECTOR == 0xa1671295)
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::EnableFeeAmount as MsgVariant<Sol>>::SELECTOR == 0x8a7c195f)
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::FeeAmountTickSpacing as MsgVariant<Sol>>::SELECTOR == 0x22afcccb)
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::GetPool as MsgVariant<Sol>>::SELECTOR == 0x1698ee82)
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::Owner as MsgVariant<Sol>>::SELECTOR == 0x8da5cb5b)
+    assert!(<super::core_i_uniswap_v3_factory::IUniswapV3Factory::SetOwner as MsgVariant<Sol>>::SELECTOR == 0x13af4035)
+}
+#[test]
+fn selectors_core_i_uniswap_v3_pool() {
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Burn as MsgVariant<Sol>>::SELECTOR == 0xa34123a7)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Collect as MsgVariant<Sol>>::SELECTOR == 0x4f1eb3d8)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::CollectProtocol as MsgVariant<Sol>>::SELECTOR == 0x85b66729)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Factory as MsgVariant<Sol>>::SELECTOR == 0xc45a0155)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Fee as MsgVariant<Sol>>::SELECTOR == 0xddca3f43)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::FeeGrowthGlobal0X128 as MsgVariant<Sol>>::SELECTOR == 0xf3058399)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::FeeGrowthGlobal1X128 as MsgVariant<Sol>>::SELECTOR == 0x46141319)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Flash as MsgVariant<Sol>>::SELECTOR == 0x490e6cbc)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::IncreaseObservationCardinalityNext as MsgVariant<Sol>>::SELECTOR == 0x32148f67)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Initialize as MsgVariant<Sol>>::SELECTOR == 0xf637731d)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Liquidity as MsgVariant<Sol>>::SELECTOR == 0x1a686502)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::MaxLiquidityPerTick as MsgVariant<Sol>>::SELECTOR == 0x70cf754a)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Mint as MsgVariant<Sol>>::SELECTOR == 0x3c8a7d8d)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Observations as MsgVariant<Sol>>::SELECTOR == 0x252c09d7)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Observe as MsgVariant<Sol>>::SELECTOR == 0x883bdbfd)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Positions as MsgVariant<Sol>>::SELECTOR == 0x514ea4bf)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::ProtocolFees as MsgVariant<Sol>>::SELECTOR == 0x1ad8b03b)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::SetFeeProtocol as MsgVariant<Sol>>::SELECTOR == 0x8206a4d1)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Slot0 as MsgVariant<Sol>>::SELECTOR == 0x3850c7bd)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::SnapshotCumulativesInside as MsgVariant<Sol>>::SELECTOR == 0xa38807f2)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Swap as MsgVariant<Sol>>::SELECTOR == 0x128acb08)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::TickBitmap as MsgVariant<Sol>>::SELECTOR == 0x5339c296)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::TickSpacing as MsgVariant<Sol>>::SELECTOR == 0xd0c93a7c)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Ticks as MsgVariant<Sol>>::SELECTOR == 0xf30dba93)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Token0 as MsgVariant<Sol>>::SELECTOR == 0x0dfe1681)
+    assert!(<super::core_i_uniswap_v3_pool::IUniswapV3Pool::Token1 as MsgVariant<Sol>>::SELECTOR == 0xd21220a7)
+}
+#[test]
+fn selectors_core_i_flash_loan_recipient() {
+    assert!(<super::core_i_flash_loan_recipient::IFlashLoanRecipient::ReceiveFlashLoan as MsgVariant<Sol>>::SELECTOR == 0xf04f2707)
+}
+#[test]
+fn selectors_core_i_vault() {
+    assert!(<super::core_i_vault::IVault::FlashLoan as MsgVariant<Sol>>::SELECTOR == 0x5c38449e)
+}
+#[test]
+fn selectors_gov_i_bribe_initiative() {
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::Bold as MsgVariant<Sol>>::SELECTOR == 0x727d0f35)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::BribeByEpoch as MsgVariant<Sol>>::SELECTOR == 0x3c815549)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::BribeToken as MsgVariant<Sol>>::SELECTOR == 0x58c93f78)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::ClaimBribes as MsgVariant<Sol>>::SELECTOR == 0x81c4fea5)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::ClaimedBribeAtEpoch as MsgVariant<Sol>>::SELECTOR == 0x63efdf4a)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::DepositBribe as MsgVariant<Sol>>::SELECTOR == 0x5bab17b1)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::GetMostRecentTotalEpoch as MsgVariant<Sol>>::SELECTOR == 0xf0f2698d)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::GetMostRecentUserEpoch as MsgVariant<Sol>>::SELECTOR == 0xe6fc3786)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::Governance as MsgVariant<Sol>>::SELECTOR == 0x5aa6e675)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::LqtyAllocatedByUserAtEpoch as MsgVariant<Sol>>::SELECTOR == 0xe89946e2)
+    assert!(<super::gov_i_bribe_initiative::IBribeInitiative::TotalLQTYAllocatedByEpoch as MsgVariant<Sol>>::SELECTOR == 0x7c1f3627)
+}
+#[test]
+fn selectors_gov_i_curve_stableswap_factory_n_g() {
+    assert!(<super::gov_i_curve_stableswap_factory_n_g::ICurveStableswapFactoryNG::Admin as MsgVariant<Sol>>::SELECTOR == 0xf851a440)
+    assert!(<super::gov_i_curve_stableswap_factory_n_g::ICurveStableswapFactoryNG::DeployGauge as MsgVariant<Sol>>::SELECTOR == 0x96bebb34)
+    assert!(<super::gov_i_curve_stableswap_factory_n_g::ICurveStableswapFactoryNG::DeployPlainPool as MsgVariant<Sol>>::SELECTOR == 0x5bcd3d83)
+}
+#[test]
+fn selectors_gov_i_curve_stableswap_n_g() {
+    assert!(<super::gov_i_curve_stableswap_n_g::ICurveStableswapNG::AddLiquidity as MsgVariant<Sol>>::SELECTOR == 0xb72df5de)
+    assert!(<super::gov_i_curve_stableswap_n_g::ICurveStableswapNG::DepositRewardToken as MsgVariant<Sol>>::SELECTOR == 0x33b50aed)
+}
+#[test]
+fn selectors_gov_i_distribution_creator() {
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::AcceptConditions as MsgVariant<Sol>>::SELECTOR == 0x63b87bf0)
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::Campaign as MsgVariant<Sol>>::SELECTOR == 0x6a8b4a32)
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::CampaignId as MsgVariant<Sol>>::SELECTOR == 0x48c11a2f)
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::CampaignLookup as MsgVariant<Sol>>::SELECTOR == 0x31dc7722)
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::CreateCampaign as MsgVariant<Sol>>::SELECTOR == 0xa63f05ad)
+    assert!(<super::gov_i_distribution_creator::IDistributionCreator::Distributor as MsgVariant<Sol>>::SELECTOR == 0xbfe10928)
+}
+#[test]
+fn selectors_gov_i_governance() {
+    assert!(<super::gov_i_governance::IGovernance::EPOCHDURATION as MsgVariant<Sol>>::SELECTOR == 0xa70b9f0c)
+    assert!(<super::gov_i_governance::IGovernance::EPOCHSTART as MsgVariant<Sol>>::SELECTOR == 0x46d62a63)
+    assert!(<super::gov_i_governance::IGovernance::EPOCHVOTINGCUTOFF as MsgVariant<Sol>>::SELECTOR == 0x0df9049b)
+    assert!(<super::gov_i_governance::IGovernance::MINACCRUAL as MsgVariant<Sol>>::SELECTOR == 0xe772b765)
+    assert!(<super::gov_i_governance::IGovernance::MINCLAIM as MsgVariant<Sol>>::SELECTOR == 0x1cd2a05d)
+    assert!(<super::gov_i_governance::IGovernance::REGISTRATIONFEE as MsgVariant<Sol>>::SELECTOR == 0x64b4f751)
+    assert!(<super::gov_i_governance::IGovernance::REGISTRATIONTHRESHOLDFACTOR as MsgVariant<Sol>>::SELECTOR == 0x2591003a)
+    assert!(<super::gov_i_governance::IGovernance::UNREGISTRATIONAFTEREPOCHS as MsgVariant<Sol>>::SELECTOR == 0xe4a61d95)
+    assert!(<super::gov_i_governance::IGovernance::UNREGISTRATIONTHRESHOLDFACTOR as MsgVariant<Sol>>::SELECTOR == 0x6bca7c55)
+    assert!(<super::gov_i_governance::IGovernance::VOTINGTHRESHOLDFACTOR as MsgVariant<Sol>>::SELECTOR == 0x8a00b67a)
+    assert!(<super::gov_i_governance::IGovernance::AllocateLQTY as MsgVariant<Sol>>::SELECTOR == 0x82a15be1)
+    assert!(<super::gov_i_governance::IGovernance::Bold as MsgVariant<Sol>>::SELECTOR == 0x727d0f35)
+    assert!(<super::gov_i_governance::IGovernance::BoldAccrued as MsgVariant<Sol>>::SELECTOR == 0xa5e8455d)
+    assert!(<super::gov_i_governance::IGovernance::CalculateVotingThreshold13 as MsgVariant<Sol>>::SELECTOR == 0x8777e095)
+    assert!(<super::gov_i_governance::IGovernance::CalculateVotingThreshold14 as MsgVariant<Sol>>::SELECTOR == 0x8b7d38a1)
+    assert!(<super::gov_i_governance::IGovernance::ClaimForInitiative as MsgVariant<Sol>>::SELECTOR == 0xc20fb59e)
+    assert!(<super::gov_i_governance::IGovernance::ClaimFromStakingV1 as MsgVariant<Sol>>::SELECTOR == 0xbfd79cae)
+    assert!(<super::gov_i_governance::IGovernance::DepositLQTY17 as MsgVariant<Sol>>::SELECTOR == 0x52d420b9)
+    assert!(<super::gov_i_governance::IGovernance::DepositLQTY18 as MsgVariant<Sol>>::SELECTOR == 0xecf22e32)
+    assert!(<super::gov_i_governance::IGovernance::DepositLQTYViaPermit19 as MsgVariant<Sol>>::SELECTOR == 0x394ff406)
+    assert!(<super::gov_i_governance::IGovernance::DepositLQTYViaPermit20 as MsgVariant<Sol>>::SELECTOR == 0xee1c7172)
+    assert!(<super::gov_i_governance::IGovernance::Epoch as MsgVariant<Sol>>::SELECTOR == 0x900cf0cf)
+    assert!(<super::gov_i_governance::IGovernance::EpochStart as MsgVariant<Sol>>::SELECTOR == 0x15e5a1e5)
+    assert!(<super::gov_i_governance::IGovernance::GetInitiativeSnapshotAndState as MsgVariant<Sol>>::SELECTOR == 0xcf84a88c)
+    assert!(<super::gov_i_governance::IGovernance::GetInitiativeState24 as MsgVariant<Sol>>::SELECTOR == 0x5245b1ea)
+    assert!(<super::gov_i_governance::IGovernance::GetInitiativeState25 as MsgVariant<Sol>>::SELECTOR == 0x972e6d66)
+    assert!(<super::gov_i_governance::IGovernance::GetLatestVotingThreshold as MsgVariant<Sol>>::SELECTOR == 0xac85912e)
+    assert!(<super::gov_i_governance::IGovernance::GetTotalVotesAndState as MsgVariant<Sol>>::SELECTOR == 0x8eb9399e)
+    assert!(<super::gov_i_governance::IGovernance::GlobalState as MsgVariant<Sol>>::SELECTOR == 0xe76c01e4)
+    assert!(<super::gov_i_governance::IGovernance::InitiativeStates as MsgVariant<Sol>>::SELECTOR == 0x524fcc80)
+    assert!(<super::gov_i_governance::IGovernance::Lqty as MsgVariant<Sol>>::SELECTOR == 0x7f6ec455)
+    assert!(<super::gov_i_governance::IGovernance::LqtyAllocatedByUserToInitiative as MsgVariant<Sol>>::SELECTOR == 0x91050f40)
+    assert!(<super::gov_i_governance::IGovernance::LqtyToVotes as MsgVariant<Sol>>::SELECTOR == 0xadfcdb9d)
+    assert!(<super::gov_i_governance::IGovernance::RegisterInitialInitiatives as MsgVariant<Sol>>::SELECTOR == 0x8113630d)
+    assert!(<super::gov_i_governance::IGovernance::RegisterInitiative as MsgVariant<Sol>>::SELECTOR == 0x78a1bdd4)
+    assert!(<super::gov_i_governance::IGovernance::RegisteredInitiatives as MsgVariant<Sol>>::SELECTOR == 0x38f3e285)
+    assert!(<super::gov_i_governance::IGovernance::ResetAllocations as MsgVariant<Sol>>::SELECTOR == 0x88edf9be)
+    assert!(<super::gov_i_governance::IGovernance::SecondsWithinEpoch as MsgVariant<Sol>>::SELECTOR == 0x50283275)
+    assert!(<super::gov_i_governance::IGovernance::SnapshotVotesForInitiative as MsgVariant<Sol>>::SELECTOR == 0xb1d8f274)
+    assert!(<super::gov_i_governance::IGovernance::StakingV1 as MsgVariant<Sol>>::SELECTOR == 0xf556a79c)
+    assert!(<super::gov_i_governance::IGovernance::UnregisterInitiative as MsgVariant<Sol>>::SELECTOR == 0x0f2f6aa5)
+    assert!(<super::gov_i_governance::IGovernance::UserStates as MsgVariant<Sol>>::SELECTOR == 0x0ecc535f)
+    assert!(<super::gov_i_governance::IGovernance::VotesForInitiativeSnapshot as MsgVariant<Sol>>::SELECTOR == 0x53905402)
+    assert!(<super::gov_i_governance::IGovernance::VotesSnapshot as MsgVariant<Sol>>::SELECTOR == 0xa9952a0c)
+    assert!(<super::gov_i_governance::IGovernance::WithdrawLQTY44 as MsgVariant<Sol>>::SELECTOR == 0x070f418a)
+    assert!(<super::gov_i_governance::IGovernance::WithdrawLQTY45 as MsgVariant<Sol>>::SELECTOR == 0xb285a870)
+}
+#[test]
+fn selectors_gov_i_initiative() {
+    assert!(<super::gov_i_initiative::IInitiative::OnAfterAllocateLQTY as MsgVariant<Sol>>::SELECTOR == 0xc1932ea4)
+    assert!(<super::gov_i_initiative::IInitiative::OnClaimForInitiative as MsgVariant<Sol>>::SELECTOR == 0x1e18de1a)
+    assert!(<super::gov_i_initiative::IInitiative::OnRegisterInitiative as MsgVariant<Sol>>::SELECTOR == 0x2695d74d)
+    assert!(<super::gov_i_initiative::IInitiative::OnUnregisterInitiative as MsgVariant<Sol>>::SELECTOR == 0x955161cd)
+}
+#[test]
+fn selectors_gov_i_l_q_t_y() {
+    assert!(<super::gov_i_l_q_t_y::ILQTY::DOMAINSEPARATOR as MsgVariant<Sol>>::SELECTOR == 0x3644e515)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::Allowance as MsgVariant<Sol>>::SELECTOR == 0xdd62ed3e)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::DomainSeparator as MsgVariant<Sol>>::SELECTOR == 0xf698da25)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::Nonces as MsgVariant<Sol>>::SELECTOR == 0x7ecebe00)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::Permit as MsgVariant<Sol>>::SELECTOR == 0xd505accf)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::TotalSupply as MsgVariant<Sol>>::SELECTOR == 0x18160ddd)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::Transfer as MsgVariant<Sol>>::SELECTOR == 0xa9059cbb)
+    assert!(<super::gov_i_l_q_t_y::ILQTY::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+}
+#[test]
+fn selectors_gov_i_l_q_t_y_staking() {
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::GetPendingETHGain as MsgVariant<Sol>>::SELECTOR == 0x8b9345ad)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::GetPendingLUSDGain as MsgVariant<Sol>>::SELECTOR == 0x9beab5c0)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::IncreaseFETH as MsgVariant<Sol>>::SELECTOR == 0x1e3e2a1a)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::IncreaseFLUSD as MsgVariant<Sol>>::SELECTOR == 0x4677ffb3)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::SetAddresses as MsgVariant<Sol>>::SELECTOR == 0x5dd68acd)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::Stake as MsgVariant<Sol>>::SELECTOR == 0xa694fc3a)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::Stakes as MsgVariant<Sol>>::SELECTOR == 0x16934fc4)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::TotalLQTYStaked as MsgVariant<Sol>>::SELECTOR == 0x077ee4c6)
+    assert!(<super::gov_i_l_q_t_y_staking::ILQTYStaking::Unstake as MsgVariant<Sol>>::SELECTOR == 0x2e17de78)
+}
+#[test]
+fn selectors_gov_i_l_u_s_d() {
+    assert!(<super::gov_i_l_u_s_d::ILUSD::DOMAINSEPARATOR as MsgVariant<Sol>>::SELECTOR == 0x3644e515)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Allowance as MsgVariant<Sol>>::SELECTOR == 0xdd62ed3e)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Approve as MsgVariant<Sol>>::SELECTOR == 0x095ea7b3)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::BalanceOf as MsgVariant<Sol>>::SELECTOR == 0x70a08231)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Mint as MsgVariant<Sol>>::SELECTOR == 0x40c10f19)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Nonces as MsgVariant<Sol>>::SELECTOR == 0x7ecebe00)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Permit as MsgVariant<Sol>>::SELECTOR == 0xd505accf)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::TotalSupply as MsgVariant<Sol>>::SELECTOR == 0x18160ddd)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::Transfer as MsgVariant<Sol>>::SELECTOR == 0xa9059cbb)
+    assert!(<super::gov_i_l_u_s_d::ILUSD::TransferFrom as MsgVariant<Sol>>::SELECTOR == 0x23b872dd)
+}
+#[test]
+fn selectors_gov_i_liquidity_gauge() {
+    assert!(<super::gov_i_liquidity_gauge::ILiquidityGauge::AddReward as MsgVariant<Sol>>::SELECTOR == 0xe8de0d4d)
+    assert!(<super::gov_i_liquidity_gauge::ILiquidityGauge::DepositRewardToken as MsgVariant<Sol>>::SELECTOR == 0x33b50aed)
+}
+#[test]
+fn selectors_gov_i_multi_delegate_call() {
+    assert!(<super::gov_i_multi_delegate_call::IMultiDelegateCall::MultiDelegateCall as MsgVariant<Sol>>::SELECTOR == 0x415c2d96)
+}
+#[test]
+fn selectors_gov_i_user_proxy() {
+    assert!(<super::gov_i_user_proxy::IUserProxy::Lqty as MsgVariant<Sol>>::SELECTOR == 0x7f6ec455)
+    assert!(<super::gov_i_user_proxy::IUserProxy::Lusd as MsgVariant<Sol>>::SELECTOR == 0x99ad68a7)
+    assert!(<super::gov_i_user_proxy::IUserProxy::Stake as MsgVariant<Sol>>::SELECTOR == 0x38fb3599)
+    assert!(<super::gov_i_user_proxy::IUserProxy::StakeViaPermit as MsgVariant<Sol>>::SELECTOR == 0xeb876bf7)
+    assert!(<super::gov_i_user_proxy::IUserProxy::Staked as MsgVariant<Sol>>::SELECTOR == 0x0b76619b)
+    assert!(<super::gov_i_user_proxy::IUserProxy::StakingV1 as MsgVariant<Sol>>::SELECTOR == 0xf556a79c)
+    assert!(<super::gov_i_user_proxy::IUserProxy::StakingV2 as MsgVariant<Sol>>::SELECTOR == 0x88611736)
+    assert!(<super::gov_i_user_proxy::IUserProxy::Unstake as MsgVariant<Sol>>::SELECTOR == 0x3fdf42e3)
+}
+#[test]
+fn selectors_gov_i_user_proxy_factory() {
+    assert!(<super::gov_i_user_proxy_factory::IUserProxyFactory::DeployUserProxy as MsgVariant<Sol>>::SELECTOR == 0x5c79696c)
+    assert!(<super::gov_i_user_proxy_factory::IUserProxyFactory::DeriveUserProxyAddress as MsgVariant<Sol>>::SELECTOR == 0xcc9baa12)
+    assert!(<super::gov_i_user_proxy_factory::IUserProxyFactory::UserProxyImplementation as MsgVariant<Sol>>::SELECTOR == 0x8d4f0b6c)
+}

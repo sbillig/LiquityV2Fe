@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IDefaultPool.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IDefaultPool {
+    // Solidity: view
+    #[selector = sol("activePoolAddress()")]
+    ActivePoolAddress {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("decreaseBoldDebt(uint256)")]
+    DecreaseBoldDebt { amount: u256 },
+    // Solidity: view
+    #[selector = sol("getBoldDebt()")]
+    GetBoldDebt {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getCollBalance()")]
+    GetCollBalance {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("increaseBoldDebt(uint256)")]
+    IncreaseBoldDebt { amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("receiveColl(uint256)")]
+    ReceiveColl { amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("sendCollToActivePool(uint256)")]
+    SendCollToActivePool { amount: u256 },
+    // Solidity: view
+    #[selector = sol("troveManagerAddress()")]
+    TroveManagerAddress {  } -> Address,
+}

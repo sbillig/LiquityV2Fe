@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IVault.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, DynArray, sol}
+use std::evm::Address
+pub msg IVault {
+    // Solidity: nonpayable
+    #[selector = sol("flashLoan(address,address[],uint256[],bytes)")]
+    FlashLoan { recipient: Address, tokens: DynArray<Address>, amounts: DynArray<u256>, user_data: Bytes },
+}
+#[event]
+pub struct FlashLoan {
+    #[indexed]
+    pub recipient: Address,
+    #[indexed]
+    pub token: Address,
+    pub amount: u256,
+    pub fee_amount: u256,
+}

@@ -5,3 +5,6 @@
 /tests/cache/
 __pycache__/
 /cache/
+/tools/local_demo/out/
+/tools/local_demo/cache/
+/deployments/

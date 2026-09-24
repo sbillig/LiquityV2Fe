@@ -1,0 +1,81 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ITroveEvents.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+// Marker-only interface; Solidity declares no callable methods.
+pub struct ITroveEvents {}
+#[event]
+pub struct BatchUpdated {
+    #[indexed]
+    pub interest_batch_manager: Address,
+    pub operation: u8,
+    pub debt: u256,
+    pub coll: u256,
+    pub annual_interest_rate: u256,
+    pub annual_management_fee: u256,
+    pub total_debt_shares: u256,
+    pub debt_increase_from_upfront_fee: u256,
+}
+#[event]
+pub struct BatchedTroveUpdated {
+    #[indexed]
+    pub trove_id: u256,
+    pub interest_batch_manager: Address,
+    pub batch_debt_shares: u256,
+    pub coll: u256,
+    pub stake: u256,
+    pub snapshot_of_total_coll_redist: u256,
+    pub snapshot_of_total_debt_redist: u256,
+}
+#[event]
+pub struct Liquidation {
+    pub debt_offset_by_s_p: u256,
+    pub debt_redistributed: u256,
+    pub bold_gas_compensation: u256,
+    pub coll_gas_compensation: u256,
+    pub coll_sent_to_s_p: u256,
+    pub coll_redistributed: u256,
+    pub coll_surplus: u256,
+    pub l__e_t_h: u256,
+    pub l_bold_debt: u256,
+    pub price: u256,
+}
+#[event]
+pub struct Redemption {
+    pub attempted_bold_amount: u256,
+    pub actual_bold_amount: u256,
+    pub e_t_h_sent: u256,
+    pub e_t_h_fee: u256,
+    pub price: u256,
+    pub redemption_price: u256,
+}
+#[event]
+pub struct RedemptionFeePaidToTrove {
+    #[indexed]
+    pub trove_id: u256,
+    pub e_t_h_fee: u256,
+}
+#[event]
+pub struct TroveOperation {
+    #[indexed]
+    pub trove_id: u256,
+    pub operation: u8,
+    pub annual_interest_rate: u256,
+    pub debt_increase_from_redist: u256,
+    pub debt_increase_from_upfront_fee: u256,
+    pub debt_change_from_operation: i256,
+    pub coll_increase_from_redist: u256,
+    pub coll_change_from_operation: i256,
+}
+#[event]
+pub struct TroveUpdated {
+    #[indexed]
+    pub trove_id: u256,
+    pub debt: u256,
+    pub coll: u256,
+    pub stake: u256,
+    pub annual_interest_rate: u256,
+    pub snapshot_of_total_coll_redist: u256,
+    pub snapshot_of_total_debt_redist: u256,
+}

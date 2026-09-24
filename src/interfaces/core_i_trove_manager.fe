@@ -1,0 +1,278 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ITroveManager.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg ITroveManager {
+    // Solidity: view
+    #[selector = sol("Troves(uint256)")]
+    Troves { id: u256 } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256),
+    // Solidity: view
+    #[selector = sol("activePool()")]
+    ActivePool {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("batchLiquidateTroves(uint256[])")]
+    BatchLiquidateTroves { trove_array: DynArray<u256> },
+    // Solidity: view
+    #[selector = sol("borrowerOperations()")]
+    BorrowerOperations {  } -> Address,
+    // Solidity: view
+    #[selector = sol("getCurrentICR(uint256,uint256)")]
+    GetCurrentICR { trove_id: u256, price: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchColl()")]
+    GetEntireBranchColl {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchDebt()")]
+    GetEntireBranchDebt {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getLatestBatchData(address)")]
+    GetLatestBatchData { batch_address: Address } -> LatestBatchData,
+    // Solidity: view
+    #[selector = sol("getLatestTroveData(uint256)")]
+    GetLatestTroveData { trove_id: u256 } -> LatestTroveData,
+    // Solidity: view
+    #[selector = sol("getTroveAnnualInterestRate(uint256)")]
+    GetTroveAnnualInterestRate { trove_id: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getTroveFromTroveIdsArray(uint256)")]
+    GetTroveFromTroveIdsArray { index: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getTroveIdsCount()")]
+    GetTroveIdsCount {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getTroveStatus(uint256)")]
+    GetTroveStatus { trove_id: u256 } -> u8,
+    // Solidity: nonpayable
+    #[selector = sol("getUnbackedPortionPriceAndRedeemability()")]
+    GetUnbackedPortionPriceAndRedeemability {  } -> (u256, u256, bool),
+    // Solidity: view
+    #[selector = sol("lastZombieTroveId()")]
+    LastZombieTroveId {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("onAdjustTrove(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    OnAdjustTrove { trove_id: u256, new_coll: u256, new_debt: u256, trove_change: TroveChange },
+    // Solidity: nonpayable
+    #[selector = sol("onAdjustTroveInsideBatch(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    OnAdjustTroveInsideBatch { trove_id: u256, new_trove_coll: u256, new_trove_debt: u256, trove_change: TroveChange, batch_address: Address, new_batch_coll: u256, new_batch_debt: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onAdjustTroveInterestRate(uint256,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    OnAdjustTroveInterestRate { trove_id: u256, new_coll: u256, new_debt: u256, new_annual_interest_rate: u256, trove_change: TroveChange },
+    // Solidity: nonpayable
+    #[selector = sol("onApplyTroveInterest(uint256,uint256,uint256,address,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    OnApplyTroveInterest { trove_id: u256, new_trove_coll: u256, new_trove_debt: u256, batch_address: Address, new_batch_coll: u256, new_batch_debt: u256, trove_change: TroveChange },
+    // Solidity: nonpayable
+    #[selector = sol("onCloseTrove(uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    OnCloseTrove { trove_id: u256, trove_change: TroveChange, batch_address: Address, new_batch_coll: u256, new_batch_debt: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onLowerBatchManagerAnnualFee(address,uint256,uint256,uint256)")]
+    OnLowerBatchManagerAnnualFee { batch_address: Address, new_coll: u256, new_debt: u256, new_annual_management_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onOpenTrove(address,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),uint256)")]
+    OnOpenTrove { owner: Address, trove_id: u256, trove_change: TroveChange, annual_interest_rate: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onOpenTroveAndJoinBatch(address,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    OnOpenTroveAndJoinBatch { owner: Address, trove_id: u256, trove_change: TroveChange, batch_address: Address, batch_coll: u256, batch_debt: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onRegisterBatchManager(address,uint256,uint256)")]
+    OnRegisterBatchManager { batch_address: Address, annual_interest_rate: u256, annual_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onRemoveFromBatch(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256,uint256)")]
+    OnRemoveFromBatch { trove_id: u256, new_trove_coll: u256, new_trove_debt: u256, trove_change: TroveChange, batch_address: Address, new_batch_coll: u256, new_batch_debt: u256, new_annual_interest_rate: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onSetBatchManagerAnnualInterestRate(address,uint256,uint256,uint256,uint256)")]
+    OnSetBatchManagerAnnualInterestRate { batch_address: Address, new_coll: u256, new_debt: u256, new_annual_interest_rate: u256, upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onSetInterestBatchManager((uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256))")]
+    OnSetInterestBatchManager { params: (u256, u256, u256, TroveChange, Address, u256, u256) },
+    // Solidity: nonpayable
+    #[selector = sol("redeemCollateral(address,uint256,uint256,uint256,uint256)")]
+    RedeemCollateral { sender: Address, bold_amount: u256, price: u256, redemption_rate: u256, max_iterations: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("rewardSnapshots(uint256)")]
+    RewardSnapshots { id: u256 } -> (u256, u256),
+    // Solidity: nonpayable
+    #[selector = sol("setTroveStatusToActive(uint256)")]
+    SetTroveStatusToActive { trove_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("shutdown()")]
+    Shutdown {  },
+    // Solidity: view
+    #[selector = sol("shutdownTime()")]
+    ShutdownTime {  } -> u256,
+    // Solidity: view
+    #[selector = sol("sortedTroves()")]
+    SortedTroves {  } -> Address,
+    // Solidity: view
+    #[selector = sol("stabilityPool()")]
+    StabilityPool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("troveNFT()")]
+    TroveNFT {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("urgentRedemption(uint256,uint256[],uint256)")]
+    UrgentRedemption { bold_amount: u256, trove_ids: DynArray<u256>, min_collateral: u256 },
+}
+pub struct LatestBatchData {
+    pub total_debt_shares: u256,
+    pub entire_debt_without_redistribution: u256,
+    pub entire_coll_without_redistribution: u256,
+    pub accrued_interest: u256,
+    pub recorded_debt: u256,
+    pub annual_interest_rate: u256,
+    pub weighted_recorded_debt: u256,
+    pub annual_management_fee: u256,
+    pub accrued_management_fee: u256,
+    pub weighted_recorded_batch_management_fee: u256,
+    pub last_debt_update_time: u256,
+    pub last_interest_rate_adj_time: u256,
+}
+impl AbiSize for LatestBatchData { const HEAD_SIZE: u256 = 384
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for LatestBatchData {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 384, input.len()) }
+}
+impl Decode<Sol> for LatestBatchData {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 384, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let total_debt_shares = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let entire_debt_without_redistribution = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let entire_coll_without_redistribution = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let accrued_interest = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let annual_interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let annual_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let accrued_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let weighted_recorded_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
+        let last_debt_update_time = <u256 as Decode<Sol>>::decode_from(input, pos + 320)
+        let last_interest_rate_adj_time = <u256 as Decode<Sol>>::decode_from(input, pos + 352)
+        Self { total_debt_shares, entire_debt_without_redistribution, entire_coll_without_redistribution, accrued_interest, recorded_debt, annual_interest_rate, weighted_recorded_debt, annual_management_fee, accrued_management_fee, weighted_recorded_batch_management_fee, last_debt_update_time, last_interest_rate_adj_time }
+    }
+}
+impl Encode<Sol> for LatestBatchData {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.total_debt_shares, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.entire_debt_without_redistribution, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.entire_coll_without_redistribution, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.accrued_interest, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.recorded_debt, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.annual_management_fee, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.accrued_management_fee, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 288))
+        <u256 as Encode<Sol>>::encode(self.last_debt_update_time, core::ptr::offset_bytes(ptr, 320))
+        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, core::ptr::offset_bytes(ptr, 352))
+    }
+}
+pub struct LatestTroveData {
+    pub entire_debt: u256,
+    pub entire_coll: u256,
+    pub redist_bold_debt_gain: u256,
+    pub redist_coll_gain: u256,
+    pub accrued_interest: u256,
+    pub recorded_debt: u256,
+    pub annual_interest_rate: u256,
+    pub weighted_recorded_debt: u256,
+    pub accrued_batch_management_fee: u256,
+    pub last_interest_rate_adj_time: u256,
+}
+impl AbiSize for LatestTroveData { const HEAD_SIZE: u256 = 320
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for LatestTroveData {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 320, input.len()) }
+}
+impl Decode<Sol> for LatestTroveData {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 320, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let entire_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let entire_coll = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let redist_bold_debt_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let redist_coll_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let accrued_interest = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let annual_interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let accrued_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let last_interest_rate_adj_time = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
+        Self { entire_debt, entire_coll, redist_bold_debt_gain, redist_coll_gain, accrued_interest, recorded_debt, annual_interest_rate, weighted_recorded_debt, accrued_batch_management_fee, last_interest_rate_adj_time }
+    }
+}
+impl Encode<Sol> for LatestTroveData {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.entire_debt, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.entire_coll, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.redist_coll_gain, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.accrued_interest, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.recorded_debt, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.accrued_batch_management_fee, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, core::ptr::offset_bytes(ptr, 288))
+    }
+}
+pub struct TroveChange {
+    pub applied_redist_bold_debt_gain: u256,
+    pub applied_redist_coll_gain: u256,
+    pub coll_increase: u256,
+    pub coll_decrease: u256,
+    pub debt_increase: u256,
+    pub debt_decrease: u256,
+    pub new_weighted_recorded_debt: u256,
+    pub old_weighted_recorded_debt: u256,
+    pub upfront_fee: u256,
+    pub batch_accrued_management_fee: u256,
+    pub new_weighted_recorded_batch_management_fee: u256,
+    pub old_weighted_recorded_batch_management_fee: u256,
+}
+impl AbiSize for TroveChange { const HEAD_SIZE: u256 = 384
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for TroveChange {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 384, input.len()) }
+}
+impl Decode<Sol> for TroveChange {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 384, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let applied_redist_bold_debt_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let applied_redist_coll_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let coll_increase = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let coll_decrease = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let debt_increase = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let debt_decrease = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let new_weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let old_weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let upfront_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let batch_accrued_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
+        let new_weighted_recorded_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 320)
+        let old_weighted_recorded_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 352)
+        Self { applied_redist_bold_debt_gain, applied_redist_coll_gain, coll_increase, coll_decrease, debt_increase, debt_decrease, new_weighted_recorded_debt, old_weighted_recorded_debt, upfront_fee, batch_accrued_management_fee, new_weighted_recorded_batch_management_fee, old_weighted_recorded_batch_management_fee }
+    }
+}
+impl Encode<Sol> for TroveChange {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.applied_redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.applied_redist_coll_gain, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.coll_increase, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.coll_decrease, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.debt_increase, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.debt_decrease, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.upfront_fee, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.batch_accrued_management_fee, core::ptr::offset_bytes(ptr, 288))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 320))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 352))
+    }
+}

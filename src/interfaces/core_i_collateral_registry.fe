@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ICollateralRegistry.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ICollateralRegistry {
+    // Solidity: view
+    #[selector = sol("baseRate()")]
+    BaseRate {  } -> u256,
+    // Solidity: view
+    #[selector = sol("boldToken()")]
+    BoldToken {  } -> Address,
+    // Solidity: view
+    #[selector = sol("getEffectiveRedemptionFeeInBold(uint256)")]
+    GetEffectiveRedemptionFeeInBold { redeem_amount: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getRedemptionFeeWithDecay(uint256)")]
+    GetRedemptionFeeWithDecay { e_t_h_drawn: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getRedemptionRate()")]
+    GetRedemptionRate {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getRedemptionRateForRedeemedAmount(uint256)")]
+    GetRedemptionRateForRedeemedAmount { redeem_amount: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getRedemptionRateWithDecay()")]
+    GetRedemptionRateWithDecay {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getToken(uint256)")]
+    GetToken { index: u256 } -> Address,
+    // Solidity: view
+    #[selector = sol("getTroveManager(uint256)")]
+    GetTroveManager { index: u256 } -> Address,
+    // Solidity: view
+    #[selector = sol("lastFeeOperationTime()")]
+    LastFeeOperationTime {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("redeemCollateral(uint256,uint256,uint256)")]
+    RedeemCollateral { boldamount: u256, max_iterations: u256, max_fee_percentage: u256 },
+    // Solidity: view
+    #[selector = sol("totalCollaterals()")]
+    TotalCollaterals {  } -> u256,
+}

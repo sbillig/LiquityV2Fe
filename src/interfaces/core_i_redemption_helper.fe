@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IRedemptionHelper.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IRedemptionHelper {
+    // Solidity: nonpayable
+    #[selector = sol("redeemCollateral(uint256,uint256,uint256,uint256[])")]
+    RedeemCollateral { bold: u256, max_iterations_per_collateral: u256, max_fee_pct: u256, min_coll_redeemed: DynArray<u256> },
+    // Solidity: nonpayable
+    #[selector = sol("simulateRedemption(uint256,uint256)")]
+    SimulateRedemption { bold: u256, max_iterations_per_collateral: u256 } -> (DynArray<SimulationContext>, u256),
+    // Solidity: nonpayable
+    #[selector = sol("truncateRedemption(uint256,uint256)")]
+    TruncateRedemption { bold: u256, max_iterations_per_collateral: u256 } -> (u256, u256, DynArray<(u256, u256)>),
+}
+pub struct SimulationContext {
+    pub trove_manager: Address,
+    pub sorted_troves: Address,
+    pub redeemable: bool,
+    pub price: u256,
+    pub proportion: u256,
+    pub attempted_bold: u256,
+    pub redeemed_bold: u256,
+    pub iterations: u256,
+}
+impl AbiSize for SimulationContext { const HEAD_SIZE: u256 = 256
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for SimulationContext {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 256, input.len()) }
+}
+impl Decode<Sol> for SimulationContext {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 256, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let trove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let sorted_troves = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let redeemable = <bool as Decode<Sol>>::decode_from(input, pos + 64)
+        let price = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let proportion = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let attempted_bold = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let redeemed_bold = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let iterations = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        Self { trove_manager, sorted_troves, redeemable, price, proportion, attempted_bold, redeemed_bold, iterations }
+    }
+}
+impl Encode<Sol> for SimulationContext {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.trove_manager, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.sorted_troves, core::ptr::offset_bytes(ptr, 32))
+        <bool as Encode<Sol>>::encode(self.redeemable, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.price, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.proportion, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.attempted_bold, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.redeemed_bold, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.iterations, core::ptr::offset_bytes(ptr, 224))
+    }
+}

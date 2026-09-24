@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Dependencies/AggregatorV3Interface.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Uint80, sol}
+use std::evm::Address
+pub msg AggregatorV3Interface {
+    // Solidity: view
+    #[selector = sol("decimals()")]
+    Decimals {  } -> u8,
+    // Solidity: view
+    #[selector = sol("latestRoundData()")]
+    LatestRoundData {  } -> (Uint80, i256, u256, u256, Uint80),
+}

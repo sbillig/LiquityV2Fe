@@ -141,3 +141,7 @@ pub use metadata_utils
 pub use metadata_utils_harness
 pub use metadata_base_svg
 pub use metadata_base_svg_harness
+pub use interfaces
+pub use trove_id
+pub use batch_id
+pub use metadata_namespaces

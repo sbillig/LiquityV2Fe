@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ISortedTroves.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ISortedTroves {
+    // Solidity: view
+    #[selector = sol("batches(address)")]
+    Batches { id: Address } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("borrowerOperationsAddress()")]
+    BorrowerOperationsAddress {  } -> Address,
+    // Solidity: view
+    #[selector = sol("contains(uint256)")]
+    Contains { id: u256 } -> bool,
+    // Solidity: view
+    #[selector = sol("findInsertPosition(uint256,uint256,uint256)")]
+    FindInsertPosition { annual_interest_rate: u256, prev_id: u256, next_id: u256 } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("getFirst()")]
+    GetFirst {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getLast()")]
+    GetLast {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getNext(uint256)")]
+    GetNext { id: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getPrev(uint256)")]
+    GetPrev { id: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getSize()")]
+    GetSize {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("insert(uint256,uint256,uint256,uint256)")]
+    Insert { id: u256, annual_interest_rate: u256, prev_id: u256, next_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("insertIntoBatch(uint256,address,uint256,uint256,uint256)")]
+    InsertIntoBatch { trove_id: u256, batch_id: Address, annual_interest_rate: u256, prev_id: u256, next_id: u256 },
+    // Solidity: view
+    #[selector = sol("isBatchedNode(uint256)")]
+    IsBatchedNode { id: u256 } -> bool,
+    // Solidity: view
+    #[selector = sol("isEmpty()")]
+    IsEmpty {  } -> bool,
+    // Solidity: view
+    #[selector = sol("isEmptyBatch(address)")]
+    IsEmptyBatch { id: Address } -> bool,
+    // Solidity: view
+    #[selector = sol("nodes(uint256)")]
+    Nodes { id: u256 } -> (u256, u256, Address, bool),
+    // Solidity: nonpayable
+    #[selector = sol("reInsert(uint256,uint256,uint256,uint256)")]
+    ReInsert { id: u256, new_annual_interest_rate: u256, prev_id: u256, next_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("reInsertBatch(address,uint256,uint256,uint256)")]
+    ReInsertBatch { id: Address, new_annual_interest_rate: u256, prev_id: u256, next_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("remove(uint256)")]
+    Remove { id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("removeFromBatch(uint256)")]
+    RemoveFromBatch { id: u256 },
+    // Solidity: view
+    #[selector = sol("size()")]
+    Size {  } -> u256,
+    // Solidity: view
+    #[selector = sol("troveManager()")]
+    TroveManager {  } -> Address,
+    // Solidity: view
+    #[selector = sol("validInsertPosition(uint256,uint256,uint256)")]
+    ValidInsertPosition { annual_interest_rate: u256, prev_id: u256, next_id: u256 } -> bool,
+}

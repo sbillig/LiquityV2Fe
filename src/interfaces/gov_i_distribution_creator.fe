@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/IDistributionCreator.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, Bytes32, sol}
+use std::evm::Address
+pub msg IDistributionCreator {
+    // Solidity: nonpayable
+    #[selector = sol("acceptConditions()")]
+    AcceptConditions {  },
+    // Solidity: view
+    #[selector = sol("campaign(bytes32)")]
+    Campaign { campaign_id: Bytes32 } -> (Bytes32, Address, Address, u256, u32, u32, u32, Bytes),
+    // Solidity: nonpayable
+    #[selector = sol("campaignId((bytes32,address,address,uint256,uint32,uint32,uint32,bytes))")]
+    CampaignId { campaign_data: (Bytes32, Address, Address, u256, u32, u32, u32, Bytes) } -> Bytes32,
+    // Solidity: view
+    #[selector = sol("campaignLookup(bytes32)")]
+    CampaignLookup { campaign_id: Bytes32 } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("createCampaign((bytes32,address,address,uint256,uint32,uint32,uint32,bytes))")]
+    CreateCampaign { new_campaign: (Bytes32, Address, Address, u256, u32, u32, u32, Bytes) } -> Bytes32,
+    // Solidity: view
+    #[selector = sol("distributor()")]
+    Distributor {  } -> Address,
+}
+#[error]
+pub struct CampaignAlreadyExists {
+}
+#[error]
+pub struct CampaignDoesNotExist {
+}

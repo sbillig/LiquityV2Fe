@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: MIT
+// Constant SVG namespace values are returned as owned strings because Fe inline
+// strings have a 31-byte capacity. Preserve the reference's trailing spaces.
+use std::abi::DynString
+use std::evm::RawMem
+use super::metadata_concat::{cat, text, fragment}
+pub fn svg_namespace() -> DynString uses (mem: mut RawMem) { cat(fragment("xmlns=\"http://www.w3.org/2000/"), fragment("svg\"")) }
+pub fn html_namespace() -> DynString uses (mem: mut RawMem) { cat(fragment("xmlns=\"http://www.w3.org/1999/"), fragment("xhtml\"")) }
+pub fn xmlns_namespace() -> DynString uses (mem: mut RawMem) { text(fragment("http://www.w3.org/2000/xmlns/ ")) }
+pub fn xlink_namespace() -> DynString uses (mem: mut RawMem) { text(fragment("http://www.w3.org/1999/xlink ")) }
+pub fn null() -> DynString { DynString::empty() }

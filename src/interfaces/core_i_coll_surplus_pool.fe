@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ICollSurplusPool.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ICollSurplusPool {
+    // Solidity: nonpayable
+    #[selector = sol("accountSurplus(address,uint256)")]
+    AccountSurplus { account: Address, amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("claimColl(address)")]
+    ClaimColl { account: Address },
+    // Solidity: view
+    #[selector = sol("getCollBalance()")]
+    GetCollBalance {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getCollateral(address)")]
+    GetCollateral { account: Address } -> u256,
+}

@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/ICurveStableswapFactoryNG.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes4, DynArray, DynString, sol}
+use std::evm::Address
+pub msg ICurveStableswapFactoryNG {
+    // Solidity: view
+    #[selector = sol("admin()")]
+    Admin {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("deploy_gauge(address)")]
+    DeployGauge { pool: Address } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("deploy_plain_pool(string,string,address[],uint256,uint256,uint256,uint256,uint256,uint8[],bytes4[],address[])")]
+    DeployPlainPool { name: DynString, symbol: DynString, coins: DynArray<Address>, a: u256, fee: u256, offpeg_fee_multiplier: u256, ma_exp_time: u256, implementation_idx: u256, asset_types: DynArray<u8>, method_ids: DynArray<Bytes4>, oracles: DynArray<Address> } -> Address,
+}

@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Interfaces/IExchangeHelpersV2.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IExchangeHelpersV2 {
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactInput(uint256,bool,address)")]
+    QuoteExactInput { input_amount: u256, coll_to_bold: bool, coll_token: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("quoteExactOutput(uint256,bool,address)")]
+    QuoteExactOutput { output_amount: u256, coll_to_bold: bool, coll_token: Address } -> u256,
+}

@@ -1,0 +1,10 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 452.39ms
+Compiler run successful!
+
+Ran 2 tests for test/InterfaceRecordParity.t.sol:InterfaceRecordParityTest
+[PASS] testFuzzAllRecordCodecs(bytes32) (runs: 1024, μ: 394731, ~: 394713)
+[PASS] testInvalidScalarCanonicalization() (gas: 506436)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 916.29ms (917.59ms CPU time)
+
+Ran 1 test suite in 916.78ms (916.29ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

@@ -1,0 +1,179 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/UniswapV3/INonfungiblePositionManager.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Int24, Sol, Uint160, Uint24, Uint96, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg INonfungiblePositionManager {
+    // Solidity: payable
+    #[selector = sol("burn(uint256)")]
+    Burn { token_id: u256 },
+    // Solidity: payable
+    #[selector = sol("collect((uint256,address,uint128,uint128))")]
+    Collect { params: (u256, Address, u128, u128) } -> (u256, u256),
+    // Solidity: payable
+    #[selector = sol("createAndInitializePoolIfNecessary(address,address,uint24,uint160)")]
+    CreateAndInitializePoolIfNecessary { token0: Address, token1: Address, fee: Uint24, sqrt_price_x96: Uint160 } -> Address,
+    // Solidity: payable
+    #[selector = sol("decreaseLiquidity((uint256,uint128,uint256,uint256,uint256))")]
+    DecreaseLiquidity { params: DecreaseLiquidityParams } -> (u256, u256),
+    // Solidity: payable
+    #[selector = sol("increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))")]
+    IncreaseLiquidity { params: IncreaseLiquidityParams } -> (u128, u256, u256),
+    // Solidity: payable
+    #[selector = sol("mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))")]
+    Mint { params: MintParams } -> (u256, u128, u256, u256),
+    // Solidity: view
+    #[selector = sol("positions(uint256)")]
+    Positions { token_id: u256 } -> (Uint96, Address, Address, Address, Uint24, Int24, Int24, u128, u256, u256, u128, u128),
+}
+#[event]
+pub struct Collect {
+    #[indexed]
+    pub token_id: u256,
+    pub recipient: Address,
+    pub amount0: u256,
+    pub amount1: u256,
+}
+#[event]
+pub struct DecreaseLiquidity {
+    #[indexed]
+    pub token_id: u256,
+    pub liquidity: u128,
+    pub amount0: u256,
+    pub amount1: u256,
+}
+#[event]
+pub struct IncreaseLiquidity {
+    #[indexed]
+    pub token_id: u256,
+    pub liquidity: u128,
+    pub amount0: u256,
+    pub amount1: u256,
+}
+pub struct DecreaseLiquidityParams {
+    pub token_id: u256,
+    pub liquidity: u128,
+    pub amount0_min: u256,
+    pub amount1_min: u256,
+    pub deadline: u256,
+}
+impl AbiSize for DecreaseLiquidityParams { const HEAD_SIZE: u256 = 160
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for DecreaseLiquidityParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
+}
+impl Decode<Sol> for DecreaseLiquidityParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 160, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let token_id = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let liquidity = <u128 as Decode<Sol>>::decode_from(input, pos + 32)
+        let amount0_min = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let amount1_min = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let deadline = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        Self { token_id, liquidity, amount0_min, amount1_min, deadline }
+    }
+}
+impl Encode<Sol> for DecreaseLiquidityParams {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.token_id, core::ptr::offset_bytes(ptr, 0))
+        <u128 as Encode<Sol>>::encode(self.liquidity, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.amount0_min, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.amount1_min, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 128))
+    }
+}
+pub struct IncreaseLiquidityParams {
+    pub token_id: u256,
+    pub amount0_desired: u256,
+    pub amount1_desired: u256,
+    pub amount0_min: u256,
+    pub amount1_min: u256,
+    pub deadline: u256,
+}
+impl AbiSize for IncreaseLiquidityParams { const HEAD_SIZE: u256 = 192
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for IncreaseLiquidityParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 192, input.len()) }
+}
+impl Decode<Sol> for IncreaseLiquidityParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 192, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let token_id = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
+        let amount0_desired = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let amount1_desired = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let amount0_min = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let amount1_min = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let deadline = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        Self { token_id, amount0_desired, amount1_desired, amount0_min, amount1_min, deadline }
+    }
+}
+impl Encode<Sol> for IncreaseLiquidityParams {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.token_id, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.amount0_desired, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.amount1_desired, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.amount0_min, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.amount1_min, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 160))
+    }
+}
+pub struct MintParams {
+    pub token0: Address,
+    pub token1: Address,
+    pub fee: Uint24,
+    pub tick_lower: Int24,
+    pub tick_upper: Int24,
+    pub amount0_desired: u256,
+    pub amount1_desired: u256,
+    pub amount0_min: u256,
+    pub amount1_min: u256,
+    pub recipient: Address,
+    pub deadline: u256,
+}
+impl AbiSize for MintParams { const HEAD_SIZE: u256 = 352
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for MintParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 352, input.len()) }
+}
+impl Decode<Sol> for MintParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 352, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let token0 = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let token1 = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let fee = <Uint24 as Decode<Sol>>::decode_from(input, pos + 64)
+        let tick_lower = <Int24 as Decode<Sol>>::decode_from(input, pos + 96)
+        let tick_upper = <Int24 as Decode<Sol>>::decode_from(input, pos + 128)
+        let amount0_desired = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let amount1_desired = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let amount0_min = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let amount1_min = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let recipient = <Address as Decode<Sol>>::decode_from(input, pos + 288)
+        let deadline = <u256 as Decode<Sol>>::decode_from(input, pos + 320)
+        Self { token0, token1, fee, tick_lower, tick_upper, amount0_desired, amount1_desired, amount0_min, amount1_min, recipient, deadline }
+    }
+}
+impl Encode<Sol> for MintParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.token0, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.token1, core::ptr::offset_bytes(ptr, 32))
+        <Uint24 as Encode<Sol>>::encode(self.fee, core::ptr::offset_bytes(ptr, 64))
+        <Int24 as Encode<Sol>>::encode(self.tick_lower, core::ptr::offset_bytes(ptr, 96))
+        <Int24 as Encode<Sol>>::encode(self.tick_upper, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.amount0_desired, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.amount1_desired, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.amount0_min, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.amount1_min, core::ptr::offset_bytes(ptr, 256))
+        <Address as Encode<Sol>>::encode(self.recipient, core::ptr::offset_bytes(ptr, 288))
+        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 320))
+    }
+}

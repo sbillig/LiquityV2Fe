@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/ICurveStableswapNG.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{DynArray, sol}
+use std::evm::Address
+pub msg ICurveStableswapNG {
+    // Solidity: nonpayable
+    #[selector = sol("add_liquidity(uint256[],uint256)")]
+    AddLiquidity { amounts: DynArray<u256>, min_mint_amount: u256 } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("deposit_reward_token(address,uint256,uint256)")]
+    DepositRewardToken { reward_token: Address, amount: u256, epoch: u256 },
+}

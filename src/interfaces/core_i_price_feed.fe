@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IPriceFeed.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IPriceFeed {
+    // Solidity: nonpayable
+    #[selector = sol("fetchPrice()")]
+    FetchPrice {  } -> (u256, bool),
+    // Solidity: nonpayable
+    #[selector = sol("fetchRedemptionPrice()")]
+    FetchRedemptionPrice {  } -> (u256, bool),
+    // Solidity: view
+    #[selector = sol("lastGoodPrice()")]
+    LastGoodPrice {  } -> u256,
+}

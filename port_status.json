@@ -8,7 +8,8 @@
       "tests/ActivePoolParity.t.sol",
       "tests/PoolSystem.t.sol",
       "tests/results/pools-token.log",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/AddressesRegistry.sol": {
@@ -18,7 +19,8 @@
     ],
     "verification": [
       "tests/RegistryParity.t.sol",
-      "tests/results/foundation.log"
+      "tests/results/foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/BoldToken.sol": {
@@ -30,7 +32,8 @@
       "tests/BoldTokenParity.t.sol",
       "tests/PoolSystem.t.sol",
       "tests/results/pools-token.log",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/BorrowerOperations.sol": {
@@ -53,7 +56,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/borrower-operations.log",
       "tests/results/borrower-operations.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ],
     "notes": "Fixed non-upgradeable delegate modules; constructor takes registry plus opening, adjustments and batches module addresses. Connected single-branch user workflows pass; feeds, helpers, governance and multi-branch completion remain outstanding."
   },
@@ -66,7 +70,8 @@
       "tests/SurplusPoolParity.t.sol",
       "tests/PoolSystem.t.sol",
       "tests/results/pools-token.log",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/CollateralRegistry.sol": {
@@ -78,7 +83,8 @@
       "tests/CollateralRegistryParity.t.sol",
       "tests/results/collateral-registry.log",
       "tests/results/collateral-registry.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/DebtInFrontHelper.sol": {
@@ -89,7 +95,8 @@
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/debt-helpers.log"
+      "tests/results/debt-helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/DefaultPool.sol": {
@@ -99,7 +106,8 @@
     ],
     "verification": [
       "tests/DefaultPoolParity.t.sol",
-      "tests/results/foundation.log"
+      "tests/results/foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Dependencies/AddRemoveManagers.sol": {
@@ -112,13 +120,23 @@
       "tests/AddRemoveManagersParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Dependencies/AggregatorV3Interface.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_aggregator_v3_interface.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Dependencies/Constants.sol": {
     "status": "implemented_differential_tests_pass",
@@ -128,7 +146,8 @@
     "verification": [
       "tests/MathParity.t.sol",
       "tests/HelperParity.t.sol",
-      "tests/results/debt-helpers.log"
+      "tests/results/debt-helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Dependencies/LiquityBase.sol": {
@@ -143,7 +162,8 @@
       "tests/MathParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Dependencies/LiquityMath.sol": {
@@ -153,7 +173,8 @@
     ],
     "verification": [
       "tests/MathParity.t.sol",
-      "tests/results/foundation.log"
+      "tests/results/foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Dependencies/Ownable.sol": {
@@ -162,7 +183,8 @@
       "src/addresses_registry.fe"
     ],
     "verification": [
-      "tests/RegistryParity.t.sol"
+      "tests/RegistryParity.t.sol",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/GasPool.sol": {
@@ -172,7 +194,8 @@
     ],
     "verification": [
       "tests/GasPoolParity.t.sol",
-      "tests/results/foundation.log"
+      "tests/results/foundation.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/HintHelpers.sol": {
@@ -184,220 +207,425 @@
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/helpers.log"
+      "tests/results/helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Interfaces/IActivePool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_active_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IAddRemoveManagers.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/add_remove_managers.fe",
-      "src/manager_harness.fe"
+      "src/manager_harness.fe",
+      "src/interfaces/core_i_add_remove_managers.fe"
     ],
     "verification": [
       "tests/AddRemoveManagersParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IAddressesRegistry.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_addresses_registry.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IBoldRewardsReceiver.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/stability_pool.fe"
+      "src/stability_pool.fe",
+      "src/interfaces/core_i_bold_rewards_receiver.fe"
     ],
     "verification": [
       "tests/StabilityPoolParity.t.sol",
       "tests/StabilityPoolSystem.t.sol",
       "tests/results/stability-pool.log",
       "tests/results/stability-pool.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IBoldToken.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_bold_token.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IBorrowerOperations.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_borrower_operations.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ICollSurplusPool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_coll_surplus_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ICollateralRegistry.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/collateral_registry.fe"
+      "src/collateral_registry.fe",
+      "src/interfaces/core_i_collateral_registry.fe"
     ],
     "verification": [
       "tests/CollateralRegistryParity.t.sol",
       "tests/results/collateral-registry.log",
       "tests/results/collateral-registry.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ICommunityIssuance.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_community_issuance.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IDebtInFrontHelper.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/debt_in_front_helper.fe"
+      "src/debt_in_front_helper.fe",
+      "src/interfaces/core_i_debt_in_front_helper.fe"
     ],
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/debt-helpers.log"
-    ]
+      "tests/results/debt-helpers.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IDefaultPool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_default_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IHintHelpers.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/hint_helpers.fe",
-      "src/helper_calls.fe"
+      "src/helper_calls.fe",
+      "src/interfaces/core_i_hint_helpers.fe"
     ],
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/helpers.log"
-    ]
+      "tests/results/helpers.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IInterestRouter.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_interest_router.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ILQTYStaking.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_l_q_t_y_staking.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ILQTYToken.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_l_q_t_y_token.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ILiquityBase.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/liquity_base.fe",
       "src/liquity_base_harness.fe",
-      "src/liquity_math.fe"
+      "src/liquity_math.fe",
+      "src/interfaces/core_i_liquity_base.fe"
     ],
     "verification": [
       "tests/LiquityBaseParity.t.sol",
       "tests/MathParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IMainnetPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_mainnet_price_feed.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IMultiTroveGetter.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/multi_trove_getter.fe",
-      "src/helper_calls.fe"
+      "src/helper_calls.fe",
+      "src/interfaces/core_i_multi_trove_getter.fe"
     ],
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/helpers.log"
-    ]
+      "tests/results/helpers.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_price_feed.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IRETHPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_r_e_t_h_price_feed.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IRETHToken.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_r_e_t_h_token.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IRedemptionHelper.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
       "src/redemption_helper.fe",
-      "src/trove_memory_array.fe"
+      "src/trove_memory_array.fe",
+      "src/interfaces/core_i_redemption_helper.fe"
     ],
     "verification": [
       "tests/RedemptionHelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/redemption-helper.log"
-    ]
+      "tests/results/redemption-helper.log",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ISortedTroves.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/sorted_troves.fe"
+      "src/sorted_troves.fe",
+      "src/interfaces/core_i_sorted_troves.fe"
     ],
     "verification": [
       "tests/SortedTrovesParity.t.sol",
       "tests/results/sorted-nft.log",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IStabilityPool.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/stability_pool.fe"
+      "src/stability_pool.fe",
+      "src/interfaces/core_i_stability_pool.fe"
     ],
     "verification": [
       "tests/StabilityPoolParity.t.sol",
       "tests/StabilityPoolSystem.t.sol",
       "tests/results/stability-pool.log",
       "tests/results/stability-pool.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IStabilityPoolEvents.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/stability_pool.fe"
+      "src/stability_pool.fe",
+      "src/interfaces/core_i_stability_pool_events.fe"
     ],
     "verification": [
       "tests/StabilityPoolParity.t.sol",
       "tests/StabilityPoolSystem.t.sol",
       "tests/results/stability-pool.log",
       "tests/results/stability-pool.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ITroveEvents.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/trove_events.fe"
+      "src/trove_events.fe",
+      "src/interfaces/core_i_trove_events.fe"
     ],
     "verification": [
       "tests/TroveDataParity.t.sol",
@@ -407,13 +635,20 @@
       "tests/TroveManagerSystem.t.sol",
       "tests/results/trove-manager.log",
       "tests/results/trove-manager.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ITroveManager.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/trove_manager.fe"
+      "src/trove_manager.fe",
+      "src/interfaces/core_i_trove_manager.fe"
     ],
     "verification": [
       "tests/TroveDataParity.t.sol",
@@ -423,34 +658,74 @@
       "tests/TroveManagerSystem.t.sol",
       "tests/results/trove-manager.log",
       "tests/results/trove-manager.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/ITroveNFT.sol": {
-    "status": "implemented_differential_tests_pass",
+    "status": "interface_bindings_compiled_selectors_verified",
     "fe": [
-      "src/trove_nft.fe"
+      "src/trove_nft.fe",
+      "src/interfaces/core_i_trove_n_f_t.fe"
     ],
     "verification": [
       "tests/TroveNFTParity.t.sol",
       "tests/results/sorted-nft.log",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IWETH.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_w_e_t_h.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IWSTETH.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_w_s_t_e_t_h.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Interfaces/IWSTETHPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_w_s_t_e_t_h_price_feed.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/MultiTroveGetter.sol": {
     "status": "implemented_differential_tests_pass",
@@ -461,7 +736,8 @@
     "verification": [
       "tests/HelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/helpers.log"
+      "tests/results/helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/NFTMetadata/MetadataNFT.sol": {
@@ -473,15 +749,22 @@
       "src/metadata_concat.fe",
       "src/metadata_literals.fe",
       "src/metadata_bauhaus.fe",
-      "src/fixed_asset_reader.fe"
+      "src/fixed_asset_reader.fe",
+      "src/interfaces/core_i_metadata_n_f_t.fe"
     ],
     "verification": [
       "tests/MetadataNFTParity.t.sol",
       "tests/MetadataPrimitivesParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
-    ]
+      "tests/results/abi-audit.json",
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "interface_binding": "src/interfaces/core_i_metadata_n_f_t.fe"
   },
   "contracts/src/NFTMetadata/utils/FixedAssets.sol": {
     "status": "implemented_differential_tests_pass",
@@ -492,69 +775,90 @@
       "tests/FixedAssetReaderParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/NFTMetadata/utils/JSON.sol": {
-    "status": "partial_renderer_reachable_functions_verified",
+    "status": "implemented_differential_tests_pass",
     "fe": [
       "src/metadata_nft.fe",
-      "src/metadata_string.fe"
+      "src/metadata_string.fe",
+      "src/metadata_json.fe",
+      "src/metadata_namespaces.fe"
     ],
     "verification": [
       "tests/MetadataPrimitivesParity.t.sol",
       "tests/MetadataNFTParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/MetadataJsonParity.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/complete-port.json"
     ],
-    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
+    "scope": "All callable library functions are ported and compared with Solidity. SVG namespaces and NULL are represented as owned-string functions, checked against the original constant values."
   },
   "contracts/src/NFTMetadata/utils/SVG.sol": {
-    "status": "partial_renderer_reachable_functions_verified",
+    "status": "implemented_differential_tests_pass",
     "fe": [
       "src/metadata_bauhaus.fe",
       "src/metadata_literals.fe",
-      "src/metadata_nft.fe"
+      "src/metadata_nft.fe",
+      "src/metadata_svg.fe",
+      "src/metadata_namespaces.fe"
     ],
     "verification": [
       "tests/MetadataPrimitivesParity.t.sol",
       "tests/MetadataNFTParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/MetadataSvgParity.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/complete-port.json"
     ],
-    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
+    "scope": "All callable library functions are ported and compared with Solidity. SVG namespaces and NULL are represented as owned-string functions, checked against the original constant values."
   },
   "contracts/src/NFTMetadata/utils/Utils.sol": {
-    "status": "partial_renderer_reachable_functions_verified",
+    "status": "implemented_differential_tests_pass",
     "fe": [
-      "src/metadata_string.fe"
+      "src/metadata_string.fe",
+      "src/metadata_utils.fe",
+      "src/metadata_namespaces.fe"
     ],
     "verification": [
       "tests/MetadataPrimitivesParity.t.sol",
       "tests/MetadataNFTParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/MetadataUtilsParity.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/complete-port.json"
     ],
-    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
+    "scope": "All callable library functions are ported and compared with Solidity. SVG namespaces and NULL are represented as owned-string functions, checked against the original constant values."
   },
   "contracts/src/NFTMetadata/utils/baseSVG.sol": {
-    "status": "partial_renderer_reachable_functions_verified",
+    "status": "implemented_differential_tests_pass",
     "fe": [
       "src/metadata_literals.fe",
       "src/metadata_geometry.fe",
-      "src/metadata_nft.fe"
+      "src/metadata_nft.fe",
+      "src/metadata_base_svg.fe",
+      "src/metadata_namespaces.fe"
     ],
     "verification": [
       "tests/MetadataPrimitivesParity.t.sol",
       "tests/MetadataNFTParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/MetadataBaseSvgParity.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/complete-port.json"
     ],
-    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
+    "scope": "All callable library functions are ported and compared with Solidity. SVG namespaces and NULL are represented as owned-string functions, checked against the original constant values."
   },
   "contracts/src/NFTMetadata/utils/bauhaus.sol": {
     "status": "implemented_differential_tests_pass",
@@ -568,7 +872,8 @@
       "tests/MetadataNFTParity.t.sol",
       "tests/results/metadata-bases.log",
       "tests/results/metadata-bases.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/PriceFeeds/CompositePriceFeed.sol": {
@@ -581,7 +886,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/price-feeds.log",
       "tests/results/price-feeds.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/PriceFeeds/MainnetPriceFeedBase.sol": {
@@ -594,7 +900,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/price-feeds.log",
       "tests/results/price-feeds.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/PriceFeeds/RETHPriceFeed.sol": {
@@ -608,7 +915,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/price-feeds.log",
       "tests/results/price-feeds.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/PriceFeeds/WETHPriceFeed.sol": {
@@ -622,7 +930,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/price-feeds.log",
       "tests/results/price-feeds.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/PriceFeeds/WSTETHPriceFeed.sol": {
@@ -636,7 +945,8 @@
       "tests/BorrowerOperationsSystem.t.sol",
       "tests/results/price-feeds.log",
       "tests/results/price-feeds.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/RedemptionHelper.sol": {
@@ -648,7 +958,8 @@
     "verification": [
       "tests/RedemptionHelperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/redemption-helper.log"
+      "tests/results/redemption-helper.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/SortedTroves.sol": {
@@ -659,7 +970,8 @@
     "verification": [
       "tests/SortedTrovesParity.t.sol",
       "tests/results/sorted-nft.log",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/StabilityPool.sol": {
@@ -672,7 +984,8 @@
       "tests/StabilityPoolSystem.t.sol",
       "tests/results/stability-pool.log",
       "tests/results/stability-pool.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/TroveManager.sol": {
@@ -698,7 +1011,8 @@
       "tests/TroveManagerSystem.t.sol",
       "tests/results/trove-manager.log",
       "tests/results/trove-manager.json",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ],
     "notes": "Three fixed delegate modules enforce deployment size limits. Constructor extends registry argument with three module addresses; runtime selectors and manager storage remain compatible. See TROVE_MANAGER_DEPLOYMENT.md."
   },
@@ -710,18 +1024,24 @@
     "verification": [
       "tests/TroveNFTParity.t.sol",
       "tests/results/sorted-nft.log",
-      "tests/results/abi-audit.json"
+      "tests/results/abi-audit.json",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Types/BatchId.sol": {
-    "status": "represented_by_address_used_by_sorted_troves",
+    "status": "nominal_type_and_wire_codec_implemented",
     "fe": [
+      "src/batch_id.fe",
       "src/sorted_troves.fe"
     ],
     "verification": [
       "tests/SortedTrovesParity.t.sol",
-      "tests/results/sorted-nft.log"
-    ]
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/type-namespace-prepared.json",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Nominal wrapper, zero/sentinel values, equality and helper methods; primitive address/uint256 wire representation. Wrapper code is compiler-checked; actual protocol ID operations are covered by the existing differential suites."
   },
   "contracts/src/Types/LatestBatchData.sol": {
     "status": "fields_and_abi_implemented_integrated",
@@ -731,7 +1051,8 @@
     "verification": [
       "tests/TroveDataParity.t.sol",
       "tests/TroveManagerSystem.t.sol",
-      "tests/results/trove-manager.log"
+      "tests/results/trove-manager.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Types/LatestTroveData.sol": {
@@ -742,7 +1063,8 @@
     "verification": [
       "tests/TroveDataParity.t.sol",
       "tests/TroveManagerSystem.t.sol",
-      "tests/results/trove-manager.log"
+      "tests/results/trove-manager.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Types/TroveChange.sol": {
@@ -753,13 +1075,24 @@
     "verification": [
       "tests/TroveDataParity.t.sol",
       "tests/TroveManagerSystem.t.sol",
-      "tests/results/trove-manager.log"
+      "tests/results/trove-manager.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Types/TroveId.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "nominal_type_and_wire_codec_implemented",
+    "fe": [
+      "src/trove_id.fe",
+      "src/sorted_troves.fe"
+    ],
+    "verification": [
+      "tests/SortedTrovesParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/metadata-multibranch.json",
+      "tests/results/type-namespace-prepared.json",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Nominal wrapper, zero/sentinel values, equality and helper methods; primitive address/uint256 wire representation. Wrapper code is compiler-checked; actual protocol ID operations are covered by the existing differential suites."
   },
   "contracts/src/Zappers/BaseZapper.sol": {
     "status": "implemented_differential_tests_pass",
@@ -770,7 +1103,8 @@
     "verification": [
       "tests/WETHZapperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/weth-zapper.log"
+      "tests/results/weth-zapper.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/GasCompZapper.sol": {
@@ -782,43 +1116,107 @@
     "verification": [
       "tests/GasCompZapperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/zappers.log"
+      "tests/results/zappers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Interfaces/IExchange.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_exchange.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/IExchangeHelpers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_exchange_helpers.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/IExchangeHelpersV2.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_exchange_helpers_v2.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/IFlashLoanProvider.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_flash_loan_provider.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/IFlashLoanReceiver.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_flash_loan_receiver.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/ILeverageZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_leverage_zapper.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Interfaces/IZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_zapper.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/LeftoversSweep.sol": {
     "status": "implemented_differential_tests_pass",
@@ -828,7 +1226,8 @@
     ],
     "verification": [
       "tests/LeftoversParity.t.sol",
-      "tests/results/redemption-helper.log"
+      "tests/results/redemption-helper.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/LeverageLSTZapper.sol": {
@@ -842,7 +1241,8 @@
     "verification": [
       "tests/LeverageZapperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/zappers.log"
+      "tests/results/zappers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/LeverageWETHZapper.sol": {
@@ -856,28 +1256,65 @@
     "verification": [
       "tests/LeverageZapperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/zappers.log"
+      "tests/results/zappers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveFactory.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_curve_factory.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/Curve/ICurvePool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_curve_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGFactory.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_curve_stableswap_n_g_factory.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGPool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_curve_stableswap_n_g_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/CurveExchange.sol": {
     "status": "implemented_differential_tests_pass",
@@ -887,7 +1324,8 @@
     "verification": [
       "tests/CurveExchangeParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/exchanges.log"
+      "tests/results/exchanges.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3Exchange.sol": {
@@ -899,7 +1337,8 @@
     "verification": [
       "tests/HybridExchangeParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/exchanges.log"
+      "tests/results/exchanges.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol": {
@@ -912,7 +1351,8 @@
     "verification": [
       "tests/HybridHelpersParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/flash-helpers.log"
+      "tests/results/flash-helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpersV2.sol": {
@@ -925,7 +1365,8 @@
     "verification": [
       "tests/HybridHelpersParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/flash-helpers.log"
+      "tests/results/flash-helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/UniV3Exchange.sol": {
@@ -937,38 +1378,93 @@
     "verification": [
       "tests/UniV3ExchangeParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/exchanges.log"
+      "tests/results/exchanges.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/INonfungiblePositionManager.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_nonfungible_position_manager.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IPoolInitializer.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_pool_initializer.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IQuoterV2.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_quoter_v2.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/ISwapRouter.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_swap_router.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Factory.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_uniswap_v3_factory.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Pool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_uniswap_v3_pool.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/Exchanges/UniswapV3/UniPriceConverter.sol": {
     "status": "implemented_differential_tests_pass",
@@ -978,18 +1474,37 @@
     "verification": [
       "tests/UniV3ExchangeParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/exchanges.log"
+      "tests/results/exchanges.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IFlashLoanRecipient.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_flash_loan_recipient.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IVault.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "interface_bindings_compiled_selectors_verified",
+    "fe": [
+      "src/interfaces/core_i_vault.fe"
+    ],
+    "verification": [
+      "src/interfaces/selector_tests.fe",
+      "tests/InterfaceRecordParity.t.sol",
+      "tests/results/interfaces-prepared-selectors.log",
+      "tests/results/interfaces-prepared-records.log",
+      "tests/results/complete-port.json"
+    ],
+    "scope": "Full typed interface declarations, including inherited methods, events and errors. Selectors match Solidity; larger record codecs are tested differentially. External service implementations are outside these interface source files."
   },
   "contracts/src/Zappers/Modules/FlashLoans/BalancerFlashLoan.sol": {
     "status": "implemented_differential_tests_pass",
@@ -1000,7 +1515,8 @@
     "verification": [
       "tests/BalancerFlashLoanParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/flash-helpers.log"
+      "tests/results/flash-helpers.log",
+      "tests/results/complete-port.json"
     ]
   },
   "contracts/src/Zappers/WETHZapper.sol": {
@@ -1012,7 +1528,8 @@
     "verification": [
       "tests/WETHZapperParity.t.sol",
       "tests/BorrowerOperationsSystem.t.sol",
-      "tests/results/weth-zapper.log"
+      "tests/results/weth-zapper.log",
+      "tests/results/complete-port.json"
     ]
   }
 }

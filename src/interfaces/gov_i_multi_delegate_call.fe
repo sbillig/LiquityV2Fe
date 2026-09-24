@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/IMultiDelegateCall.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, DynArray, sol}
+use std::evm::Address
+pub msg IMultiDelegateCall {
+    // Solidity: nonpayable
+    #[selector = sol("multiDelegateCall(bytes[])")]
+    MultiDelegateCall { inputs: DynArray<Bytes> } -> DynArray<Bytes>,
+}

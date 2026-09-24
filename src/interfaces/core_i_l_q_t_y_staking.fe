@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ILQTYStaking.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ILQTYStaking {
+    // Solidity: view
+    #[selector = sol("getPendingBoldGain(address)")]
+    GetPendingBoldGain { user: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getPendingETHGain(address)")]
+    GetPendingETHGain { user: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("increaseF_ETH(uint256)")]
+    IncreaseFETH { e_t_h_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("increaseF_bold(uint256)")]
+    IncreaseFBold { l_q_t_y_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setAddresses(address,address,address,address,address)")]
+    SetAddresses { lqty_token_address: Address, bold_token_address: Address, trove_manager_address: Address, borrower_operations_address: Address, active_pool_address: Address },
+    // Solidity: nonpayable
+    #[selector = sol("stake(uint256)")]
+    Stake { l_q_t_yamount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("unstake(uint256)")]
+    Unstake { l_q_t_yamount: u256 },
+}

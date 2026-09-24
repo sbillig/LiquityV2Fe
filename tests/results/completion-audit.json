@@ -1,0 +1,32 @@
+{
+  "result": "passed",
+  "audited_at_utc": "2026-09-24T23:21:06.078391+00:00",
+  "full_validation_sha256": "08158e89098163be00cce6a5fba3134919042a24f4791627906f6a888bf2edd1",
+  "verified_hash_groups": {
+    "sources_sha256": 208,
+    "configuration_sha256": 4,
+    "deployment_sources_sha256": 7,
+    "tests_sha256": 65,
+    "scripts_sha256": 11,
+    "artifacts_sha256": 269
+  },
+  "inventories": {
+    "port_status.json": {
+      "source_files": 102,
+      "sha256": "cd0a38bd07932b72b959af0b76ed380732efa905dbe714606b4bdeff03adda99"
+    },
+    "governance_status.json": {
+      "source_files": 27,
+      "sha256": "2c8cb888957c6c1c026eae55b9c56f190a96564370f30db380dc41a3f4bd3e74"
+    }
+  },
+  "upstream_master": "f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d",
+  "published_string_fix": "35502252d6f7873e9bd1928388633319145c871b",
+  "compiler_clean": true,
+  "deployment_proof_sha256": "286e58f014e140df3fc8cefef4aab8e0098fd615ff1115476e09ee78c48c4c47",
+  "deployment_bytecode_matches": 150,
+  "abi_audited_protocol_contracts": 41,
+  "size_audited_contracts_including_companions": 53,
+  "abi_audit_sha256": "6f875e39646ab408aa34d158b54065cd61c21d18f4507200f41bd6bfbe1d8543",
+  "scope": "Final consistency audit of full-suite inputs/outputs and packaged deployment proof. Requirement scope and test limitations are in COMPLETION_AUDIT.md."
+}

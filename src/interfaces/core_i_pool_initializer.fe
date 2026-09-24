@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/UniswapV3/IPoolInitializer.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Uint160, Uint24, sol}
+use std::evm::Address
+pub msg IPoolInitializer {
+    // Solidity: payable
+    #[selector = sol("createAndInitializePoolIfNecessary(address,address,uint24,uint160)")]
+    CreateAndInitializePoolIfNecessary { token0: Address, token1: Address, fee: Uint24, sqrt_price_x96: Uint160 } -> Address,
+}

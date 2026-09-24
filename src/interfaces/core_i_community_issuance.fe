@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ICommunityIssuance.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ICommunityIssuance {
+    // Solidity: nonpayable
+    #[selector = sol("issueLQTY()")]
+    IssueLQTY {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("sendLQTY(address,uint256)")]
+    SendLQTY { account: Address, l_q_t_yamount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setAddresses(address,address)")]
+    SetAddresses { lqty_token_address: Address, stability_pool_address: Address },
+}

@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Interfaces/IZapper.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IZapper {
+    // Solidity: nonpayable
+    #[selector = sol("closeTroveFromCollateral(uint256,uint256,uint256)")]
+    CloseTroveFromCollateral { trove_id: u256, flash_loan_amount: u256, min_expected_collateral: u256 },
+    // Solidity: view
+    #[selector = sol("exchange()")]
+    Exchange {  } -> Address,
+    // Solidity: view
+    #[selector = sol("flashLoanProvider()")]
+    FlashLoanProvider {  } -> Address,
+    // Solidity: payable
+    #[selector = sol("openTroveWithRawETH((address,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    OpenTroveWithRawETH { params: OpenTroveParams } -> u256,
+}
+pub struct OpenTroveParams {
+    pub owner: Address,
+    pub owner_index: u256,
+    pub coll_amount: u256,
+    pub bold_amount: u256,
+    pub upper_hint: u256,
+    pub lower_hint: u256,
+    pub annual_interest_rate: u256,
+    pub batch_manager: Address,
+    pub max_upfront_fee: u256,
+    pub add_manager: Address,
+    pub remove_manager: Address,
+    pub receiver: Address,
+}
+impl AbiSize for OpenTroveParams { const HEAD_SIZE: u256 = 384
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for OpenTroveParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 384, input.len()) }
+}
+impl Decode<Sol> for OpenTroveParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 384, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let owner_index = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let bold_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let upper_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let lower_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let annual_interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let batch_manager = <Address as Decode<Sol>>::decode_from(input, pos + 224)
+        let max_upfront_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
+        let add_manager = <Address as Decode<Sol>>::decode_from(input, pos + 288)
+        let remove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 320)
+        let receiver = <Address as Decode<Sol>>::decode_from(input, pos + 352)
+        Self { owner, owner_index, coll_amount, bold_amount, upper_hint, lower_hint, annual_interest_rate, batch_manager, max_upfront_fee, add_manager, remove_manager, receiver }
+    }
+}
+impl Encode<Sol> for OpenTroveParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.owner_index, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.coll_amount, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.bold_amount, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.upper_hint, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.lower_hint, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 192))
+        <Address as Encode<Sol>>::encode(self.batch_manager, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, core::ptr::offset_bytes(ptr, 256))
+        <Address as Encode<Sol>>::encode(self.add_manager, core::ptr::offset_bytes(ptr, 288))
+        <Address as Encode<Sol>>::encode(self.remove_manager, core::ptr::offset_bytes(ptr, 320))
+        <Address as Encode<Sol>>::encode(self.receiver, core::ptr::offset_bytes(ptr, 352))
+    }
+}

@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Zappers/Interfaces/IFlashLoanReceiver.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IFlashLoanReceiver {
+    // Solidity: nonpayable
+    #[selector = sol("receiveFlashLoanOnCloseTroveFromCollateral((uint256,uint256,uint256,address),uint256)")]
+    ReceiveFlashLoanOnCloseTroveFromCollateral { params: (u256, u256, u256, Address), effective_flash_loan_amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("receiveFlashLoanOnLeverDownTrove((uint256,uint256,uint256),uint256)")]
+    ReceiveFlashLoanOnLeverDownTrove { params: (u256, u256, u256), effective_flash_loan_amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("receiveFlashLoanOnLeverUpTrove((uint256,uint256,uint256,uint256),uint256)")]
+    ReceiveFlashLoanOnLeverUpTrove { params: (u256, u256, u256, u256), effective_flash_loan_amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("receiveFlashLoanOnOpenLeveragedTrove((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address),uint256)")]
+    ReceiveFlashLoanOnOpenLeveragedTrove { params: OpenLeveragedTroveParams, effective_flash_loan_amount: u256 },
+}
+pub struct OpenLeveragedTroveParams {
+    pub owner: Address,
+    pub owner_index: u256,
+    pub coll_amount: u256,
+    pub flash_loan_amount: u256,
+    pub bold_amount: u256,
+    pub upper_hint: u256,
+    pub lower_hint: u256,
+    pub annual_interest_rate: u256,
+    pub batch_manager: Address,
+    pub max_upfront_fee: u256,
+    pub add_manager: Address,
+    pub remove_manager: Address,
+    pub receiver: Address,
+}
+impl AbiSize for OpenLeveragedTroveParams { const HEAD_SIZE: u256 = 416
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for OpenLeveragedTroveParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 416, input.len()) }
+}
+impl Decode<Sol> for OpenLeveragedTroveParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 416, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let owner_index = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let flash_loan_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let bold_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let upper_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let lower_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
+        let annual_interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let batch_manager = <Address as Decode<Sol>>::decode_from(input, pos + 256)
+        let max_upfront_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
+        let add_manager = <Address as Decode<Sol>>::decode_from(input, pos + 320)
+        let remove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 352)
+        let receiver = <Address as Decode<Sol>>::decode_from(input, pos + 384)
+        Self { owner, owner_index, coll_amount, flash_loan_amount, bold_amount, upper_hint, lower_hint, annual_interest_rate, batch_manager, max_upfront_fee, add_manager, remove_manager, receiver }
+    }
+}
+impl Encode<Sol> for OpenLeveragedTroveParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.owner_index, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.coll_amount, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.flash_loan_amount, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.bold_amount, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.upper_hint, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.lower_hint, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 224))
+        <Address as Encode<Sol>>::encode(self.batch_manager, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, core::ptr::offset_bytes(ptr, 288))
+        <Address as Encode<Sol>>::encode(self.add_manager, core::ptr::offset_bytes(ptr, 320))
+        <Address as Encode<Sol>>::encode(self.remove_manager, core::ptr::offset_bytes(ptr, 352))
+        <Address as Encode<Sol>>::encode(self.receiver, core::ptr::offset_bytes(ptr, 384))
+    }
+}

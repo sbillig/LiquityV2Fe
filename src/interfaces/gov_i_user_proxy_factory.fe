@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/IUserProxyFactory.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IUserProxyFactory {
+    // Solidity: nonpayable
+    #[selector = sol("deployUserProxy()")]
+    DeployUserProxy {  } -> Address,
+    // Solidity: view
+    #[selector = sol("deriveUserProxyAddress(address)")]
+    DeriveUserProxyAddress { user: Address } -> Address,
+    // Solidity: view
+    #[selector = sol("userProxyImplementation()")]
+    UserProxyImplementation {  } -> Address,
+}
+#[event]
+pub struct DeployUserProxy {
+    #[indexed]
+    pub user: Address,
+    #[indexed]
+    pub user_proxy: Address,
+}

@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IStabilityPool.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IStabilityPool {
+    // Solidity: view
+    #[selector = sol("P()")]
+    P {  } -> u256,
+    // Solidity: view
+    #[selector = sol("P_PRECISION()")]
+    PPRECISION {  } -> u256,
+    // Solidity: view
+    #[selector = sol("activePool()")]
+    ActivePool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("boldToken()")]
+    BoldToken {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("claimAllCollGains()")]
+    ClaimAllCollGains {  },
+    // Solidity: view
+    #[selector = sol("currentScale()")]
+    CurrentScale {  } -> u256,
+    // Solidity: view
+    #[selector = sol("deposits(address)")]
+    Deposits { depositor: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getCollBalance()")]
+    GetCollBalance {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getCompoundedBoldDeposit(address)")]
+    GetCompoundedBoldDeposit { depositor: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getDepositorCollGain(address)")]
+    GetDepositorCollGain { depositor: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getDepositorYieldGain(address)")]
+    GetDepositorYieldGain { depositor: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getDepositorYieldGainWithPending(address)")]
+    GetDepositorYieldGainWithPending { depositor: Address } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchColl()")]
+    GetEntireBranchColl {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchDebt()")]
+    GetEntireBranchDebt {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getTotalBoldDeposits()")]
+    GetTotalBoldDeposits {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getYieldGainsOwed()")]
+    GetYieldGainsOwed {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getYieldGainsPending()")]
+    GetYieldGainsPending {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("offset(uint256,uint256)")]
+    Offset { debt: u256, coll: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("provideToSP(uint256,bool)")]
+    ProvideToSP { amount: u256, do_claim: bool },
+    // Solidity: view
+    #[selector = sol("scaleToB(uint256)")]
+    ScaleToB { scale: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("scaleToS(uint256)")]
+    ScaleToS { scale: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("stashedColl(address)")]
+    StashedColl { depositor: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("triggerBoldRewards(uint256)")]
+    TriggerBoldRewards { bold_yield: u256 },
+    // Solidity: view
+    #[selector = sol("troveManager()")]
+    TroveManager {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("withdrawFromSP(uint256,bool)")]
+    WithdrawFromSP { amount: u256, do_claim: bool },
+}

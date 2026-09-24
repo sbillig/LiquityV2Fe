@@ -1,0 +1,85 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Generated from pinned Solidity interface contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Pool.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes, Bytes32, DynArray, Int24, Int56, Uint160, Uint24, sol}
+use std::evm::Address
+pub msg IUniswapV3Pool {
+    // Solidity: nonpayable
+    #[selector = sol("burn(int24,int24,uint128)")]
+    Burn { tick_lower: Int24, tick_upper: Int24, amount: u128 } -> (u256, u256),
+    // Solidity: nonpayable
+    #[selector = sol("collect(address,int24,int24,uint128,uint128)")]
+    Collect { recipient: Address, tick_lower: Int24, tick_upper: Int24, amount0_requested: u128, amount1_requested: u128 } -> (u128, u128),
+    // Solidity: nonpayable
+    #[selector = sol("collectProtocol(address,uint128,uint128)")]
+    CollectProtocol { recipient: Address, amount0_requested: u128, amount1_requested: u128 } -> (u128, u128),
+    // Solidity: view
+    #[selector = sol("factory()")]
+    Factory {  } -> Address,
+    // Solidity: view
+    #[selector = sol("fee()")]
+    Fee {  } -> Uint24,
+    // Solidity: view
+    #[selector = sol("feeGrowthGlobal0X128()")]
+    FeeGrowthGlobal0X128 {  } -> u256,
+    // Solidity: view
+    #[selector = sol("feeGrowthGlobal1X128()")]
+    FeeGrowthGlobal1X128 {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("flash(address,uint256,uint256,bytes)")]
+    Flash { recipient: Address, amount0: u256, amount1: u256, data: Bytes },
+    // Solidity: nonpayable
+    #[selector = sol("increaseObservationCardinalityNext(uint16)")]
+    IncreaseObservationCardinalityNext { observation_cardinality_next: u16 },
+    // Solidity: nonpayable
+    #[selector = sol("initialize(uint160)")]
+    Initialize { sqrt_price_x96: Uint160 },
+    // Solidity: view
+    #[selector = sol("liquidity()")]
+    Liquidity {  } -> u128,
+    // Solidity: view
+    #[selector = sol("maxLiquidityPerTick()")]
+    MaxLiquidityPerTick {  } -> u128,
+    // Solidity: nonpayable
+    #[selector = sol("mint(address,int24,int24,uint128,bytes)")]
+    Mint { recipient: Address, tick_lower: Int24, tick_upper: Int24, amount: u128, data: Bytes } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("observations(uint256)")]
+    Observations { index: u256 } -> (u32, Int56, Uint160, bool),
+    // Solidity: view
+    #[selector = sol("observe(uint32[])")]
+    Observe { seconds_agos: DynArray<u32> } -> (DynArray<Int56>, DynArray<Uint160>),
+    // Solidity: view
+    #[selector = sol("positions(bytes32)")]
+    Positions { key: Bytes32 } -> (u128, u256, u256, u128, u128),
+    // Solidity: view
+    #[selector = sol("protocolFees()")]
+    ProtocolFees {  } -> (u128, u128),
+    // Solidity: nonpayable
+    #[selector = sol("setFeeProtocol(uint8,uint8)")]
+    SetFeeProtocol { fee_protocol0: u8, fee_protocol1: u8 },
+    // Solidity: view
+    #[selector = sol("slot0()")]
+    Slot0 {  } -> (Uint160, Int24, u16, u16, u16, u8, bool),
+    // Solidity: view
+    #[selector = sol("snapshotCumulativesInside(int24,int24)")]
+    SnapshotCumulativesInside { tick_lower: Int24, tick_upper: Int24 } -> (Int56, Uint160, u32),
+    // Solidity: nonpayable
+    #[selector = sol("swap(address,bool,int256,uint160,bytes)")]
+    Swap { recipient: Address, zero_for_one: bool, amount_specified: i256, sqrt_price_limit_x96: Uint160, data: Bytes } -> (i256, i256),
+    // Solidity: view
+    #[selector = sol("tickBitmap(int16)")]
+    TickBitmap { word_position: i16 } -> u256,
+    // Solidity: view
+    #[selector = sol("tickSpacing()")]
+    TickSpacing {  } -> Int24,
+    // Solidity: view
+    #[selector = sol("ticks(int24)")]
+    Ticks { tick: Int24 } -> (u128, i128, u256, u256, Int56, Uint160, u32, bool),
+    // Solidity: view
+    #[selector = sol("token0()")]
+    Token0 {  } -> Address,
+    // Solidity: view
+    #[selector = sol("token1()")]
+    Token1 {  } -> Address,
+}

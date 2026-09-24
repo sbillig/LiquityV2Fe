@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IWSTETH.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IWSTETH {
+    // Solidity: view
+    #[selector = sol("getStETHByWstETH(uint256)")]
+    GetStETHByWstETH { wst_e_t_h_amount: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("getWstETHByStETH(uint256)")]
+    GetWstETHByStETH { st_e_t_h_amount: u256 } -> u256,
+    // Solidity: view
+    #[selector = sol("stEthPerToken()")]
+    StEthPerToken {  } -> u256,
+    // Solidity: view
+    #[selector = sol("tokensPerStEth()")]
+    TokensPerStEth {  } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("unwrap(uint256)")]
+    Unwrap { wst_e_t_h_amount: u256 } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("wrap(uint256)")]
+    Wrap { st_e_t_h_amount: u256 } -> u256,
+}

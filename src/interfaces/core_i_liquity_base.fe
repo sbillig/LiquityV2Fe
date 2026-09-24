@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/ILiquityBase.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg ILiquityBase {
+    // Solidity: view
+    #[selector = sol("activePool()")]
+    ActivePool {  } -> Address,
+    // Solidity: view
+    #[selector = sol("getEntireBranchColl()")]
+    GetEntireBranchColl {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchDebt()")]
+    GetEntireBranchDebt {  } -> u256,
+}

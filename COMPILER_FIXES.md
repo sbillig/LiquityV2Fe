@@ -1,10 +1,13 @@
 # Compiler fixes
 
 Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
-Current upstream/master: `3dd15a62124fb75370c7931c4ee040d8566a3649`.
+Current upstream/master: `f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d`.
+Current local integration: `0617639002e12e599fd7bfb68bd2722215c8a935`.
 
-Three existing upstream fixes and one new independently tested fix have been
-integrated. The new fix remains available on its own published branch.
+The release compiler includes the pinned upstream fixes described below. Of the
+two independently authored fixes, the integer-width fix is merged upstream as
+#1595; the string-constant diagnostic fix is published on its own branch and is
+not needed by valid port code. Older integration revisions below are historical.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.
@@ -98,8 +101,8 @@ recorder require the exact pinned tree and all input commits as ancestors.
 - Patch: [reject-oversized-integer-literals.patch](compiler-patches/reject-oversized-integer-literals.patch).
 - Trigger: a 33-byte integer used to assemble a string was accepted and silently
   truncated to its low 256 bits. The independent reproduction
-  `tests/repros/oversized_integer_literal.fe` demonstrates that `2^256` currently
-  executes as zero on the pinned protocol compiler.
+  `tests/repros/oversized_integer_literal.fe` demonstrated that `2^256`
+  executed as zero on the compiler before this fix.
 - Fix: diagnose integer expression literals wider than 256 bits before lowering.
   This patch concerns the maximum primitive integer width; it does not claim to
   change all narrower integer-conversion rules.
@@ -182,6 +185,7 @@ Upstream master is now `f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d`, including
 `0617639002e12e599fd7bfb68bd2722215c8a935` retains the other pinned fixes.
 A fresh replay from the new base produces the identical tree
 `17b20419e39a12c49b0e09d5b67053812c16504e`. Release build and 27 targeted execution tests pass (19 ABI, four CLZ/CTZ,
-four payable returns). Proof: `tests/results/compiler-refresh.json`. The new
-full protocol validation is still running. Solidity differential tests
+four payable returns). Proof: `tests/results/compiler-refresh.json`. The final integrated
+protocol suite passes 353 EVM tests and 64 Fe tests with this compiler
+(`tests/results/complete-port.json`), including the new interface bindings. Solidity differential tests
 remain on Cancun. The string constant diagnostic branch is still separate.

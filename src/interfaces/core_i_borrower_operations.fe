@@ -1,0 +1,181 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IBorrowerOperations.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IBorrowerOperations {
+    // Solidity: view
+    #[selector = sol("CCR()")]
+    CCR {  } -> u256,
+    // Solidity: view
+    #[selector = sol("MCR()")]
+    MCR {  } -> u256,
+    // Solidity: view
+    #[selector = sol("SCR()")]
+    SCR {  } -> u256,
+    // Solidity: view
+    #[selector = sol("activePool()")]
+    ActivePool {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("addColl(uint256,uint256)")]
+    AddColl { trove_id: u256, e_t_h_amount: u256 },
+    // Solidity: view
+    #[selector = sol("addManagerOf(uint256)")]
+    AddManagerOf { trove_id: u256 } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("adjustTrove(uint256,uint256,bool,uint256,bool,uint256)")]
+    AdjustTrove { trove_id: u256, coll_change: u256, is_coll_increase: bool, debt_change: u256, is_debt_increase: bool, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("adjustTroveInterestRate(uint256,uint256,uint256,uint256,uint256)")]
+    AdjustTroveInterestRate { trove_id: u256, new_annual_interest_rate: u256, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("adjustZombieTrove(uint256,uint256,bool,uint256,bool,uint256,uint256,uint256)")]
+    AdjustZombieTrove { trove_id: u256, coll_change: u256, is_coll_increase: bool, bold_change: u256, is_debt_increase: bool, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("applyPendingDebt(uint256,uint256,uint256)")]
+    ApplyPendingDebt { trove_id: u256, lower_hint: u256, upper_hint: u256 },
+    // Solidity: view
+    #[selector = sol("checkBatchManagerExists(address)")]
+    CheckBatchManagerExists { batch_mananger: Address } -> bool,
+    // Solidity: nonpayable
+    #[selector = sol("claimCollateral()")]
+    ClaimCollateral {  },
+    // Solidity: nonpayable
+    #[selector = sol("closeTrove(uint256)")]
+    CloseTrove { trove_id: u256 },
+    // Solidity: view
+    #[selector = sol("getEntireBranchColl()")]
+    GetEntireBranchColl {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getEntireBranchDebt()")]
+    GetEntireBranchDebt {  } -> u256,
+    // Solidity: view
+    #[selector = sol("getInterestBatchManager(address)")]
+    GetInterestBatchManager { account: Address } -> (u128, u128, u256),
+    // Solidity: view
+    #[selector = sol("getInterestIndividualDelegateOf(uint256)")]
+    GetInterestIndividualDelegateOf { trove_id: u256 } -> (Address, u128, u128, u256),
+    // Solidity: view
+    #[selector = sol("hasBeenShutDown()")]
+    HasBeenShutDown {  } -> bool,
+    // Solidity: view
+    #[selector = sol("interestBatchManagerOf(uint256)")]
+    InterestBatchManagerOf { trove_id: u256 } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("kickFromBatch(uint256,uint256,uint256)")]
+    KickFromBatch { trove_id: u256, upper_hint: u256, lower_hint: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("lowerBatchManagementFee(uint256)")]
+    LowerBatchManagementFee { new_annual_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("onLiquidateTrove(uint256)")]
+    OnLiquidateTrove { trove_id: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("openTrove(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address)")]
+    OpenTrove { owner: Address, owner_index: u256, e_t_h_amount: u256, bold_amount: u256, upper_hint: u256, lower_hint: u256, annual_interest_rate: u256, max_upfront_fee: u256, add_manager: Address, remove_manager: Address, receiver: Address } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("openTroveAndJoinInterestBatchManager((address,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    OpenTroveAndJoinInterestBatchManager { params: OpenTroveAndJoinInterestBatchManagerParams } -> u256,
+    // Solidity: nonpayable
+    #[selector = sol("registerBatchManager(uint128,uint128,uint128,uint128,uint128)")]
+    RegisterBatchManager { min_interest_rate: u128, max_interest_rate: u128, current_interest_rate: u128, fee: u128, min_interest_rate_change_period: u128 },
+    // Solidity: nonpayable
+    #[selector = sol("removeFromBatch(uint256,uint256,uint256,uint256,uint256)")]
+    RemoveFromBatch { trove_id: u256, new_annual_interest_rate: u256, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("removeInterestIndividualDelegate(uint256)")]
+    RemoveInterestIndividualDelegate { trove_id: u256 },
+    // Solidity: view
+    #[selector = sol("removeManagerReceiverOf(uint256)")]
+    RemoveManagerReceiverOf { trove_id: u256 } -> (Address, Address),
+    // Solidity: nonpayable
+    #[selector = sol("repayBold(uint256,uint256)")]
+    RepayBold { trove_id: u256, amount: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setAddManager(uint256,address)")]
+    SetAddManager { trove_id: u256, manager: Address },
+    // Solidity: nonpayable
+    #[selector = sol("setBatchManagerAnnualInterestRate(uint128,uint256,uint256,uint256)")]
+    SetBatchManagerAnnualInterestRate { new_annual_interest_rate: u128, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setInterestBatchManager(uint256,address,uint256,uint256,uint256)")]
+    SetInterestBatchManager { trove_id: u256, new_batch_manager: Address, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setInterestIndividualDelegate(uint256,address,uint128,uint128,uint256,uint256,uint256,uint256,uint256)")]
+    SetInterestIndividualDelegate { trove_id: u256, delegate: Address, min_interest_rate: u128, max_interest_rate: u128, new_annual_interest_rate: u256, upper_hint: u256, lower_hint: u256, max_upfront_fee: u256, min_interest_rate_change_period: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("setRemoveManager(uint256,address)")]
+    SetRemoveManager { trove_id: u256, manager: Address },
+    // Solidity: nonpayable
+    #[selector = sol("setRemoveManagerWithReceiver(uint256,address,address)")]
+    SetRemoveManagerWithReceiver { trove_id: u256, manager: Address, receiver: Address },
+    // Solidity: nonpayable
+    #[selector = sol("shutdown()")]
+    Shutdown {  },
+    // Solidity: nonpayable
+    #[selector = sol("shutdownFromOracleFailure()")]
+    ShutdownFromOracleFailure {  },
+    // Solidity: nonpayable
+    #[selector = sol("switchBatchManager(uint256,uint256,uint256,address,uint256,uint256,uint256)")]
+    SwitchBatchManager { trove_id: u256, remove_upper_hint: u256, remove_lower_hint: u256, new_batch_manager: Address, add_upper_hint: u256, add_lower_hint: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("withdrawBold(uint256,uint256,uint256)")]
+    WithdrawBold { trove_id: u256, amount: u256, max_upfront_fee: u256 },
+    // Solidity: nonpayable
+    #[selector = sol("withdrawColl(uint256,uint256)")]
+    WithdrawColl { trove_id: u256, amount: u256 },
+}
+pub struct OpenTroveAndJoinInterestBatchManagerParams {
+    pub owner: Address,
+    pub owner_index: u256,
+    pub coll_amount: u256,
+    pub bold_amount: u256,
+    pub upper_hint: u256,
+    pub lower_hint: u256,
+    pub interest_batch_manager: Address,
+    pub max_upfront_fee: u256,
+    pub add_manager: Address,
+    pub remove_manager: Address,
+    pub receiver: Address,
+}
+impl AbiSize for OpenTroveAndJoinInterestBatchManagerParams { const HEAD_SIZE: u256 = 352
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for OpenTroveAndJoinInterestBatchManagerParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 352, input.len()) }
+}
+impl Decode<Sol> for OpenTroveAndJoinInterestBatchManagerParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 352, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let owner_index = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
+        let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let bold_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let upper_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
+        let lower_hint = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
+        let interest_batch_manager = <Address as Decode<Sol>>::decode_from(input, pos + 192)
+        let max_upfront_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
+        let add_manager = <Address as Decode<Sol>>::decode_from(input, pos + 256)
+        let remove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 288)
+        let receiver = <Address as Decode<Sol>>::decode_from(input, pos + 320)
+        Self { owner, owner_index, coll_amount, bold_amount, upper_hint, lower_hint, interest_batch_manager, max_upfront_fee, add_manager, remove_manager, receiver }
+    }
+}
+impl Encode<Sol> for OpenTroveAndJoinInterestBatchManagerParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.owner_index, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.coll_amount, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.bold_amount, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.upper_hint, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.lower_hint, core::ptr::offset_bytes(ptr, 160))
+        <Address as Encode<Sol>>::encode(self.interest_batch_manager, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, core::ptr::offset_bytes(ptr, 224))
+        <Address as Encode<Sol>>::encode(self.add_manager, core::ptr::offset_bytes(ptr, 256))
+        <Address as Encode<Sol>>::encode(self.remove_manager, core::ptr::offset_bytes(ptr, 288))
+        <Address as Encode<Sol>>::encode(self.receiver, core::ptr::offset_bytes(ptr, 320))
+    }
+}

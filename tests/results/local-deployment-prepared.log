@@ -1,0 +1,313 @@
+No files changed, compilation skipped
+note[mixed-case-function]: function names should use mixedCase
+ --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:9:11
+  |
+9 |  function sendToLQTYStaking(address from,uint amount) external {require(msg.sender==staking);move(from,staking,amount);}
+  |           ^^^^^^^^^^^^^^^^^ help: consider using: `sendToLqtyStaking`
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:23:25
+   |
+23 |  uint8 public immutable decimals;int public answer;uint public updatedAt;
+   |                         ^^^^^^^^ help: consider using: `DECIMALS`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:33:28
+   |
+33 |  DevToken public immutable lqty;mapping(address=>uint) public stakes;
+   |                            ^^^^ help: consider using: `LQTY`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[mixed-case-function]: function names should use mixedCase
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:37:11
+   |
+37 |  function getPendingETHGain(address) external pure returns(uint){return 0;}
+   |           ^^^^^^^^^^^^^^^^^ help: consider using: `getPendingEthGain`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[mixed-case-function]: function names should use mixedCase
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:38:11
+   |
+38 |  function getPendingLUSDGain(address) external pure returns(uint){return 0;}
+   |           ^^^^^^^^^^^^^^^^^^ help: consider using: `getPendingLusdGain`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:62:48
+   |
+62 |  address[2] public coins;uint public immutable ratio;
+   |                                                ^^^^^ help: consider using: `RATIO`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[mixed-case-function]: function names should use mixedCase
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:67:11
+   |
+67 |  function get_dy(int128 i,int128 j,uint amount) external view returns(uint){return quote(uint(uint128(i)),uint(uint128(j)),amount);}
+   |           ^^^^^^ help: consider using: `getDy`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[mixed-case-function]: function names should use mixedCase
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:68:11
+   |
+68 |  function get_dx(int128 i,int128 j,uint out) external view returns(uint){require(i>=0&&j>=0&&i!=j);return i==0?(out+ratio-1)/ratio:o...
+   |           ^^^^^^ help: consider using: `getDx`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[mixed-case-function]: function names should use mixedCase
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:86:11
+   |
+86 |  function deposit_reward_token(address token,uint amount,uint seconds_) external {require(DevERC20(token).transferFrom(msg.sender,ad...
+   |           ^^^^^^^^^^^^^^^^^^^^ help: consider using: `depositRewardToken`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+warning[erc20-unchecked-transfer]: ERC20 'transfer' and 'transferFrom' calls should check the return value
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:36:69
+   |
+36 |  function unstake(uint amount) external {stakes[msg.sender]-=amount;lqty.transfer(msg.sender,amount);}
+   |                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#erc20-unchecked-transfer
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:66:103
+   |
+66 |  function exchange(int128 i,int128 j,uint amount,uint minimum) external returns(uint){return exchange(uint(uint128(i)),uint(uint128(...
+   |                                                                                                       ^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:66:108
+   |
+66 |  function exchange(int128 i,int128 j,uint amount,uint minimum) external returns(uint){return exchange(uint(uint128(i)),uint(uint128(...
+   |                                                                                                            ^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:66:120
+   |
+66 | ...external returns(uint){return exchange(uint(uint128(i)),uint(uint128(j)),amount,minimum);}
+   |                                                            ^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:66:125
+   |
+66 | ...ternal returns(uint){return exchange(uint(uint128(i)),uint(uint128(j)),amount,minimum);}
+   |                                                               ^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:67:90
+   |
+67 |  function get_dy(int128 i,int128 j,uint amount) external view returns(uint){return quote(uint(uint128(i)),uint(uint128(j)),amount);}
+   |                                                                                          ^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:67:95
+   |
+67 |  function get_dy(int128 i,int128 j,uint amount) external view returns(uint){return quote(uint(uint128(i)),uint(uint128(j)),amount);}
+   |                                                                                               ^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:67:107
+   |
+67 |  function get_dy(int128 i,int128 j,uint amount) external view returns(uint){return quote(uint(uint128(i)),uint(uint128(j)),amount);}
+   |                                                                                                           ^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:67:112
+   |
+67 |  function get_dy(int128 i,int128 j,uint amount) external view returns(uint){return quote(uint(uint128(i)),uint(uint128(j)),amount);}
+   |                                                                                                                ^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'uint128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[asm-keccak256]: use of inefficient hashing mechanism; consider using inline assembly
+  --> /tmp/liquity-local-deployment-v2/src/DevDependencies.sol:92:310
+   |
+92 | ...duration;dataHash=keccak256(p.data);return keccak256(abi.encode(msg.sender,calls,p));}
+   |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#asm-keccak256
+
+Constants: 0xaa7412bc24dee5572193931bd2bd9b4c2e1075fa (82 bytes)
+BoldToken: 0x788e645a6e99596b8e706e9e7c8ad5b2f533e8a3 (8492 bytes)
+GovernanceStakingModule: 0xd129ab0773c488881f5668c4f4f4bf5c17aa3fde (7324 bytes)
+GovernanceVotingModule: 0xda8bd98d1c8549c24bbb62c0a61d8af78f5a055e (21116 bytes)
+GovernanceActionsModule: 0xde51bd7f045ccb49a5413073e68a557d772d56d0 (13409 bytes)
+Governance: 0x5f6b05575a50df4b2f7c7af6d11b80030296f7b5 (16423 bytes)
+BribeInitiative: 0x0f5ed13c4ebe852aced974bdcca9542363f0ec08 (6878 bytes)
+CurveV2GaugeRewards: 0xef671ce7b2b6e8eb4f6f08016af9203fffac33af (8663 bytes)
+UniV4MerklRewards: 0xda3bcbf2adf255e6044edc922e13415cb323800b (3822 bytes)
+AssetPointer: 0x0b8ebbc05fe7f4c29b5ab4d8c326f64ba117e2a1 (19337 bytes)
+FixedAssetReader: 0xeaf1537870cbaea80bf42548b17c15b05dafe8aa (1428 bytes)
+MetadataNFT: 0xe8f0a84a3944de13858668de7b66385c1610c5ba (22636 bytes)
+WETH.AddressesRegistry: 0x609277bb41c8c4a8bd50d9d7e5aaf27ed2cc9c5d (4608 bytes)
+rETH.AddressesRegistry: 0x62ec96abe88742e08c236cc29ef3f3c81bc6ef1e (4608 bytes)
+wstETH.AddressesRegistry: 0x38cbaa6f5c47440b99201731e64ad016bb1e6bd9 (4608 bytes)
+CollateralRegistry: 0x198ff063f254fe455ddb1b2ca690bc25fc243212 (5577 bytes)
+HintHelpers: 0x0dc68f665ff9a90ba78074c21b0753b28ef22c60 (8138 bytes)
+MultiTroveGetter: 0x52c0e2a5f7be4cddb4d915984f9ee35e3c71ca58 (4773 bytes)
+DebtInFrontHelper: 0x22c4bed75550ee0c3df7454f8d6253626320dc77 (3799 bytes)
+WETH.BorrowerOpening: 0x0e487ed7f9df96ce9305e8c664ac4e044442e1de (12276 bytes)
+WETH.BorrowerAdjustments: 0x64f51b9db653627c5e484ed63b9e54b1cdf63c03 (22804 bytes)
+WETH.BorrowerBatches: 0x34df4c8cafd935e1276ba78d530ae535cb528902 (24052 bytes)
+WETH.TroveLiquidations: 0xd3fd65959c1c70def82970d7a0b9a52331531085 (12593 bytes)
+WETH.ActivePool: 0xaf612a4156c30517d1a7988f1d897f7c2ef3a107 (7616 bytes)
+WETH.DefaultPool: 0x2e0f7ecb6e538b0697388520368171e8a5110589 (2735 bytes)
+WETH.StabilityPool: 0x112d39be9307258004d43878e1da86ec6e135df4 (13280 bytes)
+WETH.TroveNFT: 0x245281f402a5f883e60fbbbc86523c359d482282 (10051 bytes)
+WETH.SortedTroves: 0x221eb04d8dbf40e94822c277e5c35274bfb95e18 (13685 bytes)
+WETH.GasPool: 0xe8a045d8d2d5119e78b123518d54e8127d578c8d (3 bytes)
+WETH.CollSurplusPool: 0x5d1fdad22b915aefa66ed0ca636c1f0fbac452f9 (2243 bytes)
+WETH.TroveOperations: 0xd63d2198ae4472dd5637cecae2b8fa93161b3912 (18447 bytes)
+WETH.TroveRedemptions: 0xd4da1242e089a68f901c9eb767fd6348e1a2427f (18172 bytes)
+WETH.BorrowerOperations: 0xb32fc4e795aacf32834bd882d540a564e7eca53f (14212 bytes)
+WETH.TroveManager: 0x13f9663a1424e063182a34f96472975004e894c1 (11153 bytes)
+WETH.WETHPriceFeed: 0xfbb85730a4b3dd9ef8fd6f5c813a5bc8bce90149 (1102 bytes)
+rETH.BorrowerOpening: 0x33d0f4515a57c94424034364e303b6f9a223a92b (12276 bytes)
+rETH.BorrowerAdjustments: 0x1e4545d4c905f5afeb1c8c43e8546ddf0f5af17e (22804 bytes)
+rETH.BorrowerBatches: 0x8607822e47903aeb7b3f4853906c68512411cb2f (24052 bytes)
+rETH.TroveLiquidations: 0xb9b1b6f7910f2b515d78baa93978f4710f522faa (12593 bytes)
+rETH.ActivePool: 0x57559ee25010ef2c21342abd8b54a6c6d369da73 (7616 bytes)
+rETH.DefaultPool: 0x85e2512138159da66f4fb5c3f49970fb21394799 (2735 bytes)
+rETH.StabilityPool: 0x930553bd9441838c6f47fe01d750ae0728dea436 (13280 bytes)
+rETH.TroveNFT: 0xaec09d05814c9d3ae9df6f034f584a530f6ae9f5 (10051 bytes)
+rETH.SortedTroves: 0xbe02dc091da00ac27839cfcab94f2d0948240803 (13685 bytes)
+rETH.GasPool: 0x421d4dc65926e8a11b3a11c9efbf49f9d67cef2d (3 bytes)
+rETH.CollSurplusPool: 0x64476c0bbfbcc7bf4ae99fe88497e2bb1a659946 (2243 bytes)
+rETH.TroveOperations: 0x82332bb11d7990771bd0cb5f3bdc098b470fe81d (18447 bytes)
+rETH.TroveRedemptions: 0x30672a978ff2e46c0f0f5d8aefe8b8ae0c799825 (18172 bytes)
+rETH.BorrowerOperations: 0xdfecbb4b025b32dde10f60aa11024c17cd3311c7 (14212 bytes)
+rETH.TroveManager: 0x5a70463ca980a5b140cbda534465ca0d043451e0 (11153 bytes)
+rETH.RETHPriceFeed: 0xe4dbbcf2b8aafef6d776809b6cc8cea2a22775a9 (2542 bytes)
+wstETH.BorrowerOpening: 0x6d1c676ab378c649da600899379823bd59a93eef (12276 bytes)
+wstETH.BorrowerAdjustments: 0x9b2923a253cfebc7d463bf7604573bfc342722ba (22804 bytes)
+wstETH.BorrowerBatches: 0x4a9f34ac578674a13c50a0e06b259cff58e3417b (24052 bytes)
+wstETH.TroveLiquidations: 0xd42c4e6a0a34b00ad303bf9d0b6166b370d16892 (12593 bytes)
+wstETH.ActivePool: 0xbc6abb011da02ed076c6232e265b4babf5cefdd3 (7616 bytes)
+wstETH.DefaultPool: 0x92e50b0832b1d04ccb3473511aeb18e580c47940 (2735 bytes)
+wstETH.StabilityPool: 0xc8af4d836849d2a1ba634aebfc1464dbf513b6be (13280 bytes)
+wstETH.TroveNFT: 0x97486a6f7ed3ecfaab95654c9d58732a7127fcf7 (10051 bytes)
+wstETH.SortedTroves: 0xb1aa282eb279c1a4b807d045b6f6e4fbbb8ea58f (13685 bytes)
+wstETH.GasPool: 0xadfce75418440c7921841fbf7d6c9cc4c6319a80 (3 bytes)
+wstETH.CollSurplusPool: 0xc718255d97f189eb60e70373be0c15af06129974 (2243 bytes)
+wstETH.TroveOperations: 0xf96b26177b7c2b5b49e7d64ae2684f90b37d88ea (18447 bytes)
+wstETH.TroveRedemptions: 0x79ccc287ed7b58c861af3f769180ca4f851206a1 (18172 bytes)
+wstETH.BorrowerOperations: 0x7b612b7dde3fc3334478eb55c7bc7f5f7f6844d1 (14212 bytes)
+wstETH.TroveManager: 0x07ee14af45991ccf45201e21658b06e6f2845413 (11153 bytes)
+wstETH.WSTETHPriceFeed: 0x0224630a207d411f28fa0ae948a91de75437fa58 (2538 bytes)
+RedemptionHelper: 0x8f5b819cba1c8fa137108d03d90b483763ca3049 (9931 bytes)
+BalancerFlashLoan: 0x47390463669c1da1dd934352d97017690e41edbe (5556 bytes)
+WETH.CurveExchange: 0xaba6d26044c1f4b93d9b1e3b12783c562f4fd049 (3816 bytes)
+WETH.UniV3Exchange: 0x58e64c4996b405601574b9b038ad0293b65f6b09 (5009 bytes)
+WETH.HybridCurveUniV3Exchange: 0x8c72b9f911ae21edc979bb1948990914d872dc9c (6238 bytes)
+WETH.WETHZapper: 0x361efc0835ef3bb790d1b3cdc83d297ffdfc1583 (19694 bytes)
+WETH.LeverageWETHZapper: 0xaeedc06b36c2fc5b699b055c602f627f486a1387 (21412 bytes)
+WETH.LeverageWETHZapper.UniV3Exchange: 0x228e6d04cb6510d13007cd19a5789f2387fa1edb (21412 bytes)
+WETH.LeverageWETHZapper.HybridCurveUniV3Exchange: 0x243f7f9dc8db04e8887b5e09ecc500f67577c40a (21412 bytes)
+rETH.CurveExchange: 0xe875048f254e62aec53dcd24645b1ab85a33bba6 (3816 bytes)
+rETH.UniV3Exchange: 0xa24cab4f250b25a056b0eee3c1ff7b44679d0085 (5009 bytes)
+rETH.HybridCurveUniV3Exchange: 0x4f8118bd18cfd7ccbf9d64057e2ffbc6994363f6 (6238 bytes)
+rETH.GasCompZapper: 0xa62f5c1090c3e9befa7781c297b480cf1096017d (21124 bytes)
+rETH.LeverageLSTZapper: 0xb744aad973791d25fec9c9c97184c6d1bda72864 (21170 bytes)
+rETH.LeverageLSTZapper.UniV3Exchange: 0x7e0450536ed89e372298e5957434e9aaa82bbe3c (21170 bytes)
+rETH.LeverageLSTZapper.HybridCurveUniV3Exchange: 0xf2d4bdf053fdb57fc966aa80db17f4663cc68c82 (21170 bytes)
+wstETH.CurveExchange: 0xcaf13480ed506459b6a21439782de9b22f0abfa9 (3816 bytes)
+wstETH.UniV3Exchange: 0x7fa60504841c6a32a06ba406025030b5d75898bd (5009 bytes)
+wstETH.HybridCurveUniV3Exchange: 0x87b986c1a064b97585c925cc8168a2f313760ac9 (6238 bytes)
+wstETH.GasCompZapper: 0x2217f8a96cd2a77bcb148c074cfb95eff0b6d350 (21124 bytes)
+wstETH.LeverageLSTZapper: 0xabe87ebe7ac1ffd72e1d6c533e5dbff3955110c3 (21170 bytes)
+wstETH.LeverageLSTZapper.UniV3Exchange: 0x6f7587841705ef27b70a72e8ea37714968759bab (21170 bytes)
+wstETH.LeverageLSTZapper.HybridCurveUniV3Exchange: 0x1e3767a99eec02d10acde70c8d0d9cb7faa1834b (21170 bytes)
+HybridCurveUniV3ExchangeHelpers: 0x7e876ec678d18abdcddd9e82df129e8a0331ef2a (2647 bytes)
+HybridCurveUniV3ExchangeHelpersV2: 0x4edd4d4f7b34c893eaed3dde165db57beab29501 (3725 bytes)
+Deployment manifest: /tmp/liquity-local-deployment-refreshed-check/deployment.json
+Basic zapper open/close: WETH
+Leveraged open/up/down/flash-close: WETH LeverageWETHZapper
+Leveraged open/up/down/flash-close: WETH LeverageWETHZapper.UniV3Exchange
+Leveraged open/up/down/flash-close: WETH LeverageWETHZapper.HybridCurveUniV3Exchange
+Basic zapper open/close: rETH
+Leveraged open/up/down/flash-close: rETH LeverageLSTZapper
+Leveraged open/up/down/flash-close: rETH LeverageLSTZapper.UniV3Exchange
+Leveraged open/up/down/flash-close: rETH LeverageLSTZapper.HybridCurveUniV3Exchange
+Basic zapper open/close: wstETH
+Leveraged open/up/down/flash-close: wstETH LeverageLSTZapper
+Leveraged open/up/down/flash-close: wstETH LeverageLSTZapper.UniV3Exchange
+Leveraged open/up/down/flash-close: wstETH LeverageLSTZapper.HybridCurveUniV3Exchange
+Interest batch join, fee/rate changes, pending debt and exit passed
+Opened both troves, deposited BOLD and rendered NFT: WETH
+Opened both troves, deposited BOLD and rendered NFT: rETH
+Opened both troves, deposited BOLD and rendered NFT: wstETH
+Governance income, bribe claims, Curve gauge, Merkl campaign and LQTY withdrawal passed
+Redemption, liquidation, branch shutdown and conservation passed
+Smoke checks passed. Evidence: /tmp/liquity-local-deployment-refreshed-check/smoke-result.json

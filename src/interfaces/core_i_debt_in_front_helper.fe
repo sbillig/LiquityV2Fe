@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface contracts/src/Interfaces/IDebtInFrontHelper.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{sol}
+use std::evm::Address
+pub msg IDebtInFrontHelper {
+    // Solidity: view
+    #[selector = sol("collateralRegistry()")]
+    CollateralRegistry {  } -> Address,
+    // Solidity: view
+    #[selector = sol("getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)")]
+    GetDebtBetweenInterestRateAndTrove { coll_index: u256, interest_rate_lo: u256, interest_rate_hi: u256, trove_id_to_stop_at: u256, hint_id: u256, num_trials: u256 } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)")]
+    GetDebtBetweenInterestRates { coll_index: u256, interest_rate_lo: u256, interest_rate_hi: u256, excluded_trove_id: u256, hint_id: u256, num_trials: u256 } -> (u256, u256),
+    // Solidity: view
+    #[selector = sol("hintHelpers()")]
+    HintHelpers {  } -> Address,
+}

@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: MIT
+// Generated from pinned Solidity interface src/interfaces/IUserProxy.sol.
+// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
+use std::abi::{Bytes32, Sol, sol}
+use std::evm::Address
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
+pub msg IUserProxy {
+    // Solidity: view
+    #[selector = sol("lqty()")]
+    Lqty {  } -> Address,
+    // Solidity: view
+    #[selector = sol("lusd()")]
+    Lusd {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("stake(uint256,address,bool,address)")]
+    Stake { amount: u256, lqty_from: Address, do_send_rewards: bool, recipient: Address } -> (u256, u256, u256, u256),
+    // Solidity: nonpayable
+    #[selector = sol("stakeViaPermit(uint256,address,(address,address,uint256,uint256,uint8,bytes32,bytes32),bool,address)")]
+    StakeViaPermit { amount: u256, lqty_from: Address, permit_params: PermitParams, do_send_rewards: bool, recipient: Address } -> (u256, u256, u256, u256),
+    // Solidity: view
+    #[selector = sol("staked()")]
+    Staked {  } -> u256,
+    // Solidity: view
+    #[selector = sol("stakingV1()")]
+    StakingV1 {  } -> Address,
+    // Solidity: view
+    #[selector = sol("stakingV2()")]
+    StakingV2 {  } -> Address,
+    // Solidity: nonpayable
+    #[selector = sol("unstake(uint256,bool,address)")]
+    Unstake { amount: u256, do_send_rewards: bool, recipient: Address } -> (u256, u256, u256, u256, u256, u256),
+}
+pub struct PermitParams {
+    pub owner: Address,
+    pub spender: Address,
+    pub value: u256,
+    pub deadline: u256,
+    pub v: u8,
+    pub r: Bytes32,
+    pub s: Bytes32,
+}
+impl AbiSize for PermitParams { const HEAD_SIZE: u256 = 224
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for PermitParams {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 224, input.len()) }
+}
+impl Decode<Sol> for PermitParams {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let pos = d.pos()
+        let end = checked_frame_end<Sol>(pos, 224, d.input().len())
+        d.set_pos(end)
+        let input = d.input()
+        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
+        let spender = <Address as Decode<Sol>>::decode_from(input, pos + 32)
+        let value = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
+        let deadline = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
+        let v = <u8 as Decode<Sol>>::decode_from(input, pos + 128)
+        let r = <Bytes32 as Decode<Sol>>::decode_from(input, pos + 160)
+        let s = <Bytes32 as Decode<Sol>>::decode_from(input, pos + 192)
+        Self { owner, spender, value, deadline, v, r, s }
+    }
+}
+impl Encode<Sol> for PermitParams {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.spender, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.value, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 96))
+        <u8 as Encode<Sol>>::encode(self.v, core::ptr::offset_bytes(ptr, 128))
+        <Bytes32 as Encode<Sol>>::encode(self.r, core::ptr::offset_bytes(ptr, 160))
+        <Bytes32 as Encode<Sol>>::encode(self.s, core::ptr::offset_bytes(ptr, 192))
+    }
+}

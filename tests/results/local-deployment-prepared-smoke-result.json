@@ -1,0 +1,253 @@
+{
+  "result": "passed",
+  "deployment": "/tmp/liquity-local-deployment-refreshed-check/deployment.json",
+  "deployment_sha256": "53c29b45e75bf4a5453cc39b0ea17f8d0c6bac0cf11072d695ae440ba3b4a078",
+  "smoke_transactions": [
+    {
+      "transactionHash": "0xe4b80b981aba1ef63d29fab6ebe0e76cf55fe3b37a97157ec24de545bed721d7",
+      "gasUsed": 34189
+    },
+    {
+      "transactionHash": "0xe1089eeceefd290de135cd0b9095c2ad763b20b65331f51b46e03c08de0ff19e",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0xf073fca87d67af6d193de9c5ebfa8e93738fcd753ca56f393a3042c347ff67f5",
+      "gasUsed": 591685
+    },
+    {
+      "transactionHash": "0x1a79d7764625cc7aef7a4aaa10e6e51cad8df9c9f00d90457c2f5f3b59826d5d",
+      "gasUsed": 51265
+    },
+    {
+      "transactionHash": "0xa292948f8eff081ea488ef3eeb3338d2e206ae0f20d5fdccba74f3a1b1a11e21",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x080d2f382c214c48af87f42e8c0ccffffee8dead251a5ef81c91afefbd29357f",
+      "gasUsed": 577416
+    },
+    {
+      "transactionHash": "0x7b2d0e43c6fef4c6d893dacaf7bc9304f4ce7c423e815bb4ee972b24a3984f53",
+      "gasUsed": 205620
+    },
+    {
+      "transactionHash": "0xf52dea2a215678e0d535218a838a7244da5ca132373471cafc5df12e1fbc31fc",
+      "gasUsed": 34189
+    },
+    {
+      "transactionHash": "0x686044dc9981592251e206bce00aef45aaad197f4825b766679813b5f2de53c4",
+      "gasUsed": 34165
+    },
+    {
+      "transactionHash": "0xbfac367402bae21f0fb32aecdd276c285f01c5ef4a8b76c748e912cc000e65a6",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x0c3df42719ef7716f650433a39a826dcad177bf3c4ee333af6e5375ff6b20061",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0xa5adeb4563a2e3c143c499f4bd5d7cc278e06163ecbf2591f2fb803816169ed6",
+      "gasUsed": 621904
+    },
+    {
+      "transactionHash": "0x6f7e7021bef3ea71487dbed7bc691ccc9ba8637749c4e29dc2dcacbcbc7fd84b",
+      "gasUsed": 51265
+    },
+    {
+      "transactionHash": "0x4c2d802043310446daa752e57973b6b551e39ba7d9ab4a833dc32326e1bcaf24",
+      "gasUsed": 51253
+    },
+    {
+      "transactionHash": "0xd660c6f5ce2d8608fc317c4995039d260df38344ecfa571eb97490d554e9f056",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x590f16bdad85b8347351a9febf407158efc686f9d8946f02896090b49f47fdd5",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x41feef4d78c485e80a9a758a0f8a784e3c0b6e2cfd3823f2179a01d9e18aee33",
+      "gasUsed": 607635
+    },
+    {
+      "transactionHash": "0xfbd8ebf6bc1108ed17ef7e32f55d4c22f640598eeb9707a6b76b84f3a87c755d",
+      "gasUsed": 205620
+    },
+    {
+      "transactionHash": "0x21fba3d60e01dfb4fe6b54be54a051ec34b88bed92afe9cf5ed9aeb124590fb0",
+      "gasUsed": 34189
+    },
+    {
+      "transactionHash": "0xe82cb8e0891ae29900a7816e8a707f115f2195864a81db23a28262b54981fc9d",
+      "gasUsed": 34165
+    },
+    {
+      "transactionHash": "0x507eaed8abb37b3e594460623c729f31f149f484a0496498e024a3b86435fb5b",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x436b52bec52db24a1bad4acd7fb0c679079b976e6be6b6a6579e4aa4a3f33224",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x82778f9ad5fd9af965b8f92d2f2c6eb792dd31714e91238428cfcad916ae3bc6",
+      "gasUsed": 622848
+    },
+    {
+      "transactionHash": "0xbdef1c2e255ad48472235277ad4515a4864bec453c5e08fb07c94e8aeda33917",
+      "gasUsed": 51265
+    },
+    {
+      "transactionHash": "0xdc1d395493dc3e1d1a2fe6309c5adf6e3c479f89605b1a8ffe9151d77c1ec4ca",
+      "gasUsed": 51253
+    },
+    {
+      "transactionHash": "0x26463c7316fb022cd421fcd1b31720e90d7be08874b9f0de188dd5b34d95ea28",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0xae843c88b3be5941774ee11ac4482ccb04ba449e5a47932491d21fd35204f078",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x5a36b61ed3ab8975092525075789db8abd88817d91fd178ce2f766fcd34c4194",
+      "gasUsed": 611550
+    },
+    {
+      "transactionHash": "0xbc8b74df44168232eef02f53f83b3b692e56ac29e6f13575101a17639da61251",
+      "gasUsed": 205620
+    },
+    {
+      "transactionHash": "0x03474efc314ea8be9b3016184afe7dda20bb1d753ecc2f16a35c9444f919c47f",
+      "gasUsed": 68377
+    },
+    {
+      "transactionHash": "0x2664fe0bba9be258c79bbd56c43c84136eb2968bb7f3c252f673c227909d1b8c",
+      "gasUsed": 46475
+    },
+    {
+      "transactionHash": "0x1d98a91fe7b73f2e5a3f56c4a196dc61fd6180f6737c6303cfd83f3cbe964e6b",
+      "gasUsed": 202629
+    },
+    {
+      "transactionHash": "0xdd955ab15073ee894e526b92242aba5391df0d48aabc651e7109d62b785dd500",
+      "gasUsed": 1193485
+    },
+    {
+      "transactionHash": "0x6e2bcf8a6d0dfa4c04f12634e99f8b191cf453c855cfbd1ee2c0af254219b312",
+      "gasUsed": 47082
+    },
+    {
+      "transactionHash": "0x2deb07c4f43e3a8fd29af5eb63d29c0c4c455edcbbf4d76aae6f7ff4467a983c",
+      "gasUsed": 68377
+    },
+    {
+      "transactionHash": "0x8a4c374ef6a9be2016307e21271ad127a521d0aeb029ecf70a84b37f77a36b54",
+      "gasUsed": 46487
+    },
+    {
+      "transactionHash": "0x13518610d30a00259ab3c6002655ced8a13ca3fe9116e834641421311e87454d",
+      "gasUsed": 142225
+    },
+    {
+      "transactionHash": "0x7a4f2b968b64a50251a2f1dea05f1d8be90963af6bdd296713d5203533e6ced2",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0x01364c4185c030725cdab8e52f311e7513e414546ed8c4f56d67aa021ca266bc",
+      "gasUsed": 207766
+    },
+    {
+      "transactionHash": "0x0807f940248dbae937431d1681727b8a7522b8b0e8d6c09584d194f6fa6938bb",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0x303b4c2aa5d0fb4f4c548c598eebe69ff5cd7bb3d375f4a20fe634b53d5a0059",
+      "gasUsed": 28722
+    },
+    {
+      "transactionHash": "0xda288310dd005d9ff57974038e02d15f717f1c7a97ff03687486d6a05714e794",
+      "gasUsed": 207766
+    },
+    {
+      "transactionHash": "0x86622e25cc8fff510110513a41c4df841ffc9adae553c28fa4d117f41df3108c",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0xbf024e5c5f54621fda2effcf4aff4f098ce663c1172eb0024c2db09073a42510",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0xa2b9f535466cdd6e43e43d9efbadba0690814ba9c417b5a76d75cb12c5f70355",
+      "gasUsed": 207766
+    },
+    {
+      "transactionHash": "0xaaebf9f94f2c786574c77e1a916dc2520b1e5f3c6ba6f305142f62bf0ac89346",
+      "gasUsed": 195775
+    },
+    {
+      "transactionHash": "0x9a4a831f4988af9d92a5df7ceb06c36987a0572d0af3691e03b998055f16b8df",
+      "gasUsed": 253495
+    },
+    {
+      "transactionHash": "0xa97e9e82bbc83d41cca4be9b6f6bb8a25c616fbf9e55f3e84596cb3227a03862",
+      "gasUsed": 321674
+    },
+    {
+      "transactionHash": "0x8191163139f0c234a5095e6375acdd53ba4b06a210a5494ac88cec05ccfe76e8",
+      "gasUsed": 151902
+    },
+    {
+      "transactionHash": "0xb14e71214b5df6bab9bbd084c29e458171610781fe352864a6a3193eab274d90",
+      "gasUsed": 558141
+    },
+    {
+      "transactionHash": "0xe30168ce62a80e78ae0cfdbcad110b31d5d928efe8ff957ba7b6ac04adc9aed7",
+      "gasUsed": 108590
+    },
+    {
+      "transactionHash": "0xb3120fa14b91008ff8c8064846df9867ca61ac099484d6c757c0a7b254acc74e",
+      "gasUsed": 822036
+    },
+    {
+      "transactionHash": "0xa2fb471f91ca9f350769a18ffdd28ba01c609b69428da480f9855ce2ece95652",
+      "gasUsed": 31498
+    },
+    {
+      "transactionHash": "0x8a456d3ccd6d60799588babccf3062b99c6a31513726c19567d83eb684363b9c",
+      "gasUsed": 31498
+    },
+    {
+      "transactionHash": "0x76f4c949d0e2637cbf88a358529e2b4ba27cdefdb37f086e71c214fb84deb838",
+      "gasUsed": 688825
+    },
+    {
+      "transactionHash": "0x80d22e7b17f08b7df6112e0fc168485e8af084bc81379de0288c8a8ea88aaabc",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0x0093599124757357dcf3cfa5b8a5f511170353fd692b68a4ed8ddec7870244b7",
+      "gasUsed": 28698
+    },
+    {
+      "transactionHash": "0x25ec2c54611c0af31eca4e4c6def115df75c34a155a90e6e8bde09088e19f070",
+      "gasUsed": 31498
+    },
+    {
+      "transactionHash": "0xe160eae1b25d84622d88ca3603f381013ecdbe0f2c440a184aa14b8b78849f22",
+      "gasUsed": 28722
+    },
+    {
+      "transactionHash": "0xdf67f28a4a6757e7f657258efd8fd7b91589a47580d58003e6710233e9c21bed",
+      "gasUsed": 233640
+    },
+    {
+      "transactionHash": "0xedfbf528b2f078c276d76a8000f6b4168339226e22dd267c31dd9118a80181a9",
+      "gasUsed": 716992
+    }
+  ],
+  "governance_income": 311668131012048674900,
+  "scope": "Real Fe core/governance/metadata/helper deployment with local external fixtures; ordinary transactions with normal size limits. Only external Balancer/Merkl fixtures are installed at canonical addresses; no Fe protocol code is injected."
+}

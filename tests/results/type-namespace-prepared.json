@@ -1,0 +1,14 @@
+{
+  "result": "fe_check_passed",
+  "command": "toolchain/fe/target/release/fe check /tmp/liquity-port-extras-project",
+  "compiler_revision": "0617639002e12e599fd7bfb68bd2722215c8a935",
+  "scope": "Nominal BatchId/TroveId wrappers and SVG namespace constants. Compile/inspection evidence, not a new differential runtime test claim. Existing protocol tests cover address/uint256 ID semantics in the actual system.",
+  "sources_sha256": {
+    "batch_id.fe": "291ae171277e89884c928ce3a092b56e18c84eeada6df09ed671ba688ccdfbab",
+    "trove_id.fe": "8bc21e1337fb0ecbc67cfd5c76f9f113ae6c47d0cf03b41b286fa117c6313894",
+    "lib.fe": "02bfee0574915805b5fb487c0b8233522be20554f0b2654c21ec92dee8973d4f",
+    "metadata_concat.fe": "745662d609e2b4ea9ea40a0a3d97a869223128da04ef077a494c50dd4f280e67",
+    "metadata_namespaces.fe": "9adb005b69f51b3a81298132f734af4f40d69394b84061243157c08addcc6f08"
+  },
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
