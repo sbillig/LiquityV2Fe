@@ -93,9 +93,9 @@
     "protocol_abi_sha256": "26142ca5f7a7ce9847335aabcc945c793a13e1f427da25e38cee171f2a0cbf16",
     "metadata_refinements": [
       "eip712Domain: explicit flat runtime return",
+      "symbol(): pure implementation of view function",
       "name(): pure implementation of view function",
-      "decimals(): pure implementation of view function",
-      "symbol(): pure implementation of view function"
+      "decimals(): pure implementation of view function"
     ],
     "declaration_only": [
       [
@@ -252,6 +252,32 @@
       ]
     ],
     "function_count": 12
+  },
+  "StabilityPool": {
+    "runtime_bytes": 13184,
+    "initcode_bytes_before_arguments": 14595,
+    "compiler_abi_sha256": "0dab8fbaf9b690eb2db87f9e448381ec8e4a95f7ce118aa67c2fa71204c499ad",
+    "reference_artifact_sha256": "951f86cd957ef47664b4aaec768e118b2000b28aeec253248d73d8f64d11c1f7",
+    "protocol_abi_sha256": "414b5b0242e36cf1703ab97676cbd25f12f3fb556a657071ee249707802c43d2",
+    "metadata_refinements": [
+      "getEntireBranchColl: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getEntireBranchDebt: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getDepositorYieldGainWithPending: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "depositSnapshots: static tuple has identical flat runtime encoding",
+      "SCALE_FACTOR(): pure implementation of view function",
+      "SCALE_SPAN(): pure implementation of view function",
+      "MAX_SCALE_FACTOR_EXPONENT(): pure implementation of view function",
+      "P_PRECISION(): pure implementation of view function",
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 31
   },
   "MetadataGeometry": {
     "implementation_companion": true,

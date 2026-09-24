@@ -177,9 +177,17 @@
     "verification": []
   },
   "contracts/src/Interfaces/IBoldRewardsReceiver.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/stability_pool.fe"
+    ],
+    "verification": [
+      "tests/StabilityPoolParity.t.sol",
+      "tests/StabilityPoolSystem.t.sol",
+      "tests/results/stability-pool.log",
+      "tests/results/stability-pool.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IBoldToken.sol": {
     "status": "pending",
@@ -300,14 +308,30 @@
     ]
   },
   "contracts/src/Interfaces/IStabilityPool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/stability_pool.fe"
+    ],
+    "verification": [
+      "tests/StabilityPoolParity.t.sol",
+      "tests/StabilityPoolSystem.t.sol",
+      "tests/results/stability-pool.log",
+      "tests/results/stability-pool.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IStabilityPoolEvents.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/stability_pool.fe"
+    ],
+    "verification": [
+      "tests/StabilityPoolParity.t.sol",
+      "tests/StabilityPoolSystem.t.sol",
+      "tests/results/stability-pool.log",
+      "tests/results/stability-pool.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/ITroveEvents.sol": {
     "status": "pending",
@@ -499,9 +523,17 @@
     ]
   },
   "contracts/src/StabilityPool.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/stability_pool.fe"
+    ],
+    "verification": [
+      "tests/StabilityPoolParity.t.sol",
+      "tests/StabilityPoolSystem.t.sol",
+      "tests/results/stability-pool.log",
+      "tests/results/stability-pool.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/TroveManager.sol": {
     "status": "pending",

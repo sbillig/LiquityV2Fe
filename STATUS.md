@@ -6,10 +6,10 @@ are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **107 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **118 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/collateral-registry.json`;
-the complete log is `tests/results/collateral-registry.log`.
+compiler and reference hashes are recorded in `tests/results/stability-pool.json`;
+the complete log is `tests/results/stability-pool.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -25,6 +25,9 @@ Implemented and differentially tested:
 - CollateralRegistry: all branches, fallback allocation, fee decay, exact rounding,
   partial redemptions and real BOLD burn/rollback; 11 differential tests include
   1,024 random sequences of 12 redemptions each.
+- StabilityPool: exact P/S/B and scale accounting, pending rewards, compounding,
+  stash/claim behavior, minimum remainder and rollback. Ten parity tests plus one
+  system test; fuzz includes 1,024 sixteen-operation sequences and reward arithmetic.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -37,8 +40,10 @@ Runtime sizes are 23,721 bytes (MetadataNFT) and 18,538 bytes (companion); main
 initcode is 42,596 bytes before its 32-byte constructor argument. All size limits
 are enforced. Companion deployment and output are tested directly.
 
-PoolSystem connects real Fe pools, registry and BOLDToken, with mocked BO/TM/SP
-operations. It does not establish a complete borrowing/liquidation deployment.
+PoolSystem connects real Fe pools, registry and BOLDToken. StabilityPoolSystem
+also connects the actual Fe StabilityPool, exercising real interest minting,
+offsets and claims. Both tests drive BO/TM-side operations and do not establish
+a complete borrowing/liquidation deployment.
 TroveChange and LatestTroveData ABI support are integrated; LatestBatchData is
 currently only a field definition.
 
@@ -68,15 +73,18 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Complete StabilityPool. A compiled draft and initial differential tests are
-   being developed in a separate temporary project after this checkpoint.
-2. Full TroveManager and BorrowerOperations, including individual/batch debt,
+1. Full TroveManager and BorrowerOperations, including individual/batch debt,
    shares, interest, fees, liquidation, redistribution and redemptions.
-3. Price feeds/shutdown, hints/getters, helpers and zappers.
-4. Governance and full multi-branch deployment/lifecycle/invariant validation.
+2. Price feeds/shutdown, hints/getters, helpers and zappers.
+3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
 reinsertion occurs before updating the manager's reported interest rate.
 Native storage borrows cannot span external calls; raw handles/copies preserve
 storage access ordering without weakening compiler checks. Any newly authored
 compiler fix needs its own branch, regression tests and newsfragment.
+
+Temporary TroveManager work after this checkpoint: `/tmp/liquity-next-trove-data.fe`
+contains the storage/interest calculation draft; `/tmp/liquity-next-types.fe` adds
+LatestBatchData ABI support and zero constructors. Neither is yet integrated or
+validated. All of TroveManager.sol and ITroveManager/ITroveEvents have been read.

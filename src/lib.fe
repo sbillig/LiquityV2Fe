@@ -28,3 +28,5 @@ pub use liquity_base_harness
 pub use metadata_geometry
 
 pub use collateral_registry
+
+pub use stability_pool

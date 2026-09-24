@@ -51,11 +51,11 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase and CollateralRegistry. The current suite
-passes 107 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry and StabilityPool. The current suite
+passes 118 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
-BorrowerOperations/TroveManager and StabilityPool are not yet ported; this pool
+BorrowerOperations/TroveManager are not yet ported; this pool
 workflow is not a complete borrowing/liquidation deployment.
 
 Use `build/protocol/*.abi.json` for protocol integration after `scripts/test.sh`.
@@ -81,11 +81,18 @@ arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes ar
 
 The local compiler integrates existing upstream PRs #1592, #1587 and #1585; their 10 and
 14 execution regressions and 218 HIR unit tests pass. See `COMPILER_FIXES.md`. The latest complete
-validation log and source/artifact hashes are `tests/results/collateral-registry.log` and
-`tests/results/collateral-registry.json`. After a new successful logged test run, record its
+validation log and source/artifact hashes are `tests/results/stability-pool.log` and
+`tests/results/stability-pool.json`. After a new successful logged test run, record its
 provenance with `python3 scripts/record_validation.py <log-path>` before edits.
 
 CollateralRegistry tests cover branch allocation, rounding remainders, fallback
 to branch debt, partial redemptions, fee decay, malformed constructor arrays and
 stateful sequences. A connected test burns actual Fe BOLD and checks rollback
 when the redeemer has insufficient tokens. TroveManager remains mocked.
+
+StabilityPool preserves scale-based P/S/B accounting, pending yield thresholds,
+compounding, claims, stashed collateral and the minimum deposit remainder. Tests
+include 1,024 sixteen-operation random sequences, scale expiry, arithmetic and
+rollback boundaries. StabilityPoolSystem connects actual Fe registry, active and
+default pools, StabilityPool and BOLDToken for interest minting, offsets and claims;
+the test still drives the BO/TM-side operations.

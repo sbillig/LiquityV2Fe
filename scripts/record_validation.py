@@ -49,7 +49,9 @@ report = {
     'sources_sha256': hashes((ROOT / 'src').glob('*.fe')),
     'tests_sha256': hashes((ROOT / 'tests').glob('*.t.sol')),
     'scripts_sha256': hashes(p for p in (ROOT / 'scripts').iterdir() if p.is_file()),
-    'artifacts_sha256': hashes(p for p in (ROOT / 'build').rglob('*') if p.is_file()),
+    # Isolated experiments under build/*-validation are outside this suite.
+    'artifacts_sha256': hashes([p for p in (ROOT / 'build').iterdir() if p.is_file()] +
+                              [p for p in (ROOT / 'build/protocol').rglob('*') if p.is_file()]),
     'log_sha256': digest(log),
     'reference_manifest_sha256': digest(ROOT / 'reference_manifest.json'),
 }

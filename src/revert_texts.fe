@@ -518,3 +518,57 @@ pub fn registry_fee_exceeded() -> DynString uses (mem: mut RawMem) {
     mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6d00000000000000000000000000000000000000000000000000000000000000)
     DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
 }
+
+pub fn stability_name() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c00000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 13))
+}
+
+pub fn stability_nonzero() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a20416d6f756e74206d757374206265206e6f)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6e2d7a65726f0000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 38))
+}
+
+pub fn stability_has_deposit() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2055736572206d7573742068617665206120)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6e6f6e2d7a65726f206465706f73697400000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 48))
+}
+
+pub fn stability_no_deposit() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2055736572206d7573742068617665206e6f)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x206465706f736974000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 40))
+}
+
+pub fn stability_minimum() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x5769746864726177616c206d757374206c6561766520746f74616c426f6c6444)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x65706f73697473203e3d204d494e5f424f4c445f494e5f535000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 57))
+}
+
+pub fn stability_nonzero_p() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x50206d757374206e6576657220646563726561736520746f2030000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 26))
+}
+
+pub fn stability_active_only() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2043616c6c6572206973206e6f7420416374)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x697665506f6f6c00000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 39))
+}
+
+pub fn stability_manager_only() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2043616c6c6572206973206e6f742054726f)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x76654d616e616765720000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 41))
+}
