@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Full multi-branch redemption allocation and fee accounting from CollateralRegistry.sol.
+use std::abi::{sol, DynArray, DynArrayAccess}
+use std::evm::{Address, Call, Ctx, Log, RawMem, RawStorage}
+use super::constants::*
+use super::liquity_math as math
+use super::revert_texts as text
+use super::bold_token::BoldTokenMsg
+#[event]
+pub struct BaseRateUpdated { pub value: u256 }
+#[event]
+pub struct LastFeeOpTimeUpdated { pub value: u256 }
+pub msg RedemptionBranchMsg {
+    #[selector = sol("getUnbackedPortionPriceAndRedeemability()")]
+    Unbacked -> (u256, u256, bool),
+    #[selector = sol("getEntireBranchDebt()")]
+    EntireDebt -> u256,
+    #[selector = sol("redeemCollateral(address,uint256,uint256,uint256,uint256)")]
+    Redeem { redeemer: Address, amount: u256, price: u256, rate: u256, iterations: u256 } -> u256,
+}
+// Solidity's memory-array decoder validates every address, including surplus
+// manager entries the constructor does not otherwise consume. Fe DynArray
+// validates scalar elements on access, so preserve the eager boundary here.
+fn validate_addresses(_ values: DynArray<Address>) {
+    let mut i: u256 = 0
+    while i < values.len() {
+        let validated = values.get(i)
+        i += 1
+    }
+}
+fn decayed() -> u256 uses (ctx: Ctx, storage: RawStorage) {
+    let minutes = (ctx.timestamp() - storage.sload(1)) / ONE_MINUTE
+    storage.sload(0) * math::dec_pow(REDEMPTION_MINUTE_DECAY_FACTOR, minutes) / DECIMAL_PRECISION
+}
+fn updated(_ amount: u256, _ supply: u256) -> u256 uses (ctx: Ctx, storage: RawStorage) {
+    let prior = decayed()
+    let fraction = amount * DECIMAL_PRECISION / supply
+    math::min(prior + fraction / REDEMPTION_BETA, DECIMAL_PRECISION)
+}
+fn redemption_rate(_ base: u256) -> u256 { math::min(REDEMPTION_FEE_FLOOR + base, DECIMAL_PRECISION) }
+fn update_base(_ amount: u256, _ supply: u256) uses (ctx: Ctx, storage: mut RawStorage, log: mut Log) {
+    let rate = updated(amount, supply)
+    storage.sstore(slot: 0, value: rate)
+    log.emit(BaseRateUpdated { value: rate })
+    let last = storage.sload(1)
+    let minutes = (ctx.timestamp() - last) / ONE_MINUTE
+    if minutes > 0 {
+        let timestamp = last + ONE_MINUTE * minutes
+        storage.sstore(slot: 1, value: timestamp)
+        log.emit(LastFeeOpTimeUpdated { value: timestamp })
+    }
+}
+pub msg CollateralRegistryMsg {
+    #[selector = sol("baseRate()")]
+    BaseRate -> u256,
+    #[selector = sol("lastFeeOperationTime()")]
+    LastFeeOperationTime -> u256,
+    #[selector = sol("totalCollaterals()")]
+    TotalCollaterals -> u256,
+    #[selector = sol("getToken(uint256)")]
+    GetToken { index: u256 } -> Address,
+    #[selector = sol("getTroveManager(uint256)")]
+    GetTroveManager { index: u256 } -> Address,
+    #[selector = sol("boldToken()")]
+    BoldToken -> Address,
+    #[selector = sol("getRedemptionRate()")]
+    RedemptionRate -> u256,
+    #[selector = sol("getRedemptionRateWithDecay()")]
+    RedemptionRateWithDecay -> u256,
+    #[selector = sol("getRedemptionRateForRedeemedAmount(uint256)")]
+    RedemptionRateForRedeemedAmount { amount: u256 } -> u256,
+    #[selector = sol("getRedemptionFeeWithDecay(uint256)")]
+    RedemptionFeeWithDecay { amount: u256 } -> u256,
+    #[selector = sol("getEffectiveRedemptionFeeInBold(uint256)")]
+    EffectiveRedemptionFeeInBold { amount: u256 } -> u256,
+    #[selector = sol("redeemCollateral(uint256,uint256,uint256)")]
+    RedeemCollateral { amount: u256, iterations: u256, max_fee: u256 },
+}
+pub contract CollateralRegistry {
+    total: u256,
+    bold: Address,
+    tokens: [Address; 10],
+    managers: [Address; 10],
+    init(bold_token: Address, collateral_tokens: DynArray<Address>, trove_managers: DynArray<Address>)
+    uses (mut total, mut bold, mut tokens, mut managers, ctx: Ctx, storage: mut RawStorage, mem: mut RawMem, log: mut Log) {
+        validate_addresses(collateral_tokens)
+        validate_addresses(trove_managers)
+        let count = collateral_tokens.len()
+        text::require(count > 0, text::registry_empty_collateral())
+        text::require(count <= 10, text::registry_too_many_collaterals())
+        total = count
+        bold = bold_token
+        let mut token_values = [Address::zero(); 10]
+        let mut manager_values = [Address::zero(); 10]
+        let mut i: u256 = 0
+        while i < count { token_values[i as usize] = collateral_tokens.get(i)
+            i += 1
+        }
+        i = 0
+        while i < count { manager_values[i as usize] = trove_managers.get(i)
+            i += 1
+        }
+        tokens = token_values
+        managers = manager_values
+        storage.sstore(slot: 0, value: INITIAL_BASE_RATE)
+        storage.sstore(slot: 1, value: ctx.timestamp())
+        log.emit(BaseRateUpdated { value: INITIAL_BASE_RATE })
+    }
+    recv CollateralRegistryMsg {
+        BaseRate -> u256 uses (storage: RawStorage) { storage.sload(0) }
+        LastFeeOperationTime -> u256 uses (storage: RawStorage) { storage.sload(1) }
+        TotalCollaterals -> u256 uses (total) { total }
+        BoldToken -> Address uses (bold) { bold }
+        GetToken { index } -> Address uses (tokens, mem: mut RawMem) {
+            text::require(index < 10, text::registry_invalid_index())
+            tokens[index as usize]
+        }
+        GetTroveManager { index } -> Address uses (managers, mem: mut RawMem) {
+            text::require(index < 10, text::registry_invalid_index())
+            managers[index as usize]
+        }
+        RedemptionRate -> u256 uses (storage: RawStorage) { redemption_rate(storage.sload(0)) }
+        RedemptionRateWithDecay -> u256 uses (ctx: Ctx, storage: RawStorage) { redemption_rate(decayed()) }
+        RedemptionFeeWithDecay { amount } -> u256 uses (ctx: Ctx, storage: RawStorage) {
+            redemption_rate(decayed()) * amount / DECIMAL_PRECISION
+        }
+        RedemptionRateForRedeemedAmount { amount } -> u256 uses (bold, call: mut Call, ctx: Ctx, storage: RawStorage) {
+            let supply = bold.static(BoldTokenMsg::TotalSupply {})
+            redemption_rate(updated(amount, supply))
+        }
+        EffectiveRedemptionFeeInBold { amount } -> u256 uses (bold, call: mut Call, ctx: Ctx, storage: RawStorage) {
+            let supply = bold.static(BoldTokenMsg::TotalSupply {})
+            redemption_rate(updated(amount, supply)) * amount / DECIMAL_PRECISION
+        }
+        RedeemCollateral { amount, iterations, max_fee } uses (total, bold, managers, call: mut Call, ctx: Ctx, storage: mut RawStorage, mem: mut RawMem, log: mut Log) {
+            text::require(max_fee >= REDEMPTION_FEE_FLOOR && max_fee <= DECIMAL_PRECISION, text::registry_invalid_fee())
+            text::require(amount > 0, text::registry_zero_amount())
+            let count = total
+            let mut portions: [u256; 10] = [0; 10]
+            let mut prices: [u256; 10] = [0; 10]
+            let mut unbacked: u256 = 0
+            let mut remaining = amount
+            let mut redeemed: u256 = 0
+            let mut i: u256 = 0
+            while i < count {
+                let result = managers[i as usize].call(RedemptionBranchMsg::Unbacked {})
+                prices[i as usize] = result.1
+                if result.2 { unbacked += result.0
+                    portions[i as usize] = result.0
+                }
+                i += 1
+            }
+            if unbacked == 0 {
+                portions = [0; 10]
+                i = 0
+                while i < count {
+                    let manager = managers[i as usize]
+                    let result = manager.call(RedemptionBranchMsg::Unbacked {})
+                    if result.2 {
+                        let debt = manager.static(RedemptionBranchMsg::EntireDebt {})
+                        unbacked += debt
+                        portions[i as usize] = debt
+                    }
+                    i += 1
+                }
+            } else if remaining > unbacked { remaining = unbacked }
+            let supply = bold.static(BoldTokenMsg::TotalSupply {})
+            let rate = redemption_rate(updated(remaining, supply))
+            text::require(rate <= max_fee, text::registry_fee_exceeded())
+            i = 0
+            while i < count {
+                if portions[i as usize] > 0 {
+                    let allocation = remaining * portions[i as usize] / unbacked
+                    if allocation > 0 {
+                        redeemed += managers[i as usize].call(RedemptionBranchMsg::Redeem { redeemer: ctx.caller(), amount: allocation, price: prices[i as usize], rate, iterations })
+                    }
+                    remaining -= allocation
+                    unbacked -= portions[i as usize]
+                }
+                i += 1
+            }
+            update_base(redeemed, supply)
+            if redeemed > 0 { bold.call(BoldTokenMsg::Burn { account: ctx.caller(), amount: redeemed }) }
+        }
+    }
+}

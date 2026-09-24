@@ -93,8 +93,8 @@
     "protocol_abi_sha256": "26142ca5f7a7ce9847335aabcc945c793a13e1f427da25e38cee171f2a0cbf16",
     "metadata_refinements": [
       "eip712Domain: explicit flat runtime return",
-      "decimals(): pure implementation of view function",
       "name(): pure implementation of view function",
+      "decimals(): pure implementation of view function",
       "symbol(): pure implementation of view function"
     ],
     "declaration_only": [
@@ -229,6 +229,29 @@
     "declaration_only": [],
     "compiler_standard_errors": [],
     "function_count": 3
+  },
+  "CollateralRegistry": {
+    "runtime_bytes": 4873,
+    "initcode_bytes_before_arguments": 6757,
+    "compiler_abi_sha256": "f0318a7279bf6da6348a88482d1a82fc546f08ae27e3e6d09be51ad7075d8791",
+    "reference_artifact_sha256": "b3a8b35b3b72d2f102adf18d059546b3b9231903d04009d0ae82dd86753d2a2f",
+    "protocol_abi_sha256": "b24872aeb6da41dc98a1cceac28d7475377b24701754493df1fc6cf9af631604",
+    "metadata_refinements": [
+      "getRedemptionRateForRedeemedAmount: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getEffectiveRedemptionFeeInBold: read-only STATICCALL; Fe capability conservatively implies nonpayable"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 12
   },
   "MetadataGeometry": {
     "implementation_companion": true,

@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'CollateralRegistry': ('STATICCALL', {'getRedemptionRateForRedeemedAmount(uint256)', 'getEffectiveRedemptionFeeInBold(uint256)'}),
     'LiquityBase': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'SortedTroves': ('STATICCALL', {'validInsertPosition(uint256,uint256,uint256)', 'findInsertPosition(uint256,uint256,uint256)'}),
     'TroveNFT': ('STATICCALL', {'tokenURI(uint256)'}),
@@ -79,7 +80,8 @@ for contract in CONTRACTS:
     missing = set(sol) - set(fe)
     extra = set(fe) - set(sol)
     assert missing <= DECLARATION_ONLY.get(contract, set()), (contract, 'missing ABI entries', missing)
-    assert extra <= {('error', 'Error(string)')}, (contract, 'extra ABI entries', extra)
+    # Solidity omits its implicit standard errors from ABI metadata.
+    assert extra <= {('error', 'Error(string)'), ('error', 'Panic(uint256)')}, (contract, 'extra ABI entries', extra)
     for k in set(sol) & set(fe):
         x, y = fe[k], sol[k]
         assert [typ(f) for f in x.get('outputs', [])] == [typ(f) for f in y.get('outputs', [])], (contract, k, 'return shape')

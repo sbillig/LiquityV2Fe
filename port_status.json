@@ -51,9 +51,16 @@
     ]
   },
   "contracts/src/CollateralRegistry.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/collateral_registry.fe"
+    ],
+    "verification": [
+      "tests/CollateralRegistryParity.t.sol",
+      "tests/results/collateral-registry.log",
+      "tests/results/collateral-registry.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/DebtInFrontHelper.sol": {
     "status": "pending",
@@ -190,9 +197,16 @@
     "verification": []
   },
   "contracts/src/Interfaces/ICollateralRegistry.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/collateral_registry.fe"
+    ],
+    "verification": [
+      "tests/CollateralRegistryParity.t.sol",
+      "tests/results/collateral-registry.log",
+      "tests/results/collateral-registry.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/ICommunityIssuance.sol": {
     "status": "pending",

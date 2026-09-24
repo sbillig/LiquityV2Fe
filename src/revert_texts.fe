@@ -479,3 +479,42 @@ pub fn asset_invalid_input() -> DynString uses (mem: mut RawMem) {
     mem.mstore(addr: data, value: 0x466978656441737365745265616465723a20496e76616c696420696e70757400)
     DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
 }
+
+pub fn registry_empty_collateral() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c206c6973742063616e6e6f7420626520656d70747900)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
+}
+
+pub fn registry_too_many_collaterals() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c206c69737420746f6f206c6f6e670000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
+}
+
+pub fn registry_invalid_index() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x496e76616c696420696e64657800000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 13))
+}
+
+pub fn registry_invalid_fee() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4d6178206665652070657263656e74616765206d757374206265206265747765)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x656e20302e352520616e64203130302500000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 48))
+}
+
+pub fn registry_zero_amount() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c52656769737472793a20416d6f756e74206d75737420)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x62652067726561746572207468616e207a65726f000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 52))
+}
+
+pub fn registry_fee_exceeded() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x43523a204665652065786365656465642070726f7669646564206d6178696d75)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6d00000000000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
+}

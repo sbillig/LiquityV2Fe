@@ -6,10 +6,10 @@ are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **96 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **107 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/metadata-bases.json`;
-the complete log is `tests/results/metadata-bases.log`.
+compiler and reference hashes are recorded in `tests/results/collateral-registry.json`;
+the complete log is `tests/results/collateral-registry.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -22,6 +22,9 @@ Implemented and differentially tested:
 - FixedAssetReader: SSTORE2 clipping, cap, empty/invalid pointers and packed assets.
 - MetadataNFT: exact nested base64 JSON/SVG, numeric formatting, checksummed owner,
   all Bauhaus/status variants, arbitrary token strings and production assets.
+- CollateralRegistry: all branches, fallback allocation, fee decay, exact rounding,
+  partial redemptions and real BOLD burn/rollback; 11 differential tests include
+  1,024 random sequences of 12 redemptions each.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -65,11 +68,11 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Complete CollateralRegistry allocation, fee decay and redemptions. A draft is
+1. Complete StabilityPool. A compiled draft and initial differential tests are
    being developed in a separate temporary project after this checkpoint.
 2. Full TroveManager and BorrowerOperations, including individual/batch debt,
    shares, interest, fees, liquidation, redistribution and redemptions.
-3. StabilityPool, price feeds/shutdown, hints/getters, helpers and zappers.
+3. Price feeds/shutdown, hints/getters, helpers and zappers.
 4. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
