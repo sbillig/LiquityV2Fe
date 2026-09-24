@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -49,6 +49,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'WETHZapper': {'removeManagerReceiverOf'},
     'DebtInFrontHelper': {'getDebtBetweenInterestRates', 'getDebtBetweenInterestRateAndTrove'},
     'HintHelpers': {'getApproxHint'},
     'WETHPriceFeed': {'ethUsdOracle', 'fetchPrice', 'fetchRedemptionPrice'},
@@ -121,6 +122,14 @@ for contract in CONTRACTS:
         refinements.append('constructor: AddressMemoryArray explicitly decodes a flat address[] with eager allocation panic and address validation')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
+        if contract == 'WETHZapper' and entry.get('name') in {'receiveFlashLoanOnOpenLeveragedTrove', 'receiveFlashLoanOnLeverUpTrove', 'receiveFlashLoanOnLeverDownTrove'}:
+            assert entry['stateMutability'] == 'pure'
+            entry['stateMutability'] = 'nonpayable'
+            refinements.append(entry['name'] + ': pure implementation of the reference no-op callback; nonpayable value guard retained')
+        if contract == 'WETHZapper' and entry['type'] == 'fallback':
+            assert entry['stateMutability'] == 'payable'
+            entry['type'] = 'receive'
+            refinements.append('receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior')
         if contract == 'RedemptionHelper' and entry.get('name') in {'simulateRedemption', 'truncateRedemption'}:
             outputs = entry['outputs']
             assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'

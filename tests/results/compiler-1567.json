@@ -2,7 +2,7 @@
   "integration_revision": "27976c7df7d0fca487f2c80f26241c9021dfa04c",
   "integration_tree": "e8e5d938074145678e2ec2f01c6e14e50cb99638",
   "pr_revision": "8557f3f5e56c17801743469f6d46377ecd58c572",
-  "integrated_into_protocol_release": false,
+  "integrated_into_protocol_release": true,
   "execution_tests_by_optimization": {
     "0": 4,
     "1": 4,
@@ -16,6 +16,12 @@
     "tests/results/compiler-1567-verifier.log": "3cfa2da0cf1965e384ea0ed3a573939b6319e9875c740a06059d6c8220ed1bd2",
     "tests/results/compiler-1567-execution.log": "ce1698b3f770db66d77c24b2891a0a777ffef9bb8847ef5b22f91042f5285f5c",
     "tests/results/compiler-1567-abi.json": "8da1aef5da886b9ef727fd440faec3468246ef29dd2212396bd4726903c0333b",
-    "tests/results/compiler-1567-optimization.log": "ed4030ce74d0090d10d826c1ccaac7515b33d771f048d8c8637ec200926bf459"
-  }
+    "tests/results/compiler-1567-optimization.log": "ed4030ce74d0090d10d826c1ccaac7515b33d771f048d8c8637ec200926bf459",
+    "tests/results/compiler-1567-mir-all.log": "3571f929b05355756a16ce655afd23bf5f5977e1743a48ec6e7f424ace8da04a",
+    "tests/results/compiler-1567-release-execution.log": "9cd8e73aa24116647f9a3c27263deaa4e5c8577c093acb0b4952996357617105"
+  },
+  "mir_library_tests": 98,
+  "release_execution_tests": 4,
+  "protocol_validation": "tests/results/weth-zapper.json",
+  "bootstrap_replayed_tree": "e8e5d938074145678e2ec2f01c6e14e50cb99638"
 }

@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 import subprocess
+from merge_compiler_fix import merge_fix
 
 root = Path(__file__).resolve().parents[1]
 manifest = json.loads((root / 'reference_manifest.json').read_text())
@@ -32,7 +33,7 @@ if clone_at(compiler, manifest['compiler']['url'], manifest['compiler']['upstrea
     for fix in manifest['compiler']['fixes']:
         run('git', 'fetch', 'upstream', fix['revision'], cwd=compiler)
         run('git', 'branch', fix['branch'], fix['revision'], cwd=compiler)
-        run('git', 'merge', '--no-ff', '--no-edit', fix['branch'], cwd=compiler)
+        merge_fix(compiler, fix)
 # Local merge commit IDs include local timestamps; pin the complete source tree
 # as well as every input commit so a fresh checkout can reproduce the build.
 actual_tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=compiler, text=True).strip()

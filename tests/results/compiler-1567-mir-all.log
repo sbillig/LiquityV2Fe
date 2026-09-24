@@ -1,0 +1,114 @@
+   Compiling fe-parser v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/parser)
+   Compiling fe-common v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/common)
+   Compiling fe-test-utils v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/test-utils)
+   Compiling fe-trace-facts v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/trace-facts)
+   Compiling fe-resolver v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/resolver)
+   Compiling fe-hir v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/hir)
+   Compiling fe-driver v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/driver)
+   Compiling fe-mir v26.3.0 (/home/cburgdorf/Documents/hacking/fe/liquityV2demo/toolchain/fe/crates/mir)
+    Finished `test` profile [unoptimized] target(s) in 36.78s
+     Running unittests src/lib.rs (toolchain/fe/target/debug/deps/fe_mir-3ba697bf2b181366)
+
+running 98 tests
+test runtime::lower::boundary::tests::exact_transport_requires_transport_match_but_exact_shape_preserves_source_transport ... ok
+test runtime::lower::boundary::tests::borrow_like_boundary_respects_transport_allowlist ... ok
+test runtime::lower::boundary::tests::aggregate_borrow_like_materializes_object_ref ... ok
+test runtime::layout_utils::tests::wide_enum_layout_uses_its_declared_tag_width ... ok
+test runtime::lower::boundary::tests::exact_shape_ref_matching_ignores_provider_space_but_not_view_or_pointee ... ok
+test runtime::layout_utils::tests::address_space_layout_uses_bytes_or_words_consistently ... ok
+test runtime::lower::boundary::tests::borrow_like_planner_prefers_compatible_address_then_scalar_slot_materialization ... ok
+test runtime::layout_utils::tests::raw_array_layout_size_is_checked ... ok
+test runtime::lower::conversion::tests::aggregate_to_object_ref_materializes_without_policy ... ok
+test runtime::lower::conversion::tests::const_ref_to_object_ref_materializes_without_retagging ... ok
+test runtime::lower::conversion::tests::identity_conversion_has_no_steps ... ok
+test runtime::lower::conversion::tests::object_ref_cannot_change_to_a_storage_provider ... ok
+test runtime::lower::conversion::tests::native_reference_conversion_preserves_static_and_raw_referents ... ok
+test runtime::lower::conversion::tests::provider_to_raw_address_requires_matching_space_and_target ... ok
+test runtime::lower::conversion::tests::raw_address_to_provider_requires_matching_space ... ok
+test runtime::lower::conversion::tests::raw_address_retag_preserves_same_space_pointer_value ... ok
+test runtime::lower::conversion::tests::raw_aggregate_address_to_value_loads_from_pointer ... ok
+test runtime::lower::conversion::tests::raw_memory_address_does_not_reconstruct_memory_provider ... ok
+test runtime::lower::conversion::tests::scalar_ref_to_untyped_raw_addr_is_unsupported ... ok
+test runtime::lower::conversion::tests::structurally_identical_enum_values_need_no_conversion ... ok
+test runtime::lower::infer::tests::join_runtime_class_keeps_matching_const_refs ... ok
+test runtime::lower::infer::tests::join_runtime_class_materializes_const_ref_to_aggregate_for_plain_values ... ok
+test runtime::lower::conversion::tests::word_and_raw_address_conversions_are_explicit_steps ... ok
+test runtime::lower::infer::tests::join_runtime_class_materializes_const_ref_to_object_for_owned_storage ... ok
+test runtime::lower::infer::tests::join_runtime_class_preserves_structural_aggregate_merge ... ok
+test runtime::lower::infer::tests::merge_runtime_class_merges_memory_raw_addr_into_non_memory_space ... ok
+test runtime::lower::infer::tests::merge_runtime_class_prefers_non_memory_provider_enum_layouts ... ok
+test runtime::lower::infer::tests::merge_runtime_class_prefers_provider_refs_over_object_refs ... ok
+test runtime::lower::infer::tests::merge_runtime_class_rejects_conflicting_non_memory_provider_refs ... ok
+test runtime::lower::infer::tests::merge_runtime_class_rejects_conflicting_non_memory_raw_addr_spaces ... ok
+test runtime::lower::infer::tests::preferred_address_space_is_commutative ... ok
+test runtime::lower::infer::tests::native_borrow_joins_preserve_mixed_layouts_in_both_orders ... ok
+test runtime::lower::realize::tests::raw_addr_slot_materialization_coerces_stores_and_addresses_slot ... ok
+test runtime::lower::realize::tests::selected_runtime_value_args_share_use_plan_lowering ... ok
+test runtime::lower::classify::tests::runtime_handle_preservation_keeps_mut_owned_aggregate_param_by_value ... ok
+test runtime::lower::classify::tests::generic_zero_sized_uses_provider_erases_runtime_root ... ok
+test runtime::lower::classify::tests::visible_return_selection_preserves_transport_return_source ... ok
+test runtime::lower::classify::tests::runtime_instance_overrides_cannot_resurrect_zero_width_params ... ok
+test runtime::lower::returns::tests::merged_return_class_folds_memory_into_non_memory_regardless_of_order ... ok
+test runtime::lower::returns::tests::merged_return_class_is_order_independent_for_irreconcilable_sites ... ok
+test runtime::lower::classify::tests::transport_shaped_returns_remain_visible_transport_returns ... ok
+test runtime::lower::classify::tests::runtime_handle_preservation_keeps_mut_owned_enum_param_as_object_ref ... ok
+test runtime::lower::classify::tests::transport_shaped_method_return_keeps_runtime_visible_signature ... ok
+test runtime::lower::returns::tests::aggregate_temporaries_match_full_inference_in_return_slices ... ok
+test runtime::lower::returns::tests::borrow_return_class_remains_dynamic ... ok
+test runtime::lower::body::tests::mixed_compile_time_and_runtime_layout_components_lower_through_calls ... ok
+test runtime::lower::classify::tests::poseidon_helpers_keep_visible_by_value_array_returns ... ok
+test runtime::lower::returns::tests::exact_aggregate_return_class_does_not_need_body_inference ... ok
+test runtime::lower::returns::tests::exact_scalar_return_class_does_not_need_body_inference ... ok
+test runtime::lower::returns::tests::panic_wrappers_are_known_never_returning ... ok
+test runtime::lower::returns::tests::mixed_native_return_declaration_matches_body_inference ... ok
+test runtime::lower::type_info::tests::non_zst_borrow_boundary_remains_borrow_like ... ok
+test runtime::lower::type_info::tests::plain_runtime_zst_boundary_is_erased ... ok
+test runtime::lower::type_info::tests::raw_pointer_classes_retain_complete_nested_pointees ... ok
+test runtime::lower::returns::tests::ordinary_unit_call_may_return_normally ... ok
+test runtime::lower::returns::tests::mixed_panic_branch_may_return_normally ... ok
+test runtime::lower::type_info::tests::raw_pointer_pointees_do_not_make_the_pointer_an_aggregate_value ... ok
+test runtime::lower::type_info::tests::zst_borrow_boundary_preserves_provider_transport ... ok
+test runtime::package::tests::contract_init_wrapper_is_synthesized_for_no_init_contracts ... ok
+test runtime::lower::body::tests::poseidon_mock_range_consts_with_zst_fields_lower_into_runtime_package ... ok
+test runtime::lower::returns::tests::return_slice_includes_all_definitions_of_returned_local ... ok
+test runtime::lower::returns::tests::raw_pointer_borrows_keep_their_return_layout ... ok
+test runtime::package::tests::filtered_test_package_without_matches_is_empty ... ok
+test runtime::lower::returns::tests::semantic_nonreturning_wrapper_calls_lower_as_terminal_calls ... ok
+test runtime::lower::classify::tests::own_scalar_call_inputs_materialize_provider_backed_direct_values ... ok
+test runtime::lower::returns::tests::unit_return_class_is_statically_known_absent ... ok
+test runtime::place::tests::loading_a_reference_slot_preserves_the_stored_reference ... ok
+test runtime::place::tests::native_scalar_addresses_preserve_object_layout ... ok
+test runtime::package::tests::blocked_body_keeps_a_declaration_abi_but_cannot_be_lowered ... ok
+test runtime::package::tests::filtered_test_package_excludes_unreferenced_contract_roots ... ok
+test trace::tests::cfg_hash_uses_the_emitted_backedge_kind ... ok
+test trace::tests::empty_revert_is_visible_and_has_no_cfg_successor ... ok
+test trace::tests::raw_pointer_operations_have_explicit_trace_displays ... ok
+test runtime::lower::classify::tests::concrete_zero_width_storage_packed_array_effect_args_erase_from_runtime_calls ... ok
+test runtime::lower::classify::tests::inner_take_call_uses_the_same_runtime_key_and_return_class_as_lowering ... ok
+test runtime::package::tests::invalid_layout_evidence_returns_a_lowering_error_instead_of_panicking ... ok
+test runtime::package::tests::native_package_keeps_extern_calls_as_bodyless_declarations ... ok
+test runtime::lower::classify::tests::provider_backed_method_call_inputs_keep_storage_receiver_transport ... ok
+test instance::runtime::tests::runtime_lowering_cannot_discharge_pending_semantic_validation ... ok
+test runtime::lower::returns::tests::stored_native_field_returns_preserve_their_carrier ... ok
+test runtime::lower::returns::tests::forwarded_scalar_provenance_does_not_replace_aggregate_return_shape ... ok
+test runtime::package::tests::contract_entry_plan_carries_each_terminal_layout_family ... ok
+test runtime::lower::classify::tests::provider_backed_effect_bindings_keep_actualized_borrow_boundaries ... ok
+test runtime::package::tests::contract_recv_wrapper_projects_only_runtime_visible_fields_in_runtime_order ... ok
+test runtime::package::tests::usize_layout_evidence_uses_usize_scalar_constants ... ok
+test runtime::synthetic::tests::test_roots_erase_inert_raw_mem_root_providers ... ok
+test runtime::lower::classify::tests::concrete_zero_width_storage_map_effect_args_erase_from_runtime_calls ... ok
+test runtime::lower::returns::tests::provider_root_return_slice_matches_full_inference ... ok
+test runtime::lower::classify::tests::specialized_grant_callee_erases_self_after_root_assignment ... ok
+test runtime::package::tests::filtered_test_package_discovers_create2_contract_dependency ... ok
+test verify::storage_layout::tests::package_verifier_rejects_array_and_hole_field_span_mutations ... ok
+test runtime::synthetic::tests::contract_recv_abi_returns_the_declared_type_through_the_host ... ok
+test verify::storage_layout::tests::package_verifier_rejects_contract_field_identity_mutations ... ok
+test verify::storage_layout::tests::package_verifier_rejects_owner_count_type_and_kind_mutations ... ok
+test verify::package::tests::recv_terminal_calls_must_use_the_planned_semantic_return_helper ... ok
+test verify::storage_layout::tests::package_verifier_rejects_space_slot_and_immutable_mode_mutations ... ok
+test verify::storage_layout::tests::valid_contract_field_bindings_cover_all_spaces_and_shapes ... ok
+test runtime::lower::returns::tests::return_class_merges_default_enum_with_storage_provider_variant has been running for over 60 seconds
+test runtime::lower::returns::tests::return_class_merges_default_enum_with_storage_provider_variant ... ok
+
+test result: ok. 98 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 74.53s
+

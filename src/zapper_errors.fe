@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: MIT
+use std::abi::DynString
+use std::evm::RawMem
+pub fn not_receiver() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x425a3a205a6170706572206973206e6f7420726563656976657220666f722074)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6869732074726f76650000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 41))
+}
+pub fn wrong_branch() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a2057726f6e6720636f6c6c206272616e63680000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 21))
+}
+pub fn insufficient_eth() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a20496e73756666696369656e7420455448000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 20))
+}
+pub fn batch_rate() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a2043616e6e6f742063686f6f736520696e746572657374206966206a6f)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x696e696e67206120626174636800000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 45))
+}
+pub fn send_failed() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a2053656e64696e6720455448206661696c656400000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 22))
+}
+pub fn wrong_coll() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a2057726f6e6720636f6c6c20616d6f756e740000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 21))
+}
+pub fn no_eth() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a204e6f7420616464696e6720636f6c6c2c206e6f204554482073686f75)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6c64206265207265636569766564000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 46))
+}
+pub fn flash_caller() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a2043616c6c6572206e6f7420466c6173684c6f616e2070726f76696465)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x7200000000000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 33))
+}
+pub fn coll_minimum() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x575a3a204e6f7420656e6f75676820636f6c6c61746572616c20726563656976)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6564000000000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 34))
+}

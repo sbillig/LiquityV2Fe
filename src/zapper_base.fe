@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use super::addresses_registry::{RegistryMsg, TroveNFTAddressChanged}
+use super::add_remove_managers as managers
+use super::add_remove_managers::{ManagerSlots, AddRemoveManagersMsg}
+use super::trove_nft::TroveNFTMsg
+use super::revert_texts::require
+use super::zapper_errors as error
+pub struct Config { pub nft: Address, pub bo: Address, pub manager: Address, pub bold: Address, pub weth: Address, pub flash: Address, pub exchange: Address }
+impl Copy for Config {}
+pub fn slots() -> ManagerSlots { ManagerSlots { add: 0, remove: 1 } }
+pub fn initialize(_ registry: Address, _ flash: Address, _ exchange: Address) -> Config uses (call: mut Call, log: mut Log) {
+    let nft = registry.static(RegistryMsg::GettroveNFT {})
+    log.emit(TroveNFTAddressChanged { value: nft })
+    let bo = registry.static(RegistryMsg::GetborrowerOperations {})
+    let manager = registry.static(RegistryMsg::GettroveManager {})
+    let bold = registry.static(RegistryMsg::GetboldToken {})
+    let weth = registry.call(RegistryMsg::GetWETH {})
+    Config { nft, bo, manager, bold, weth, flash, exchange }
+}
+pub fn require_receiver(_ cfg: Config, _ id: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    let (_, receiver) = cfg.bo.static(AddRemoveManagersMsg::RemoveManagerReceiverOf { id })
+    require(receiver == ctx.address(), error::not_receiver())
+}
+pub fn remove_receiver(_ cfg: Config, _ id: u256) -> Address uses (ctx: Ctx, call: mut Call, storage: RawStorage, mem: mut RawMem) {
+    let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+    let receiver = managers::require_owner_or_remove(slots(), id, owner)
+    require_receiver(cfg, id)
+    receiver
+}
+pub fn check_adjust(_ cfg: Config, _ id: u256, _ coll: u256, _ coll_increase: bool, _ debt_increase: bool) -> Address
+uses (ctx: Ctx, call: mut Call, storage: RawStorage, mem: mut RawMem) {
+    let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+    if (!coll_increase && coll > 0) || debt_increase {
+        let receiver = managers::require_owner_or_remove(slots(), id, owner)
+        require_receiver(cfg, id)
+        receiver
+    } else {
+        managers::require_owner_or_add(slots(), id, owner)
+        owner
+    }
+}

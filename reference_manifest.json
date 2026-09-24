@@ -34,10 +34,18 @@
         "revision": "b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4",
         "regression": "crates/uitest/fixtures/ty_check/oversized_integer_literals.fe",
         "newsfragment": "newsfragments/+oversized-integer-literals.bugfix.md"
+      },
+      {
+        "pr": "https://github.com/argotorg/fe/pull/1567",
+        "branch": "fix/1567-payable-returns",
+        "revision": "8557f3f5e56c17801743469f6d46377ecd58c572",
+        "regression": "crates/fe/tests/fixtures/fe_test/payable_return.fe",
+        "newsfragment": "newsfragments/1567.bugfix.md",
+        "merge_resolution": "payable_return_imports"
       }
     ],
-    "integration_revision": "14779075e25fad96e0e1e1755fa6b9ff8eb9f087",
-    "integration_tree": "0d1d3cedde2c9305c0d9219ee9de866e88d8e545"
+    "integration_revision": "27976c7df7d0fca487f2c80f26241c9021dfa04c",
+    "integration_tree": "e8e5d938074145678e2ec2f01c6e14e50cb99638"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",

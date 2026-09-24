@@ -762,9 +762,16 @@
     "verification": []
   },
   "contracts/src/Zappers/BaseZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/zapper_base.fe",
+      "src/zapper_errors.fe"
+    ],
+    "verification": [
+      "tests/WETHZapperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/weth-zapper.log"
+    ]
   },
   "contracts/src/Zappers/GasCompZapper.sol": {
     "status": "pending",
@@ -923,8 +930,15 @@
     "verification": []
   },
   "contracts/src/Zappers/WETHZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/weth_zapper.fe",
+      "src/zapper_calls.fe"
+    ],
+    "verification": [
+      "tests/WETHZapperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/weth-zapper.log"
+    ]
   }
 }

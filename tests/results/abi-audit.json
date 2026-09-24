@@ -481,6 +481,28 @@
     ],
     "function_count": 7
   },
+  "WETHZapper": {
+    "runtime_bytes": 19470,
+    "initcode_bytes_before_arguments": 21569,
+    "compiler_abi_sha256": "633f7a251a1c589b8d664f2bcbaa34e55578cd0884293cfaf238178ba6c008d8",
+    "reference_artifact_sha256": "04add3392279f496abb364fc6b5a13dd52ea4f20a41d2b3dbe90a1a0aae72723",
+    "protocol_abi_sha256": "0183cbac2364597b3f9a51995e2b19fa19e9124abddbcd87ad3bf2b1f053d677",
+    "metadata_refinements": [
+      "receiveFlashLoanOnOpenLeveragedTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "receiveFlashLoanOnLeverUpTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "receiveFlashLoanOnLeverDownTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding",
+      "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 24
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,

@@ -6,10 +6,10 @@ workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **202 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **210 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/redemption-helper.json`;
-the complete log is `tests/results/redemption-helper.log`.
+compiler and reference hashes are recorded in `tests/results/weth-zapper.json`;
+the complete log is `tests/results/weth-zapper.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -55,7 +55,11 @@ Implemented and differentially tested:
   Nine differential tests and one actual-registry system test cover storage,
   malformed ABI, dependency failures and rollback. Runtime: 9,835 bytes.
 - LeftoversSweep: common zapper balance snapshots and surplus returns, with three
-  parity tests including 1,024 fuzz runs. Full zapper contracts remain outstanding.
+  parity tests including 1,024 fuzz runs.
+- WETHZapper: native ETH opening, adjustments, closing, flash-loan closing,
+  manager permissions and surplus handling. Seven parity tests plus a connected
+  lifecycle test pass; runtime 19,470 bytes, original constructor arguments.
+  ABI tests preserve Solidity lazy calldata-address validation and receive behavior.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -92,9 +96,11 @@ points remain explicitly partial even though all renderer behavior is tested.
 - Solidity reference: `c8a5a4ee2e9dc024905856b6698a77d849c68c7e`.
 - Latest upstream/master, rechecked with ls-remote:
   `3dd15a62124fb75370c7931c4ee040d8566a3649`.
-- Compiler integration: `14779075e25fad96e0e1e1755fa6b9ff8eb9f087`, branch
-  `liquity-v2-integration`, including existing PRs #1592, #1587 and #1585.
-- All 243 type-check fixtures, 218 HIR unit tests and 25 execution regressions pass.
+- Compiler integration: `27976c7df7d0fca487f2c80f26241c9021dfa04c`, branch
+  `liquity-v2-integration`, including existing PRs #1592, #1587, #1585 and #1567.
+- Prior integration: 243 type-check fixtures, 218 HIR unit tests and 25 execution regressions passed.
+- With #1567: all 98 MIR tests and four payable-return release execution tests pass;
+  the complete protocol suite above runs on the rebuilt release compiler.
 - New compiler fix: reject integer expression literals wider than 256 bits,
   on separate branch `fix/reject-oversized-integer-literals` at `b11dee2`.
   The independently tested branch is now integrated into the protocol compiler. See COMPILER_FIXES.md for patch and newsfragment.
@@ -111,8 +117,8 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Finish and integrate WETHZapper, then the remaining zappers and exchange/flash-loan modules.
-2. Remaining helpers and zappers.
+1. Integrate GasCompZapper; finish leverage zappers and exchange/flash-loan modules.
+2. Remaining helper/library interfaces.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
@@ -127,8 +133,8 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-The WETHZapper draft is isolated in `/tmp/liquity-zapper-project`, with test
-scaffolding in `/tmp/liquity-zapper-inspect`. Its build uses a separate debug
-compiler with existing PR #1567 for payable return handlers. The pinned release
-compiler remains unchanged. See COMPILER_FIXES.md for the preparation and the
-bootstrap conflict that must be handled before integrating this compiler update.
+GasCompZapper is prepared in `/tmp/liquity-zapper-project`; six parity tests
+and an actual connected LST-branch lifecycle pass in `/tmp/liquity-zapper-inspect`.
+It is not yet part of the root checkpoint. Leverage zappers are under development
+in `/tmp/liquity-leverage-project`; monolithic versions exceeded EIP-170, so the
+current draft uses constructor-created fixed delegate companions.

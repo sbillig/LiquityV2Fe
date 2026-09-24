@@ -70,3 +70,7 @@ pub use debt_in_front_helper
 pub use redemption_helper
 pub use leftovers_sweep
 pub use leftovers_harness
+pub use zapper_calls
+pub use zapper_base
+pub use zapper_errors
+pub use weth_zapper

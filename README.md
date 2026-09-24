@@ -52,7 +52,7 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
 EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations the WETH/rETH/wstETH price feeds, HintHelpers, MultiTroveGetter, DebtInFrontHelper and the legacy Constants query contract. The current suite
-passes 202 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+passes 210 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
@@ -122,7 +122,7 @@ exhaustion. The price-feed checkpoint is recorded in `tests/results/price-feeds.
 HintHelpers and MultiTroveGetter preserve hint sampling, fee calculations, signed
 pagination and cursor behavior. Connected tests verify predicted fees against
 actual borrowing operations. The latest complete validation is
-`tests/results/redemption-helper.*`. The separately tested and now locally integrated compiler fix rejects integer
+`tests/results/weth-zapper.*`. The separately tested and now locally integrated compiler fix rejects integer
 expression literals wider than 256 bits; its branch, regression tests and
 newsfragment are documented in [COMPILER_FIXES.md](COMPILER_FIXES.md).
 
@@ -131,4 +131,8 @@ minimums and BOLD refunds. Its constructor and public runtime ABI match Solidity
 the explicit memory-array decoder preserves allocation panics and address
 validation. A connected test deploys actual Fe CollateralRegistry and verifies
 redemption predictions and transfers against Solidity. Common LeftoversSweep
-functions also pass differential tests; complete zapper contracts remain pending.
+functions also pass differential tests. WETHZapper now supports the complete
+native-ETH lifecycle, manager permissions and flash-loan closing. Seven parity
+tests and an actual connected protocol lifecycle pass. Its original constructor
+arguments are preserved and its runtime is 19,470 bytes. Remaining zapper,
+exchange and flash-loan implementations are still in progress.

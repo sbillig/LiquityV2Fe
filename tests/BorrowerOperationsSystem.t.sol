@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {WETHZapper} from "../reference/bold/contracts/src/Zappers/WETHZapper.sol";
+import {IZapper} from "../reference/bold/contracts/src/Zappers/Interfaces/IZapper.sol";
+interface ZapperSystemVm {function deal(address,uint) external;}
 import {RedemptionHelper} from "../reference/bold/contracts/src/RedemptionHelper.sol";
 import {CollateralRegistry} from "../reference/bold/contracts/src/CollateralRegistry.sol";
 import {DebtInFrontHelper} from "../reference/bold/contracts/src/DebtInFrontHelper.sol";
@@ -24,6 +27,9 @@ import {ActiveCollateralToken,TimeVm} from "./ActivePoolParity.t.sol";
 import {PoolVm} from "./DefaultPoolParity.t.sol";
 interface BOSystemVm {function envOr(string calldata,string calldata) external returns(string memory);}
 contract BorrowerSystemCollateral is ActiveCollateralToken {
+    function deposit() external payable {balanceOf[msg.sender]+=msg.value;}
+    function withdraw(uint amount) external {balanceOf[msg.sender]-=amount;(bool ok,)=msg.sender.call{value:amount}("");require(ok);}
+
     function name() external pure returns(string memory){return "Collateral";}
     function symbol() external pure returns(string memory){return "COLL";}
 }
@@ -44,6 +50,7 @@ contract BorrowerOperationsSystemTest {
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("WETHZapper"))return type(WETHZapper).creationCode;
         if(k==keccak256("RedemptionHelper"))return type(RedemptionHelper).creationCode;
         if(k==keccak256("CollateralRegistry"))return type(CollateralRegistry).creationCode;
         if(k==keccak256("DebtInFrontHelper"))return type(DebtInFrontHelper).creationCode;
@@ -225,5 +232,30 @@ contract BorrowerOperationsSystemTest {
         TimeVm(address(vm)).warp(1000);bytes32 actual=runRedemptionHelper(true);
         TimeVm(address(vm)).warp(1000);bytes32 expected=runRedemptionHelper(false);
         require(actual==expected,"connected redemption helper parity");
+    }
+    function runWETHZapper(bool fe) internal returns(bytes32){
+        System memory s=make(fe);open(s,2,BOB,10e18,6e16);
+        WETHZapper zapper=WETHZapper(payable(deploy(bytes.concat(code("WETHZapper",fe),abi.encode(s.registry,address(77),address(88))))));
+        ZapperSystemVm(address(vm)).deal(ALICE,100e18);
+        IZapper.OpenTroveParams memory p=IZapper.OpenTroveParams(ALICE,1,999,3000e18,0,0,5e16,address(0),type(uint).max,address(0),address(0),address(0));
+        vm.prank(ALICE);uint trove=zapper.openTroveWithRawETH{value:20e18+375e14}(p);
+        uint ownerIndex=uint(keccak256(abi.encode(ALICE,uint(1))));require(trove==uint(keccak256(abi.encode(address(zapper),ALICE,ownerIndex))),"zapper trove ID");
+        vm.prank(ALICE);s.bold.approve(address(zapper),type(uint).max);
+        vm.prank(ALICE);zapper.addCollWithRawETH{value:2e18}(trove);
+        vm.prank(ALICE);zapper.withdrawCollToRawETH(trove,1e18);
+        vm.prank(ALICE);zapper.withdrawBold(trove,100e18,type(uint).max);
+        vm.prank(ALICE);zapper.repayBold(trove,50e18);
+        vm.prank(ALICE);zapper.adjustTroveWithRawETH(trove,5e17,false,100e18,true,type(uint).max);
+        require(s.manager.getLatestTroveData(trove).entireColl==205e17,"zapper collateral");
+        vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+        vm.prank(ALICE);zapper.closeTroveToRawETH(trove);
+        require(s.bold.balanceOf(address(zapper))==0&&s.coll.balanceOf(address(zapper))==0&&address(zapper).balance==0,"zapper residual");
+        conserve(s);
+        return keccak256(abi.encode(ALICE.balance,s.bold.balanceOf(ALICE),s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.sorted.getSize()));
+    }
+    function testActualWETHZapperLifecycle() public {
+        TimeVm(address(vm)).warp(1000);bytes32 actual=runWETHZapper(true);
+        TimeVm(address(vm)).warp(1000);bytes32 expected=runWETHZapper(false);
+        require(actual==expected,"connected WETH zapper parity");
     }
 }
