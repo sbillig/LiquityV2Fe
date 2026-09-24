@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Full TroveManager public interface and registry configuration.
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use super::trove_memory_array::TroveMemoryArray
+use super::trove_hooks as hooks
+use super::types::{TroveChange, LatestTroveData, LatestBatchData}
+use super::trove_data as data
+use super::trove_state as state
+use super::addresses_registry::*
+use super::liquity_base as base
+use super::liquity_math as math
+use super::active_pool::ActivePoolMsg
+use super::stability_pool::StabilityPoolMsg
+use super::trove_redemption::{PriceMsg, require_code}
+pub msg TroveLiquidationsMsg {
+    // batchLiquidateTroves(uint256[]): custom memory-array decoder retains the wire shape.
+    #[selector = 0xef49a6b4]
+    batchLiquidateTroves { ids: TroveMemoryArray },
+}
+pub contract TroveLiquidations {
+    mcr: u256,
+    sp_penalty: u256,
+    redist_penalty: u256,
+    weth: Address,
+    init(registry: Address) uses (mut mcr, mut sp_penalty, mut redist_penalty, mut weth, call: mut Call) {
+        mcr = registry.static(RegistryMsg::GetMCR {})
+        sp_penalty = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_SP {})
+        redist_penalty = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_REDISTRIBUTION {})
+        weth = registry.static(RegistryMsg::GetWETH {})
+    }
+    recv TroveLiquidationsMsg {
+        batchLiquidateTroves { ids } uses (mcr, sp_penalty, redist_penalty, weth, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_liquidation::liquidate(ids.values, mcr, sp_penalty, redist_penalty, weth) }
+    }
+}

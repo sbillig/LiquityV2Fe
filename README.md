@@ -44,19 +44,20 @@ Required completion evidence includes an inventory of implemented interfaces and
 contracts, tests against the pinned Solidity contracts, multi-branch end-to-end
 deployment and operation, batch changes, liquidation and redemption edge cases,
 stability pool compounding/yield, accounting invariants and a reproducible local
-deployment command. These checks are not yet implemented.
+deployment command. Complete multi-branch deployment and all user-facing workflows remain outstanding.
 
 Source files retain the corresponding upstream SPDX identifiers. The upstream
 Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry and StabilityPool. The current suite
-passes 118 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool and TroveManager. The current suite
+passes 152 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
-BorrowerOperations/TroveManager are not yet ported; this pool
-workflow is not a complete borrowing/liquidation deployment.
+TroveManagerSystem additionally connects the real manager, pools, token, NFT and
+sorted list for liquidation, regular/urgent redemption and shutdown. BorrowerOperations
+is still driven by the test; a full user-facing borrowing deployment remains pending.
 
 Use `build/protocol/*.abi.json` for protocol integration after `scripts/test.sh`.
 The ABI export validates every function signature, return shape and emitted event
@@ -74,21 +75,21 @@ SortedTroves tests compare exact list and batch storage, search hints, equal-rat
 ordering, access control and stateful randomized operations. TroveNFT tests cover
 ERC721 events and approvals, callback rollback and reentrancy, constructor strings,
 metadata dependency calls and unpadded transfer calldata. The connected metadata test uses actual Fe TroveNFT, MetadataNFT and FixedAssetReader.
-TroveManager remains a test double. SVG/JSON output matches the reference, including
+That metadata-specific test uses a manager double. SVG/JSON output matches the reference, including
 all image/status variants and pinned production font/logo assets. MetadataNFT creates
 a stateless rendering companion in its constructor to satisfy EIP-170; constructor
 arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes are checked.
 
 The local compiler integrates existing upstream PRs #1592, #1587 and #1585; their 10 and
 14 execution regressions and 218 HIR unit tests pass. See `COMPILER_FIXES.md`. The latest complete
-validation log and source/artifact hashes are `tests/results/stability-pool.log` and
-`tests/results/stability-pool.json`. After a new successful logged test run, record its
+validation log and source/artifact hashes are `tests/results/trove-manager.log` and
+`tests/results/trove-manager.json`. After a new successful logged test run, record its
 provenance with `python3 scripts/record_validation.py <log-path>` before edits.
 
 CollateralRegistry tests cover branch allocation, rounding remainders, fallback
 to branch debt, partial redemptions, fee decay, malformed constructor arrays and
 stateful sequences. A connected test burns actual Fe BOLD and checks rollback
-when the redeemer has insufficient tokens. TroveManager remains mocked.
+when the redeemer has insufficient tokens. That registry-specific test uses manager doubles.
 
 StabilityPool preserves scale-based P/S/B accounting, pending yield thresholds,
 compounding, claims, stashed collateral and the minimum deposit remainder. Tests
@@ -96,3 +97,9 @@ include 1,024 sixteen-operation random sequences, scale expiry, arithmetic and
 rollback boundaries. StabilityPoolSystem connects actual Fe registry, active and
 default pools, StabilityPool and BOLDToken for interest minting, offsets and claims;
 the test still drives the BO/TM-side operations.
+
+TroveManager uses three fixed delegate modules to satisfy EIP-170. Its constructor
+accepts the registry plus the three module addresses; runtime function selectors
+remain unchanged. See [TROVE_MANAGER_DEPLOYMENT.md](TROVE_MANAGER_DEPLOYMENT.md)
+for deployment order, ABI metadata and the custom memory-array decoder. The
+manager and every module are checked against deployment size limits.

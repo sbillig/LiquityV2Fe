@@ -1,0 +1,24 @@
+No files changed, compilation skipped
+
+Ran 8 tests for tests/TroveHooksParity.t.sol:TroveHooksParityTest
+[PASS] testActivateZombieAndTimestampTruncation() (gas: 953948)
+[PASS] testBatchHooksLifecycle() (gas: 2108212)
+[PASS] testClosePreservesPackedPadding() (gas: 961067)
+[PASS] testDependencyRollbackAndAuthorization() (gas: 1173292)
+[PASS] testFuzzHookErrors((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,uint256,uint8) (runs: 1024, μ: 1125848, ~: 1137447)
+[PASS] testFuzzOpenAdjust(uint96,uint96,uint64,uint64,uint64,uint64) (runs: 1024, μ: 709304, ~: 714812)
+[PASS] testIndividualHooksLifecycle() (gas: 1812963)
+[PASS] testJoinBatchAndCloseBatchTrove() (gas: 1566045)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.27s (2.19s CPU time)
+
+Ran 7 tests for tests/TroveFlowsParity.t.sol:TroveFlowsParityTest
+[PASS] testBatchLiquidationAndNoEligibleTroves() (gas: 2056307)
+[PASS] testBatchRedemptionsAndSkippedICR() (gas: 2181512)
+[PASS] testFuzzLiquidation(uint64,uint96,bool) (runs: 1024, μ: 1761484, ~: 1745169)
+[PASS] testFuzzRedemption(uint96,uint64,uint64,uint8,bool) (runs: 1024, μ: 1277546, ~: 1182696)
+[PASS] testLiquidationOffsetRedistributionAndSurplus() (gas: 2099385)
+[PASS] testRegularRedemptionAndZombieContinuation() (gas: 1835207)
+[PASS] testUrgentRedemptionCapsAndRollback() (gas: 2047933)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.81s (2.86s CPU time)
+
+Ran 2 test suites in 1.81s (3.08s CPU time): 15 tests passed, 0 failed, 0 skipped (15 total tests)

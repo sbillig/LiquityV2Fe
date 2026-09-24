@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'TroveManager': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'StabilityPool': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getDepositorYieldGainWithPending(address)'}),
     'CollateralRegistry': ('STATICCALL', {'getRedemptionRateForRedeemedAmount(uint256)', 'getEffectiveRedemptionFeeInBold(uint256)'}),
     'LiquityBase': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
@@ -33,6 +34,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'TroveManager': {'Troves', 'rewardSnapshots', 'getUnbackedPortionPriceAndRedeemability'},
     'StabilityPool': {'depositSnapshots'},
     'AddRemoveManagers': {'removeManagerReceiverOf'},
     'SortedTroves': {'nodes', 'batches', 'findInsertPosition'},
@@ -58,8 +60,27 @@ for contract in CONTRACTS:
     sol_path = ROOT / 'tests/out' / (source_file + '.sol') / (contract + '.json')
     compiled = json.loads(fe_path.read_text())
     reference = json.loads(sol_path.read_text())['abi']
-    normalized = copy.deepcopy(compiled)
     refinements = []
+    if contract == 'TroveManager':
+        # Fixed delegate modules preserve runtime selectors and manager storage.
+        # Deployment explicitly supplies three module addresses; export the real
+        # four-argument constructor, never the incompatible Solidity constructor.
+        for companion in ['TroveOperations', 'TroveRedemptions', 'TroveLiquidations']:
+            module_abi = json.loads((ROOT / 'build' / (companion + '.abi.json')).read_text())
+            compiled += [e for e in module_abi if e['type'] in ('event', 'error')]
+        memory_array_key = ('function', 'batchLiquidateTroves(uint256[])')
+        assert memory_array_key not in {key(e) for e in compiled}
+        # Fe deliberately omits numeric-selector receivers from ABI metadata.
+        # This receiver uses a custom decoder for Solidity memory-allocation
+        # error ordering; its unchanged wire signature is exercised directly.
+        compiled.append(copy.deepcopy(next(e for e in reference if key(e) == memory_array_key)))
+        refinements.append('batchLiquidateTroves: compiler omits explicit numeric selector 0xef49a6b4; custom uint256[] memory-array decoder is tested at the Solidity wire signature')
+        constructor = next(e for e in reference if e['type'] == 'constructor')
+        assert [typ(f) for f in constructor['inputs']] == ['address']
+        constructor['inputs'] += [dict(type='address', internalType='address', name=n)
+                                  for n in ['operationsModule', 'redemptionsModule', 'liquidationsModule']]
+        refinements.append('constructor: registry plus three fixed, non-upgradeable delegate modules; event/error ABI includes module emissions at the manager address')
+    normalized = copy.deepcopy(compiled)
     for entry in normalized:
         if contract == 'BoldToken' and key(entry) == ('function', 'eip712Domain()'):
             outputs = entry['outputs']
@@ -74,7 +95,7 @@ for contract in CONTRACTS:
         if entry.get('name') in STATIC_TUPLE_OUTPUTS.get(contract, set()):
             outputs = entry['outputs']
             assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
-            assert all(c['type'] in ('uint256', 'uint128', 'address', 'bool') for c in outputs[0]['components'])
+            assert all(c['type'] in ('uint256', 'uint128', 'uint64', 'uint8', 'address', 'bool') for c in outputs[0]['components'])
             entry['outputs'] = outputs[0]['components']
             refinements.append(entry['name'] + ': static tuple has identical flat runtime encoding')
     fe = {key(e): e for e in normalized}
@@ -84,7 +105,7 @@ for contract in CONTRACTS:
     assert missing <= DECLARATION_ONLY.get(contract, set()), (contract, 'missing ABI entries', missing)
     # Solidity omits its implicit standard errors from ABI metadata.
     assert extra <= {('error', 'Error(string)'), ('error', 'Panic(uint256)')}, (contract, 'extra ABI entries', extra)
-    for k in set(sol) & set(fe):
+    for k in sorted(set(sol) & set(fe)):
         x, y = fe[k], sol[k]
         assert [typ(f) for f in x.get('outputs', [])] == [typ(f) for f in y.get('outputs', [])], (contract, k, 'return shape')
         if k[0] in ('constructor', 'function'):
@@ -109,9 +130,10 @@ for contract in CONTRACTS:
         'compiler_standard_errors': sorted(map(list, extra)),
         'function_count': sum(e['type'] == 'function' for e in reference),
     }
-# The renderer creates this private geometry companion in its constructor.
-# It is an implementation artifact, with no Solidity protocol ABI counterpart.
-for contract in ['MetadataGeometry']:
+# Implementation companions have no direct Solidity protocol ABI counterpart.
+# MetadataGeometry is created by the renderer; TroveManager modules are deployed
+# explicitly and their immutable addresses are supplied to its constructor.
+for contract in ['MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations']:
     runtime = ROOT / 'build' / (contract + '.runtime.bin')
     init = ROOT / 'build' / (contract + '.bin')
     runtime_size = len(bytes.fromhex(runtime.read_text().strip().removeprefix('0x')))

@@ -93,8 +93,8 @@
     "protocol_abi_sha256": "26142ca5f7a7ce9847335aabcc945c793a13e1f427da25e38cee171f2a0cbf16",
     "metadata_refinements": [
       "eip712Domain: explicit flat runtime return",
-      "name(): pure implementation of view function",
       "decimals(): pure implementation of view function",
+      "name(): pure implementation of view function",
       "symbol(): pure implementation of view function"
     ],
     "declaration_only": [
@@ -264,11 +264,11 @@
       "getEntireBranchDebt: read-only STATICCALL; Fe capability conservatively implies nonpayable",
       "getDepositorYieldGainWithPending: read-only STATICCALL; Fe capability conservatively implies nonpayable",
       "depositSnapshots: static tuple has identical flat runtime encoding",
-      "P_PRECISION(): pure implementation of view function",
-      "SCALE_SPAN(): pure implementation of view function",
-      "SCALE_FACTOR(): pure implementation of view function",
       "MAX_SCALE_FACTOR_EXPONENT(): pure implementation of view function",
-      "NAME(): pure implementation of view function"
+      "NAME(): pure implementation of view function",
+      "P_PRECISION(): pure implementation of view function",
+      "SCALE_FACTOR(): pure implementation of view function",
+      "SCALE_SPAN(): pure implementation of view function"
     ],
     "declaration_only": [],
     "compiler_standard_errors": [
@@ -279,11 +279,56 @@
     ],
     "function_count": 31
   },
+  "TroveManager": {
+    "runtime_bytes": 10865,
+    "initcode_bytes_before_arguments": 14529,
+    "compiler_abi_sha256": "f3da470c09191d5b3adea949395edb684e723f0c2b4da687fd6c59db026e1965",
+    "reference_artifact_sha256": "1fc448dda2e500811586e332a86ce52493b67a314feb93b032e7a5178c4d0df5",
+    "protocol_abi_sha256": "fac9785f50292c35ec9983ae5308ee2c91cfc30e73308bc6fcfc9aa0ee366fa8",
+    "metadata_refinements": [
+      "batchLiquidateTroves: compiler omits explicit numeric selector 0xef49a6b4; custom uint256[] memory-array decoder is tested at the Solidity wire signature",
+      "constructor: registry plus three fixed, non-upgradeable delegate modules; event/error ABI includes module emissions at the manager address",
+      "getEntireBranchColl: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getEntireBranchDebt: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "Troves: static tuple has identical flat runtime encoding",
+      "rewardSnapshots: static tuple has identical flat runtime encoding",
+      "getUnbackedPortionPriceAndRedeemability: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 38
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,
     "initcode_bytes_before_arguments": 18558,
     "runtime_sha256": "cfaf9200d7200b77cfb5a327f9cac4d1ca5ae424aa7e84881cd9d9956a78bcd0",
     "initcode_sha256": "7d5e436219e432583fe9e913cc1152b27d58e0084d928319b97f2e4671c7297d"
+  },
+  "TroveOperations": {
+    "implementation_companion": true,
+    "runtime_bytes": 18447,
+    "initcode_bytes_before_arguments": 18467,
+    "runtime_sha256": "561f3b630c76429ccd7daf18673b7d6603f897439816b4895371cc168268066c",
+    "initcode_sha256": "74492dee6a17542e75d963883e721b8fe6221e3d8a39058a3cffe4b9a4fd6a1b"
+  },
+  "TroveRedemptions": {
+    "implementation_companion": true,
+    "runtime_bytes": 18172,
+    "initcode_bytes_before_arguments": 18192,
+    "runtime_sha256": "30786a7390a3fed24cf6b18d1a1c3e2e7d5aa0ff9f14b02cf91f5136f97d3779",
+    "initcode_sha256": "bc9d4cabb61497fc167c1486b0ff5c0d6441434dd36597a27591c7cc7a918f78"
+  },
+  "TroveLiquidations": {
+    "implementation_companion": true,
+    "runtime_bytes": 12465,
+    "initcode_bytes_before_arguments": 13518,
+    "runtime_sha256": "fabd0730563e9a260ae5cfb0e27b4736d0fe1243bb5aa27a2e2bc183b62d969c",
+    "initcode_sha256": "864cbfbf5c73723a3f025fe92f1e6f875ac166c64b5d469bdc9b01e13d5406d7"
   }
 }

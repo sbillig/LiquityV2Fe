@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Full TroveManager public interface and registry configuration.
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use super::trove_hooks as hooks
+use super::types::{TroveChange, LatestTroveData, LatestBatchData}
+use super::trove_data as data
+use super::trove_state as state
+use super::addresses_registry::*
+use super::liquity_base as base
+use super::liquity_math as math
+use super::active_pool::ActivePoolMsg
+use super::stability_pool::StabilityPoolMsg
+use super::trove_redemption::{PriceMsg, require_code}
+pub msg TroveOperationsMsg {
+    #[selector = sol("onSetInterestBatchManager((uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256))")]
+    SetBatch { params: (u256, u256, u256, TroveChange, Address, u256, u256) },
+    #[selector = sol("onOpenTrove(address,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),uint256)")]
+    HookOnOpenTrove { owner: Address, id: u256, change: TroveChange, rate: u256 },
+    #[selector = sol("onOpenTroveAndJoinBatch(address,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    HookOnOpenTroveAndJoinBatch { owner: Address, id: u256, change: TroveChange, manager: Address, batch_coll: u256, batch_debt: u256 },
+    #[selector = sol("setTroveStatusToActive(uint256)")]
+    HookSetTroveStatusToActive { id: u256 },
+    #[selector = sol("onAdjustTroveInterestRate(uint256,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    HookOnAdjustTroveInterestRate { id: u256, coll: u256, debt: u256, rate: u256, change: TroveChange },
+    #[selector = sol("onAdjustTrove(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    HookOnAdjustTrove { id: u256, coll: u256, debt: u256, change: TroveChange },
+    #[selector = sol("onCloseTrove(uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    HookOnCloseTrove { id: u256, change: TroveChange, manager: Address, batch_coll: u256, batch_debt: u256 },
+    #[selector = sol("onAdjustTroveInsideBatch(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256)")]
+    HookOnAdjustTroveInsideBatch { id: u256, coll: u256, debt: u256, change: TroveChange, manager: Address, batch_coll: u256, batch_debt: u256 },
+    #[selector = sol("onApplyTroveInterest(uint256,uint256,uint256,address,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    HookOnApplyTroveInterest { id: u256, coll: u256, debt: u256, manager: Address, batch_coll: u256, batch_debt: u256, change: TroveChange },
+    #[selector = sol("onRegisterBatchManager(address,uint256,uint256)")]
+    HookOnRegisterBatchManager { manager: Address, rate: u256, fee: u256 },
+    #[selector = sol("onLowerBatchManagerAnnualFee(address,uint256,uint256,uint256)")]
+    HookOnLowerBatchManagerAnnualFee { manager: Address, coll: u256, debt: u256, fee: u256 },
+    #[selector = sol("onSetBatchManagerAnnualInterestRate(address,uint256,uint256,uint256,uint256)")]
+    HookOnSetBatchManagerAnnualInterestRate { manager: Address, coll: u256, debt: u256, rate: u256, upfront: u256 },
+    #[selector = sol("onRemoveFromBatch(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,uint256,uint256)")]
+    HookOnRemoveFromBatch { id: u256, coll: u256, debt: u256, change: TroveChange, manager: Address, batch_coll: u256, batch_debt: u256, rate: u256 },
+}
+pub contract TroveOperations {
+    init() {}
+    recv TroveOperationsMsg {
+        SetBatch { params } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::set_batch(params.0, params.1, params.2, params.3, params.4, params.5, params.6)
+        }
+        HookOnOpenTrove { owner, id, change, rate } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::open(owner, id, change, rate)
+        }
+        HookOnOpenTroveAndJoinBatch { owner, id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::open_batch(owner, id, change, manager, batch_coll, batch_debt)
+        }
+        HookSetTroveStatusToActive { id } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::activate(id)
+        }
+        HookOnAdjustTroveInterestRate { id, coll, debt, rate, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::adjust_rate(id, coll, debt, rate, change)
+        }
+        HookOnAdjustTrove { id, coll, debt, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::adjust(id, coll, debt, change)
+        }
+        HookOnCloseTrove { id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::on_close(id, change, manager, batch_coll, batch_debt)
+        }
+        HookOnAdjustTroveInsideBatch { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::adjust_batch(id, coll, debt, change, manager, batch_coll, batch_debt)
+        }
+        HookOnApplyTroveInterest { id, coll, debt, manager, batch_coll, batch_debt, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::apply_interest(id, coll, debt, manager, batch_coll, batch_debt, change)
+        }
+        HookOnRegisterBatchManager { manager, rate, fee } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::register_batch(manager, rate, fee)
+        }
+        HookOnLowerBatchManagerAnnualFee { manager, coll, debt, fee } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::lower_fee(manager, coll, debt, fee)
+        }
+        HookOnSetBatchManagerAnnualInterestRate { manager, coll, debt, rate, upfront } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::set_batch_rate(manager, coll, debt, rate, upfront)
+        }
+        HookOnRemoveFromBatch { id, coll, debt, change, manager, batch_coll, batch_debt, rate } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+            hooks::remove_batch(id, coll, debt, change, manager, batch_coll, batch_debt, rate)
+        }
+    }
+}

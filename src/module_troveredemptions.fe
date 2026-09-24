@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Full TroveManager public interface and registry configuration.
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use super::trove_hooks as hooks
+use super::types::{TroveChange, LatestTroveData, LatestBatchData}
+use super::trove_data as data
+use super::trove_state as state
+use super::addresses_registry::*
+use super::liquity_base as base
+use super::liquity_math as math
+use super::active_pool::ActivePoolMsg
+use super::stability_pool::StabilityPoolMsg
+use super::trove_redemption::{PriceMsg, require_code}
+pub msg TroveRedemptionsMsg {
+    #[selector = sol("redeemCollateral(address,uint256,uint256,uint256,uint256)")]
+    Redeem { user: Address, amount: u256, price: u256, rate: u256, iterations: u256 } -> u256,
+    #[selector = sol("urgentRedemption(uint256,uint256[],uint256)")]
+    Urgent { amount: u256, ids: DynArray<u256>, min_coll: u256 },
+}
+pub contract TroveRedemptions {
+    init() {}
+    recv TroveRedemptionsMsg {
+        Redeem { user, amount, price, rate, iterations } -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::redeem(user, amount, price, rate, iterations) }
+        Urgent { amount, ids, min_coll } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::urgent(amount, ids, min_coll) }
+    }
+}

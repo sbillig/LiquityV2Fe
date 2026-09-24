@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: MIT
+// Test-only decoder harness.
+use super::trove_memory_array::TroveMemoryArray
+pub msg MemoryArrayHarnessMsg {
+    #[selector = 0xef49a6b4]
+    batchLiquidateTroves { ids: TroveMemoryArray } -> u256,
+}
+pub contract MemoryArrayHarness {
+    init() {}
+    recv MemoryArrayHarnessMsg {
+        batchLiquidateTroves { ids } -> u256 { ids.values.len() }
+    }
+}

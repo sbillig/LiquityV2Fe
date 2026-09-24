@@ -1,15 +1,15 @@
 # Current work state
 
 The complete Liquity V2 port goal remains active. The verified contracts below
-are a partial system; full borrowing, liquidation and stability-pool workflows
+are a partial system; full user-facing borrowing and multi-branch workflows
 are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **138 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **152 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/trove-hooks.json`;
-the complete log is `tests/results/trove-hooks.log`.
+compiler and reference hashes are recorded in `tests/results/trove-manager.json`;
+the complete log is `tests/results/trove-manager.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -28,6 +28,11 @@ Implemented and differentially tested:
 - StabilityPool: exact P/S/B and scale accounting, pending rewards, compounding,
   stash/claim behavior, minimum remainder and rollback. Ten parity tests plus one
   system test; fuzz includes 1,024 sixteen-operation sequences and reward arithmetic.
+- TroveManager: public getters, all borrower/batch hooks, liquidation, redistribution,
+  regular/urgent redemption, zombie handling and shutdown. Fixed delegate modules
+  preserve manager storage, caller and events; the constructor adds module addresses.
+  See TROVE_MANAGER_DEPLOYMENT.md. Tests include three memory-array ABI tests,
+  12 data/state tests, eight hook tests, ten flow tests and a real connected system.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -45,9 +50,9 @@ also connects the actual Fe StabilityPool, exercising real interest minting,
 offsets and claims. Both tests drive BO/TM-side operations and do not establish
 a complete borrowing/liquidation deployment.
 TroveChange, LatestTroveData and LatestBatchData ABI support are integrated.
-TroveManager shared data/state helpers pass 12 differential tests covering interest,
-redistribution, shares, packed writes and indexed removal; the public manager is
-still pending.
+TroveManagerSystem connects actual Fe manager modules, pools, registry, BOLDToken,
+SortedTroves, TroveNFT and GasPool. It drives BO-side hooks; collateral and price
+feed are controlled test contracts. Full BorrowerOperations is still pending.
 
 `port_status.json` retains all 102 core/helper sources; `governance_status.json`
 retains all 27 governance sources. Unused generic SVG/JSON/Utils/baseSVG entry
@@ -75,8 +80,8 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Full TroveManager and BorrowerOperations, including individual/batch debt,
-   shares, interest, fees, liquidation, redistribution and redemptions.
+1. BorrowerOperations and user-facing individual/batch borrowing, adjustments,
+   delegation, fees, repayment and closing workflows.
 2. Price feeds/shutdown, hints/getters, helpers and zappers.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -86,10 +91,12 @@ Native storage borrows cannot span external calls; raw handles/copies preserve
 storage access ordering without weakening compiler checks. Any newly authored
 compiler fix needs its own branch, regression tests and newsfragment.
 
-TroveManager borrower hooks are integrated and pass eight differential tests,
-including batch migration, events, packed storage preservation, dependency failure
-rollback and arbitrary arithmetic errors. Full suite: 138 EVM + 2 Fe tests.
-The public manager, liquidation and redemption drafts are being compiled/tested
-in `/tmp/liquity-tm-manager-project` and `/tmp/liquity-tm-compact-project`.
-They are not yet integrated or claimed complete. Public manager requires size
-validation; shared helpers are being tested with `#[inline(never)]`.
+BorrowerOperations.sol (all 1,616 lines) and its interface have been read.
+Storage layout is independently verified in `/tmp/liquity-borrower-storage.json`
+using `/tmp/liquity-bo-inspect-project`: base addresses 0–2, add/remove mappings
+3–4, manager 5, gas 6, surplus 7, BOLD 8, sorted address + shutdown bool at slot 9
+(byte offset 20), delegate/batch-of/batch-manager maps 10–12. Individual delegate:
+address at 0, min/max uint128 at 1, period at 2; batch manager: min/max at 0,
+period at 1. Draft data helpers and errors are in
+`/tmp/liquity-next-borrower-data.fe` and `/tmp/liquity-next-borrower-errors.fe`;
+these drafts are not yet integrated or validated.

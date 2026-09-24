@@ -39,3 +39,12 @@ pub use trove_state
 pub use trove_hooks
 pub use trove_events
 pub use trove_hook_harness
+
+pub use trove_redemption
+pub use trove_liquidation
+pub use trove_manager
+pub use module_troveoperations
+pub use module_troveredemptions
+pub use module_troveliquidations
+pub use trove_memory_array
+pub use trove_memory_harness

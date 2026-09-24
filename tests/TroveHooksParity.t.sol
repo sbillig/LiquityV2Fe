@@ -17,10 +17,25 @@ contract TroveHooksParityTest {
     address constant BATCH=address(0xba7c);
     function setUp() public {
         tv.warp(10_000_000_000);dep=new TroveHookDependency();
-        bytes memory code=bytes.concat(vm.parseBytes(vm.readFile(string.concat(tv.envOr("LIQUITY_TEST_ARTIFACTS","build"),"/TroveHookHarness.bin"))),abi.encode(address(this),address(dep),address(dep),address(dep)));
-        address created;assembly{created:=create(0,add(code,32),mload(code))}require(created.code.length>0);a=TroveManager(created);
-        b=new TroveManager(IAddressesRegistry(address(new EmptyTroveRegistry())));
+        IAddressesRegistry registry=IAddressesRegistry(address(new EmptyTroveRegistry()));
+        string memory artifacts=tv.envOr("LIQUITY_TEST_ARTIFACTS","build");
+        if(keccak256(bytes(tv.envOr("LIQUITY_TROVE_MODULAR","true")))==keccak256("true")){
+            address operations=deploy(artifacts,"TroveOperations","");
+            address redemptions=deploy(artifacts,"TroveRedemptions","");
+            address liquidations=deploy(artifacts,"TroveLiquidations",abi.encode(registry));
+            a=TroveManager(deploy(artifacts,"TroveManager",abi.encode(registry,operations,redemptions,liquidations)));
+        } else {
+            bytes memory code=bytes.concat(vm.parseBytes(vm.readFile(string.concat(artifacts,"/TroveHookHarness.bin"))),abi.encode(address(this),address(dep),address(dep),address(dep)));
+            address created;assembly{created:=create(0,add(code,32),mload(code))}require(created.code.length>0);a=TroveManager(created);
+        }
+        b=new TroveManager(registry);
         write(1,uint160(address(dep)));write(3,uint160(address(dep)));write(4,uint160(address(this)));write(9,uint160(address(dep)));
+    }
+    function deploy(string memory path,string memory name,bytes memory args) internal returns(address created){
+        bytes memory code=bytes.concat(vm.parseBytes(vm.readFile(string.concat(path,"/",name,".bin"))),args);
+        require(code.length<=49152,"initcode limit");
+        assembly{created:=create(0,add(code,32),mload(code))}
+        require(created.code.length>0&&created.code.length<=24576,"runtime limit");
     }
     function write(uint slot,uint value) internal {tv.store(address(a),bytes32(slot),bytes32(value));tv.store(address(b),bytes32(slot),bytes32(value));}
     function mapped(uint key,uint root) internal pure returns(uint){return uint(keccak256(abi.encode(key,root)));}

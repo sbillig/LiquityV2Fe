@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Solidity batchLiquidateTroves decodes a memory array. Its allocation-size
+// panic precedes the truncated-payload check, unlike a calldata-array decoder.
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
+use std::abi::{Sol, DynArray}
+use std::evm::panic::{Panic, PANIC_OUT_OF_MEMORY}
+use std::evm::revert_error
+pub struct TroveMemoryArray { pub values: DynArray<u256> }
+fn validate_size<I: ByteInput>(_ input: I, _ pos: u256) {
+    if pos <= input.len() && input.len() - pos >= 32 {
+        // Solidity starts at free-memory pointer 0x80, then allocates the
+        // length word plus 32 bytes per element, capped at uint64.max.
+        if input.word_at(pos) > 0x7fffffffffffffa { revert_error(Panic::from(PANIC_OUT_OF_MEMORY)) }
+    }
+}
+impl AbiSize for TroveMemoryArray {
+    const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = true
+    fn payload_size(self) -> u256 { self.values.payload_size() }
+}
+impl AbiSpan<Sol> for TroveMemoryArray {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 {
+        validate_size(input, pos)
+        <DynArray<u256> as AbiSpan<Sol>>::payload_end(input, base: base, pos: pos)
+    }
+}
+impl Decode<Sol> for TroveMemoryArray {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let input = d.input()
+        let pos = d.pos()
+        validate_size(input, pos)
+        let values = <DynArray<u256> as Decode<Sol>>::decode_from(input, pos)
+        Self { values }
+    }
+}
+impl Encode<Sol> for TroveMemoryArray {
+    fn encode(own self, _ ptr: *u8) { <DynArray<u256> as Encode<Sol>>::encode(self.values, ptr) }
+}

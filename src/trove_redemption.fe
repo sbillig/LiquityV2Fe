@@ -1,0 +1,203 @@
+// SPDX-License-Identifier: BUSL-1.1
+use core::num::IntDowncast
+use std::abi::{sol, DynArray, DynArrayAccess}
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use super::trove_data as data
+use super::trove_state as state
+use super::trove_events as events
+use super::trove_hooks as hooks
+use super::types::{TroveChange, LatestTroveData, LatestBatchData}
+use super::active_pool::ActivePoolMsg
+use super::sorted_troves::SortedTrovesMsg
+use super::bold_token::BoldTokenMsg
+use super::liquity_math as math
+use super::constants::{DECIMAL_PRECISION, MIN_DEBT, MAX_UINT256, URGENT_REDEMPTION_BONUS}
+#[error]
+pub struct CallerNotCollateralRegistry {}
+#[error]
+pub struct NotShutDown {}
+#[error]
+pub struct ZeroAmount {}
+#[error]
+pub struct NotEnoughBoldBalance {}
+#[error]
+pub struct MinCollNotReached { pub coll: u256 }
+pub msg PriceMsg {
+    #[selector = sol("fetchPrice()")]
+    Price -> (u256, bool),
+    #[selector = sol("fetchRedemptionPrice()")]
+    RedemptionPrice -> (u256, bool),
+}
+pub struct Single {
+    pub id: u256, pub manager: Address, pub trove: LatestTroveData,
+    pub bold: u256, pub coll: u256, pub fee: u256,
+    pub old_weighted: u256, pub new_weighted: u256,
+}
+impl Copy for Single {}
+pub fn require_code(_ target: Address) uses (ctx: Ctx) {
+    if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
+}
+pub fn update_batch(_ active: Address, _ manager: Address) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call) {
+    let b = data::latest_batch(manager)
+    storage.sstore(slot: data::batch_slot(manager), value: b.entire_debt_without_redistribution)
+    state::set_batch_debt_time(manager, ctx.timestamp())
+    let mut change = TroveChange::zero()
+    change.old_weighted_recorded_debt = b.weighted_recorded_debt
+    change.new_weighted_recorded_debt = b.entire_debt_without_redistribution * b.annual_interest_rate
+    change.batch_accrued_management_fee = b.accrued_management_fee
+    change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    change.new_weighted_recorded_batch_management_fee = b.entire_debt_without_redistribution * b.annual_management_fee
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch: manager })
+}
+pub fn apply_single(_ single: Single) -> Single uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let mut s = single
+    let t = s.trove
+    let debt = t.entire_debt - s.bold
+    let coll = t.entire_coll - s.coll
+    let mut b = LatestBatchData::zero()
+    let base = data::trove_slot(s.id)
+    if s.manager != Address::zero() {
+        b = data::latest_batch(s.manager)
+        let new_amount = b.entire_debt_without_redistribution + t.redist_bold_debt_gain - s.bold
+        s.old_weighted = b.weighted_recorded_debt
+        s.new_weighted = new_amount * b.annual_interest_rate
+        let mut change = TroveChange::zero()
+        change.debt_decrease = s.bold
+        change.coll_decrease = s.coll
+        change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+        change.applied_redist_coll_gain = t.redist_coll_gain
+        change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+        change.new_weighted_recorded_batch_management_fee = new_amount * b.annual_management_fee
+        let active = Address { inner: storage.sload(0) }
+        require_code(active)
+        active.call(ActivePoolMsg::BatchFee { change, batch: s.manager })
+        storage.sstore(slot: base + 1, value: coll)
+        state::update_batch_shares(s.id, s.manager, change, debt, b.entire_coll_without_redistribution, b.entire_debt_without_redistribution, false)
+    } else {
+        s.old_weighted = t.weighted_recorded_debt
+        s.new_weighted = debt * t.annual_interest_rate
+        storage.sstore(slot: base, value: debt)
+        storage.sstore(slot: base + 1, value: coll)
+        state::set_trove_debt_time(s.id, ctx.timestamp())
+    }
+    let stake = data::update_stake(s.id, coll)
+    hooks::move_rewards(t.redist_bold_debt_gain, t.redist_coll_gain)
+    data::update_rewards(s.id)
+    if s.manager != Address::zero() { events::batched(s.id, s.manager, coll, stake) }
+    else { events::updated(s.id, debt, coll, stake, t.annual_interest_rate) }
+    let bold_signed: i256 = s.bold.downcast_truncate()
+    let coll_signed: i256 = s.coll.downcast_truncate()
+    log.emit(events::TroveOperation { id: s.id, operation: 6, rate: t.annual_interest_rate, redist_debt: t.redist_bold_debt_gain, upfront: 0, debt_change: -bold_signed, redist_coll: t.redist_coll_gain, coll_change: -coll_signed })
+    if s.manager != Address::zero() {
+        let current = data::load_batch(s.manager)
+        log.emit(events::BatchUpdated { manager: s.manager, operation: 6, debt: current.debt, coll: current.coll, rate: b.annual_interest_rate, fee: b.annual_management_fee, shares: current.total_shares, upfront: 0 })
+    }
+    log.emit(events::RedemptionFeePaidToTrove { id: s.id, fee: s.fee })
+    s
+}
+fn add_total(_ totals: TroveChange, _ s: Single) -> TroveChange {
+    let mut total = totals
+    total.coll_decrease += s.coll
+    total.debt_decrease += s.bold
+    total.applied_redist_bold_debt_gain += s.trove.redist_bold_debt_gain
+    total.new_weighted_recorded_debt += s.new_weighted
+    total.old_weighted_recorded_debt += s.old_weighted
+    total
+}
+pub fn redeem(_ redeemer: Address, _ amount: u256, _ price: u256, _ rate: u256, _ max_iterations: u256) -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    if ctx.caller().inner != storage.sload(10) { revert_error(CallerNotCollateralRegistry {}) }
+    let active = Address { inner: storage.sload(0) }
+    let sorted = Address { inner: storage.sload(9) }
+    let mut total = TroveChange::zero()
+    let mut remaining = amount
+    let mut id = storage.sload(data::LAST_ZOMBIE)
+    let mut zombie = id != 0
+    if !zombie { id = sorted.static(SortedTrovesMsg::GetLast {}) }
+    let mut last_batch = Address::zero()
+    let feed = Address { inner: storage.sload(2) }
+    let redemption_price = feed.call(PriceMsg::RedemptionPrice {}).0
+    let mut iterations = if max_iterations == 0 { MAX_UINT256 } else { max_iterations }
+    let mut fees: u256 = 0
+    while id != 0 && remaining > 0 && iterations > 0 {
+        iterations -= 1
+        let next = if zombie { sorted.static(SortedTrovesMsg::GetLast {}) } else { sorted.static(SortedTrovesMsg::GetPrev { id }) }
+        let t = data::latest_trove(id)
+        if math::compute_cr(t.entire_coll, t.entire_debt, price) < DECIMAL_PRECISION {
+            id = next
+            zombie = false
+            continue
+        }
+        let manager = data::load_trove(id).batch_manager
+        if manager != Address::zero() && manager != last_batch { update_batch(active, manager)
+            last_batch = manager
+        }
+        let trove = data::latest_trove(id)
+        let bold = math::min(remaining, trove.entire_debt)
+        let corresponding = bold * DECIMAL_PRECISION / redemption_price
+        let fee = corresponding * rate / DECIMAL_PRECISION
+        let s = apply_single(Single { id, manager, trove, bold, coll: corresponding - fee, fee, old_weighted: 0, new_weighted: 0 })
+        let debt = trove.entire_debt - bold
+        if debt < MIN_DEBT {
+            if !zombie {
+                state::set_status(id, 4)
+                let sorted_now = Address { inner: storage.sload(9) }
+                require_code(sorted_now)
+                if manager != Address::zero() { sorted_now.call(SortedTrovesMsg::RemoveFromBatch { id }) }
+                else { sorted_now.call(SortedTrovesMsg::Remove { id }) }
+                if debt > 0 { storage.sstore(slot: data::LAST_ZOMBIE, value: id) }
+            } else if debt == 0 { storage.sstore(slot: data::LAST_ZOMBIE, value: 0) }
+        }
+        total = add_total(total, s)
+        fees += s.fee
+        remaining -= s.bold
+        id = next
+        zombie = false
+    }
+    log.emit(events::Redemption { attempted: amount, actual: total.debt_decrease, coll: total.coll_decrease, fee: fees, price, redemption_price })
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change: total, batch: Address::zero() })
+    require_code(active)
+    active.call(ActivePoolMsg::SendColl { account: redeemer, amount: total.coll_decrease })
+    total.debt_decrease
+}
+pub fn urgent(_ amount: u256, _ ids: DynArray<u256>, _ min_coll: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    if storage.sload(data::SHUTDOWN) == 0 { revert_error(NotShutDown {}) }
+    if amount == 0 { revert_error(ZeroAmount {}) }
+    let bold_token = Address { inner: storage.sload(8) }
+    if bold_token.static(BoldTokenMsg::BalanceOf { account: ctx.caller() }) < amount { revert_error(NotEnoughBoldBalance {}) }
+    let active = Address { inner: storage.sload(0) }
+    let mut total = TroveChange::zero()
+    let feed = Address { inner: storage.sload(2) }
+    let price = feed.call(PriceMsg::Price {}).0
+    let mut remaining = amount
+    let mut i: u256 = 0
+    while i < ids.len() {
+        if remaining == 0 { break }
+        let id = ids.get(i)
+        i += 1
+        let trove = data::latest_trove(id)
+        let t = data::load_trove(id)
+        if (t.status != 1 && t.status != 4) || trove.entire_debt == 0 { continue }
+        let manager = t.batch_manager
+        if manager != Address::zero() { update_batch(active, manager) }
+        let mut bold = math::min(remaining, trove.entire_debt)
+        let mut coll = bold * (DECIMAL_PRECISION + URGENT_REDEMPTION_BONUS) / price
+        if coll > trove.entire_coll {
+            coll = trove.entire_coll
+            bold = trove.entire_coll * price / (DECIMAL_PRECISION + URGENT_REDEMPTION_BONUS)
+        }
+        let s = apply_single(Single { id, manager, trove, bold, coll, fee: 0, old_weighted: 0, new_weighted: 0 })
+        total = add_total(total, s)
+        remaining -= s.bold
+    }
+    if total.coll_decrease < min_coll { revert_error(MinCollNotReached { coll: total.coll_decrease }) }
+    log.emit(events::Redemption { attempted: amount, actual: total.debt_decrease, coll: total.coll_decrease, fee: 0, price, redemption_price: price })
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change: total, batch: Address::zero() })
+    require_code(active)
+    active.call(ActivePoolMsg::SendColl { account: ctx.caller(), amount: total.coll_decrease })
+    let token = Address { inner: storage.sload(8) }
+    require_code(token)
+    token.call(BoldTokenMsg::Burn { account: ctx.caller(), amount: total.debt_decrease })
+}

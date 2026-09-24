@@ -334,14 +334,36 @@
     ]
   },
   "contracts/src/Interfaces/ITroveEvents.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/trove_events.fe"
+    ],
+    "verification": [
+      "tests/TroveDataParity.t.sol",
+      "tests/TroveHooksParity.t.sol",
+      "tests/TroveFlowsParity.t.sol",
+      "tests/TroveMemoryArrayParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log",
+      "tests/results/trove-manager.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/ITroveManager.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/trove_manager.fe"
+    ],
+    "verification": [
+      "tests/TroveDataParity.t.sol",
+      "tests/TroveHooksParity.t.sol",
+      "tests/TroveFlowsParity.t.sol",
+      "tests/TroveMemoryArrayParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log",
+      "tests/results/trove-manager.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/ITroveNFT.sol": {
     "status": "implemented_differential_tests_pass",
@@ -536,16 +558,31 @@
     ]
   },
   "contracts/src/TroveManager.sol": {
-    "status": "partial",
+    "status": "implemented_differential_tests_pass",
     "fe": [
+      "src/trove_manager.fe",
       "src/trove_data.fe",
-      "src/trove_state.fe"
+      "src/trove_state.fe",
+      "src/trove_hooks.fe",
+      "src/trove_events.fe",
+      "src/trove_redemption.fe",
+      "src/trove_liquidation.fe",
+      "src/trove_memory_array.fe",
+      "src/module_troveoperations.fe",
+      "src/module_troveredemptions.fe",
+      "src/module_troveliquidations.fe"
     ],
     "verification": [
       "tests/TroveDataParity.t.sol",
-      "tests/results/trove-core.log"
+      "tests/TroveHooksParity.t.sol",
+      "tests/TroveFlowsParity.t.sol",
+      "tests/TroveMemoryArrayParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log",
+      "tests/results/trove-manager.json",
+      "tests/results/abi-audit.json"
     ],
-    "notes": "Shared storage, interest, redistribution, stakes and batch-share accounting verified. Public manager operations remain pending."
+    "notes": "Three fixed delegate modules enforce deployment size limits. Constructor extends registry argument with three module addresses; runtime selectors and manager storage remain compatible. See TROVE_MANAGER_DEPLOYMENT.md."
   },
   "contracts/src/TroveNFT.sol": {
     "status": "implemented_differential_tests_pass",
@@ -569,30 +606,36 @@
     ]
   },
   "contracts/src/Types/LatestBatchData.sol": {
-    "status": "data_fields_ported_not_integrated",
-    "fe": [
-      "src/types.fe"
-    ],
-    "verification": []
-  },
-  "contracts/src/Types/LatestTroveData.sol": {
-    "status": "fields_and_abi_implemented_used_by_trove_nft",
+    "status": "fields_and_abi_implemented_integrated",
     "fe": [
       "src/types.fe"
     ],
     "verification": [
-      "tests/TroveNFTParity.t.sol",
-      "tests/results/sorted-nft.log"
+      "tests/TroveDataParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log"
+    ]
+  },
+  "contracts/src/Types/LatestTroveData.sol": {
+    "status": "fields_and_abi_implemented_integrated",
+    "fe": [
+      "src/types.fe"
+    ],
+    "verification": [
+      "tests/TroveDataParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log"
     ]
   },
   "contracts/src/Types/TroveChange.sol": {
-    "status": "fields_and_abi_implemented_used_by_active_pool",
+    "status": "fields_and_abi_implemented_integrated",
     "fe": [
       "src/types.fe"
     ],
     "verification": [
-      "tests/ActivePoolParity.t.sol",
-      "tests/results/pools-token.log"
+      "tests/TroveDataParity.t.sol",
+      "tests/TroveManagerSystem.t.sol",
+      "tests/results/trove-manager.log"
     ]
   },
   "contracts/src/Types/TroveId.sol": {
