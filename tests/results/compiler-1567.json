@@ -1,0 +1,21 @@
+{
+  "integration_revision": "27976c7df7d0fca487f2c80f26241c9021dfa04c",
+  "integration_tree": "e8e5d938074145678e2ec2f01c6e14e50cb99638",
+  "pr_revision": "8557f3f5e56c17801743469f6d46377ecd58c572",
+  "integrated_into_protocol_release": false,
+  "execution_tests_by_optimization": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "s": 4
+  },
+  "verifier_regressions": 1,
+  "deposit_abi_check": "payable with uint256 output",
+  "sha256": {
+    "tests/results/compiler-1567-baseline.log": "5df3ecb8faf7a01f3376e6eced0276724fc0fb1f49d514bd06284cfffa63b018",
+    "tests/results/compiler-1567-verifier.log": "3cfa2da0cf1965e384ea0ed3a573939b6319e9875c740a06059d6c8220ed1bd2",
+    "tests/results/compiler-1567-execution.log": "ce1698b3f770db66d77c24b2891a0a777ffef9bb8847ef5b22f91042f5285f5c",
+    "tests/results/compiler-1567-abi.json": "8da1aef5da886b9ef727fd440faec3468246ef29dd2212396bd4726903c0333b",
+    "tests/results/compiler-1567-optimization.log": "ed4030ce74d0090d10d826c1ccaac7515b33d771f048d8c8637ec200926bf459"
+  }
+}

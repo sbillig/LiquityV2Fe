@@ -1,0 +1,17 @@
+   Compiling fe-parser v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/parser)
+   Compiling fe-trace-facts-macros v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/trace-facts-macros)
+   Compiling fe-common v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/common)
+   Compiling fe-test-utils v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/test-utils)
+   Compiling fe-trace-facts v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/trace-facts)
+   Compiling fe-resolver v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/resolver)
+   Compiling fe-hir v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/hir)
+   Compiling fe-driver v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/driver)
+   Compiling fe-mir v26.3.0 (/tmp/liquity-fe-zapper-compiler/crates/mir)
+    Finished `test` profile [unoptimized] target(s) in 35.02s
+     Running unittests src/lib.rs (toolchain/fe/target/debug/deps/fe_mir-3ba697bf2b181366)
+
+running 1 test
+test verify::package::tests::recv_terminal_calls_must_use_the_planned_semantic_return_helper ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 97 filtered out; finished in 8.49s
+

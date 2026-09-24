@@ -14,3 +14,7 @@ behavior and was not included in the integration compiler.
 literal becomes zero. The fix branch documented in `COMPILER_FIXES.md` rejects
 the source during type checking; the reproduction is intentionally outside the
 protocol ingot.
+
+`payable_return.fe` isolates the payable value-returning handler verifier failure
+needed by WETHZapper. Existing upstream PR #1567 addresses it; its experimental
+integration and regression results are recorded in `COMPILER_FIXES.md`.

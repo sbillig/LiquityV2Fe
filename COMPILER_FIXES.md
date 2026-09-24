@@ -133,3 +133,23 @@ All 243 type-check fixtures, 218 HIR tests, and 25 dedicated execution regressio
 pass. Evidence is in `tests/results/compiler-updated.*` and the associated logs.
 Replaying every pinned merge from the new upstream base in a separate clean
 worktree produced the same integration tree `0d1d3cedde2c9305c0d9219ee9de866e88d8e545`.
+
+## Prepared separately: payable return handlers (upstream PR #1567)
+
+- PR: https://github.com/argotorg/fe/pull/1567, still open when checked.
+- PR branch: `fix/1567-payable-returns`, head
+  `8557f3f5e56c17801743469f6d46377ecd58c572`.
+- Trigger: `tests/repros/payable_return.fe` fails on the pinned release compiler
+  with `InvalidReturnClass`; WETHZapper's payable opening function needs this.
+- Experimental integration branch: `liquity-zapper-integration`, commit
+  `27976c7df7d0fca487f2c80f26241c9021dfa04c`, worktree
+  `/tmp/liquity-fe-zapper-compiler`. Only an import-list merge conflict needed
+  resolution: retain both `RuntimeLinkage` and `RuntimeReturnPlan`.
+- The four execution tests pass at O0, O1, O2 and Os; the targeted verifier
+  regression also passes. Logs: `tests/results/compiler-1567-*`.
+- Newsfragment supplied by upstream: `newsfragments/1567.bugfix.md`.
+- This is an existing upstream PR, not a newly authored compiler fix.
+  It is not yet included in the pinned release compiler or full-system proof.
+  Its separate debug binary is used for the isolated WETHZapper draft.
+- Before adopting this integration, the reproducible bootstrap must account
+  for the import-list conflict and a new local release build must be validated.

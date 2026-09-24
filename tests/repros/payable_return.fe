@@ -1,0 +1,12 @@
+use std::abi::sol
+use std::evm::Ctx
+pub msg PayableReturnMsg {
+    #[selector = sol("deposit()")]
+    Deposit -> u256,
+}
+pub contract PayableReturn {
+    recv PayableReturnMsg {
+        #[payable]
+        Deposit -> u256 uses (ctx: Ctx) { ctx.value() }
+    }
+}
