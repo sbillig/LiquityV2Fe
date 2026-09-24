@@ -3,7 +3,7 @@
 Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
 Base upstream/master: `f00132a97429f966804d70c40206ef40ebca6960`.
 
-Two existing upstream fixes have been integrated (details below). No new compiler fixes have been authored.
+Three existing upstream fixes have been integrated (details below). No new compiler fixes have been authored.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.
@@ -61,3 +61,28 @@ capability for STATICCALL. Its conservative ABI metadata says `nonpayable`;
 `export_abi.py` explicitly normalizes the three runtime-tested view functions.
 Raw-storage getters declare their capability per handler to retain `view` ABI
 metadata. No compiler modifications are needed for these metadata adaptations.
+
+## Integrated: borrow-analysis performance (upstream PR #1585)
+
+- PR: https://github.com/argotorg/fe/pull/1585
+- Local branch: `fix/1585-borrow-analysis-performance`.
+- PR head: `c4856b4fb6e5383d3f31c95312f966dec9491233`.
+- Integration revision is pinned in `reference_manifest.json`.
+- Trigger under investigation: metadata ingot compilation spent over twenty
+  minutes in analysis; even ABI-only export remained busy. Both old-compiler
+  jobs were explicitly stopped to evaluate this existing upstream fix.
+- The PR includes regression tests for guard size, quantification, source cache
+  invalidation, summary mappings, and control-flow ordering.
+- No newsfragment is supplied by this existing upstream PR. No new compiler
+  fix has been authored locally. All 218 `fe-hir` library unit tests pass
+  (`cargo test --release -p fe-hir --lib --locked`), recorded in
+  `tests/results/compiler-1585.log`. The 10 PR #1592 and 14 PR #1587
+  execution regressions also pass with this integration compiler.
+  The full 96-test EVM / 2-test Fe suite passes with this compiler.
+  Tuple and uniform-array concatenation remained slow; the final renderer uses
+  pairwise concatenation. PR #1585 alone is not claimed to resolve that slowdown.
+
+Reproducibility: `reference_manifest.json` pins the complete integration tree as
+well as upstream and PR input commits. Fresh bootstrap merges can have different
+commit IDs because local merge timestamps differ; the bootstrap and validation
+recorder require the exact pinned tree and all input commits as ancestors.

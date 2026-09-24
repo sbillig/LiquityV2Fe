@@ -20,9 +20,17 @@
         "revision": "c22b24357063592e282efd6efc16ce831413fce7",
         "regression": "crates/fe/tests/fixtures/fe_test/abi_unpadded_dynamic_payload.fe",
         "newsfragment": "newsfragments/1587.bugfix.md"
+      },
+      {
+        "pr": "https://github.com/argotorg/fe/pull/1585",
+        "branch": "fix/1585-borrow-analysis-performance",
+        "revision": "c4856b4fb6e5383d3f31c95312f966dec9491233",
+        "regression": "crates/hir/src/analysis/semantic/capability/tests.rs; crates/hir/src/analysis/semantic/borrowck/summary.rs",
+        "newsfragment": null
       }
     ],
-    "integration_revision": "5903581eecd9ce0edf78884feeef087729973e5d"
+    "integration_revision": "ce277a26962d60fa0c5fa58ef2219313a922903b",
+    "integration_tree": "e73c8ca674080ae9084be42209c003eb7f98db1c"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",
@@ -174,5 +182,12 @@
     "src/utils/Types.sol": "996ec0667981c0bc3cf41157ae0493d91e2a463f6efdfafed59a97cb7d40f8bb",
     "src/utils/UniqueArray.sol": "d0e42cbb56ab4cd8b67d954c88c827e1c5157e120de6342c0f338f5bc0000bad",
     "src/utils/VotingPower.sol": "ab16978015ced16e6608405b7671a4861a0f259e9781241c8a176671f89f94a6"
+  },
+  "metadata_assets": {
+    "contracts/utils/assets/bold_logo.txt": "2b915d62f0e91f06e6d4380031cec4fb10e83e9a19715cfb31f1a22d3d0455c6",
+    "contracts/utils/assets/geist.txt": "40744bb84ef4de5b4c2d977cdf8de832571e2aca089325deefc9c5dba89ad54d",
+    "contracts/utils/assets/reth_logo.txt": "541e1ea9ce138254fea43897193136d96356e37a97e8fd00220faccd8141b92a",
+    "contracts/utils/assets/weth_logo.txt": "cc15895ad6f32ac3d120f50359109ffd6eb87f9ac500e35a2b6453bbddd03c6b",
+    "contracts/utils/assets/wsteth_logo.txt": "7d32b0eaebd2653af493a06a52338b52ec6d45b45f85a2bce234928bb2b65dac"
   }
 }

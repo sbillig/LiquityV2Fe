@@ -1,0 +1,25 @@
+Compiling 2 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.25s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+   --> tests/SortedTrovesParity.t.sol:100:5:
+    |
+100 |     function testGettersAndEmptyPositions() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for tests/LiquityBaseParity.t.sol:LiquityBaseParityTest
+[PASS] testConstructorStorageAndGetters() (gas: 49895)
+[PASS] testDependencyFailures() (gas: 488881)
+[PASS] testFuzzTotalsAndRatios(uint256,uint256,uint256,uint256,uint256,uint256) (runs: 1024, μ: 171304, ~: 171311)
+[PASS] testThresholdBoundaryAndZeroDebt() (gas: 105499)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 88.22ms (88.82ms CPU time)
+
+Ran 4 tests for tests/AddRemoveManagersParity.t.sol:AddRemoveManagersParityTest
+[PASS] testErrorsAndMissingNFT() (gas: 100105)
+[PASS] testFuzzConfiguration(uint256,address,address,address) (runs: 1024, μ: 213495, ~: 214054)
+[PASS] testPermissionMatrixAndWipe() (gas: 9928633)
+[PASS] testPublicSettersAndOwnershipTransfer() (gas: 220608)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 117.44ms (131.24ms CPU time)
+
+Ran 2 test suites in 118.26ms (205.66ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)

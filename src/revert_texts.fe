@@ -472,3 +472,10 @@ pub fn nft_receiver() -> DynString uses (mem: mut RawMem) {
     mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x63656976657220696d706c656d656e7465720000000000000000000000000000)
     DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 50))
 }
+
+// FixedAssetReader: Invalid input
+pub fn asset_invalid_input() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: data, value: 0x466978656441737365745265616465723a20496e76616c696420696e70757400)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
+}

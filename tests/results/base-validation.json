@@ -1,0 +1,42 @@
+{
+  "validated_at_utc": "2026-09-24T08:56:21.024686+00:00",
+  "scope": "Exact-source independent AddRemoveManagers and LiquityBase contracts; not the full protocol suite",
+  "command": "LIQUITY_TEST_ARTIFACTS=build/base-validation forge test --match-contract AddRemoveManagersParityTest|LiquityBaseParityTest -vv",
+  "evm_tests": 8,
+  "fuzz_runs_per_test": 1024,
+  "compiler_revision": "5903581eecd9ce0edf78884feeef087729973e5d",
+  "sources_sha256": {
+    "src/add_remove_managers.fe": "6489927a1e68602631c0dc0e24aba07458081730412178c54ce3a5d34a17374e",
+    "src/liquity_base.fe": "f2d0982fe79b97c131a94651003203ef3f1f62b96789f79a6d7d6b15427d7ec0",
+    "src/revert_texts.fe": "a86e1fd96b7a3c5a2362947da2ede97ebc25beccf9d43c985b4306bfa81310ce",
+    "src/manager_harness.fe": "b6112142c908d093f93d231c79bcec7f42d4641d78db87401905a51f5d544ccb",
+    "src/constants.fe": "ccff0f9125fa5887b28837019b3db50117be2306149706bb9c31e7240eeb95cc",
+    "src/addresses_registry.fe": "95cccd3220c693d93d955f7404e89ad349bc4683d1cb044f574c25e47ed911b9",
+    "src/types.fe": "5d0423b109f955f85a776a46c5749380fca22379c0552e7ea164fe35845340e3",
+    "src/liquity_math.fe": "4a417676713031ab13ad03cf47e880695649630a51183e1179a6d817a28e12e1",
+    "src/trove_nft.fe": "bbbfe303ca594227e32e314c7a12d5be30423b8a038297d2b5eebb5d52268966",
+    "src/liquity_base_harness.fe": "3e6b67f64719c7c6ee12d4d883688399dbf2333661b12dcd758e458bd1a37736",
+    "src/storage_string.fe": "8db5e89ce8284b6f89165b2e5842a54a4cd04f5695a0fc8b0a188c2944fe1551"
+  },
+  "artifact_sha256": {
+    "build/base-validation/LiquityBase.runtime.bin": "3a300874d4c242ec095e30b1dada3aa0b90953407ee124b2dcf446f564f84434",
+    "build/base-validation/ManagerHarness.abi.json": "364affdc744d43cecb7beb60725c8697516ea39a7b0370d6ce094efb343d2a7f",
+    "build/base-validation/AddressesRegistry.abi.json": "d07e32e3c4d4daf825ff9f25ac0c4a0f6659af33a8eea87ad8c6fbd6c8045e29",
+    "build/base-validation/LiquityBaseHarness.runtime.bin": "88e3e7457654b6398e586fd9a13d0d11b904b52da7961a0166086ed313c5c2ed",
+    "build/base-validation/TroveNFT.bin": "9e8f6475f634c6d51ff99c8e05a43007cc797dd8fb658c87418e875c4f12b08f",
+    "build/base-validation/AddressesRegistry.runtime.bin": "3d59338800240d8453ad1d78c6e43076f6bae93f566f15d4b9f83a81a652e71b",
+    "build/base-validation/TroveNFT.runtime.bin": "5d9dc7c5c0101324d8c5c5261d2d6a2598231165ab4ede73d46caff992bffe41",
+    "build/base-validation/LiquityBase.bin": "4fca5673c41a9705cc50ecb6c08f1307f62230d1da95be193ad85e5ccba92f33",
+    "build/base-validation/TroveNFT.abi.json": "a8ee70a4b75f8af8db2eea8cdd82cb678371e518b0b44baa274ec430fabe14c5",
+    "build/base-validation/LiquityBase.abi.json": "034e56ca283e35a3b7168d9d794bbf2ed0c46397dee9232c1b20139e3c6ee5a9",
+    "build/base-validation/LiquityBaseHarness.abi.json": "8bf46b1ecc6a7ccb6ad85cfbe74f435ae44715b097ad8dc071573774763f65e6",
+    "build/base-validation/LiquityBaseHarness.bin": "30188f3cf2e532776c0d2173314e82da1ef7aef14ba65b89bd78f289ca937626",
+    "build/base-validation/AddRemoveManagers.abi.json": "90a4a808f1bf319d7a9956832a063799142b9c5a7ddb90e8737533dd3fe3937c",
+    "build/base-validation/AddRemoveManagers.bin": "64925ad7783fb044a71842edb07ccee174c90bbcef62444ee7245f28dcfaa04f",
+    "build/base-validation/ManagerHarness.bin": "3db4394b348f3af9c3c28da44b507d63fbcbf59f565c93812e6faff2bdd22259",
+    "build/base-validation/AddRemoveManagers.runtime.bin": "22602117a88e3e69f2147e0d04b21c53a9d1564cdaf3c8fc383dd6b5b37ad9dd",
+    "build/base-validation/ManagerHarness.runtime.bin": "51f79832f6d3c81c1f358e61b3e47259dde7649106e13090f38181f127b1d0d4",
+    "build/base-validation/AddressesRegistry.bin": "1dec89c80203da31d33a26b00bb148aa6403f9305500b40e30c35745e3db1f42"
+  },
+  "log_sha256": "c05bd03829efb775a434b2a8ed350e79905492c00c0fa0bcf59ad29d376361f7"
+}

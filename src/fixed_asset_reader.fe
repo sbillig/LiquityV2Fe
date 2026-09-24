@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+// FixedAssets.sol, using the pinned Solady SSTORE2 slice semantics.
+use core::abi::Decode
+use core::num::IntDowncast
+use core::ptr::MemBuffer
+use std::abi::{sol, Sol, Bytes4, DynArray, DynString}
+use std::evm::{Address, Ctx, RawMem, RawStorage, revert}
+use std::evm::packed::keccak_packed
+use super::revert_texts as text
+fn asset_slot(_ sig: Bytes4) -> u256 uses (mem: mut RawMem) { keccak_packed((sig.word(), 0 as u256)) }
+pub msg FixedAssetReaderMsg {
+    #[selector = sol("pointer()")]
+    Pointer -> Address,
+    #[selector = sol("assets(bytes4)")]
+    Assets { sig: Bytes4 } -> (u128, u128),
+    #[selector = sol("readAsset(bytes4)")]
+    ReadAsset { sig: Bytes4 } -> DynString,
+}
+pub contract FixedAssetReader {
+    pointer_address: Address,
+    init(pointer: Address, sigs: DynArray<Bytes4>, assets: DynArray<(u128, u128)>)
+    uses (mut pointer_address, mem: mut RawMem, storage: mut RawStorage) {
+        pointer_address = pointer
+        text::require(sigs.len() == assets.len(), text::asset_invalid_input())
+        let mut i: u256 = 0
+        while i < sigs.len() {
+            let sig = <Bytes4 as Decode<Sol>>::decode_from(sigs.encoded_span(), 32 + i * 32)
+            let asset = <(u128, u128) as Decode<Sol>>::decode_from(assets.encoded_span(), 32 + i * 64)
+            storage.sstore(slot: asset_slot(sig), value: (asset.0 as u256) | ((asset.1 as u256) << 128))
+            i += 1
+        }
+    }
+    recv FixedAssetReaderMsg {
+        Pointer -> Address uses (pointer_address) { pointer_address }
+        Assets { sig } -> (u128, u128) uses (mem: mut RawMem, storage: RawStorage) {
+            let value = storage.sload(asset_slot(sig))
+            (value.downcast_truncate(), (value >> 128).downcast_truncate())
+        }
+        ReadAsset { sig } -> DynString uses (pointer_address, ctx: mut Ctx, mem: mut RawMem, storage: RawStorage) {
+            let value = storage.sload(asset_slot(sig))
+            let start = value & 0xffffffffffffffffffffffffffffffff
+            let end = value >> 128
+            // Solady caps the requested end, clips to code length minus the STOP
+            // prefix, and returns an empty slice for reversed/out-of-range bounds.
+            let code_size = ctx.extcodesize(pointer_address)
+            if code_size == 0 { revert(()) }
+            let available = code_size - 1
+            let capped_end = if end < 0xffff { end } else { 0xffff }
+            let clipped_end = if capped_end < available { capped_end } else { available }
+            let len = if start < clipped_end { clipped_end - start } else { 0 }
+            let mut output = MemBuffer::alloc(len)
+            ctx.extcodecopy(pointer_address, dest: mut output, dest_offset: 0, src_offset: start + 1, len)
+            DynString::from_payload(source: output.span())
+        }
+    }
+}

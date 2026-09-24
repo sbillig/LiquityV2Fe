@@ -30,7 +30,9 @@ def hashes(paths):
     return {str(p.relative_to(ROOT)): digest(p) for p in sorted(paths)}
 
 assert not git('status', '--porcelain'), 'Compiler checkout has uncommitted changes'
-assert git('rev-parse', 'HEAD') == manifest['compiler']['integration_revision'], 'Compiler revision differs from manifest'
+assert git('rev-parse', 'HEAD^{tree}') == manifest['compiler']['integration_tree'], 'Compiler source tree differs from manifest'
+for revision in [manifest['compiler']['upstream_master']] + [f['revision'] for f in manifest['compiler']['fixes']]:
+    subprocess.run(['git', '-C', str(ROOT / 'toolchain/fe'), 'merge-base', '--is-ancestor', revision, 'HEAD'], check=True)
 report = {
     'validated_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
     'command': './scripts/test.sh',
@@ -40,6 +42,7 @@ report = {
     'fuzz_runs_per_test': 1024,
     'cached_fuzz_regressions_also_run': True,
     'compiler_revision': git('rev-parse', 'HEAD'),
+    'compiler_tree': git('rev-parse', 'HEAD^{tree}'),
     'upstream_master': manifest['compiler']['upstream_master'],
     'compiler_binary_sha256': digest(ROOT / 'toolchain/fe/target/release/fe'),
     'compiler_dirty': '',

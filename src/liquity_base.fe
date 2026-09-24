@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::sol
+use std::evm::{Address, Call, Log}
+use super::addresses_registry::{RegistryMsg, ActivePoolAddressChanged, DefaultPoolAddressChanged, PriceFeedAddressChanged}
+use super::liquity_math as math
+pub msg BranchPoolMsg {
+    #[selector = sol("getCollBalance()")]
+    CollBalance -> u256,
+    #[selector = sol("getBoldDebt()")]
+    BoldDebt -> u256,
+}
+pub fn entire_coll(_ active: Address, _ default: Address) -> u256 uses (call: mut Call) {
+    let active_coll = active.static(BranchPoolMsg::CollBalance {})
+    let liquidated_coll = default.static(BranchPoolMsg::CollBalance {})
+    active_coll + liquidated_coll
+}
+pub fn entire_debt(_ active: Address, _ default: Address) -> u256 uses (call: mut Call) {
+    let active_debt = active.static(BranchPoolMsg::BoldDebt {})
+    let closed_debt = default.static(BranchPoolMsg::BoldDebt {})
+    active_debt + closed_debt
+}
+pub fn tcr(_ active: Address, _ default: Address, _ price: u256) -> u256 uses (call: mut Call) {
+    let coll = entire_coll(active, default)
+    let debt = entire_debt(active, default)
+    math::compute_cr(coll, debt, price)
+}
+pub fn below_critical(_ active: Address, _ default: Address, _ price: u256, _ ccr: u256) -> bool uses (call: mut Call) {
+    tcr(active, default, price) < ccr
+}
+pub msg LiquityBaseMsg {
+    #[selector = sol("activePool()")]
+    ActivePool -> Address,
+    #[selector = sol("getEntireBranchColl()")]
+    EntireBranchColl -> u256,
+    #[selector = sol("getEntireBranchDebt()")]
+    EntireBranchDebt -> u256,
+}
+pub contract LiquityBase {
+    mut active: Address,
+    mut default: Address,
+    mut price_feed: Address,
+    init(registry: Address) uses (mut active, mut default, mut price_feed, call: mut Call, log: mut Log) {
+        active = registry.static(RegistryMsg::GetactivePool {})
+        default = registry.static(RegistryMsg::GetdefaultPool {})
+        price_feed = registry.static(RegistryMsg::GetpriceFeed {})
+        log.emit(ActivePoolAddressChanged { value: active })
+        log.emit(DefaultPoolAddressChanged { value: default })
+        log.emit(PriceFeedAddressChanged { value: price_feed })
+    }
+    recv LiquityBaseMsg {
+        ActivePool -> Address uses (active) { active }
+        EntireBranchColl -> u256 uses (active, default, call: mut Call) {
+            let a = active
+            let d = default
+            entire_coll(a, d)
+        }
+        EntireBranchDebt -> u256 uses (active, default, call: mut Call) {
+            let a = active
+            let d = default
+            entire_debt(a, d)
+        }
+    }
+}

@@ -1,0 +1,14 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 717.90ms
+Compiler run successful!
+
+Ran 6 tests for tests/MetadataPrimitivesParity.t.sol:MetadataPrimitivesParityTest
+[PASS] testBauhausAllVariants() (gas: 1419365)
+[PASS] testFuzzBauhaus(string,uint256) (runs: 1024, μ: 89109, ~: 88941)
+[PASS] testFuzzLocale(uint256,uint8,uint8) (runs: 1024, μ: 241018, ~: 57611)
+[PASS] testFuzzNumbers(uint256,address) (runs: 1025, μ: 67317, ~: 62499)
+[PASS] testFuzzStrings(string,uint256,uint256) (runs: 1024, μ: 41827, ~: 40930)
+[PASS] testRendererFormattingBoundaries() (gas: 15391421)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 427.65ms (908.32ms CPU time)
+
+Ran 1 test suite in 428.25ms (427.65ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

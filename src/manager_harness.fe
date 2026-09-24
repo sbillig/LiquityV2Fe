@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: MIT
+// Exposes internal base operations solely for differential tests.
+use std::abi::sol
+use std::evm::{Address, Ctx, RawMem, RawStorage, Log}
+use super::add_remove_managers::{self as managers, ManagerSlots}
+msg ManagerHarnessMsg {
+    #[selector = sol("setInternal(uint256,address,address,address)")]
+    Set { id: u256, add: Address, remove: Address, receiver: Address },
+    #[selector = sol("wipe(uint256)")]
+    Wipe { id: u256 },
+    #[selector = sol("checkAdd(uint256,address)")]
+    CheckAdd { id: u256, owner: Address },
+    #[selector = sol("checkRemove(uint256,address)")]
+    CheckRemove { id: u256, owner: Address } -> Address,
+    #[selector = sol("addManagerOf(uint256)")]
+    Add { id: u256 } -> Address,
+    #[selector = sol("removeManagerReceiverOf(uint256)")]
+    Remove { id: u256 } -> (Address, Address),
+}
+pub contract ManagerHarness {
+    recv ManagerHarnessMsg {
+        Set { id, add, remove, receiver } uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::set_add(ManagerSlots { add: 0, remove: 1 }, id, add)
+            managers::set_remove(ManagerSlots { add: 0, remove: 1 }, id, remove, receiver)
+        }
+        Wipe { id } uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) { managers::wipe(ManagerSlots { add: 0, remove: 1 }, id) }
+        CheckAdd { id, owner } uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { managers::require_owner_or_add(ManagerSlots { add: 0, remove: 1 }, id, owner) }
+        CheckRemove { id, owner } -> Address uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { managers::require_owner_or_remove(ManagerSlots { add: 0, remove: 1 }, id, owner) }
+        Add { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { managers::get_add(ManagerSlots { add: 0, remove: 1 }, id) }
+        Remove { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) { managers::get_remove(ManagerSlots { add: 0, remove: 1 }, id) }
+    }
+}

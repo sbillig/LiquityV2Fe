@@ -30,3 +30,8 @@ for relative, expected in manifest.get('dependencies', {}).items():
     if tracked != present:
         raise SystemExit(f'Dependency Solidity source inventory drift: {relative}')
 print(f"Verified {len(manifest.get('dependencies', {}))} pinned dependency source trees")
+
+for relative, expected in manifest.get('metadata_assets', {}).items():
+    if hashlib.sha256((reference / relative).read_bytes()).hexdigest() != expected:
+        raise SystemExit(f'Metadata asset drift: {relative}')
+print(f"Verified {len(manifest.get('metadata_assets', {}))} pinned NFT metadata assets")

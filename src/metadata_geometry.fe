@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: MIT
+// Constructor-created pure geometry companion keeps each runtime below EIP-170.
+use std::abi::{sol, DynString}
+use std::evm::RawMem
+use super::metadata_bauhaus::bauhaus
+use super::metadata_literals as lit
+use super::metadata_concat::cat
+pub msg MetadataGeometryMsg {
+    #[selector = sol("base(string,string)")]
+    Base { font: DynString, bold_logo: DynString } -> DynString,
+    #[selector = sol("image(string,uint256)")]
+    Image { symbol: DynString, id: u256 } -> DynString,
+}
+pub contract MetadataGeometry {
+    init() {}
+    recv MetadataGeometryMsg {
+        Base { font, bold_logo } -> DynString uses (mem: mut RawMem) {
+            cat(cat(cat(cat(cat(cat(cat(cat(lit::background().as_bytes(), lit::font_open().as_bytes()).as_bytes(), font.as_bytes()).as_bytes(), lit::font_close().as_bytes()).as_bytes(), lit::leverage_logo().as_bytes()).as_bytes(), lit::bold_logo_open().as_bytes()).as_bytes(), bold_logo.as_bytes()).as_bytes(), lit::image_close().as_bytes()).as_bytes(), lit::static_text().as_bytes())
+        }
+        Image { symbol, id } -> DynString uses (mem: mut RawMem) { bauhaus(symbol, id) }
+    }
+}

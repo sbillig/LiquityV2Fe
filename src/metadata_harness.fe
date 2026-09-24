@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynString}
+use std::evm::{Address, RawMem}
+use super::metadata_string as strings
+msg MetadataPrimitivesMsg {
+    #[selector = sol("bauhausImage(string,uint256)")]
+    Bauhaus { symbol: DynString, id: u256 } -> DynString,
+    #[selector = sol("decimal(uint256)")]
+    Decimal { value: u256 } -> DynString,
+    #[selector = sol("hexNumber(uint256)")]
+    HexNumber { value: u256 } -> DynString,
+    #[selector = sol("hexAddress(address)")]
+    HexAddress { value: Address } -> DynString,
+    #[selector = sol("checksum(address)")]
+    Checksum { value: Address } -> DynString,
+    #[selector = sol("slice(string,uint256,uint256)")]
+    Slice { value: DynString, start: u256, end: u256 } -> DynString,
+    #[selector = sol("base64(string)")]
+    Base64 { value: DynString } -> DynString,
+    #[selector = sol("locale(uint256,uint8,uint8)")]
+    Locale { value: u256, divisor: u8, precision: u8 } -> DynString,
+}
+pub contract MetadataPrimitivesHarness {
+    recv MetadataPrimitivesMsg {
+        Bauhaus { symbol, id } -> DynString uses (mem: mut RawMem) { super::metadata_bauhaus::bauhaus(symbol, id) }
+        Decimal { value } -> DynString uses (mem: mut RawMem) { strings::decimal(value) }
+        HexNumber { value } -> DynString uses (mem: mut RawMem) { strings::hex_number(value) }
+        HexAddress { value } -> DynString uses (mem: mut RawMem) { strings::hex_fixed(value.inner, 20) }
+        Checksum { value } -> DynString uses (mem: mut RawMem) { strings::checksum(value) }
+        Slice { value, start, end } -> DynString { strings::slice(value, start, end) }
+        Base64 { value } -> DynString uses (mem: mut RawMem) { strings::base64(value) }
+        Locale { value, divisor, precision } -> DynString uses (mem: mut RawMem) { strings::locale(value, divisor, precision) }
+    }
+}

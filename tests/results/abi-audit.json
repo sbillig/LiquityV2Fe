@@ -1,5 +1,7 @@
 {
   "AddressesRegistry": {
+    "runtime_bytes": 4416,
+    "initcode_bytes_before_arguments": 5792,
     "compiler_abi_sha256": "d07e32e3c4d4daf825ff9f25ac0c4a0f6659af33a8eea87ad8c6fbd6c8045e29",
     "reference_artifact_sha256": "6ee088859152e91d873d5a95660bc70ae6f3a5b70f1ec7e66ae79e651b2210a8",
     "protocol_abi_sha256": "b05b188fe23ea77c434e90ea690e3bed9a89384d193715c00b850c3c11b1b863",
@@ -14,6 +16,8 @@
     "function_count": 27
   },
   "GasPool": {
+    "runtime_bytes": 3,
+    "initcode_bytes_before_arguments": 880,
     "compiler_abi_sha256": "c555bbbc0689fa646f193ae130220db7631f342dea033b8ffa5c02ed59b477ab",
     "reference_artifact_sha256": "8b7d3a0fa9dab455f3b2ce386ce7ada67079972949d5490746a2c72e9a6dce3e",
     "protocol_abi_sha256": "3bd108c091d5054318a9b89dbf661a59faa47563f440241d360aa6d031446991",
@@ -23,6 +27,8 @@
     "function_count": 0
   },
   "DefaultPool": {
+    "runtime_bytes": 2639,
+    "initcode_bytes_before_arguments": 3722,
     "compiler_abi_sha256": "3ca94784d9dc8e6abc757ff8748741c4905e63f04ad69560543833c5d6604f2f",
     "reference_artifact_sha256": "25a8b0035c5f15b70b4f423f72471f5922f440d36dab535003d98bbbb72b7eed",
     "protocol_abi_sha256": "5bc413bde68914e88922c1aa664c2130e32c3751ab36a30b7368676853413126",
@@ -39,6 +45,8 @@
     "function_count": 10
   },
   "CollSurplusPool": {
+    "runtime_bytes": 2147,
+    "initcode_bytes_before_arguments": 2919,
     "compiler_abi_sha256": "ddb07a3a4fab412934aeafc45e08b595c9484ffd4097e8059905cd32be65ac0f",
     "reference_artifact_sha256": "338b4368996e3ace884b64cfb3903bdcbf210bb21cbd46ba55bec6f8986ca530",
     "protocol_abi_sha256": "92c6312f65777d1909648912dd2ea43d74332d7920baa3eb83e198ba0c3317d3",
@@ -55,6 +63,8 @@
     "function_count": 8
   },
   "ActivePool": {
+    "runtime_bytes": 7392,
+    "initcode_bytes_before_arguments": 9519,
     "compiler_abi_sha256": "ef9b07157dd39598ba7dabcf6cb36de689053e3a9be12ac3c05b9512f00980b2",
     "reference_artifact_sha256": "bfca8e4342a733d0d7f7ca6a618a13481ea32511fa3f51415e30236ba46e6719",
     "protocol_abi_sha256": "8791d999a080e1f39ef76ebde144fedc64d3a3db547c5f32ddabaf781cdaeb2d",
@@ -76,14 +86,16 @@
     "function_count": 30
   },
   "BoldToken": {
+    "runtime_bytes": 8492,
+    "initcode_bytes_before_arguments": 8613,
     "compiler_abi_sha256": "b6f33e07b47331c8392e8ce8dd40c926650bee78dc8a123d858876e246da586a",
     "reference_artifact_sha256": "3327fe14d487a6ccaf5e45fbea4ba814d146782d3ee59cbf2b338454454dc65e",
     "protocol_abi_sha256": "26142ca5f7a7ce9847335aabcc945c793a13e1f427da25e38cee171f2a0cbf16",
     "metadata_refinements": [
       "eip712Domain: explicit flat runtime return",
-      "symbol(): pure implementation of view function",
       "decimals(): pure implementation of view function",
-      "name(): pure implementation of view function"
+      "name(): pure implementation of view function",
+      "symbol(): pure implementation of view function"
     ],
     "declaration_only": [
       [
@@ -108,14 +120,16 @@
     "function_count": 24
   },
   "SortedTroves": {
+    "runtime_bytes": 13621,
+    "initcode_bytes_before_arguments": 14823,
     "compiler_abi_sha256": "9ae77f66778df745734b30cdb94e25d9da20b50a034f2c92785ab9acb1c94251",
     "reference_artifact_sha256": "fc10507ffe434d3a1093b16e13f524a8a7edb045651c9ede5d086c55c98e1a4e",
     "protocol_abi_sha256": "29265a8b57de80bff0be98e5cc9d6a6dc554564b12b15d8961a907423622d46a",
     "metadata_refinements": [
       "nodes: static tuple has identical flat runtime encoding",
       "batches: static tuple has identical flat runtime encoding",
-      "validInsertPosition: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
-      "findInsertPosition: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
+      "validInsertPosition: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "findInsertPosition: read-only STATICCALL; Fe capability conservatively implies nonpayable",
       "findInsertPosition: static tuple has identical flat runtime encoding",
       "NAME(): pure implementation of view function"
     ],
@@ -129,11 +143,13 @@
     "function_count": 23
   },
   "TroveNFT": {
+    "runtime_bytes": 10444,
+    "initcode_bytes_before_arguments": 14406,
     "compiler_abi_sha256": "a8ee70a4b75f8af8db2eea8cdd82cb678371e518b0b44baa274ec430fabe14c5",
     "reference_artifact_sha256": "577e2d4ce92d371e3710f711f1795e7c133ce2b9aff7c1350c9abddcd9536759",
     "protocol_abi_sha256": "acf38ba50ddc9ddf7c0b51037fcfc21259ce65aed1a450129536fe042008e60f",
     "metadata_refinements": [
-      "tokenURI: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
+      "tokenURI: read-only STATICCALL; Fe capability conservatively implies nonpayable",
       "supportsInterface(bytes4): pure implementation of view function"
     ],
     "declaration_only": [],
@@ -144,5 +160,81 @@
       ]
     ],
     "function_count": 17
+  },
+  "FixedAssetReader": {
+    "runtime_bytes": 1396,
+    "initcode_bytes_before_arguments": 2819,
+    "compiler_abi_sha256": "767e6bca899c8bf94c086a5e759231fbe7451decd062c0fbe4ea5edc492e7373",
+    "reference_artifact_sha256": "c77217b2f7e42b4d96e9f58e2590a8be2ff29c2ca7a795871e9a638934bf1483",
+    "protocol_abi_sha256": "b5d60730fc33ec3e4a3ac05a9d05111f4213c8ba001c6fb4bac78a82564d1f32",
+    "metadata_refinements": [
+      "assets: static tuple has identical flat runtime encoding",
+      "readAsset: read-only EXTCODECOPY; Fe capability conservatively implies nonpayable"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 3
+  },
+  "MetadataNFT": {
+    "runtime_bytes": 23721,
+    "initcode_bytes_before_arguments": 42596,
+    "compiler_abi_sha256": "b2af857607a89a4cc6652d8f027d8ec729780cbaaf108e2a70bb2ed34e6346bc",
+    "reference_artifact_sha256": "3e6d4de7b09b85b2dccd8664c34b519acf335b68a8ae4a2e238adcb781fbf415",
+    "protocol_abi_sha256": "9f7267bfd9c73a4e2a131a1c003c6d1310a73c24b064f29815a5e1aea6904747",
+    "metadata_refinements": [
+      "dynamicTextComponents: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "uri: read-only STATICCALL; Fe capability conservatively implies nonpayable"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 4
+  },
+  "AddRemoveManagers": {
+    "runtime_bytes": 2207,
+    "initcode_bytes_before_arguments": 2666,
+    "compiler_abi_sha256": "90a4a808f1bf319d7a9956832a063799142b9c5a7ddb90e8737533dd3fe3937c",
+    "reference_artifact_sha256": "ec156dc99ddc412cdd97e6f50719006463586e060cbaee08b42a071fcc2d94bb",
+    "protocol_abi_sha256": "a37afb0fa2807c1843a6504d10dcff4435be0d403d53d6adc8f8a9de7748fd6d",
+    "metadata_refinements": [
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [
+      [
+        "error",
+        "NotOwnerNorAddManager()"
+      ],
+      [
+        "error",
+        "NotOwnerNorRemoveManager()"
+      ]
+    ],
+    "compiler_standard_errors": [],
+    "function_count": 5
+  },
+  "LiquityBase": {
+    "runtime_bytes": 595,
+    "initcode_bytes_before_arguments": 1286,
+    "compiler_abi_sha256": "034e56ca283e35a3b7168d9d794bbf2ed0c46397dee9232c1b20139e3c6ee5a9",
+    "reference_artifact_sha256": "e767c074c0e1a33ae2f61f238948aec4e4fe6cf6ea6fa6d93b69640c68475281",
+    "protocol_abi_sha256": "9611073fede466035c4265e98918713c2a68e5a5b773867cf74b419a2fed6bf0",
+    "metadata_refinements": [
+      "getEntireBranchColl: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getEntireBranchDebt: read-only STATICCALL; Fe capability conservatively implies nonpayable"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 3
+  },
+  "MetadataGeometry": {
+    "implementation_companion": true,
+    "runtime_bytes": 18538,
+    "initcode_bytes_before_arguments": 18558,
+    "runtime_sha256": "cfaf9200d7200b77cfb5a327f9cac4d1ca5ae424aa7e84881cd9d9956a78bcd0",
+    "initcode_sha256": "7d5e436219e432583fe9e913cc1152b27d58e0084d928319b97f2e4671c7297d"
   }
 }

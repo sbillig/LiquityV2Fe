@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: MIT
+// Exact SVG / base64 JSON renderer from MetadataNFT.sol.
+use core::num::IntDowncast
+use std::abi::{sol, Bytes4, DynString}
+use std::evm::{Address, Call, Create, RawMem, revert}
+use std::evm::packed::keccak_packed
+use super::metadata_string::{cat, text, fragment, decimal, hex_fixed, hex_number, checksum, slice, base64, locale}
+use super::metadata_geometry::{MetadataGeometry, MetadataGeometryMsg}
+use super::metadata_literals as lit
+use super::fixed_asset_reader::FixedAssetReaderMsg
+use super::trove_nft::NftDependencyMsg
+pub type TroveMetadata = (u256, Address, Address, Address, u256, u256, u256, u8)
+#[inline(never)]
+fn validate(_ data: TroveMetadata) { if data.7 > 4 { revert(()) } }
+#[inline(never)]
+fn status(_ value: u8) -> DynString uses (mem: mut RawMem) {
+    if value == 1 { text(fragment("Active")) } else if value == 2 { text(fragment("Closed")) }
+    else if value == 3 { text(fragment("Liquidated")) } else if value == 4 { text(fragment("Below Min Debt")) }
+    else { DynString::empty() }
+}
+#[inline(never)]
+fn asset(_ reader: Address, _ name: DynString) -> DynString uses (call: mut Call, mem: mut RawMem) {
+    let sig = Bytes4 { val: keccak_packed(name.as_bytes()) >> 224 }
+    reader.static(FixedAssetReaderMsg::ReadAsset { sig })
+}
+#[inline(never)]
+fn attributes(_ data: TroveMetadata) -> DynString uses (mem: mut RawMem) {
+    cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(lit::attr_open().as_bytes(), hex_fixed(data.2.inner, 20).as_bytes()).as_bytes(), lit::attr_coll().as_bytes()).as_bytes(), decimal(data.4).as_bytes()).as_bytes(), lit::attr_bold().as_bytes()).as_bytes(), hex_fixed(data.3.inner, 20).as_bytes()).as_bytes(), lit::attr_debt().as_bytes()).as_bytes(), decimal(data.5).as_bytes()).as_bytes(), lit::attr_interest().as_bytes()).as_bytes(), decimal(data.6).as_bytes()).as_bytes(), lit::attr_status().as_bytes()).as_bytes(), status(data.7).as_bytes()).as_bytes(), fragment("\"} ]"))
+}
+#[inline(never)]
+fn number_el(_ value: u256, _ divisor: u8, _ precision: u8, _ y: u256) -> DynString uses (mem: mut RawMem) {
+    cat(cat(cat(cat(lit::dynamic_open().as_bytes(), decimal(y).as_bytes()).as_bytes(), lit::dynamic_middle().as_bytes()).as_bytes(), locale(value, divisor, precision).as_bytes()).as_bytes(), fragment("</text>"))
+}
+#[inline(never)]
+fn dynamic(_ reader: Address, _ data: TroveMetadata) -> DynString uses (call: mut Call, mem: mut RawMem) {
+    let full_id = hex_number(data.0)
+    let id = cat(cat(slice(full_id, 0, 6).as_bytes(), fragment("...")).as_bytes(), slice(full_id, 38, 42).as_bytes())
+    let address = checksum(data.1)
+    let owner = cat(cat(slice(address, 0, 6).as_bytes(), fragment("...")).as_bytes(), slice(address, 38, 42).as_bytes())
+    let symbol = data.2.static(NftDependencyMsg::Symbol {})
+    let logo = asset(reader, symbol)
+    let top = cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(lit::id_open().as_bytes(), id.as_bytes()).as_bytes(), fragment("</text>")).as_bytes(), lit::owner_open().as_bytes()).as_bytes(), owner.as_bytes()).as_bytes(), fragment("</text>")).as_bytes(), lit::coll_logo_open().as_bytes()).as_bytes(), logo.as_bytes()).as_bytes(), lit::image_close().as_bytes()).as_bytes(), lit::status_open().as_bytes()).as_bytes(), status(data.7).as_bytes()).as_bytes(), fragment("</text>"))
+    cat(cat(cat(top.as_bytes(), number_el(data.4, 18, 4, 360).as_bytes()).as_bytes(), number_el(data.5, 18, 2, 391).as_bytes()).as_bytes(), number_el(data.6, 16, 2, 422).as_bytes())
+}
+#[inline(never)]
+fn base_elements(_ reader: Address, _ geometry: Address) -> DynString uses (call: mut Call, mem: mut RawMem) {
+    let font = asset(reader, text(fragment("geist")))
+    let bold_logo = asset(reader, text(fragment("BOLD")))
+    geometry.static(MetadataGeometryMsg::Base { font, bold_logo })
+}
+#[inline(never)]
+fn render(_ reader: Address, _ geometry: Address, _ data: TroveMetadata) -> DynString uses (call: mut Call, mem: mut RawMem) {
+    let base = base_elements(reader, geometry)
+    let symbol = data.2.static(NftDependencyMsg::Symbol {})
+    let image = geometry.static(MetadataGeometryMsg::Image { symbol, id: data.0 })
+    cat(cat(cat(cat(lit::svg_open().as_bytes(), base.as_bytes()).as_bytes(), image.as_bytes()).as_bytes(), dynamic(reader, data).as_bytes()).as_bytes(), fragment("</svg>"))
+}
+pub msg MetadataNFTMsg {
+    #[selector = sol("assetReader()")]
+    AssetReader -> Address,
+    #[selector = sol("attributes((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
+    Attributes { data: TroveMetadata } -> DynString,
+    #[selector = sol("dynamicTextComponents((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
+    DynamicTextComponents { data: TroveMetadata } -> DynString,
+    #[selector = sol("uri((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
+    Uri { data: TroveMetadata } -> DynString,
+}
+pub contract MetadataNFT {
+    reader: Address,
+    geometry: Address,
+    init(asset_reader: Address) uses (mut reader, mut geometry, create: mut Create) {
+        reader = asset_reader
+        geometry = create.create<MetadataGeometry>(value: 0, args: ())
+    }
+    recv MetadataNFTMsg {
+        AssetReader -> Address uses (reader) { reader }
+        Attributes { data } -> DynString uses (mem: mut RawMem) { validate(data)
+            attributes(data)
+        }
+        DynamicTextComponents { data } -> DynString uses (reader, call: mut Call, mem: mut RawMem) { validate(data)
+            dynamic(reader, data)
+        }
+        Uri { data } -> DynString uses (reader, geometry, call: mut Call, mem: mut RawMem) {
+            validate(data)
+            let attr = attributes(data)
+            let name = data.2.static(NftDependencyMsg::Name {})
+            let symbol = data.2.static(NftDependencyMsg::Symbol {})
+            let description = cat(cat(lit::description_open().as_bytes(), symbol.as_bytes()).as_bytes(), lit::description_close().as_bytes())
+            let image = base64(render(reader, geometry, data))
+            let json = cat(cat(cat(cat(cat(cat(cat(cat(cat(fragment("{\"name\": \"Liquity V2 - "), name.as_bytes()).as_bytes(), fragment("\", \"description\": \"")).as_bytes(), description.as_bytes()).as_bytes(), fragment("\", \"image\": \"")).as_bytes(), fragment("data:image/svg+xml;base64,")).as_bytes(), image.as_bytes()).as_bytes(), fragment("\",\"attributes\":")).as_bytes(), attr.as_bytes()).as_bytes(), fragment("}"))
+            cat(fragment("data:application/json;base64,"), base64(json).as_bytes())
+        }
+    }
+}

@@ -71,9 +71,17 @@
     ]
   },
   "contracts/src/Dependencies/AddRemoveManagers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/add_remove_managers.fe",
+      "src/manager_harness.fe"
+    ],
+    "verification": [
+      "tests/AddRemoveManagersParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Dependencies/AggregatorV3Interface.sol": {
     "status": "pending",
@@ -90,9 +98,19 @@
     ]
   },
   "contracts/src/Dependencies/LiquityBase.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/liquity_base.fe",
+      "src/liquity_base_harness.fe",
+      "src/liquity_math.fe"
+    ],
+    "verification": [
+      "tests/LiquityBaseParity.t.sol",
+      "tests/MathParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Dependencies/LiquityMath.sol": {
     "status": "implemented_differential_tests_pass",
@@ -134,9 +152,17 @@
     "verification": []
   },
   "contracts/src/Interfaces/IAddRemoveManagers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/add_remove_managers.fe",
+      "src/manager_harness.fe"
+    ],
+    "verification": [
+      "tests/AddRemoveManagersParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IAddressesRegistry.sol": {
     "status": "pending",
@@ -204,9 +230,19 @@
     "verification": []
   },
   "contracts/src/Interfaces/ILiquityBase.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/liquity_base.fe",
+      "src/liquity_base_harness.fe",
+      "src/liquity_math.fe"
+    ],
+    "verification": [
+      "tests/LiquityBaseParity.t.sol",
+      "tests/MathParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IMainnetPriceFeed.sol": {
     "status": "pending",
@@ -301,39 +337,111 @@
     "verification": []
   },
   "contracts/src/NFTMetadata/MetadataNFT.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/metadata_nft.fe",
+      "src/metadata_geometry.fe",
+      "src/metadata_string.fe",
+      "src/metadata_concat.fe",
+      "src/metadata_literals.fe",
+      "src/metadata_bauhaus.fe",
+      "src/fixed_asset_reader.fe"
+    ],
+    "verification": [
+      "tests/MetadataNFTParity.t.sol",
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/NFTMetadata/utils/FixedAssets.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/fixed_asset_reader.fe"
+    ],
+    "verification": [
+      "tests/FixedAssetReaderParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/NFTMetadata/utils/JSON.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial_renderer_reachable_functions_verified",
+    "fe": [
+      "src/metadata_nft.fe",
+      "src/metadata_string.fe"
+    ],
+    "verification": [
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/MetadataNFTParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ],
+    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
   },
   "contracts/src/NFTMetadata/utils/SVG.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial_renderer_reachable_functions_verified",
+    "fe": [
+      "src/metadata_bauhaus.fe",
+      "src/metadata_literals.fe",
+      "src/metadata_nft.fe"
+    ],
+    "verification": [
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/MetadataNFTParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ],
+    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
   },
   "contracts/src/NFTMetadata/utils/Utils.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial_renderer_reachable_functions_verified",
+    "fe": [
+      "src/metadata_string.fe"
+    ],
+    "verification": [
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/MetadataNFTParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ],
+    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
   },
   "contracts/src/NFTMetadata/utils/baseSVG.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial_renderer_reachable_functions_verified",
+    "fe": [
+      "src/metadata_literals.fe",
+      "src/metadata_geometry.fe",
+      "src/metadata_nft.fe"
+    ],
+    "verification": [
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/MetadataNFTParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ],
+    "scope": "All renderer-reachable behavior is verified; unused generic utility entry points are not yet individually ported."
   },
   "contracts/src/NFTMetadata/utils/bauhaus.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/metadata_bauhaus.fe",
+      "src/metadata_geometry.fe",
+      "src/metadata_concat.fe"
+    ],
+    "verification": [
+      "tests/MetadataPrimitivesParity.t.sol",
+      "tests/MetadataNFTParity.t.sol",
+      "tests/results/metadata-bases.log",
+      "tests/results/metadata-bases.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/PriceFeeds/CompositePriceFeed.sol": {
     "status": "pending",

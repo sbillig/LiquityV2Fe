@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Call}
+use super::liquity_base as base
+msg LiquityBaseHarnessMsg {
+    #[selector = sol("tcr(address,address,uint256)")]
+    Tcr { active: Address, default: Address, price: u256 } -> u256,
+    #[selector = sol("below(address,address,uint256,uint256)")]
+    Below { active: Address, default: Address, price: u256, ccr: u256 } -> bool,
+}
+pub contract LiquityBaseHarness {
+    recv LiquityBaseHarnessMsg {
+        Tcr { active, default, price } -> u256 uses (call: mut Call) { base::tcr(active, default, price) }
+        Below { active, default, price, ccr } -> bool uses (call: mut Call) { base::below_critical(active, default, price, ccr) }
+    }
+}

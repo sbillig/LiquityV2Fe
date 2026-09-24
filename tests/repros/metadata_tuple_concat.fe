@@ -1,0 +1,291 @@
+// SPDX-License-Identifier: MIT
+// Shared byte-span concatenation keeps renderer tuple adapters small.
+use core::ptr::{self, MemSpan, MemSlice, MemArray}
+use std::abi::{Bytes, DynString}
+use std::evm::RawMem
+pub trait Fragment {
+    fn fragment(self) -> MemSpan uses (mem: mut RawMem)
+}
+impl Fragment for Bytes {
+    fn fragment(self) -> MemSpan uses (mem: mut RawMem) { self.payload_span() }
+}
+impl<const N: usize> Fragment for String<N> {
+    fn fragment(self) -> MemSpan uses (mem: mut RawMem) {
+        let p = ptr::alloc_bytes(32)
+        let len = self.len() as u256
+        mem.mstore(addr: p, value: (self as u256) << ((32 - len) * 8))
+        MemSpan::from_raw_parts(ptr: p, len)
+    }
+}
+pub trait Fragments {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem)
+}
+impl<const N: usize> Fragments for String<N> {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(1)
+        *array.ptr_at(0) = self.fragment()
+        array.as_slice()
+    }
+}
+#[inline(never)]
+fn concatenate(_ pieces: MemSlice<MemSpan>) -> DynString uses (mem: mut RawMem) {
+    let mut len: u256 = 0
+    let mut i: u256 = 0
+    while i < pieces.len() {
+        len += (*ptr::offset(pieces.ptr(), i)).len()
+        i += 1
+    }
+    let size = 32 + ((len + 31) / 32) * 32
+    let output = ptr::alloc_bytes(size)
+    mem.mstore(addr: output, value: len)
+    if len % 32 != 0 { mem.mstore(addr: ptr::offset_bytes(output, size - 32), value: 0) }
+    let mut offset: u256 = 32
+    i = 0
+    while i < pieces.len() {
+        let piece = *ptr::offset(pieces.ptr(), i)
+        ptr::copy(dest: ptr::offset_bytes(output, offset), source: piece)
+        offset += piece.len()
+        i += 1
+    }
+    DynString::from_abi_tail(data: output, len, size)
+}
+pub fn join<T: Fragments>(_ value: own T) -> DynString uses (mem: mut RawMem) {
+    concatenate(value.fragments())
+}
+
+impl<A: Fragment, B: Fragment> Fragments for (A, B) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(2)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment> Fragments for (A, B, C) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(3)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment> Fragments for (A, B, C, D) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(4)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment> Fragments for (A, B, C, D, E) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(5)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment> Fragments for (A, B, C, D, E, F) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(6)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment> Fragments for (A, B, C, D, E, F, G) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(7)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment> Fragments for (A, B, C, D, E, F, G, H) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(8)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment> Fragments for (A, B, C, D, E, F, G, H, I) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(9)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(10)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(11)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment, L: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K, L) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(12)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        *array.ptr_at(11) = self.11.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment, L: Fragment, M: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K, L, M) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(13)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        *array.ptr_at(11) = self.11.fragment()
+        *array.ptr_at(12) = self.12.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment, L: Fragment, M: Fragment, N: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K, L, M, N) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(14)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        *array.ptr_at(11) = self.11.fragment()
+        *array.ptr_at(12) = self.12.fragment()
+        *array.ptr_at(13) = self.13.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment, L: Fragment, M: Fragment, N: Fragment, O: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(15)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        *array.ptr_at(11) = self.11.fragment()
+        *array.ptr_at(12) = self.12.fragment()
+        *array.ptr_at(13) = self.13.fragment()
+        *array.ptr_at(14) = self.14.fragment()
+        array.as_slice()
+    }
+}
+impl<A: Fragment, B: Fragment, C: Fragment, D: Fragment, E: Fragment, F: Fragment, G: Fragment, H: Fragment, I: Fragment, J: Fragment, K: Fragment, L: Fragment, M: Fragment, N: Fragment, O: Fragment, P: Fragment> Fragments for (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) {
+    fn fragments(own self) -> MemSlice<MemSpan> uses (mem: mut RawMem) {
+        let array = MemArray<MemSpan>::new_uninit(16)
+        *array.ptr_at(0) = self.0.fragment()
+        *array.ptr_at(1) = self.1.fragment()
+        *array.ptr_at(2) = self.2.fragment()
+        *array.ptr_at(3) = self.3.fragment()
+        *array.ptr_at(4) = self.4.fragment()
+        *array.ptr_at(5) = self.5.fragment()
+        *array.ptr_at(6) = self.6.fragment()
+        *array.ptr_at(7) = self.7.fragment()
+        *array.ptr_at(8) = self.8.fragment()
+        *array.ptr_at(9) = self.9.fragment()
+        *array.ptr_at(10) = self.10.fragment()
+        *array.ptr_at(11) = self.11.fragment()
+        *array.ptr_at(12) = self.12.fragment()
+        *array.ptr_at(13) = self.13.fragment()
+        *array.ptr_at(14) = self.14.fragment()
+        *array.ptr_at(15) = self.15.fragment()
+        array.as_slice()
+    }
+}
+
+use std::abi::sol
+msg ProbeMsg {
+    #[selector = sol("concat(string,string)")]
+    Concat { a: DynString, b: DynString } -> DynString,
+}
+pub contract ConcatProbe {
+    recv ProbeMsg {
+        Concat { a, b } -> DynString uses (mem: mut RawMem) { join((a.as_bytes(), b.as_bytes())) }
+    }
+}

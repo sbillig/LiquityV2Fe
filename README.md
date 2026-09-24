@@ -51,8 +51,8 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), and TroveNFT. The current suite
-passes 70 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers and LiquityBase. The current suite
+passes 96 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 BorrowerOperations/TroveManager and StabilityPool are not yet ported; this pool
@@ -73,11 +73,14 @@ OpenZeppelin, Solady and governance trees are checked for source drift before te
 SortedTroves tests compare exact list and batch storage, search hints, equal-rate
 ordering, access control and stateful randomized operations. TroveNFT tests cover
 ERC721 events and approvals, callback rollback and reentrancy, constructor strings,
-metadata dependency calls and unpadded transfer calldata. Its TroveManager and
-MetadataNFT dependencies remain test doubles; actual SVG/JSON rendering is pending.
+metadata dependency calls and unpadded transfer calldata. The connected metadata test uses actual Fe TroveNFT, MetadataNFT and FixedAssetReader.
+TroveManager remains a test double. SVG/JSON output matches the reference, including
+all image/status variants and pinned production font/logo assets. MetadataNFT creates
+a stateless rendering companion in its constructor to satisfy EIP-170; constructor
+arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes are checked.
 
-The local compiler integrates existing upstream PRs #1592 and #1587; their 10 and
-14 dedicated regression tests pass. See `COMPILER_FIXES.md`. The latest complete
-validation log and source/artifact hashes are `tests/results/sorted-nft.log` and
-`tests/results/sorted-nft.json`. After a new successful logged test run, record its
+The local compiler integrates existing upstream PRs #1592, #1587 and #1585; their 10 and
+14 execution regressions and 218 HIR unit tests pass. See `COMPILER_FIXES.md`. The latest complete
+validation log and source/artifact hashes are `tests/results/metadata-bases.log` and
+`tests/results/metadata-bases.json`. After a new successful logged test run, record its
 provenance with `python3 scripts/record_validation.py <log-path>` before edits.

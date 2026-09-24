@@ -1,0 +1,39 @@
+{
+  "scope": "Pairwise concatenator experiment: MetadataPrimitivesHarness only; not full renderer validation",
+  "command": "LIQUITY_TEST_ARTIFACTS=build/pair-validation forge test --match-contract MetadataPrimitivesParityTest -vv",
+  "compiler_revision": "ce277a26962d60fa0c5fa58ef2219313a922903b",
+  "sources": {
+    "active_pool.fe": "27d9938e12c67dae9fc8b40776c8d3260bf6d13922cc0eab298e3f12c1d58007",
+    "add_remove_managers.fe": "6489927a1e68602631c0dc0e24aba07458081730412178c54ce3a5d34a17374e",
+    "addresses_registry.fe": "95cccd3220c693d93d955f7404e89ad349bc4683d1cb044f574c25e47ed911b9",
+    "bold_token.fe": "8b4b847d41de82ad10199522971d02d1248f6909ada62cff55de642f28093a7d",
+    "coll_surplus_pool.fe": "24663f33a87352f363605839fa8405e19442cd9ef92f0081b763235b88a1a564",
+    "constants.fe": "ccff0f9125fa5887b28837019b3db50117be2306149706bb9c31e7240eeb95cc",
+    "default_pool.fe": "4367d1d1b5a355cae4fa08d6a7714a8cadec17c4f60813edbf1767b07cc6a525",
+    "fixed_asset_reader.fe": "d289bfa8a6776fc5bcedcd349311fe7b8b2963895645206018b3ccf85517a650",
+    "gas_pool.fe": "0141de7ce917aa74626df3c07d02f65c444595ca6efad51ed44bf7e8f5337dfe",
+    "lib.fe": "31803a944d9433887abb7752cb33fe925bc7c771543b671baaa7a2feebbeae85",
+    "liquity_base.fe": "f2d0982fe79b97c131a94651003203ef3f1f62b96789f79a6d7d6b15427d7ec0",
+    "liquity_base_harness.fe": "3e6b67f64719c7c6ee12d4d883688399dbf2333661b12dcd758e458bd1a37736",
+    "liquity_math.fe": "4a417676713031ab13ad03cf47e880695649630a51183e1179a6d817a28e12e1",
+    "manager_harness.fe": "b6112142c908d093f93d231c79bcec7f42d4641d78db87401905a51f5d544ccb",
+    "math_harness.fe": "38e1d14b1e29878b8c87bea90d3e19b33ea3bc5317609b263a13d47892823968",
+    "metadata_bauhaus.fe": "f7cf9ee0167139b0ff5e51aa44cd3633aa0fc4f3f69f7da98606a68edc35cdd5",
+    "metadata_concat.fe": "745662d609e2b4ea9ea40a0a3d97a869223128da04ef077a494c50dd4f280e67",
+    "metadata_harness.fe": "1d3e69740b24078db6817b631c957e27b1281a3fa31e999fa2d96bb1d0ca96b7",
+    "metadata_literals.fe": "7ad256ff222de69bb0a8e33a273d32a65af285beb110fab0b91a2ad9a0e918c1",
+    "metadata_nft.fe": "72b7381da1ca9ddc8d1489a170bc3c3c8963af568a489e74b93167284c655b12",
+    "metadata_string.fe": "b25cbbc7605f0560486b18114d6b7a26ea225cad66aa577c0ecdf5af0a4ee187",
+    "revert_texts.fe": "a86e1fd96b7a3c5a2362947da2ede97ebc25beccf9d43c985b4306bfa81310ce",
+    "sorted_troves.fe": "b43512b413f31f9f4120308564ba14d9c5922d09b355404391f6b4ab48c0e30b",
+    "storage_string.fe": "8db5e89ce8284b6f89165b2e5842a54a4cd04f5695a0fc8b0a188c2944fe1551",
+    "token_calls.fe": "93edb1222e3e6fb8b21c0f4fe2117629302a01603dca0dc226ef486578bfc3ba",
+    "trove_nft.fe": "bbbfe303ca594227e32e314c7a12d5be30423b8a038297d2b5eebb5d52268966",
+    "types.fe": "5d0423b109f955f85a776a46c5749380fca22379c0552e7ea164fe35845340e3"
+  },
+  "artifacts": {
+    "MetadataPrimitivesHarness.abi.json": "df1f99ce8b948b3f8a2f7c24f62e48354f3f824b0d271a86427293c5a0947838",
+    "MetadataPrimitivesHarness.bin": "a1359a3288418119f7e77270c27b796f0cc10cacd473c5dcaa1862a2b630a1ec",
+    "MetadataPrimitivesHarness.runtime.bin": "747830295a341090197321db76e9a22ed6651121c374e2ee3630b068eabdfab2"
+  }
+}

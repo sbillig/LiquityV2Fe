@@ -1,86 +1,79 @@
 # Current work state
 
-The complete Liquity V2 port goal remains active. This is a verified partial
-contract system, not the complete borrowing protocol.
+The complete Liquity V2 port goal remains active. The verified contracts below
+are a partial system; full borrowing, liquidation and stability-pool workflows
+are still outstanding.
 
-## Toolchain and references
+## Validated checkpoint
 
-- `reference/bold`: `c8a5a4ee2e9dc024905856b6698a77d849c68c7e`.
-- `toolchain/fe`, branch `liquity-v2-integration`: upstream/master
-  `f00132a97429f966804d70c40206ef40ebca6960` plus PRs #1592 and #1587.
-- Integration commit `5903581eecd9ce0edf78884feeef087729973e5d`.
-- Upstream/master was rechecked with git ls-remote during the sorted-list/NFT validation and
-  still points to the same base commit. Compiler source worktree is clean.
-- PR #1575 was tested on a separate investigation branch and NOT integrated.
-  The diagnosed storage-borrow-across-CALL pattern is deliberately rejected.
-- Local release compiler rebuilt after integrating #1587. Both upstream fix
-  regression suites pass (10 + 14 tests). No newly authored compiler fixes.
-- No builds/tests are still running.
-- Sandbox shell currently fails with `bwrap: loopback: Failed RTM_NEWADDR`;
-  approved `require_escalated` shell calls have been used throughout.
+`./scripts/test.sh` passes **96 EVM tests and 2 Fe tests**, with 1,024 runs per
+fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
+compiler and reference hashes are recorded in `tests/results/metadata-bases.json`;
+the complete log is `tests/results/metadata-bases.log`.
 
-## Verified current implementation
+Implemented and differentially tested:
+- LiquityMath and protocol constants.
+- AddressesRegistry and GasPool.
+- DefaultPool, CollSurplusPool and ActivePool, including interest, batch fees,
+  shutdown, transfers, permissions and rollback.
+- BoldToken: ERC20, permits, EIP712 and branch/registry permissions.
+- SortedTroves: individual and batch operations, hint search and exact storage.
+- TroveNFT: ERC721, callbacks/reentrancy, metadata, malformed/unpadded ABI inputs.
+- FixedAssetReader: SSTORE2 clipping, cap, empty/invalid pointers and packed assets.
+- MetadataNFT: exact nested base64 JSON/SVG, numeric formatting, checksummed owner,
+  all Bauhaus/status variants, arbitrary token strings and production assets.
+- AddRemoveManagers: authorization, configuration, receiver selection and clearing.
+- LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
-- LiquityMath: every function and LiquityBase interest arithmetic.
-- AddressesRegistry: validation, all getters, one-time registration, ownership,
-  events, malformed ABI rejection.
-- GasPool: reference approval behavior, including false approval return values.
-- DefaultPool: debt/collateral transfers, access control, SafeERC20 and rollback.
-- CollSurplusPool: per-account surplus and real token claims, events and rollback.
-- ActivePool: all functions, ceil aggregate interest, batch fees, upfront fees,
-  yield split/minting, shutdown periods, collateral transfers and access control.
-- BoldToken: all functions, branch/registry permissions, mint/burn/pool movements,
-  ERC20 balances/allowances, EIP2612 permits, EIP712 domains and replay protection.
-- SortedTroves: full individual/batch insertion, removal, relocation, hint search,
-  equal-rate ordering, errors, authorization and Solidity-compatible storage.
-- TroveNFT: full ERC721 behavior, callbacks/reentrancy, constructor name/symbol,
-  dynamic strings, latest-data and metadata dependency calls, events and errors.
-- TroveChange fields/ABI are integrated into ActivePool; LatestTroveData fields/ABI
-  are consumed by TroveNFT. LatestBatchData is still only a field definition.
+The connected metadata test deploys actual Fe TroveNFT, MetadataNFT and
+FixedAssetReader; only the manager/registry/collateral-token dependencies are mocks.
+The renderer creates a stateless MetadataGeometry companion using CREATE in its
+constructor, preserving the original public constructor arguments. Asset and token
+calls remain in the main renderer. The companion only assembles supplied bytes.
+Runtime sizes are 23,721 bytes (MetadataNFT) and 18,538 bytes (companion); main
+initcode is 42,596 bytes before its 32-byte constructor argument. All size limits
+are enforced. Companion deployment and output are tested directly.
 
-`./scripts/test.sh` passes 2 Fe tests and 70 EVM tests (1,024 runs per fuzz test,
-plus cached passing regression inputs where present). See `tests/results/sorted-nft.*`.
-The connected PoolSystem test uses the actual Fe registry, BOLDToken, ActivePool,
-DefaultPool, CollSurplusPool and GasPool together. Collateral token and SP reward
-receiver are Solidity test doubles; BO/TM operations are driven by the test.
-It checks redistribution transfers, surplus claims and a year of real BOLD yield
-minting against the same Solidity system. This does NOT establish complete Trove
-or StabilityPool workflows yet.
+PoolSystem connects real Fe pools, registry and BOLDToken, with mocked BO/TM/SP
+operations. It does not establish a complete borrowing/liquidation deployment.
+TroveChange and LatestTroveData ABI support are integrated; LatestBatchData is
+currently only a field definition.
 
-`build/protocol/*.abi.json` exports audited Solidity-compatible ABI metadata.
-`build/*.abi.json` retains raw compiler ABIs. The only return layout adaptation is
-BoldToken.eip712Domain: seven flat return values via encode_abi_payload/RawOps.
-SortedTroves static tuple outputs use identical flat runtime encoding. Its two
-read-only external-call getters and TroveNFT.tokenURI use STATICCALL despite the
-compiler's conservative nonpayable Call-capability metadata. These refinements,
-unused reference declarations and pure/view metadata differences are explicit in
-`scripts/export_abi.py`; see `tests/results/abi-audit.json`.
+`port_status.json` retains all 102 core/helper sources; `governance_status.json`
+retains all 27 governance sources. Unused generic SVG/JSON/Utils/baseSVG entry
+points remain explicitly partial even though all renderer behavior is tested.
 
-## Next implementation work
+## Compiler and reference
 
-1. MetadataNFT and its full SVG/JSON/asset dependencies, plus manager helpers and
-   LiquityBase shared configuration. TroveNFT currently uses mocked manager and
-   renderer dependencies in its differential tests; rendered metadata is pending.
-2. Full TroveManager and BorrowerOperations: preserve individual/batch debt,
-   shares, interest, management fees, rates, liquidation/redistribution and
-   redemptions. Never substitute a simplified CDP implementation.
-3. StabilityPool, CollateralRegistry, oracle feeds/shutdown, hints/getters,
-   redemption helpers and zappers.
-4. Governance implementation/integration. `governance_status.json` now contains
-   all 27 pinned V2-gov/src source files; main inventory has 102 bold sources.
-5. Complete multi-branch Fe deployment, user lifecycle, liquidations/redemptions,
-   SP compounding/yield, differential/invariant tests, ABI gates, and final audit.
+- Solidity reference: `c8a5a4ee2e9dc024905856b6698a77d849c68c7e`.
+- Latest upstream/master, rechecked with ls-remote:
+  `f00132a97429f966804d70c40206ef40ebca6960`.
+- Compiler integration: `ce277a26962d60fa0c5fa58ef2219313a922903b`, branch
+  `liquity-v2-integration`, including existing PRs #1592, #1587 and #1585.
+- All 218 HIR unit tests and 24 dedicated ABI/event execution regressions pass.
+- No new compiler fixes have been authored. See COMPILER_FIXES.md.
+- Fresh bootstrap verifies the exact integration tree and all pinned ancestors;
+  locally generated merge commit timestamps need not be identical.
+- Reference/dependency sources and five font/logo assets are hash-checked.
 
-Potential future shared-code cleanup: `revert_texts.fe` holds exact reference
-strings as byte literals because inline Fe strings are limited to 31 bytes.
-New handlers must use the right Solidity error payloads, rather than replacing
-these with empty require reverts. Long tuple return lists may require explicit
-flat ABI encoding; always test from Solidity and include the metadata gate.
+The renderer uses pairwise concatenation. Earlier generic tuple/array variants
+were slow to compile and monolithic bytecode exceeded EIP-170. Investigation
+is preserved in `tests/repros/metadata_tuple_concat.*`; PR #1585 alone is not
+claimed to resolve the compile-time issue. Generated geometry/literal sources
+are reproducible with `scripts/generate_bauhaus.py` and
+`scripts/generate_metadata_literals.py`.
 
-Compiler fixes, if newly authored, must each have their own branch, regression
-tests and newsfragment, then be integrated and recorded in COMPILER_FIXES.md.
+## Next work
 
-SortedTroves fuzz harnesses must mirror BorrowerOperations: reinsert before
-changing TroveManager's reported rate. Updating the rate first can invalidate
-self-hints and break ordering in both Fe and Solidity. A deterministic regression
-retains the sequence that exposed this harness error.
+1. Complete CollateralRegistry allocation, fee decay and redemptions. A draft is
+   being developed in a separate temporary project after this checkpoint.
+2. Full TroveManager and BorrowerOperations, including individual/batch debt,
+   shares, interest, fees, liquidation, redistribution and redemptions.
+3. StabilityPool, price feeds/shutdown, hints/getters, helpers and zappers.
+4. Governance and full multi-branch deployment/lifecycle/invariant validation.
+
+Preserve Solidity operation ordering, revert data and rounding. SortedTroves
+reinsertion occurs before updating the manager's reported interest rate.
+Native storage borrows cannot span external calls; raw handles/copies preserve
+storage access ordering without weakening compiler checks. Any newly authored
+compiler fix needs its own branch, regression tests and newsfragment.

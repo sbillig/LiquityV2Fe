@@ -1,0 +1,107 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log, revert_error}
+use std::evm::packed::keccak_packed
+use super::addresses_registry::{RegistryMsg, TroveNFTAddressChanged}
+use super::trove_nft::TroveNFTMsg
+#[error]
+pub struct EmptyManager {}
+#[error]
+pub struct NotBorrower {}
+#[error]
+pub struct NotOwnerNorAddManager {}
+#[error]
+pub struct NotOwnerNorRemoveManager {}
+#[event]
+pub struct AddManagerUpdated {
+    #[indexed]
+    pub id: u256,
+    pub manager: Address,
+}
+#[event]
+pub struct RemoveManagerAndReceiverUpdated {
+    #[indexed]
+    pub id: u256,
+    pub manager: Address,
+    pub receiver: Address,
+}
+// Explicit mapping roots let BorrowerOperations compose this base with its
+// other inherited storage while sharing the exact authorization implementation.
+pub struct ManagerSlots { pub add: u256, pub remove: u256 }
+impl Copy for ManagerSlots {}
+fn map_slot(_ root: u256, _ id: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((id, root)) }
+#[arithmetic(unchecked)]
+fn second_slot(_ slot: u256) -> u256 { slot + 1 }
+pub fn get_add(_ slots: ManagerSlots, _ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
+    Address { inner: storage.sload(map_slot(slots.add, id)) }
+}
+pub fn get_remove(_ slots: ManagerSlots, _ id: u256) -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) {
+    let slot = map_slot(slots.remove, id)
+    (Address { inner: storage.sload(slot) }, Address { inner: storage.sload(second_slot(slot)) })
+}
+pub fn require_borrower(_ nft: Address, _ id: u256) uses (ctx: Ctx, call: mut Call) {
+    if ctx.caller() != nft.static(TroveNFTMsg::OwnerOf { id }) { revert_error(NotBorrower {}) }
+}
+pub fn set_add(_ slots: ManagerSlots, _ id: u256, _ manager: Address) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    storage.sstore(slot: map_slot(slots.add, id), value: manager.inner)
+    log.emit(AddManagerUpdated { id, manager })
+}
+pub fn set_remove(_ slots: ManagerSlots, _ id: u256, _ manager: Address, _ receiver: Address) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    if manager == Address::zero() && receiver != Address::zero() { revert_error(EmptyManager {}) }
+    let slot = map_slot(slots.remove, id)
+    storage.sstore(slot, value: manager.inner)
+    storage.sstore(slot: second_slot(slot), value: receiver.inner)
+    log.emit(RemoveManagerAndReceiverUpdated { id, manager, receiver })
+}
+pub fn wipe(_ slots: ManagerSlots, _ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    set_add(slots, id, Address::zero())
+    set_remove(slots, id, Address::zero(), Address::zero())
+}
+pub fn require_owner_or_add(_ slots: ManagerSlots, _ id: u256, _ owner: Address) uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+    let add = get_add(slots, id)
+    if ctx.caller() != owner && add != Address::zero() && ctx.caller() != add {
+        let (remove, _) = get_remove(slots, id)
+        if ctx.caller() != remove { revert_error(NotOwnerNorAddManager {}) }
+    }
+}
+pub fn require_owner_or_remove(_ slots: ManagerSlots, _ id: u256, _ owner: Address) -> Address uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+    let (manager, receiver) = get_remove(slots, id)
+    if ctx.caller() != owner && ctx.caller() != manager { revert_error(NotOwnerNorRemoveManager {}) }
+    if receiver == Address::zero() || ctx.caller() != manager { owner } else { receiver }
+}
+pub msg AddRemoveManagersMsg {
+    #[selector = sol("addManagerOf(uint256)")]
+    AddManagerOf { id: u256 } -> Address,
+    #[selector = sol("removeManagerReceiverOf(uint256)")]
+    RemoveManagerReceiverOf { id: u256 } -> (Address, Address),
+    #[selector = sol("setAddManager(uint256,address)")]
+    SetAddManager { id: u256, manager: Address },
+    #[selector = sol("setRemoveManager(uint256,address)")]
+    SetRemoveManager { id: u256, manager: Address },
+    #[selector = sol("setRemoveManagerWithReceiver(uint256,address,address)")]
+    SetRemoveManagerWithReceiver { id: u256, manager: Address, receiver: Address },
+}
+pub contract AddRemoveManagers {
+    nft: Address,
+    init(registry: Address) uses (mut nft, call: mut Call, log: mut Log) {
+        nft = registry.static(RegistryMsg::GettroveNFT {})
+        log.emit(TroveNFTAddressChanged { value: nft })
+    }
+    recv AddRemoveManagersMsg {
+        AddManagerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { get_add(ManagerSlots { add: 0, remove: 1 }, id) }
+        RemoveManagerReceiverOf { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) { get_remove(ManagerSlots { add: 0, remove: 1 }, id) }
+        SetAddManager { id, manager } uses (nft, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            require_borrower(nft, id)
+            set_add(ManagerSlots { add: 0, remove: 1 }, id, manager)
+        }
+        SetRemoveManager { id, manager } uses (nft, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let receiver = nft.static(TroveNFTMsg::OwnerOf { id })
+            require_borrower(nft, id)
+            set_remove(ManagerSlots { add: 0, remove: 1 }, id, manager, receiver)
+        }
+        SetRemoveManagerWithReceiver { id, manager, receiver } uses (nft, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            require_borrower(nft, id)
+            set_remove(ManagerSlots { add: 0, remove: 1 }, id, manager, receiver)
+        }
+    }
+}

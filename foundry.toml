@@ -7,6 +7,6 @@ libs = []
 solc_version = "0.8.24"
 evm_version = "cancun"
 optimizer = true
-fs_permissions = [{ access = "read", path = "./build" }]
+fs_permissions = [{ access = "read", path = "./build" }, { access = "read", path = "./reference/bold/contracts/utils/assets" }]
 [profile.default.fuzz]
 runs = 1024

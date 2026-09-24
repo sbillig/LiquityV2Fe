@@ -33,5 +33,12 @@ if clone_at(compiler, manifest['compiler']['url'], manifest['compiler']['upstrea
         run('git', 'fetch', 'upstream', fix['revision'], cwd=compiler)
         run('git', 'branch', fix['branch'], fix['revision'], cwd=compiler)
         run('git', 'merge', '--no-ff', '--no-edit', fix['branch'], cwd=compiler)
+# Local merge commit IDs include local timestamps; pin the complete source tree
+# as well as every input commit so a fresh checkout can reproduce the build.
+actual_tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=compiler, text=True).strip()
+if actual_tree != manifest['compiler']['integration_tree']:
+    raise SystemExit('Compiler source tree differs from the pinned integration')
+for revision in [manifest['compiler']['upstream_master']] + [f['revision'] for f in manifest['compiler']['fixes']]:
+    run('git', 'merge-base', '--is-ancestor', revision, 'HEAD', cwd=compiler)
 run('npm', 'ci', '--prefix', 'crates/tree-sitter-fe', cwd=compiler)
 run('cargo', 'build', '--release', '-p', 'fe', '--locked', cwd=compiler)
