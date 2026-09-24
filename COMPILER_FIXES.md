@@ -114,4 +114,10 @@ recorder require the exact pinned tree and all input commits as ancestors.
 - Integration status: deliberately separate from the protocol compiler while
   its recorded validation runs use the pinned integration tree. The port's
   erroneous constants were corrected and all source literals were checked for
-  excessive width. No PR was published or external message sent.
+  excessive width.
+- Published branch: [fix/reject-oversized-integer-literals](https://github.com/argotorg/fe/tree/fix/reject-oversized-integer-literals),
+  pushed to upstream at the user's request on 2026-09-24. No PR opened yet.
+- Duplicate check: no matching open PR among the 39 open PRs checked. Historical
+  [PR #247](https://github.com/argotorg/fe/pull/247) addressed the same bound in
+  the old analyzer and was merged on 2021-02-15; it should be referenced in a
+  future PR description.
