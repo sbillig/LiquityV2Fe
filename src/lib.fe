@@ -59,3 +59,7 @@ pub use borrower_operations
 pub use module_borroweropening
 pub use module_borroweradjustments
 pub use module_borrowerbatches
+pub use price_feed_core
+pub use weth_price_feed
+pub use reth_price_feed
+pub use wsteth_price_feed

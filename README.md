@@ -51,15 +51,17 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager and BorrowerOperations. The current suite
-passes 166 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations and the WETH/rETH/wstETH price feeds. The current suite
+passes 179 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
 sorted list for liquidation, regular/urgent redemption and shutdown.
 BorrowerOperationsSystem connects actual Fe borrowing operations and compares
 opening, adjustments, batch management, closing and shutdown against Solidity.
-Price inputs and collateral tokens remain controlled test dependencies.
+Oracle response sources and collateral tokens are controlled test dependencies.
+A connected test uses the actual Fe WETHPriceFeed to trigger the complete
+oracle-failure shutdown path through BorrowerOperations and TroveManager.
 
 Use `build/protocol/*.abi.json` for protocol integration after `scripts/test.sh`.
 The ABI export validates every function signature, return shape and emitted event
@@ -111,3 +113,8 @@ module addresses passed to its constructor. See
 [BORROWER_OPERATIONS_DEPLOYMENT.md](BORROWER_OPERATIONS_DEPLOYMENT.md). All public
 runtime selectors and the Solidity storage layout are preserved. The complete
 validation log and source/artifact hashes are in `tests/results/borrower-operations.*`.
+
+The three price feeds retain the original Solidity constructors and public ABI.
+Their tests cover normal/redemption prices, strict staleness, malformed answers,
+precision errors, shutdown fallback and protection against external-call gas
+exhaustion. The latest complete validation is `tests/results/price-feeds.*`.

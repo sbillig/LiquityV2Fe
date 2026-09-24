@@ -1,15 +1,15 @@
 # Current work state
 
 The complete Liquity V2 port goal remains active. The verified contracts below
-are a partial system; production oracle integration, helpers, governance and complete multi-branch
+are a partial system; helpers, zappers, governance and complete multi-branch
 workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **166 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **179 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/borrower-operations.json`;
-the complete log is `tests/results/borrower-operations.log`.
+compiler and reference hashes are recorded in `tests/results/price-feeds.json`;
+the complete log is `tests/results/price-feeds.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -38,6 +38,11 @@ Implemented and differentially tested:
   fee checks and shutdown. Twelve differential tests and two connected-system
   tests cover the full public interface, storage, logs, rollback and ABI failures.
   Fixed module deployment is documented in BORROWER_OPERATIONS_DEPLOYMENT.md.
+- WETHPriceFeed, RETHPriceFeed and WSTETHPriceFeed: primary/redemption pricing,
+  exact deviation boundaries, precision/staleness validation, oracle failure
+  priority, monotonic shutdown fallback, malformed responses and out-of-gas
+  protection. Twelve parity tests and an actual connected oracle-shutdown test
+  pass. Runtime sizes: 1,102, 2,542 and 2,538 bytes respectively.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -60,7 +65,10 @@ SortedTroves, TroveNFT and GasPool. It drives BO-side hooks; collateral and pric
 feed are controlled test contracts. BorrowerOperationsSystem uses the real Fe
 BorrowerOperations and its modules with those actual Fe components. It compares
 user borrowing, rate/batch changes, closing, liquidation, redemption and shutdown
-against an all-Solidity branch, with collateral and price inputs controlled.
+against an all-Solidity branch, with collateral and price inputs controlled. A further connected test deploys
+the actual Fe WETHPriceFeed and verifies oracle failure shuts down both
+BorrowerOperations and TroveManager, freezes the fallback price, rejects new
+borrowing, and still permits closing.
 
 `port_status.json` retains all 102 core/helper sources; `governance_status.json`
 retains all 27 governance sources. Unused generic SVG/JSON/Utils/baseSVG entry
@@ -88,8 +96,8 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Price feeds/shutdown and connection to the actual borrower operations.
-2. Hints/getters, helpers and zappers.
+1. HintHelpers and MultiTroveGetter.
+2. Remaining helpers and zappers.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
@@ -104,6 +112,6 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-The next price-feed draft is isolated in `/tmp/liquity-feed-project` with twelve
-passing differential tests in `/tmp/liquity-feed-inspect-project`. It is not yet
-part of the validated repository checkpoint.
+The next HintHelpers/MultiTroveGetter drafts are isolated in
+`/tmp/liquity-helper-project`, with differential tests in
+`/tmp/liquity-helper-inspect-project`. They are not yet part of this checkpoint.

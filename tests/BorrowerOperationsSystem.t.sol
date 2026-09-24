@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {WETHPriceFeed} from "../reference/bold/contracts/src/PriceFeeds/WETHPriceFeed.sol";
+import {FeedOracle} from "./PriceFeedParity.t.sol";
 import {BorrowerOperations} from "../reference/bold/contracts/src/BorrowerOperations.sol";
 import {AddressesRegistry} from "../reference/bold/contracts/src/AddressesRegistry.sol";
 import {ActivePool} from "../reference/bold/contracts/src/ActivePool.sol";
@@ -30,12 +32,13 @@ contract BorrowerOperationsSystemTest {
     address constant ALICE=address(0xa11ce);address constant BOB=address(0xb0b);address constant ROUTER=address(0x100);
     struct System {
         AddressesRegistry registry;ActivePool active;DefaultPool defaults;StabilityPool sp;BoldToken bold;BorrowerSystemCollateral coll;
-        BorrowerOperations bo;TroveManager manager;TroveNFT nft;SortedTroves sorted;CollSurplusPool surplus;address gasPool;BorrowerSystemPrice feed;
+        WETHPriceFeed oracleFeed;FeedOracle oracle;BorrowerOperations bo;TroveManager manager;TroveNFT nft;SortedTroves sorted;CollSurplusPool surplus;address gasPool;BorrowerSystemPrice feed;
     }
     function code(string memory name,bool fe) internal returns(bytes memory){
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("WETHPriceFeed"))return type(WETHPriceFeed).creationCode;
         if(k==keccak256("BorrowerOperations"))return type(BorrowerOperations).creationCode;
         if(k==keccak256("AddressesRegistry"))return type(AddressesRegistry).creationCode;
         if(k==keccak256("ActivePool"))return type(ActivePool).creationCode;
@@ -51,11 +54,12 @@ contract BorrowerOperationsSystemTest {
     }
     function predict(bytes memory init) internal view returns(address){return address(uint160(uint256(keccak256(abi.encodePacked(hex"ff",address(this),bytes32(0),keccak256(init))))));}
     function deploy(bytes memory init) internal returns(address target){require(init.length<=49152,"initcode");assembly{target:=create2(0,add(init,32),mload(init),0)}require(target.code.length>0&&target.code.length<=24576,"deploy");}
-    function make(bool fe) internal returns(System memory s){
+    function make(bool fe) internal returns(System memory s){return makeWithOracle(fe,false);}
+    function makeWithOracle(bool fe,bool realOracle) internal returns(System memory s){
         s.coll=new BorrowerSystemCollateral();s.feed=new BorrowerSystemPrice();
         s.registry=AddressesRegistry(deploy(bytes.concat(code("AddressesRegistry",fe),abi.encode(address(this),15e17,11e17,1e17,11e17,5e16,1e17))));
         s.bold=BoldToken(deploy(bytes.concat(code("BoldToken",fe),abi.encode(address(this)))));
-        bytes[9] memory init;
+        bytes[10] memory init;
         bytes[3] memory borrowerModules;
         if(fe){
             borrowerModules[0]=bytes.concat(code("BorrowerOpening",true),abi.encode(s.registry));
@@ -69,11 +73,16 @@ contract BorrowerOperationsSystemTest {
             init[3]=bytes.concat(code("TroveManager",true),abi.encode(s.registry,predict(modules[0]),predict(modules[1]),predict(modules[2])));
         }else init[3]=bytes.concat(code("TroveManager",false),abi.encode(s.registry));
         init[4]=bytes.concat(code("TroveNFT",fe),abi.encode(s.registry));init[5]=bytes.concat(code("SortedTroves",fe),abi.encode(s.registry));init[6]=bytes.concat(code("GasPool",fe),abi.encode(s.registry));init[7]=bytes.concat(code("CollSurplusPool",fe),abi.encode(s.registry));
-        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=address(this);vars[16]=address(s.bold);vars[17]=address(s.coll);
+        if(realOracle){
+            s.oracle=new FeedOracle(8,2000e8);
+            init[9]=bytes.concat(code("WETHPriceFeed",fe),abi.encode(s.oracle,3600,predict(init[8])));
+        }
+        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=realOracle?predict(init[9]):address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=address(this);vars[16]=address(s.bold);vars[17]=address(s.coll);
         (bool ok,)=address(s.registry).call(abi.encodePacked(AddressesRegistry.setAddresses.selector,abi.encode(vars)));require(ok);
         if(fe){deploy(modules[0]);deploy(modules[1]);deploy(modules[2]);deploy(borrowerModules[0]);deploy(borrowerModules[1]);deploy(borrowerModules[2]);}
         s.active=ActivePool(deploy(init[0]));s.defaults=DefaultPool(deploy(init[1]));s.sp=StabilityPool(deploy(init[2]));s.manager=TroveManager(deploy(init[3]));s.nft=TroveNFT(deploy(init[4]));s.sorted=SortedTroves(deploy(init[5]));s.gasPool=deploy(init[6]);s.surplus=CollSurplusPool(deploy(init[7]));
         s.bo=BorrowerOperations(deploy(init[8]));
+        if(realOracle)s.oracleFeed=WETHPriceFeed(deploy(init[9]));
         s.bold.setBranchAddresses(address(s.manager),address(s.sp),address(s.bo),address(s.active));s.bold.setCollateralRegistry(address(this));
     }
     function id(address owner,uint index) internal pure returns(uint){return uint(keccak256(abi.encode(owner,owner,index)));}
@@ -124,6 +133,22 @@ contract BorrowerOperationsSystemTest {
     function testActualIndividualAndBatchClosing() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=runClose(make(true));
         TimeVm(address(vm)).warp(1000);bytes32 expected=runClose(make(false));require(actual==expected,"connected closing parity");
+    }
+    function runOracleShutdown(System memory s) internal returns(bytes32){
+        open(s,1,ALICE,20e18,5e16);open(s,2,BOB,10e18,6e16);
+        TimeVm(address(vm)).warp(1100);s.oracle.set(0,1100,0);
+        (uint price,bool failed)=s.oracleFeed.fetchPrice();
+        require(price==2000e18&&failed&&s.bo.hasBeenShutDown()&&s.manager.shutdownTime()==1100,"oracle shutdown");
+        vm.prank(ALICE);(bool ok,bytes memory reason)=address(s.bo).call(abi.encodeCall(s.bo.addColl,(id(ALICE,1),1e18)));
+        require(!ok&&keccak256(reason)==keccak256(abi.encodeWithSignature("IsShutDown()")));
+        s.oracle.set(5000e8,1100,0);(price,failed)=s.oracleFeed.fetchPrice();require(price==2000e18&&!failed,"frozen fallback");
+        vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+        vm.prank(ALICE);s.bo.closeTrove(id(ALICE,1));conserve(s);
+        return keccak256(abi.encode(s.active.getCollBalance(),s.active.getBoldDebt(),s.bold.totalSupply(),s.bold.balanceOf(ALICE),s.coll.balanceOf(ALICE),s.coll.balanceOf(s.gasPool),s.manager.shutdownTime(),s.oracleFeed.lastGoodPrice(),s.oracleFeed.priceSource()));
+    }
+    function testActualOracleFailureShutsDownBorrowingAndManager() public {
+        TimeVm(address(vm)).warp(1000);bytes32 actual=runOracleShutdown(makeWithOracle(true,true));
+        TimeVm(address(vm)).warp(1000);bytes32 expected=runOracleShutdown(makeWithOracle(false,true));require(actual==expected,"connected oracle shutdown parity");
     }
     function testActualBorrowingLiquidationRedemptionAndShutdown() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=run(make(true));

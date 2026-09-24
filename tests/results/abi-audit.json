@@ -324,6 +324,55 @@
     ],
     "function_count": 41
   },
+  "WETHPriceFeed": {
+    "runtime_bytes": 1102,
+    "initcode_bytes_before_arguments": 2534,
+    "compiler_abi_sha256": "001fc38de9470f4305e20575a5d0c0c428e9d24f3dd1f72bc8125c0d2f18a589",
+    "reference_artifact_sha256": "9da49ec133e3f06e2871614f0a281b1e18fc61fab7812551b983e81ddb0728a6",
+    "protocol_abi_sha256": "d8d4f687ebca1aada7337a6bc21580b8c32de84b2eeecce3263e36ed10fb434b",
+    "metadata_refinements": [
+      "ethUsdOracle: static tuple has identical flat runtime encoding",
+      "fetchPrice: static tuple has identical flat runtime encoding",
+      "fetchRedemptionPrice: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 5
+  },
+  "RETHPriceFeed": {
+    "runtime_bytes": 2542,
+    "initcode_bytes_before_arguments": 5370,
+    "compiler_abi_sha256": "1a1a9aef7e19851dad09769c6ecf5d03215836cedac1ce6952b0a28331f9d606",
+    "reference_artifact_sha256": "9f91cb3dc9ca8599753de53744d39c1e188c173340873e8c88ff36aab287e39b",
+    "protocol_abi_sha256": "673b0280caf060e143a8d58072840a743f60999c76c04e5bc7b7c6640dcef611",
+    "metadata_refinements": [
+      "ethUsdOracle: static tuple has identical flat runtime encoding",
+      "rEthEthOracle: static tuple has identical flat runtime encoding",
+      "fetchPrice: static tuple has identical flat runtime encoding",
+      "fetchRedemptionPrice: static tuple has identical flat runtime encoding",
+      "RETH_ETH_DEVIATION_THRESHOLD(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 8
+  },
+  "WSTETHPriceFeed": {
+    "runtime_bytes": 2538,
+    "initcode_bytes_before_arguments": 5365,
+    "compiler_abi_sha256": "c42a35faf252912e005ffbd6615e5beaef2b43a2475897f378ccc0f7e70b7532",
+    "reference_artifact_sha256": "9f407dde51c17088609039e6dafe5ef738fa4058a9f162ca35d3ef2eb3c47c0e",
+    "protocol_abi_sha256": "54a8d43752e68d4d742b404a9e887c16f26a303aee38c5e860b99e22c1257078",
+    "metadata_refinements": [
+      "ethUsdOracle: static tuple has identical flat runtime encoding",
+      "stEthUsdOracle: static tuple has identical flat runtime encoding",
+      "fetchPrice: static tuple has identical flat runtime encoding",
+      "fetchRedemptionPrice: static tuple has identical flat runtime encoding",
+      "STETH_USD_DEVIATION_THRESHOLD(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 8
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,

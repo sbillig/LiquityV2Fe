@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
+use super::price_feed_core as feeds
+pub msg WETHPriceFeedMsg {
+    #[selector = sol("priceSource()")]
+    Source -> u8,
+    #[selector = sol("lastGoodPrice()")]
+    LastGood -> u256,
+    #[selector = sol("ethUsdOracle()")]
+    EthOracle -> (Address, u256, u8),
+    #[selector = sol("fetchPrice()")]
+    Price -> (u256, bool),
+    #[selector = sol("fetchRedemptionPrice()")]
+    Redemption -> (u256, bool),
+}
+pub contract WETHPriceFeed {
+    init(eth: Address, threshold: u256, borrower: Address) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
+        feeds::init_base(eth, threshold, borrower)
+        let _initial = feeds::weth()
+        assert(feeds::source() == 0)
+    }
+    recv WETHPriceFeedMsg {
+        Source -> u8 uses (storage: RawStorage) { feeds::source() }
+        LastGood -> u256 uses (storage: RawStorage) { storage.sload(1) }
+        EthOracle -> (Address, u256, u8) uses (storage: RawStorage) { feeds::oracle(2) }
+        Price -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { feeds::weth() }
+        Redemption -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { feeds::weth() }
+    }
+}

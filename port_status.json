@@ -523,29 +523,72 @@
     ]
   },
   "contracts/src/PriceFeeds/CompositePriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/price_feed_core.fe"
+    ],
+    "verification": [
+      "tests/PriceFeedParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/price-feeds.log",
+      "tests/results/price-feeds.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/PriceFeeds/MainnetPriceFeedBase.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/price_feed_core.fe"
+    ],
+    "verification": [
+      "tests/PriceFeedParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/price-feeds.log",
+      "tests/results/price-feeds.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/PriceFeeds/RETHPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/price_feed_core.fe",
+      "src/reth_price_feed.fe"
+    ],
+    "verification": [
+      "tests/PriceFeedParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/price-feeds.log",
+      "tests/results/price-feeds.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/PriceFeeds/WETHPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/price_feed_core.fe",
+      "src/weth_price_feed.fe"
+    ],
+    "verification": [
+      "tests/PriceFeedParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/price-feeds.log",
+      "tests/results/price-feeds.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/PriceFeeds/WSTETHPriceFeed.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/price_feed_core.fe",
+      "src/wsteth_price_feed.fe"
+    ],
+    "verification": [
+      "tests/PriceFeedParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/price-feeds.log",
+      "tests/results/price-feeds.json",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/RedemptionHelper.sol": {
     "status": "pending",

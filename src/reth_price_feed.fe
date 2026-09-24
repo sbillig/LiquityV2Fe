@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
+use super::price_feed_core as feeds
+pub msg RETHPriceFeedMsg {
+    #[selector = sol("priceSource()")]
+    Source -> u8,
+    #[selector = sol("lastGoodPrice()")]
+    LastGood -> u256,
+    #[selector = sol("ethUsdOracle()")]
+    EthOracle -> (Address, u256, u8),
+    #[selector = sol("rateProviderAddress()")]
+    Provider -> Address,
+    #[selector = sol("rEthEthOracle()")]
+    LstOracle -> (Address, u256, u8),
+    #[selector = sol("RETH_ETH_DEVIATION_THRESHOLD()")]
+    Deviation -> u256,
+    #[selector = sol("fetchPrice()")]
+    Price -> (u256, bool),
+    #[selector = sol("fetchRedemptionPrice()")]
+    Redemption -> (u256, bool),
+}
+pub contract RETHPriceFeed {
+    init(eth: Address, lst: Address, provider: Address, eth_threshold: u256, lst_threshold: u256, borrower: Address) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
+        feeds::init_base(eth, eth_threshold, borrower)
+        storage.sstore(slot: 6, value: provider.inner)
+        feeds::init_oracle(7, lst, lst_threshold)
+        let _initial = feeds::composite(true, false)
+        assert(feeds::source() == 0)
+    }
+    recv RETHPriceFeedMsg {
+        Source -> u8 uses (storage: RawStorage) { feeds::source() }
+        LastGood -> u256 uses (storage: RawStorage) { storage.sload(1) }
+        EthOracle -> (Address, u256, u8) uses (storage: RawStorage) { feeds::oracle(2) }
+        Provider -> Address uses (storage: RawStorage) { feeds::address_at(6) }
+        LstOracle -> (Address, u256, u8) uses (storage: RawStorage) { feeds::oracle(7) }
+        Deviation -> u256 { 20000000000000000 }
+        Price -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { feeds::composite(true, false) }
+        Redemption -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { feeds::composite(true, true) }
+    }
+}
