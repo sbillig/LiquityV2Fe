@@ -35,3 +35,7 @@ pub use trove_data
 pub use trove_data_harness
 
 pub use trove_state
+
+pub use trove_hooks
+pub use trove_events
+pub use trove_hook_harness

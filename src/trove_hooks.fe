@@ -1,0 +1,225 @@
+// SPDX-License-Identifier: BUSL-1.1
+// BorrowerOperations hooks. Authorization is enforced by the public manager receiver.
+use core::num::IntDowncast
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use super::trove_data as data
+use super::trove_state as state
+use super::trove_events as events
+use super::types::TroveChange
+use super::default_pool::DefaultPoolMsg
+use super::trove_nft::TroveNFTMsg
+use super::sorted_troves::SortedTrovesMsg
+#[error]
+pub struct CallerNotBorrowerOperations {}
+#[error]
+pub struct OnlyOneTroveLeft {}
+pub fn require_bo() uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+    if ctx.caller().inner != storage.sload(4) { revert_error(CallerNotBorrowerOperations {}) }
+}
+pub fn move_rewards(_ debt: u256, _ coll: u256) uses (ctx: Ctx, storage: RawStorage, call: mut Call) {
+    let pool = Address { inner: storage.sload(1) }
+    if debt > 0 { if ctx.extcodesize(pool) == 0 { std::evm::revert(()) }
+        pool.call(DefaultPoolMsg::DecreaseBoldDebt { amount: debt }) }
+    if coll > 0 { if ctx.extcodesize(pool) == 0 { std::evm::revert(()) }
+        pool.call(DefaultPoolMsg::SendCollToActivePool { amount: coll }) }
+}
+pub fn open(_ owner: Address, _ id: u256, _ change: TroveChange, _ rate: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let stake = data::new_stake(change.coll_increase)
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base, value: change.debt_increase + change.upfront_fee)
+    storage.sstore(slot: base + 1, value: change.coll_increase)
+    storage.sstore(slot: base + 2, value: stake)
+    state::set_status(id, 1)
+    state::set_trove_index(id, storage.sload(data::TROVE_IDS).downcast_truncate())
+    state::set_trove_debt_time(id, ctx.timestamp())
+    state::set_trove_rate_time(id, ctx.timestamp())
+    storage.sstore(slot: base + 4, value: rate)
+    state::array_push(data::TROVE_IDS, id)
+    storage.sstore(slot: data::TOTAL_STAKES, value: storage.sload(data::TOTAL_STAKES) + stake)
+    let nft = Address { inner: storage.sload(3) }
+    if ctx.extcodesize(nft) == 0 { std::evm::revert(()) }
+    nft.call(TroveNFTMsg::Mint { to: owner, id })
+    data::update_rewards(id)
+    events::updated(id, change.debt_increase + change.upfront_fee, change.coll_increase, stake, rate)
+    log.emit(events::TroveOperation { id, operation: 0, rate, redist_debt: 0, upfront: change.upfront_fee, debt_change: change.debt_increase.downcast_truncate(), redist_coll: 0, coll_change: change.coll_increase.downcast_truncate() })
+}
+pub fn open_batch(_ owner: Address, _ id: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let stake = data::new_stake(change.coll_increase)
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base + 1, value: change.coll_increase)
+    storage.sstore(slot: base + 2, value: stake)
+    state::set_status(id, 1)
+    state::set_trove_index(id, storage.sload(data::TROVE_IDS).downcast_truncate())
+    state::set_manager(id, manager)
+    state::set_trove_rate_time(id, ctx.timestamp())
+    data::update_rewards(id)
+    state::array_push(data::TROVE_IDS, id)
+    assert(change.debt_increase > 0)
+    state::update_batch_shares(id, manager, change, change.debt_increase, batch_coll, batch_debt, true)
+    storage.sstore(slot: data::TOTAL_STAKES, value: storage.sload(data::TOTAL_STAKES) + stake)
+    let nft = Address { inner: storage.sload(3) }
+    if ctx.extcodesize(nft) == 0 { std::evm::revert(()) }
+    nft.call(TroveNFTMsg::Mint { to: owner, id })
+    events::batched(id, manager, change.coll_increase, stake)
+    log.emit(events::TroveOperation { id, operation: 7, rate: data::load_batch(manager).annual_rate, redist_debt: 0, upfront: change.upfront_fee, debt_change: change.debt_increase.downcast_truncate(), redist_coll: 0, coll_change: change.coll_increase.downcast_truncate() })
+    events::current_batch(manager, 4, 0)
+}
+pub fn activate(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+    state::set_status(id, 1)
+    if storage.sload(data::LAST_ZOMBIE) == id { storage.sstore(slot: data::LAST_ZOMBIE, value: 0) }
+}
+pub fn adjust_rate(_ id: u256, _ coll: u256, _ debt: u256, _ rate: u256, _ change: TroveChange) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base + 1, value: coll)
+    storage.sstore(slot: base, value: debt)
+    storage.sstore(slot: base + 4, value: rate)
+    state::set_trove_debt_time(id, ctx.timestamp())
+    state::set_trove_rate_time(id, ctx.timestamp())
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    data::update_rewards(id)
+    events::updated(id, debt, coll, data::load_trove(id).stake, rate)
+    events::operation(id, 3, rate, change, 0, 0)
+}
+pub fn adjust(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base + 1, value: coll)
+    storage.sstore(slot: base, value: debt)
+    state::set_trove_debt_time(id, ctx.timestamp())
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    let stake = data::update_stake(id, coll)
+    data::update_rewards(id)
+    events::updated(id, debt, coll, stake, data::load_trove(id).annual_rate)
+    events::changed(id, 2, data::load_trove(id).annual_rate, change)
+}
+pub fn close(_ id: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256, _ status: u8) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call) {
+    let len = storage.sload(data::TROVE_IDS)
+    if storage.sload(data::SHUTDOWN) == 0 || status == 3 {
+        if len == 1 { revert_error(OnlyOneTroveLeft {}) }
+    }
+    state::remove_trove_id(id, len)
+    let t = data::load_trove(id)
+    let sorted = Address { inner: storage.sload(9) }
+    if manager != Address::zero() {
+        if t.status == 1 { if ctx.extcodesize(sorted) == 0 { std::evm::revert(()) }
+            sorted.call(SortedTrovesMsg::RemoveFromBatch { id }) }
+        else if t.status == 4 && storage.sload(data::LAST_ZOMBIE) == id { storage.sstore(slot: data::LAST_ZOMBIE, value: 0) }
+        state::remove_batch_shares(id, change.coll_decrease, change.debt_decrease, change, manager, batch_coll, batch_debt)
+    } else {
+        if t.status == 1 { if ctx.extcodesize(sorted) == 0 { std::evm::revert(()) }
+            sorted.call(SortedTrovesMsg::Remove { id }) }
+        else if t.status == 4 && storage.sload(data::LAST_ZOMBIE) == id { storage.sstore(slot: data::LAST_ZOMBIE, value: 0) }
+    }
+    storage.sstore(slot: data::TOTAL_STAKES, value: storage.sload(data::TOTAL_STAKES) - t.stake)
+    let base = data::trove_slot(id)
+    // Solidity delete clears declared fields, retaining unused packed padding.
+    storage.sstore(slot: base, value: 0)
+    storage.sstore(slot: base + 1, value: 0)
+    storage.sstore(slot: base + 2, value: 0)
+    state::set_status(id, 0)
+    state::set_trove_index(id, 0)
+    state::set_trove_debt_time(id, 0)
+    state::set_trove_rate_time(id, 0)
+    storage.sstore(slot: base + 4, value: 0)
+    state::set_manager(id, Address::zero())
+    storage.sstore(slot: base + 6, value: 0)
+    state::set_status(id, status)
+    let rewards = data::reward_slot(id)
+    storage.sstore(slot: rewards, value: 0)
+    storage.sstore(slot: rewards + 1, value: 0)
+    let nft = Address { inner: storage.sload(3) }
+    if ctx.extcodesize(nft) == 0 { std::evm::revert(()) }
+    nft.call(TroveNFTMsg::Burn { id })
+}
+pub fn on_close(_ id: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    close(id, change, manager, batch_coll, batch_debt, 2)
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    log.emit(events::TroveUpdated { id, debt: 0, coll: 0, stake: 0, rate: 0, l_coll: 0, l_debt: 0 })
+    events::changed(id, 1, 0, change)
+    if manager != Address::zero() { events::current_batch(manager, 5, 0) }
+}
+pub fn adjust_batch(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    storage.sstore(slot: data::trove_slot(id) + 1, value: coll)
+    data::update_rewards(id)
+    let stake = data::update_stake(id, coll)
+    assert(debt > 0)
+    state::update_batch_shares(id, manager, change, debt, batch_coll, batch_debt, true)
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    events::batched(id, manager, coll, stake)
+    events::changed(id, 2, data::load_batch(manager).annual_rate, change)
+    events::current_batch(manager, 6, 0)
+}
+pub fn apply_interest(_ id: u256, _ coll: u256, _ debt: u256, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256, _ change: TroveChange) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    storage.sstore(slot: data::trove_slot(id) + 1, value: coll)
+    if manager != Address::zero() {
+        assert(debt > 0)
+        state::update_batch_shares(id, manager, change, debt, batch_coll, batch_debt, true)
+        events::batch(manager, 3, batch_debt, batch_coll, 0)
+    } else {
+        storage.sstore(slot: data::trove_slot(id), value: debt)
+        state::set_trove_debt_time(id, ctx.timestamp())
+    }
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    data::update_rewards(id)
+    let t = data::load_trove(id)
+    events::updated(id, debt, coll, t.stake, t.annual_rate)
+    events::changed(id, 4, data::load_trove(id).annual_rate, change)
+}
+pub fn register_batch(_ manager: Address, _ rate: u256, _ fee: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let base = data::batch_slot(manager)
+    state::set_batch_index(manager, storage.sload(data::BATCH_IDS).downcast_truncate())
+    storage.sstore(slot: base + 3, value: rate)
+    storage.sstore(slot: base + 4, value: fee)
+    state::set_batch_rate_time(manager, ctx.timestamp())
+    state::array_push(data::BATCH_IDS, manager.inner)
+    log.emit(events::BatchUpdated { manager, operation: 0, debt: 0, coll: 0, rate, fee, shares: 0, upfront: 0 })
+}
+pub fn lower_fee(_ manager: Address, _ coll: u256, _ debt: u256, _ fee: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let base = data::batch_slot(manager)
+    storage.sstore(slot: base + 1, value: coll)
+    storage.sstore(slot: base, value: debt)
+    storage.sstore(slot: base + 4, value: fee)
+    state::set_batch_debt_time(manager, ctx.timestamp())
+    events::batch(manager, 1, debt, coll, 0)
+}
+pub fn set_batch_rate(_ manager: Address, _ coll: u256, _ debt: u256, _ rate: u256, _ upfront: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let base = data::batch_slot(manager)
+    storage.sstore(slot: base + 1, value: coll)
+    storage.sstore(slot: base, value: debt)
+    storage.sstore(slot: base + 3, value: rate)
+    state::set_batch_debt_time(manager, ctx.timestamp())
+    state::set_batch_rate_time(manager, ctx.timestamp())
+    events::batch(manager, 2, debt, coll, upfront)
+}
+pub fn set_batch(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let mut change = change
+    data::update_rewards(id)
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base, value: 0)
+    storage.sstore(slot: base + 4, value: 0)
+    state::set_trove_debt_time(id, 0)
+    storage.sstore(slot: base + 1, value: coll)
+    state::set_manager(id, manager)
+    state::set_trove_rate_time(id, ctx.timestamp())
+    change.coll_increase = coll - change.applied_redist_coll_gain
+    change.debt_increase = debt - change.applied_redist_bold_debt_gain - change.upfront_fee
+    assert(debt > 0)
+    state::update_batch_shares(id, manager, change, debt, batch_coll, batch_debt, true)
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    events::batched(id, manager, coll, data::load_trove(id).stake)
+    events::operation(id, 8, data::load_batch(manager).annual_rate, change, 0, 0)
+    events::current_batch(manager, 4, 0)
+}
+pub fn remove_batch(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange, _ manager: Address, _ batch_coll: u256, _ batch_debt: u256, _ rate: u256) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    state::remove_batch_shares(id, coll, debt, change, manager, batch_coll, batch_debt)
+    let base = data::trove_slot(id)
+    storage.sstore(slot: base, value: debt)
+    storage.sstore(slot: base + 1, value: coll)
+    state::set_trove_debt_time(id, ctx.timestamp())
+    storage.sstore(slot: base + 4, value: rate)
+    state::set_trove_rate_time(id, ctx.timestamp())
+    data::update_rewards(id)
+    move_rewards(change.applied_redist_bold_debt_gain, change.applied_redist_coll_gain)
+    events::updated(id, debt, coll, data::load_trove(id).stake, rate)
+    events::operation(id, 9, rate, change, 0, 0)
+    events::current_batch(manager, 5, 0)
+}

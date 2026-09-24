@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: MIT
+use core::num::IntDowncast
+use std::evm::{Address, Log, RawMem, RawStorage}
+use super::trove_data as data
+use super::types::TroveChange
+#[event]
+pub struct Liquidation { pub debt_offset: u256, pub debt_redistributed: u256, pub bold_gas: u256, pub coll_gas: u256, pub coll_sp: u256, pub coll_redistributed: u256, pub surplus: u256, pub l_coll: u256, pub l_debt: u256, pub price: u256 }
+#[event]
+pub struct Redemption { pub attempted: u256, pub actual: u256, pub coll: u256, pub fee: u256, pub price: u256, pub redemption_price: u256 }
+#[event]
+pub struct TroveUpdated {
+    #[indexed]
+    pub id: u256,
+    pub debt: u256, pub coll: u256, pub stake: u256, pub rate: u256, pub l_coll: u256, pub l_debt: u256,
+}
+#[event]
+pub struct TroveOperation {
+    #[indexed]
+    pub id: u256,
+    pub operation: u8, pub rate: u256, pub redist_debt: u256, pub upfront: u256, pub debt_change: i256, pub redist_coll: u256, pub coll_change: i256,
+}
+#[event]
+pub struct RedemptionFeePaidToTrove {
+    #[indexed]
+    pub id: u256,
+    pub fee: u256,
+}
+#[event]
+pub struct BatchUpdated {
+    #[indexed]
+    pub manager: Address,
+    pub operation: u8, pub debt: u256, pub coll: u256, pub rate: u256, pub fee: u256, pub shares: u256, pub upfront: u256,
+}
+#[event]
+pub struct BatchedTroveUpdated {
+    #[indexed]
+    pub id: u256,
+    pub manager: Address, pub shares: u256, pub coll: u256, pub stake: u256, pub l_coll: u256, pub l_debt: u256,
+}
+pub fn updated(_ id: u256, _ debt: u256, _ coll: u256, _ stake: u256, _ rate: u256) uses (storage: RawStorage, log: mut Log) {
+    log.emit(TroveUpdated { id, debt, coll, stake, rate, l_coll: storage.sload(data::L_COLL), l_debt: storage.sload(data::L_DEBT) })
+}
+pub fn batched(_ id: u256, _ manager: Address, _ coll: u256, _ stake: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
+    log.emit(BatchedTroveUpdated { id, manager, shares: data::load_trove(id).batch_shares, coll, stake, l_coll: storage.sload(data::L_COLL), l_debt: storage.sload(data::L_DEBT) })
+}
+pub fn batch(_ manager: Address, _ operation: u8, _ debt: u256, _ coll: u256, _ upfront: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
+    let b = data::load_batch(manager)
+    log.emit(BatchUpdated { manager, operation, debt, coll, rate: b.annual_rate, fee: b.annual_fee, shares: b.total_shares, upfront })
+}
+pub fn current_batch(_ manager: Address, _ operation: u8, _ upfront: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
+    let b = data::load_batch(manager)
+    batch(manager, operation, b.debt, b.coll, upfront)
+}
+pub fn operation(_ id: u256, _ op: u8, _ rate: u256, _ change: TroveChange, _ debt: i256, _ coll: i256) uses (log: mut Log) {
+    log.emit(TroveOperation { id, operation: op, rate, redist_debt: change.applied_redist_bold_debt_gain, upfront: change.upfront_fee, debt_change: debt, redist_coll: change.applied_redist_coll_gain, coll_change: coll })
+}
+pub fn changed(_ id: u256, _ op: u8, _ rate: u256, _ change: TroveChange) uses (log: mut Log) {
+    let inc_debt: i256 = change.debt_increase.downcast_truncate()
+    let dec_debt: i256 = change.debt_decrease.downcast_truncate()
+    let inc_coll: i256 = change.coll_increase.downcast_truncate()
+    let dec_coll: i256 = change.coll_decrease.downcast_truncate()
+    operation(id, op, rate, change, inc_debt - dec_debt, inc_coll - dec_coll)
+}

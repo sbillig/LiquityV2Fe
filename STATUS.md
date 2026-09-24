@@ -6,10 +6,10 @@ are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **130 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **138 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/trove-core.json`;
-the complete log is `tests/results/trove-core.log`.
+compiler and reference hashes are recorded in `tests/results/trove-hooks.json`;
+the complete log is `tests/results/trove-hooks.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -86,7 +86,10 @@ Native storage borrows cannot span external calls; raw handles/copies preserve
 storage access ordering without weakening compiler checks. Any newly authored
 compiler fix needs its own branch, regression tests and newsfragment.
 
-TroveManager hook drafts are in `/tmp/liquity-next-trove-hooks.fe` and
-`/tmp/liquity-next-trove-events.fe`, with isolated project
-`/tmp/liquity-tm-hooks-project` and test draft
-`/tmp/liquity-next-TroveHooksParity.t.sol`. They are not part of this checkpoint.
+TroveManager borrower hooks are integrated and pass eight differential tests,
+including batch migration, events, packed storage preservation, dependency failure
+rollback and arbitrary arithmetic errors. Full suite: 138 EVM + 2 Fe tests.
+The public manager, liquidation and redemption drafts are being compiled/tested
+in `/tmp/liquity-tm-manager-project` and `/tmp/liquity-tm-compact-project`.
+They are not yet integrated or claimed complete. Public manager requires size
+validation; shared helpers are being tested with `#[inline(never)]`.
