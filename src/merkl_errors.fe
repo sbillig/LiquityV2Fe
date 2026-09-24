@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+use std::abi::DynString
+use std::evm::RawMem
+pub fn weights() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x57726f6e67207765696774687300000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 13))
+}
+pub fn sender() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x556e6956344d65726b6c496e69746961746976653a20696e76616c69642d7365)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6e64657200000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 36))
+}
+pub fn funds() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x556e6956344d65726b6c496e69746961746976653a206e6f2066756e64732066)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6f722063616d706169676e000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 43))
+}

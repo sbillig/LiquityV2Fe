@@ -6,10 +6,10 @@ complete multi-branch workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **274 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **291 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/governance-foundation.json`;
-the complete log is `tests/results/governance-foundation.log`.
+compiler and reference hashes are recorded in `tests/results/initiatives.json`;
+the complete log is `tests/results/initiatives.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -153,79 +153,36 @@ flash callbacks, fees, ABI validation and rollback. Eight connected lifecycles
 use the actual Fe provider, Curve/UniV3 exchanges, WETH/LST zappers and core;
 only the external vault and trading venues are mocked. ABI and size audits pass.
 
-### Governance preparation
+### Governance progress
 
-UserProxy, UserProxyFactory, DoubleLinkedList and governance Math/VotingPower are prepared in
-`/tmp/liquity-governance-project`. Ten differential tests pass in
-`/tmp/liquity-governance-inspect`, including six fuzz properties at 1,024 cases
-each. Coverage includes CREATE2 predictions and exact EIP-1167 clone bytecode,
-immutable configuration through delegatecall, duplicate deployment, stake and
-unstake reward accounting, accumulated balances, permit failure and lazy
-calldata validation, authorization, token return rules, ETH failure rollback,
-signed arithmetic boundaries and voting-power overflow. Stateful list tests
-check sixteen sequential insertions, sentinel links, duplicate IDs and missing
-successors against Solidity after every operation. The isolated ABI audit
-passes for both contracts (`/tmp/liquity-governance-audit`). Build artifacts and
-logs: `/tmp/liquity-governance-build`, `/tmp/liquity-governance-parity.log`.
-These governance changes are not yet integrated into the root checkpoint.
-The main Governance contract, initiatives, and remaining governance utilities
-still require porting and connected validation. No new compiler fix was needed.
+The root checkpoint now includes UserProxy, UserProxyFactory, Math/VotingPower,
+DoubleLinkedList, BribeInitiative, CurveV2GaugeRewards, UniV4MerklRewards, the
+OpenZeppelin 5 token helper, and the Governance snapshot/status calculation
+module. The latter is tested against actual Solidity Governance through a
+harness; it is not the complete Governance contract. All 291 EVM tests and two
+Fe tests pass, as do the ABI and size audits. Main Governance and full-system
+completion remain outstanding.
 
-The governance foundation is integrated and included in the root checkpoint:
-UserProxy, UserProxyFactory, Math/VotingPower and DoubleLinkedList. All ten
-foundation tests, the full combined suite and the ABI audit pass.
+The remaining Governance work is prepared in `/tmp/liquity-governance-project`,
+with tests in `/tmp/liquity-governance-inspect`, artifacts in
+`/tmp/liquity-governance-build`, and an isolated ABI audit in
+`/tmp/liquity-governance-audit`. Three staking tests, two hook tests, three action
+tests and three voting/reset tests pass against Solidity. Their logs are
+`/tmp/liquity-governance-{staking,hooks,actions,voting}-parity.log`. They cover
+real reentrancy, atomic rollback, offset rounding, event bytes/order, cached
+storage during callbacks, cutoff rules and disabled-initiative reset. The hook
+helper can also be built quickly through `/tmp/liquity-hooks-project`.
 
-BribeInitiative is now prepared separately in `/tmp/liquity-governance-project`
-(`bribe_initiative.fe`, `bribe_state.fe`, `bribe_errors.fe`). Three initial parity
-tests in `/tmp/liquity-governance-inspect/test/BribeInitiativeParity.t.sol` pass:
-fuzzed two-user distribution/conservation, allocation history and revert order,
-and malformed claim arrays. It uses a separate `governance_token.fe` helper for
-the pinned OpenZeppelin 5 custom errors; all three token-helper parity tests pass,
-including arbitrary return/revert data, optional bools and missing code.
-The isolated ABI audit now includes BribeInitiative and passes. Its unused
-AddressInsufficientBalance error is declaration-only because token calls carry
-zero ETH. Authorization-only hooks preserve the nonpayable guard despite Fe's
-view capability metadata. Logs: `/tmp/liquity-bribe-parity.log` and
-`/tmp/liquity-governance-token-parity.log`. Bribe integration still needs broader
-batch rollback/reentrancy, event/storage and Curve gauge extension validation.
-These sources must stay outside root until the active foundation run is recorded.
+A composed `governance.fe` now connects these modules, the original constructor
+arguments, getters, ownership and initial registration. Its current build is
+`/tmp/liquity-governance-build.log`; it has not yet been size-checked or tested as
+a whole. Multicall is still missing. The memory-address wrappers distinguish
+ordinary function and constructor decoder allocation bounds; verify their
+extreme lengths and eager address validation against Solidity before integration.
 
-The isolated initiative work now also includes `curve_gauge_rewards.fe`.
-Bribe deposit/claim behavior is shared through helpers in `bribe_initiative.fe`;
-the extension adds the reference remainder at storage slot 4, threshold queuing,
-balance cap, approval and gauge callback. All 20 tests in the isolated governance
-project pass after rebuilding the current source (`/tmp/liquity-governance-all-prepared.log`).
-This includes four Bribe tests (event bytes/order and batch/token failure atomic
-rollback added), three Curve gauge tests (threshold/cap, authorization/rollback,
-zero duration and arithmetic boundaries), three OZ5 token tests and the ten
-foundation tests. The ABI audit passes for UserProxy, UserProxyFactory,
-BribeInitiative and CurveV2GaugeRewards. Broader reentrancy/storage validation,
-UniV4MerklRewards and main Governance implementation remain pending; do not
-claim initiative completion solely from these initial tests.
-
-UniV4MerklRewards is now prepared in the isolated governance project
-(`merkl_rewards.fe`, `merkl_errors.fe`). Four differential tests cover exact
-640-byte campaign data, approval/conditions setup, campaign tuple fields,
-thresholds, uint32 timestamp/duration truncation, authorization/no-op hooks,
-claim assertions, weight-sum overflow and threshold-before-timestamp-overflow
-ordering. All 24 isolated governance tests pass together in
-`/tmp/liquity-governance-all-prepared.log`; the five-contract ABI audit passes.
-Specific Merkl test log: `/tmp/liquity-merkl-parity.log`. Main Governance and
-remaining utilities are still unimplemented. Initiative integration and broader
-connected/reentrancy verification are still required.
-The prepared recorder `/tmp/liquity-record-governance-foundation.py` will record
-the running 274-test root checkpoint only after the full test/ABI log proves
-success; it also updates the foundation inventory without marking Governance
-or initiatives complete.
-
-Governance snapshot/status calculations are prepared separately in
-`governance_snapshots.fe`, exercised through `GovernanceSnapshotHarness` against
-actual Solidity Governance. Three tests pass (`/tmp/liquity-governance-snapshot-parity.log`):
-fuzzed epoch/snapshot updates, threshold overflow and initiative-status precedence.
-They compare return/revert bytes and global/initiative storage slots after writes.
-The authoritative Solidity storage layout is `/tmp/liquity-governance-storage.json`:
-reentrancy slot 0, owner slot 1, accrued BOLD 2, global snapshot 3–4, initiative
+Authoritative Solidity storage layout: `/tmp/liquity-governance-storage.json`.
+Slots: reentrancy 0, owner 1, accrued BOLD 2, global snapshot 3–4, initiative
 snapshots mapping 5, global state 6–7, users mapping 8, initiatives mapping 9,
-allocations nested mapping 10 and registration mapping 11. The module is only one
-part of Governance; staking/allocation/registration/claim orchestration, hooks,
-reentrancy and multicall are still required before the contract is complete.
+allocations nested mapping 10, registration mapping 11. The source inventory
+keeps Governance partial until the complete contract and connected workflows
+are validated. No new compiler fix was needed for this governance work.

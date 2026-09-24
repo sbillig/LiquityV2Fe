@@ -1,0 +1,113 @@
+// SPDX-License-Identifier: MIT
+use core::abi::Decode
+use std::abi::{sol, Sol, DynArray}
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
+use super::bribe_state as state
+use super::bribe_errors as error
+use super::governance_list as list
+use super::governance_token::{safe_transfer, safe_transfer_from}
+use super::revert_texts::require
+pub msg GovernanceCalls {
+    #[selector = sol("EPOCH_START()")]
+    Start -> u256,
+    #[selector = sol("EPOCH_DURATION()")]
+    Duration -> u256,
+    #[selector = sol("epoch()")]
+    Epoch -> u256,
+}
+pub struct Config { pub governance: Address, pub bold: Address, pub token: Address, pub start: u256, pub duration: u256 }
+impl Copy for Config {}
+pub msg BribeMsg {
+    #[selector = sol("governance()")]
+    Governance -> Address,
+    #[selector = sol("bold()")]
+    Bold -> Address,
+    #[selector = sol("bribeToken()")]
+    Token -> Address,
+    #[selector = sol("bribeByEpoch(uint256)")]
+    Bribe { epoch: u256 } -> (u256, u256, u256),
+    #[selector = sol("claimedBribeAtEpoch(address,uint256)")]
+    Claimed { user: Address, epoch: u256 } -> bool,
+    #[selector = sol("totalLQTYAllocatedByEpoch(uint256)")]
+    Total { epoch: u256 } -> (u256, u256, u256, u256),
+    #[selector = sol("lqtyAllocatedByUserAtEpoch(address,uint256)")]
+    User { user: Address, epoch: u256 } -> (u256, u256, u256, u256),
+    #[selector = sol("getMostRecentUserEpoch(address)")]
+    UserEpoch { user: Address } -> u256,
+    #[selector = sol("getMostRecentTotalEpoch()")]
+    TotalEpoch -> u256,
+    #[selector = sol("depositBribe(uint256,uint256,uint256)")]
+    Deposit { bold: u256, token: u256, epoch: u256 },
+    #[selector = sol("claimBribes((uint256,uint256,uint256)[])")]
+    Claim { data: DynArray<(u256, u256, u256)> } -> (u256, u256),
+    #[selector = sol("onRegisterInitiative(uint256)")]
+    Register { epoch: u256 },
+    #[selector = sol("onUnregisterInitiative(uint256)")]
+    Unregister { epoch: u256 },
+    #[selector = sol("onClaimForInitiative(uint256,uint256)")]
+    OnClaim { epoch: u256, amount: u256 },
+    #[selector = sol("onAfterAllocateLQTY(uint256,address,(uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256))")]
+    Allocate { epoch: u256, user: Address, user_state: (u256, u256, u256, u256), allocation: (u256, u256, u256, u256, u256), initiative: (u256, u256, u256, u256, u256) },
+}
+pub fn auth(_ cfg: Config) uses (ctx: Ctx, mem: mut RawMem) { require(ctx.caller() == cfg.governance, error::sender()) }
+pub fn deposit(_ cfg: Config, _ bold: u256, _ token: u256, _ epoch: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let current = cfg.governance.static(GovernanceCalls::Epoch {})
+            require(epoch >= current, error::past())
+            let s = state::map(epoch, 0)
+            storage.sstore(slot: s, value: storage.sload(s) + bold)
+            storage.sstore(slot: s + 1, value: storage.sload(s + 1) + token)
+            log.emit(state::DepositBribe { depositor: ctx.caller(), bold_amount: bold, bribe_token_amount: token, epoch })
+            safe_transfer_from(cfg.bold, ctx.caller(), ctx.address(), bold)
+            safe_transfer_from(cfg.token, ctx.caller(), ctx.address(), token)
+}
+pub fn claim_all(_ cfg: Config, _ data: DynArray<(u256, u256, u256)>) -> (u256, u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let mut bold = 0
+            let mut token = 0
+            let mut i = 0
+            while i < data.len() {
+                let (epoch, user_epoch, total_epoch) = <(u256, u256, u256) as Decode<Sol>>::decode_from(data.encoded_span(), 32 + i * 96)
+                let current = cfg.governance.static(GovernanceCalls::Epoch {})
+                let (b, t) = state::claim(ctx.caller(), epoch, user_epoch, total_epoch, current, cfg.start, cfg.duration)
+                bold += b
+                token += t
+                i += 1
+            }
+            if bold != 0 { safe_transfer(cfg.bold, ctx.caller(), bold) }
+            if token != 0 { safe_transfer(cfg.token, ctx.caller(), token) }
+            (bold, token)
+}
+pub contract BribeInitiative {
+    cfg: Config,
+    init(governance: Address, bold: Address, token: Address) uses (mut cfg, call: mut Call, mem: mut RawMem) {
+        require(token != bold, error::same_token())
+        let start = governance.static(GovernanceCalls::Start {})
+        let duration = governance.static(GovernanceCalls::Duration {})
+        cfg = Config { governance, bold, token, start, duration }
+    }
+    recv BribeMsg {
+        Governance -> Address uses (cfg) { cfg.governance }
+        Bold -> Address uses (cfg) { cfg.bold }
+        Token -> Address uses (cfg) { cfg.token }
+        Bribe { epoch } -> (u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { state::bribe(epoch) }
+        Claimed { user, epoch } -> bool uses (mem: mut RawMem, storage: RawStorage) { state::claimed(user, epoch) }
+        Total { epoch } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(2, epoch) }
+        User { user, epoch } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(state::user_root(user), epoch) }
+        UserEpoch { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { list::head(state::user_root(user)) }
+        TotalEpoch -> u256 uses (mem: mut RawMem, storage: RawStorage) { list::head(2) }
+        Register { epoch } uses (cfg, ctx: Ctx, mem: mut RawMem) { auth(cfg) }
+        Unregister { epoch } uses (cfg, ctx: Ctx, mem: mut RawMem) { auth(cfg) }
+        OnClaim { epoch, amount } uses (cfg, ctx: Ctx, mem: mut RawMem) { auth(cfg) }
+        Allocate { epoch, user, user_state, allocation, initiative } uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            auth(cfg)
+            state::allocate(epoch, user, allocation.0, allocation.1, initiative.0, initiative.1)
+        }
+        Deposit { bold, token, epoch } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            deposit(cfg, bold, token, epoch)
+        }
+        Claim { data } -> (u256, u256) uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            claim_all(cfg, data)
+        }
+    }
+}

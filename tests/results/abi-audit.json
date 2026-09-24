@@ -711,6 +711,90 @@
     "compiler_standard_errors": [],
     "function_count": 3
   },
+  "BribeInitiative": {
+    "runtime_bytes": 6718,
+    "initcode_bytes_before_arguments": 7785,
+    "compiler_abi_sha256": "4a39363f39fdd8a4713e8c0e081d151aea9028c2abcdfc2fd890f9a805ed1410",
+    "reference_artifact_sha256": "f074e698c697064f7388331c38fb044856539716992953ee1a1982a766a356db",
+    "protocol_abi_sha256": "9de461eaf45ec306d59827107280a5c80ab785f124bde5eb0262aa364722b40a",
+    "metadata_refinements": [
+      "bribeByEpoch: static tuple has identical flat runtime encoding",
+      "totalLQTYAllocatedByEpoch: static tuple has identical flat runtime encoding",
+      "lqtyAllocatedByUserAtEpoch: static tuple has identical flat runtime encoding",
+      "onRegisterInitiative: authorization-only callback preserves nonpayable guard",
+      "onUnregisterInitiative: authorization-only callback preserves nonpayable guard",
+      "onClaimForInitiative: authorization-only callback preserves nonpayable guard",
+      "claimBribes: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [
+      [
+        "error",
+        "AddressInsufficientBalance(address)"
+      ]
+    ],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 15
+  },
+  "CurveV2GaugeRewards": {
+    "runtime_bytes": 8439,
+    "initcode_bytes_before_arguments": 9628,
+    "compiler_abi_sha256": "1bd779ad5c52363334839d19beaff50a0eeb9540fc4a69888f5b423e78cbdbe2",
+    "reference_artifact_sha256": "74d9541cdbce0ec2f131b52f7eff26daa1ce3fa4461378969ce3a13aa2f6998b",
+    "protocol_abi_sha256": "0214e620a97ee68ea0da64102eebdf223809a4ed46087e24c0ad6cb8d9c31d81",
+    "metadata_refinements": [
+      "bribeByEpoch: static tuple has identical flat runtime encoding",
+      "totalLQTYAllocatedByEpoch: static tuple has identical flat runtime encoding",
+      "lqtyAllocatedByUserAtEpoch: static tuple has identical flat runtime encoding",
+      "onRegisterInitiative: authorization-only callback preserves nonpayable guard",
+      "onUnregisterInitiative: authorization-only callback preserves nonpayable guard",
+      "claimBribes: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [
+      [
+        "error",
+        "AddressInsufficientBalance(address)"
+      ]
+    ],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 18
+  },
+  "UniV4MerklRewards": {
+    "runtime_bytes": 3534,
+    "initcode_bytes_before_arguments": 5535,
+    "compiler_abi_sha256": "6bc9d07ef739c228f6079ad44627d635ec1f546fc48e6fbffa387e2106417a69",
+    "reference_artifact_sha256": "b6243cbc1e4cb033e2cb73e8c444bf313e49c1d55ab92a317218fe2cbb6d1480",
+    "protocol_abi_sha256": "d4eaf5ffc7ba3141413ded3fd9077208a7582fc794967c00ab75555ff39e24f7",
+    "metadata_refinements": [
+      "onRegisterInitiative: no-op or authorization-only callback preserves nonpayable guard",
+      "onUnregisterInitiative: no-op or authorization-only callback preserves nonpayable guard",
+      "onAfterAllocateLQTY: no-op or authorization-only callback preserves nonpayable guard",
+      "onClaimForInitiative: no-op or authorization-only callback preserves nonpayable guard",
+      "CAMPAIGN_TYPE(): pure implementation of view function",
+      "LIQUITY_FUNDS_SAFE(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 15
+  },
   "LeverageWETHZapperLeverage": {
     "implementation_companion": true,
     "runtime_bytes": 10606,

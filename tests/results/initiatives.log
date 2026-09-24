@@ -1,0 +1,625 @@
+Verified 102 reference source files at c8a5a4ee2e9dc024905856b6698a77d849c68c7e
+Verified 4 pinned dependency source trees
+Verified 5 pinned NFT metadata assets
+PASS  [0.0002s] debt_and_interest
+PASS  [0.0002s] decay_and_rounding
+
+test result: ok. 2 passed; 0 failed
+Wrote build/ActivePool.bin
+Wrote build/ActivePool.runtime.bin
+Wrote build/AddRemoveManagers.bin
+Wrote build/AddRemoveManagers.runtime.bin
+Wrote build/AddressesRegistry.bin
+Wrote build/AddressesRegistry.runtime.bin
+Wrote build/BalancerFlashLoan.bin
+Wrote build/BalancerFlashLoan.runtime.bin
+Wrote build/BoldToken.bin
+Wrote build/BoldToken.runtime.bin
+Wrote build/BorrowerAdjustments.bin
+Wrote build/BorrowerAdjustments.runtime.bin
+Wrote build/BorrowerBatches.bin
+Wrote build/BorrowerBatches.runtime.bin
+Wrote build/BorrowerOpening.bin
+Wrote build/BorrowerOpening.runtime.bin
+Wrote build/BorrowerOperations.bin
+Wrote build/BorrowerOperations.runtime.bin
+Wrote build/BribeInitiative.bin
+Wrote build/BribeInitiative.runtime.bin
+Wrote build/CollSurplusPool.bin
+Wrote build/CollSurplusPool.runtime.bin
+Wrote build/CollateralRegistry.bin
+Wrote build/CollateralRegistry.runtime.bin
+Wrote build/Constants.bin
+Wrote build/Constants.runtime.bin
+Wrote build/CurveExchange.bin
+Wrote build/CurveExchange.runtime.bin
+Wrote build/CurveV2GaugeRewards.bin
+Wrote build/CurveV2GaugeRewards.runtime.bin
+Wrote build/DebtInFrontHelper.bin
+Wrote build/DebtInFrontHelper.runtime.bin
+Wrote build/DefaultPool.bin
+Wrote build/DefaultPool.runtime.bin
+Wrote build/FixedAssetReader.bin
+Wrote build/FixedAssetReader.runtime.bin
+Wrote build/GasCompZapper.bin
+Wrote build/GasCompZapper.runtime.bin
+Wrote build/GasPool.bin
+Wrote build/GasPool.runtime.bin
+Wrote build/GovernanceListHarness.bin
+Wrote build/GovernanceListHarness.runtime.bin
+Wrote build/GovernanceMathHarness.bin
+Wrote build/GovernanceMathHarness.runtime.bin
+Wrote build/GovernanceSnapshotHarness.bin
+Wrote build/GovernanceSnapshotHarness.runtime.bin
+Wrote build/GovernanceTokenHarness.bin
+Wrote build/GovernanceTokenHarness.runtime.bin
+Wrote build/HintHelpers.bin
+Wrote build/HintHelpers.runtime.bin
+Wrote build/HybridCurveUniV3Exchange.bin
+Wrote build/HybridCurveUniV3Exchange.runtime.bin
+Wrote build/HybridCurveUniV3ExchangeHelpers.bin
+Wrote build/HybridCurveUniV3ExchangeHelpers.runtime.bin
+Wrote build/HybridCurveUniV3ExchangeHelpersV2.bin
+Wrote build/HybridCurveUniV3ExchangeHelpersV2.runtime.bin
+Wrote build/LeftoversHarness.bin
+Wrote build/LeftoversHarness.runtime.bin
+Wrote build/LeverageLSTZapper.bin
+Wrote build/LeverageLSTZapper.runtime.bin
+Wrote build/LeverageLSTZapperLeverage.bin
+Wrote build/LeverageLSTZapperLeverage.runtime.bin
+Wrote build/LeverageWETHZapper.bin
+Wrote build/LeverageWETHZapper.runtime.bin
+Wrote build/LeverageWETHZapperLeverage.bin
+Wrote build/LeverageWETHZapperLeverage.runtime.bin
+Wrote build/LiquityBase.bin
+Wrote build/LiquityBase.runtime.bin
+Wrote build/LiquityBaseHarness.bin
+Wrote build/LiquityBaseHarness.runtime.bin
+Wrote build/ManagerHarness.bin
+Wrote build/ManagerHarness.runtime.bin
+Wrote build/MathHarness.bin
+Wrote build/MathHarness.runtime.bin
+Wrote build/MemoryArrayHarness.bin
+Wrote build/MemoryArrayHarness.runtime.bin
+Wrote build/MetadataGeometry.bin
+Wrote build/MetadataGeometry.runtime.bin
+Wrote build/MetadataNFT.bin
+Wrote build/MetadataNFT.runtime.bin
+Wrote build/MetadataPrimitivesHarness.bin
+Wrote build/MetadataPrimitivesHarness.runtime.bin
+Wrote build/MultiTroveGetter.bin
+Wrote build/MultiTroveGetter.runtime.bin
+Wrote build/RETHPriceFeed.bin
+Wrote build/RETHPriceFeed.runtime.bin
+Wrote build/RedemptionHelper.bin
+Wrote build/RedemptionHelper.runtime.bin
+Wrote build/SortedTroves.bin
+Wrote build/SortedTroves.runtime.bin
+Wrote build/StabilityPool.bin
+Wrote build/StabilityPool.runtime.bin
+Wrote build/TroveDataHarness.bin
+Wrote build/TroveDataHarness.runtime.bin
+Wrote build/TroveHookHarness.bin
+Wrote build/TroveHookHarness.runtime.bin
+Wrote build/TroveLiquidations.bin
+Wrote build/TroveLiquidations.runtime.bin
+Wrote build/TroveManager.bin
+Wrote build/TroveManager.runtime.bin
+Wrote build/TroveNFT.bin
+Wrote build/TroveNFT.runtime.bin
+Wrote build/TroveOperations.bin
+Wrote build/TroveOperations.runtime.bin
+Wrote build/TroveRedemptions.bin
+Wrote build/TroveRedemptions.runtime.bin
+Wrote build/UniPriceConverter.bin
+Wrote build/UniPriceConverter.runtime.bin
+Wrote build/UniV3Exchange.bin
+Wrote build/UniV3Exchange.runtime.bin
+Wrote build/UniV4MerklRewards.bin
+Wrote build/UniV4MerklRewards.runtime.bin
+Wrote build/UserProxy.bin
+Wrote build/UserProxy.runtime.bin
+Wrote build/UserProxyFactory.bin
+Wrote build/UserProxyFactory.runtime.bin
+Wrote build/WETHPriceFeed.bin
+Wrote build/WETHPriceFeed.runtime.bin
+Wrote build/WETHZapper.bin
+Wrote build/WETHZapper.runtime.bin
+Wrote build/WSTETHPriceFeed.bin
+Wrote build/WSTETHPriceFeed.runtime.bin
+Wrote build/ActivePool.abi.json
+Wrote build/AddRemoveManagers.abi.json
+Wrote build/AddressesRegistry.abi.json
+Wrote build/BalancerFlashLoan.abi.json
+Wrote build/BoldToken.abi.json
+Wrote build/BorrowerOperations.abi.json
+Wrote build/BribeInitiative.abi.json
+Wrote build/CollSurplusPool.abi.json
+Wrote build/CollateralRegistry.abi.json
+Wrote build/Constants.abi.json
+Wrote build/CurveExchange.abi.json
+Wrote build/CurveV2GaugeRewards.abi.json
+Wrote build/DebtInFrontHelper.abi.json
+Wrote build/DefaultPool.abi.json
+Wrote build/FixedAssetReader.abi.json
+Wrote build/GasCompZapper.abi.json
+Wrote build/GasPool.abi.json
+Wrote build/GovernanceListHarness.abi.json
+Wrote build/GovernanceMathHarness.abi.json
+Wrote build/GovernanceSnapshotHarness.abi.json
+Wrote build/GovernanceTokenHarness.abi.json
+Wrote build/HintHelpers.abi.json
+Wrote build/HybridCurveUniV3Exchange.abi.json
+Wrote build/HybridCurveUniV3ExchangeHelpers.abi.json
+Wrote build/HybridCurveUniV3ExchangeHelpersV2.abi.json
+Wrote build/LeftoversHarness.abi.json
+Wrote build/LeverageLSTZapper.abi.json
+Wrote build/LeverageLSTZapperLeverage.abi.json
+Wrote build/LeverageWETHZapper.abi.json
+Wrote build/LeverageWETHZapperLeverage.abi.json
+Wrote build/LiquityBase.abi.json
+Wrote build/LiquityBaseHarness.abi.json
+Wrote build/ManagerHarness.abi.json
+Wrote build/MathHarness.abi.json
+Wrote build/UniV4MerklRewards.abi.json
+Wrote build/MetadataGeometry.abi.json
+Wrote build/MetadataPrimitivesHarness.abi.json
+Wrote build/MetadataNFT.abi.json
+Wrote build/BorrowerAdjustments.abi.json
+Wrote build/BorrowerBatches.abi.json
+Wrote build/BorrowerOpening.abi.json
+Warning: skipping recv arm `batchLiquidateTroves`: selector signature is unknown; use `#[selector = sol("name(types)")]` to include it in the ABI
+Wrote build/TroveLiquidations.abi.json
+Wrote build/TroveOperations.abi.json
+Wrote build/TroveRedemptions.abi.json
+Wrote build/MultiTroveGetter.abi.json
+Warning: skipping recv arm `Redeem`: selector signature is unknown; use `#[selector = sol("name(types)")]` to include it in the ABI
+Wrote build/RedemptionHelper.abi.json
+Wrote build/RETHPriceFeed.abi.json
+Wrote build/SortedTroves.abi.json
+Wrote build/StabilityPool.abi.json
+Wrote build/TroveDataHarness.abi.json
+Wrote build/TroveHookHarness.abi.json
+Warning: skipping recv arm `batchLiquidateTroves`: selector signature is unknown; use `#[selector = sol("name(types)")]` to include it in the ABI
+Wrote build/TroveManager.abi.json
+Warning: skipping recv arm `batchLiquidateTroves`: selector signature is unknown; use `#[selector = sol("name(types)")]` to include it in the ABI
+Wrote build/MemoryArrayHarness.abi.json
+Wrote build/TroveNFT.abi.json
+Wrote build/UniPriceConverter.abi.json
+Wrote build/UniV3Exchange.abi.json
+Warning: skipping recv arm `StakePermit`: selector signature is unknown; use `#[selector = sol("name(types)")]` to include it in the ABI
+Wrote build/UserProxy.abi.json
+Wrote build/UserProxyFactory.abi.json
+Wrote build/WETHPriceFeed.abi.json
+Wrote build/WETHZapper.abi.json
+Wrote build/WSTETHPriceFeed.abi.json
+No files changed, compilation skipped
+
+Ran 1 test for tests/TroveManagerSystem.t.sol:TroveManagerSystemTest
+[PASS] testActualManagerLiquidationRedemptionAndShutdown() (gas: 49741656)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 22.75ms (21.32ms CPU time)
+
+Ran 4 tests for tests/AddRemoveManagersParity.t.sol:AddRemoveManagersParityTest
+[PASS] testErrorsAndMissingNFT() (gas: 100105)
+[PASS] testFuzzConfiguration(uint256,address,address,address) (runs: 1024, μ: 213903, ~: 214054)
+[PASS] testPermissionMatrixAndWipe() (gas: 9928633)
+[PASS] testPublicSettersAndOwnershipTransfer() (gas: 220608)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 236.58ms (264.76ms CPU time)
+
+Ran 1 test for tests/PoolSystem.t.sol:PoolSystemTest
+[PASS] testConnectedPoolsAndBoldMatchReference() (gas: 12961623)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.43ms (4.15ms CPU time)
+
+Ran 4 tests for tests/LiquityBaseParity.t.sol:LiquityBaseParityTest
+[PASS] testConstructorStorageAndGetters() (gas: 49895)
+[PASS] testDependencyFailures() (gas: 488881)
+[PASS] testFuzzTotalsAndRatios(uint256,uint256,uint256,uint256,uint256,uint256) (runs: 1024, μ: 171804, ~: 171311)
+[PASS] testThresholdBoundaryAndZeroDebt() (gas: 105499)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 259.47ms (258.48ms CPU time)
+
+Ran 3 tests for tests/TroveMemoryArrayParity.t.sol:TroveMemoryArrayParityTest
+[PASS] testFuzzMemoryArrayHeader(uint256,uint256) (runs: 1024, μ: 14339, ~: 14263)
+[PASS] testFuzzMemoryArrayPayload(uint256[]) (runs: 1024, μ: 60936, ~: 61039)
+[PASS] testMemoryAllocationBoundaries() (gas: 33851)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 356.46ms (671.39ms CPU time)
+
+Ran 10 tests for tests/MathParity.t.sol:MathParityTest
+[PASS] testBoundaries() (gas: 64099)
+[PASS] testFuzzBasic(uint256,uint256) (runs: 1024, μ: 20073, ~: 20102)
+[PASS] testFuzzCR(uint256,uint256,uint256) (runs: 1024, μ: 12283, ~: 12326)
+[PASS] testFuzzCRBounded(uint128,uint256,uint128) (runs: 1024, μ: 12587, ~: 12590)
+[PASS] testFuzzDecay(uint256,uint256) (runs: 1024, μ: 32209, ~: 38475)
+[PASS] testFuzzInterest(uint256,uint256) (runs: 1024, μ: 12024, ~: 12069)
+[PASS] testFuzzInterestBounded(uint128,uint64) (runs: 1024, μ: 12206, ~: 12206)
+[PASS] testFuzzMul(uint256,uint256) (runs: 1024, μ: 12317, ~: 12402)
+[PASS] testFuzzMulBounded(uint128,uint128) (runs: 1024, μ: 12624, ~: 12624)
+[PASS] testFuzzPow(uint256,uint256) (runs: 1024, μ: 20716, ~: 15336)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 359.48ms (619.27ms CPU time)
+
+Ran 4 tests for tests/GovernanceMathParity.t.sol:GovernanceMathParityTest
+[PASS] testArithmeticBoundaries() (gas: 215726)
+[PASS] testFuzzBoundedVotes(uint96,uint96,uint256) (runs: 1024, μ: 12281, ~: 12235)
+[PASS] testFuzzSignedArithmetic(uint256,int256) (runs: 1024, μ: 19417, ~: 19146)
+[PASS] testFuzzVotes(uint256,uint256,uint256) (runs: 1024, μ: 12142, ~: 12129)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 140.65ms (251.61ms CPU time)
+
+Ran 3 tests for tests/GovernanceSnapshotParity.t.sol:GovernanceSnapshotParityTest
+[PASS] testFuzzSnapshotsAndUpdates(uint96,uint96,uint32,uint16) (runs: 1024, μ: 113718, ~: 113336)
+[PASS] testFuzzThresholdOverflow(uint256,uint256) (runs: 1024, μ: 11087, ~: 11276)
+[PASS] testStatusPrecedenceAndZeroVotes() (gas: 521696)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 481.86ms (518.03ms CPU time)
+
+Ran 21 tests for tests/BorrowerOperationsSystem.t.sol:BorrowerOperationsSystemTest
+[PASS] testActualBalancerCurveLST() (gas: 93673645)
+[PASS] testActualBalancerCurveLSTFlashClose() (gas: 93784623)
+[PASS] testActualBalancerCurveWETH() (gas: 92534631)
+[PASS] testActualBalancerCurveWETHFlashClose() (gas: 92643290)
+[PASS] testActualBalancerUniLST() (gas: 94317723)
+[PASS] testActualBalancerUniLSTFlashClose() (gas: 94428303)
+[PASS] testActualBalancerUniWETH() (gas: 93138592)
+[PASS] testActualBalancerUniWETHFlashClose() (gas: 93246896)
+[PASS] testActualBorrowingLiquidationRedemptionAndShutdown() (gas: 76895357)
+[PASS] testActualCurveLST() (gas: 92065751)
+[PASS] testActualCurveWETH() (gas: 90927934)
+[PASS] testActualFeePredictionsAndSortedGetter() (gas: 84464368)
+[PASS] testActualGasCompZapperLifecycle() (gas: 83343249)
+[PASS] testActualIndividualAndBatchClosing() (gas: 74382448)
+[PASS] testActualLeverageLST() (gas: 88733650)
+[PASS] testActualLeverageWETH() (gas: 87597394)
+[PASS] testActualOracleFailureShutsDownBorrowingAndManager() (gas: 74691293)
+[PASS] testActualRedemptionHelperAndCollateralRegistry() (gas: 81537381)
+[PASS] testActualUniLST() (gas: 92708295)
+[PASS] testActualUniWETH() (gas: 91530335)
+[PASS] testActualWETHZapperLifecycle() (gas: 82216417)
+Suite result: ok. 21 passed; 0 failed; 0 skipped; finished in 728.17ms (724.97ms CPU time)
+
+Ran 4 tests for tests/FixedAssetReaderParity.t.sol:FixedAssetReaderParityTest
+[PASS] testBoundaryAndNonSstorePointers() (gas: 7157187)
+[PASS] testFuzzSlices(bytes,uint128,uint128) (runs: 1025, μ: 856141, ~: 853211)
+[PASS] testMaximumEndCap() (gas: 9985705)
+[PASS] testMismatchedConstructorLengths() (gas: 114127)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 820.77ms (866.77ms CPU time)
+
+Ran 3 tests for tests/CurveGaugeRewardsParity.t.sol:CurveGaugeRewardsParityTest
+[PASS] testFuzzQueueThresholdAndBalanceCap(uint64,uint96) (runs: 1024, μ: 5430301, ~: 5416268)
+[PASS] testGaugeFailureRollbackAndAuthorization() (gas: 5386167)
+[PASS] testZeroDurationAndThresholdOverflow() (gas: 15750467)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 978.08ms (977.93ms CPU time)
+
+Ran 9 tests for tests/HelperParity.t.sol:HelperParityTest
+[PASS] testAllFeePredictionsAndCooldown() (gas: 384046)
+[PASS] testDebtHintsSignedOverflowAndInvalidIndex() (gas: 1392706)
+[PASS] testDebtRangesAndExcludedTrove() (gas: 7193764)
+[PASS] testFuzzFees(uint128,uint128) (runs: 1024, μ: 56713, ~: 57159)
+[PASS] testFuzzHints(uint128,uint8,uint256) (runs: 1024, μ: 104440, ~: 84851)
+[PASS] testHugeAllocationPanic() (gas: 3405639)
+[PASS] testInvalidIndexAndZeroDebtShortCircuit() (gas: 96916)
+[PASS] testLegacyConstants() (gas: 122596)
+[PASS] testSortedPaginationAndPaddedDebtResults() (gas: 6342327)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 706.36ms (705.19ms CPU time)
+
+Ran 3 tests for tests/GovernanceTokenParity.t.sol:GovernanceTokenParityTest
+[PASS] testFuzzTokenReturndata(bytes,bool) (runs: 1024, μ: 180694, ~: 184301)
+[PASS] testMissingCode() (gas: 28048)
+[PASS] testOptionalBoolAndMalformedReturn() (gas: 4065666)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 840.06ms (843.78ms CPU time)
+
+Ran 9 tests for tests/RedemptionHelperParity.t.sol:RedemptionHelperParityTest
+[PASS] testConstructorFailuresAndMalformedArrays() (gas: 1963196)
+[PASS] testConstructorGettersAndStorage() (gas: 357148)
+[PASS] testExternalFailureMalformedReturnsAndRollback() (gas: 733239)
+[PASS] testFalseBoldReturnAndFailedCollateralReturn() (gas: 609380)
+[PASS] testFuzzSimulation(uint96,uint96,uint8,bool,bool) (runs: 1024, μ: 462652, ~: 458534)
+[PASS] testMemoryArrayDecoderAndMalformedCall() (gas: 170905)
+[PASS] testRedemptionTransfersRefundAndSlippageRollback() (gas: 692887)
+[PASS] testSimulationLimitsZombieAndFallback() (gas: 2100338)
+[PASS] testZeroAmountAndArithmeticFailures() (gas: 540073)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.49s (1.51s CPU time)
+
+Ran 12 tests for tests/PriceFeedParity.t.sol:PriceFeedParityTest
+[PASS] testCanonicalMalformedAndGasFailures() (gas: 2428847)
+[PASS] testConstructorInvalidPrecisionAndOracleFailure() (gas: 2430079)
+[PASS] testFuzzRethMarketCanonical(uint96,uint96,bool) (runs: 1024, μ: 2076383, ~: 2073231)
+[PASS] testFuzzWstethMarketCanonical(uint96,uint96,bool) (runs: 1024, μ: 2061080, ~: 2069642)
+[PASS] testMalformedRoundDataIsNotCaught() (gas: 1301168)
+[PASS] testOraclePriorityAndSignedAnswers() (gas: 4198425)
+[PASS] testOutOfGasDoesNotShutdown() (gas: 2269523)
+[PASS] testRedemptionDeviationBoundaries() (gas: 4839487)
+[PASS] testRethFallbackMonotonicAndSecondFailure() (gas: 2284863)
+[PASS] testRollbackWhenShutdownFails() (gas: 2087573)
+[PASS] testWethPricesStalenessAndFreeze() (gas: 1403842)
+[PASS] testWstethFallbackAndEthFailure() (gas: 2225459)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 1.41s (2.13s CPU time)
+
+Ran 1 test for tests/StabilityPoolSystem.t.sol:StabilityPoolSystemTest
+[PASS] testActualPoolsInterestOffsetAndClaims() (gas: 17598506)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 7.23ms (6.91ms CPU time)
+
+Ran 7 tests for tests/DefaultPoolParity.t.sol:DefaultPoolParityTest
+[PASS] testCodelessActivePool() (gas: 53517)
+[PASS] testCodelessToken() (gas: 47757)
+[PASS] testFuzzCollateral(uint128,uint128) (runs: 1024, μ: 213761, ~: 193412)
+[PASS] testFuzzDebt(uint256,uint256) (runs: 1024, μ: 123169, ~: 123004)
+[PASS] testFuzzUnauthorized(address,uint256) (runs: 1024, μ: 95602, ~: 95605)
+[PASS] testGetters() (gas: 120862)
+[PASS] testOptionalReturnAndRollback() (gas: 453698)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.16s (2.00s CPU time)
+
+Ran 12 tests for tests/BorrowerOperationsParity.t.sol:BorrowerOperationsParityTest
+[PASS] testAdjustmentsAndRepaymentCap() (gas: 1627277)
+[PASS] testDelegatesBatchChangesAndClose() (gas: 1257143)
+[PASS] testDependencyRollbackAndPermissionOrder() (gas: 408252)
+[PASS] testFuzzAdjustment(uint96,uint96,bool,bool,bool) (runs: 1025, μ: 304559, ~: 306709)
+[PASS] testFuzzOpening(uint128,uint128,uint128,uint128) (runs: 1024, μ: 99719, ~: 68896)
+[PASS] testGettersAndManagerStorage() (gas: 1341060)
+[PASS] testKickAndPackedShutdown() (gas: 516632)
+[PASS] testManagerPermissionsAndWithdrawalReceiver() (gas: 1637344)
+[PASS] testMissingCodeAndMalformedArguments() (gas: 686860)
+[PASS] testOpenIndividualAndBatch() (gas: 727703)
+[PASS] testPrematureFeesDelegationAndBatchSwitch() (gas: 1600458)
+[PASS] testShutdownAndOracleFailure() (gas: 639969)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 1.41s (1.43s CPU time)
+
+Ran 6 tests for tests/UniV3ExchangeParity.t.sol:UniV3ExchangeParityTest
+[PASS] testBothDirectionsAndRefunds() (gas: 10151547)
+[PASS] testConstructorFeeWidth() (gas: 159243)
+[PASS] testConverterBoundariesAndNoncanonicalABI() (gas: 425651)
+[PASS] testFuzzPriceConversions(uint256,uint160,bool) (runs: 1025, μ: 4882421, ~: 4882162)
+[PASS] testFuzzSwapAndRefund(uint96,uint96,uint24) (runs: 1024, μ: 5187738, ~: 5198646)
+[PASS] testRollbackAndOptionalReturns() (gas: 5233789)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.29s (3.72s CPU time)
+
+Ran 6 tests for tests/MetadataPrimitivesParity.t.sol:MetadataPrimitivesParityTest
+[PASS] testBauhausAllVariants() (gas: 1420389)
+[PASS] testFuzzBauhaus(string,uint256) (runs: 1024, μ: 89014, ~: 89005)
+[PASS] testFuzzLocale(uint256,uint8,uint8) (runs: 1024, μ: 210624, ~: 47346)
+[PASS] testFuzzNumbers(uint256,address) (runs: 1025, μ: 67669, ~: 63818)
+[PASS] testFuzzStrings(string,uint256,uint256) (runs: 1024, μ: 41901, ~: 41104)
+[PASS] testRendererFormattingBoundaries() (gas: 15398625)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.36s (3.86s CPU time)
+
+Ran 6 tests for tests/SurplusPoolParity.t.sol:SurplusPoolParityTest
+[PASS] testClaimRollback() (gas: 450132)
+[PASS] testCodelessToken() (gas: 158290)
+[PASS] testFuzzAccountAndClaim(address,uint128,uint128) (runs: 1024, μ: 208832, ~: 208829)
+[PASS] testFuzzOverflowAndSeparation(uint256,uint256) (runs: 1024, μ: 211631, ~: 212814)
+[PASS] testFuzzUnauthorized(address,uint256) (runs: 1024, μ: 53375, ~: 53375)
+[PASS] testGettersAndEmptyClaim() (gas: 86586)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 832.76ms (832.27ms CPU time)
+
+Ran 12 tests for tests/TroveDataParity.t.sol:TroveDataParityTest
+[PASS] testBatchShareBoundaries() (gas: 195686)
+[PASS] testBatchUsesSeparateRoundingAndStakeRedistribution() (gas: 203102)
+[PASS] testFuzzBatchData(uint96,uint96,uint96,uint96,uint64,uint64,uint32,uint64) (runs: 1024, μ: 111798, ~: 111864)
+[PASS] testFuzzBatchShares(uint96,uint96,uint96,uint64,uint8) (runs: 1024, μ: 61954, ~: 62456)
+[PASS] testFuzzBatchSharesOverflow(uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),bool) (runs: 1024, μ: 60344, ~: 58879)
+[PASS] testFuzzIndividualData(uint256,uint96,uint96,uint96,uint64,uint32,uint64,uint8) (runs: 1024, μ: 75582, ~: 74819)
+[PASS] testFuzzInterestPeriod(uint256,uint256) (runs: 1024, μ: 11084, ~: 10984)
+[PASS] testFuzzRemoveShares(uint256,uint256,uint256,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)) (runs: 1024, μ: 59151, ~: 58968)
+[PASS] testFuzzRemoveTroveId(uint8,uint8,uint8) (runs: 1024, μ: 171502, ~: 167941)
+[PASS] testFuzzStakeUpdate(uint256,uint256,uint256,uint256,uint256) (runs: 1024, μ: 117505, ~: 121230)
+[PASS] testIndividualInterestRedistributionAndShutdown() (gas: 268172)
+[PASS] testRemoveBatchShares() (gas: 50692)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 2.79s (5.98s CPU time)
+
+Ran 5 tests for tests/HybridHelpersParity.t.sol:HybridHelpersParityTest
+[PASS] testAllocationPanicBoundariesBothVersionsAndPaths() (gas: 240107807)
+[PASS] testDependencyFailuresAndRollback() (gas: 3223732)
+[PASS] testFuzzBothQuoteDirections(uint96,uint128,bool) (runs: 1024, μ: 3324085, ~: 3320315)
+[PASS] testFuzzLegacyDeviation(uint256,uint256,bool) (runs: 1024, μ: 2582571, ~: 2584692)
+[PASS] testMalformedUnusedQuoteArrays() (gas: 4040790)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.58s (1.58s CPU time)
+
+Ran 3 tests for tests/LeftoversParity.t.sol:LeftoversParityTest
+[PASS] testDrainingAndFailedTransferRollback() (gas: 450085)
+[PASS] testFuzzAmountsAndPrefix(uint64,uint64,uint64,uint64,uint8) (runs: 1024, μ: 247180, ~: 232283)
+[PASS] testSentinelDuplicatesAndExistingBalances() (gas: 367090)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 265.38ms (265.55ms CPU time)
+
+Ran 7 tests for tests/WETHZapperParity.t.sol:WETHZapperParityTest
+[PASS] testCalldataStructValidationOrder() (gas: 10659675)
+[PASS] testETHSendFailureRollsBack() (gas: 11036580)
+[PASS] testErrorsReceiveAndManagers() (gas: 11212184)
+[PASS] testFuzzOpeningIndexAndValue(uint256,uint64,uint96,bool) (runs: 1024, μ: 10967563, ~: 10968759)
+[PASS] testLifecycleIndividualBatchAndFlashClose() (gas: 46180246)
+[PASS] testMissingBorrowerCodeRevertsAndRollsBackDeposit() (gas: 8872421)
+[PASS] testNoOpCallbackBoundsAndLazyAddressValidation() (gas: 10562058)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.71s (1.72s CPU time)
+
+Ran 5 tests for tests/UserProxyParity.t.sol:UserProxyParityTest
+[PASS] testFuzzFactoryDeterministicClones(address) (runs: 1024, μ: 1072671207, ~: 1072671164)
+[PASS] testFuzzStakeUnstakeRewards(uint96,bool) (runs: 1024, μ: 3770775, ~: 3761651)
+[PASS] testPermitFailureIgnoredAndLazyValidation() (gas: 3880900)
+[PASS] testReceiveAndDispatch() (gas: 3479541)
+[PASS] testTokenReturnRulesAndRewardFailureRollback() (gas: 23134311)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.25s (3.41s CPU time)
+
+Ran 9 tests for tests/ActivePoolParity.t.sol:ActivePoolParityTest
+[PASS] testExternalFailureRollback() (gas: 1243532)
+[PASS] testFuzzCollateral(uint128,uint128) (runs: 1024, μ: 481943, ~: 459195)
+[PASS] testFuzzInterestAndBatch(uint96,uint64,uint64,uint32) (runs: 1025, μ: 752445, ~: 762026)
+[PASS] testFuzzRawChange((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)) (runs: 1024, μ: 611770, ~: 490515)
+[PASS] testFuzzUnauthorized(address,uint256) (runs: 1024, μ: 539706, ~: 539709)
+[PASS] testGetters() (gas: 160124)
+[PASS] testPrivilegedRoleBoundaries() (gas: 1877696)
+[PASS] testShutdownFreezesInterestAndBatchPeriod() (gas: 707201)
+[PASS] testTinyInterestRoundsUpAndSkipsZeroSPYield() (gas: 522568)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 4.56s (7.97s CPU time)
+
+Ran 3 tests for tests/HybridExchangeParity.t.sol:HybridExchangeParityTest
+[PASS] testBothBranchesDirectionsAndLeftovers() (gas: 15874938)
+[PASS] testFuzzPathsFeesAndSignedIndices(bool,uint128,uint24,uint24,uint96) (runs: 1024, μ: 7928474, ~: 7508589)
+[PASS] testRollbackAcrossBothMarketsAndOptionalReturns() (gas: 8379107)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.84s (3.84s CPU time)
+
+Ran 10 tests for tests/TroveFlowsParity.t.sol:TroveFlowsParityTest
+[PASS] testBatchLiquidationAndNoEligibleTroves() (gas: 2107421)
+[PASS] testBatchRedemptionsAndSkippedICR() (gas: 2223140)
+[PASS] testFuzzLiquidation(uint64,uint96,bool) (runs: 1024, μ: 1791105, ~: 1780620)
+[PASS] testFuzzRedemption(uint96,uint64,uint64,uint8,bool) (runs: 1024, μ: 1311894, ~: 1398438)
+[PASS] testLiquidationOffsetRedistributionAndSurplus() (gas: 2151982)
+[PASS] testMalformedAbiAndPermissionOrder() (gas: 919171)
+[PASS] testManagerConstructorEventsAndStorage() (gas: 18653761)
+[PASS] testManagerGettersAndShutdown() (gas: 3255844)
+[PASS] testRegularRedemptionAndZombieContinuation() (gas: 1880037)
+[PASS] testUrgentRedemptionCapsAndRollback() (gas: 2093808)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 4.21s (5.58s CPU time)
+
+Ran 9 tests for tests/BoldTokenParity.t.sol:BoldTokenParityTest
+[PASS] testAuthorizationAndRenunciation() (gas: 3966475)
+[PASS] testFuzzInvalidSignatures(uint8,bytes32,bytes32) (runs: 1024, μ: 271611, ~: 274240)
+[PASS] testFuzzPermit(uint128,uint256) (runs: 1024, μ: 549747, ~: 550214)
+[PASS] testFuzzPoolFlow(uint128) (runs: 1024, μ: 536585, ~: 536858)
+[PASS] testFuzzTokenFlow(uint256,uint256,uint256) (runs: 1024, μ: 1014164, ~: 1016042)
+[PASS] testInfiniteAllowanceAndSelfTransfer() (gas: 531441)
+[PASS] testMetadata() (gas: 483813)
+[PASS] testPermitDomainAndDeadline() (gas: 515286)
+[PASS] testRecipientAndZeroChecks() (gas: 1102753)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 5.22s (9.28s CPU time)
+
+Ran 8 tests for tests/TroveHooksParity.t.sol:TroveHooksParityTest
+[PASS] testActivateZombieAndTimestampTruncation() (gas: 961429)
+[PASS] testBatchHooksLifecycle() (gas: 2126925)
+[PASS] testClosePreservesPackedPadding() (gas: 971705)
+[PASS] testDependencyRollbackAndAuthorization() (gas: 1194563)
+[PASS] testFuzzHookErrors((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,uint256,uint8) (runs: 1024, μ: 1136174, ~: 1148248)
+[PASS] testFuzzOpenAdjust(uint96,uint96,uint64,uint64,uint64,uint64) (runs: 1024, μ: 718501, ~: 722845)
+[PASS] testIndividualHooksLifecycle() (gas: 1832916)
+[PASS] testJoinBatchAndCloseBatchTrove() (gas: 1576872)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 4.89s (5.26s CPU time)
+
+Ran 7 tests for tests/BalancerFlashLoanParity.t.sol:BalancerFlashLoanParityTest
+[PASS] testAllCallbacksFeesAndOptionalTokenReturns() (gas: 37643537)
+[PASS] testCallbackAndVaultRollback() (gas: 4727787)
+[PASS] testCallerGuardsAndInvalidOperation() (gas: 4447969)
+[PASS] testFuzzLoanAccounting(uint96,uint96,uint8) (runs: 1024, μ: 4675402, ~: 4686490)
+[PASS] testMemoryStructValidation() (gas: 4457252)
+[PASS] testPersistentReceiverAndPackedSlot() (gas: 4479513)
+[PASS] testReceiveArrayBoundsFeeAndAddressValidation() (gas: 4602723)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 6.27s (6.27s CPU time)
+
+Ran 11 tests for tests/CollateralRegistryParity.t.sol:CollateralRegistryParityTest
+[PASS] testAllocationTruncationAndRounding() (gas: 1426376)
+[PASS] testConnectedRealBoldTokenBurnAndRollback() (gas: 6889062)
+[PASS] testConstructorLengthsAndUnusedSlots() (gas: 59940647)
+[PASS] testConstructorMalformedAddressElements() (gas: 710697)
+[PASS] testDependencyErrorsRollbackAndZeroBranches() (gas: 2471818)
+[PASS] testFallbackAndActualRedemptionAccounting() (gas: 1325901)
+[PASS] testFuzzFeeArithmetic(uint256,uint256,uint256,uint64) (runs: 1024, μ: 463438, ~: 452597)
+[PASS] testFuzzRedemptionAllocation(uint128,uint128,uint128,uint128,uint32,uint8,uint128) (runs: 1024, μ: 929718, ~: 858446)
+[PASS] testFuzzRedemptionSequence(uint256) (runs: 1024, μ: 3509528, ~: 3507905)
+[PASS] testGettersAndMinuteDecay() (gas: 1391629)
+[PASS] testSupplyFailureAndFeeLimitOrdering() (gas: 1561310)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 6.44s (9.98s CPU time)
+
+Ran 4 tests for tests/CurveExchangeParity.t.sol:CurveExchangeParityTest
+[PASS] testBothDirectionsAndUnspentInput() (gas: 8900077)
+[PASS] testFuzzSwapAndRefund(uint96,uint96) (runs: 1024, μ: 4544399, ~: 4553918)
+[PASS] testOptionalCollateralReturnsAndFalseRollback() (gas: 4459737)
+[PASS] testSlippageAndPoolFailureRollback() (gas: 4475493)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 6.81s (6.81s CPU time)
+
+Ran 8 tests for tests/LeverageZapperParity.t.sol:LeverageZapperParityTest
+[PASS] testFuzzLeverageRatio(uint256,bool) (runs: 1025, μ: 16442680, ~: 16516270)
+[PASS] testFuzzLeveragedOwnerIndex(uint256,bool,bool) (runs: 1025, μ: 17219379, ~: 17284834)
+[PASS] testIndividualAndBatchLeverageLifecycleBothBranches() (gas: 70788225)
+[PASS] testMemoryAddressValidationAndUnauthorizedCallbacks() (gas: 33416045)
+[PASS] testMissingExchangeCodeRollsBackOpen() (gas: 34358951)
+[PASS] testOwnerAndReceiverChecksAndWrongValue() (gas: 34314006)
+[PASS] testRatioBoundaries() (gas: 16383646)
+[PASS] testSwapFailureRollsBackOpenAndUp() (gas: 35606158)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 7.24s (12.69s CPU time)
+
+Ran 6 tests for tests/GasCompZapperParity.t.sol:GasCompZapperParityTest
+[PASS] testCalldataStructValidationOrder() (gas: 12163471)
+[PASS] testETHAndBatchErrorsAndNonpayableAdjustments() (gas: 12628550)
+[PASS] testFuzzOpeningIndexAndCollateral(uint256,uint64,uint96,bool) (runs: 1025, μ: 12489515, ~: 12492390)
+[PASS] testLifecycleIndividualBatchAndFlashClose() (gas: 52078944)
+[PASS] testNoOpCallbackBoundsAndLazyAddressValidation() (gas: 12010081)
+[PASS] testOptionalTokenReturnsAndRollback() (gas: 12799953)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 7.57s (7.59s CPU time)
+
+Ran 1 test for tests/GovernanceListParity.t.sol:GovernanceListParityTest
+[PASS] testFuzzInsertionAndSentinel(uint256) (runs: 1024, μ: 4926825, ~: 4926345)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.70s (8.70s CPU time)
+
+Ran 6 tests for tests/GasPoolParity.t.sol:GasPoolParityTest
+[PASS] testApprovalRevertBubbled() (gas: 499937)
+[PASS] testCodelessTokenRejected() (gas: 234236)
+[PASS] testEmptyApprovalReturnRejected() (gas: 499546)
+[PASS] testFalseApprovalAcceptedLikeReference() (gas: 571049)
+[PASS] testFuzzApprovals(address,address) (runs: 1024, μ: 550152, ~: 551442)
+[PASS] testInvalidBoolRejected() (gas: 500214)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.87s (8.87s CPU time)
+
+Ran 8 tests for tests/MetadataNFTParity.t.sol:MetadataNFTParityTest
+[PASS] testAllImagesAndStatuses() (gas: 354741913)
+[PASS] testAssetCallsRemainInRenderer() (gas: 17830192)
+[PASS] testConnectedTroveNFTMetadata() (gas: 12081157)
+[PASS] testDependencyFailuresAndInvalidStatus() (gas: 1343627)
+[PASS] testFuzzMetadata(uint256,address,uint256,uint256,uint256,uint8) (runs: 1024, μ: 4486467, ~: 4443187)
+[PASS] testFuzzTokenStrings(string,string) (runs: 1024, μ: 4343151, ~: 4345309)
+[PASS] testGeometryCompanionDeployment() (gas: 1467200)
+[PASS] testProductionAssets() (gas: 71817150)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.84s (21.84s CPU time)
+
+Ran 4 tests for tests/MerklRewardsParity.t.sol:MerklRewardsParityTest
+[PASS] testClaimAssertionsAndAuthorization() (gas: 2950544)
+[PASS] testConstructorWeightChecks() (gas: 512559)
+[PASS] testFuzzCampaignEncodingAndThreshold(uint96,uint96,uint64,uint64,uint16,bytes32) (runs: 1024, μ: 3001240, ~: 2932096)
+[PASS] testTimestampOverflowAndThresholdOrdering() (gas: 5781308)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 13.28s (13.28s CPU time)
+
+Ran 5 tests for tests/RegistryParity.t.sol:RegistryParityTest
+[PASS] testConstructorBoundaries() (gas: 14150942)
+[PASS] testFuzzConstructor(uint256,uint256,uint256,uint256,uint256,uint256) (runs: 1024, μ: 541684, ~: 541707)
+[PASS] testFuzzSetAddresses(address[18],address) (runs: 1024, μ: 3340839, ~: 3341073)
+[PASS] testFuzzValidConstructor(uint256) (runs: 1024, μ: 2342945, ~: 2342945)
+[PASS] testMalformedAddressTuple() (gas: 2384423)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 16.75s (3.64s CPU time)
+
+Ran 10 tests for tests/StabilityPoolParity.t.sol:StabilityPoolParityTest
+[PASS] testConstructorGettersAndPermissions() (gas: 1401191)
+[PASS] testDependencyRollbackAndErrors() (gas: 3235863)
+[PASS] testDepositYieldClaimsAndCompounding() (gas: 4042531)
+[PASS] testFuzzDepositOffsetAndRewards(uint128,uint128,uint128,uint64,uint64,bool) (runs: 1024, μ: 3008428, ~: 3048596)
+[PASS] testFuzzRewardGetterArithmetic(uint256,uint256,uint256,uint256,uint64,uint256) (runs: 1024, μ: 152186, ~: 149148)
+[PASS] testFuzzStatefulDepositorSequence(uint256) (runs: 1024, μ: 7097656, ~: 7110828)
+[PASS] testMalformedStaticArguments() (gas: 711770)
+[PASS] testPendingYieldThresholdAndMinimumWithdrawal() (gas: 2869487)
+[PASS] testProductZeroAndOverflowBoundaries() (gas: 1257751)
+[PASS] testScaleTransitionsAndExpiredDeposits() (gas: 6404644)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 16.77s (23.02s CPU time)
+
+Ran 8 tests for tests/TroveNFTParity.t.sol:TroveNFTParityTest
+[PASS] testAbiValidationAndUnpaddedBytes() (gas: 2908655)
+[PASS] testApprovalsTransfersBurnAndRemint() (gas: 5363663)
+[PASS] testAuthorizationAndErrorOrder() (gas: 7021431)
+[PASS] testConstructorDependencyFailures() (gas: 1064469)
+[PASS] testFuzzConstructorStrings(string,string) (runs: 1024, μ: 3886308, ~: 3861109)
+[PASS] testFuzzLifecycle(uint256) (runs: 1024, μ: 10107387, ~: 10102105)
+[PASS] testMetadataAndInterfaces() (gas: 2959253)
+[PASS] testReceiverModesAndReentrancy() (gas: 11999865)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 25.86s (51.13s CPU time)
+
+Ran 9 tests for tests/SortedTrovesParity.t.sol:SortedTrovesParityTest
+[PASS] testBatchHeadTailMiddleAndSingletonRemoval() (gas: 7548389)
+[PASS] testEqualRatesAndBatchOrder() (gas: 4741222)
+[PASS] testErrorsAndAuthorization() (gas: 10927332)
+[PASS] testFuzzHints(uint256,uint256,uint256) (runs: 1024, μ: 5620473, ~: 5612094)
+[PASS] testFuzzStatefulSequence(uint256) (runs: 1025, μ: 18088893, ~: 18062361)
+[PASS] testGettersAndEmptyPositions() (gas: 833059)
+[PASS] testManagerFailureRollsBackAndWideIds() (gas: 2811445)
+[PASS] testRateUpdateOrderingRegression() (gas: 18498200)
+[PASS] testReinsertWholeBatchesAndNodes() (gas: 7843142)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 45.28s (82.14s CPU time)
+
+Ran 4 tests for tests/BribeInitiativeParity.t.sol:BribeInitiativeParityTest
+[PASS] testAllocationHistoryAndRevertOrder() (gas: 5623802)
+[PASS] testBatchAggregationAndAtomicRollback() (gas: 15134330)
+[PASS] testFuzzClaimDistribution(uint96,uint64) (runs: 1025, μ: 5304156, ~: 5306743)
+[PASS] testMalformedClaimArraysAndEmptyBatch() (gas: 4692600)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 46.55s (46.56s CPU time)
+
+Ran 45 test suites in 46.55s (277.43s CPU time): 291 tests passed, 0 failed, 0 skipped (291 total tests)
+ABI shape audit passed for AddressesRegistry, GasPool, DefaultPool, CollSurplusPool, ActivePool, BoldToken, SortedTroves, TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations, WETHPriceFeed, RETHPriceFeed, WSTETHPriceFeed, HintHelpers, MultiTroveGetter, DebtInFrontHelper, Constants, RedemptionHelper, WETHZapper, GasCompZapper, LeverageWETHZapper, LeverageLSTZapper, CurveExchange, UniV3Exchange, UniPriceConverter, HybridCurveUniV3Exchange, HybridCurveUniV3ExchangeHelpers, HybridCurveUniV3ExchangeHelpersV2, BalancerFlashLoan, UserProxy, UserProxyFactory, BribeInitiative, CurveV2GaugeRewards, UniV4MerklRewards

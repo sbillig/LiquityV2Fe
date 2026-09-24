@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{Address, RawMem, RawStorage, Log}
+use std::evm::packed::keccak_packed
+use super::governance_list as list
+use super::governance_math::lqty_to_votes
+use super::revert_texts::require
+use super::bribe_errors as error
+#[event]
+pub struct DepositBribe { pub depositor: Address, pub bold_amount: u256, pub bribe_token_amount: u256, pub epoch: u256 }
+#[event]
+pub struct ModifyLQTYAllocation { pub user: Address, pub epoch: u256, pub lqty_allocated: u256, pub offset: u256 }
+#[event]
+pub struct ModifyTotalLQTYAllocation { pub epoch: u256, pub total_lqty_allocated: u256, pub offset: u256 }
+#[event]
+pub struct ClaimBribe { pub user: Address, pub epoch: u256, pub bold_amount: u256, pub bribe_token_amount: u256 }
+pub fn map(_ key: u256, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((key, root)) }
+pub fn user_root(_ user: Address) -> u256 uses (mem: mut RawMem) { map(user.inner, 3) }
+pub fn bribe(_ epoch: u256) -> (u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+    let s = map(epoch, 0)
+    (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2))
+}
+pub fn claimed(_ user: Address, _ epoch: u256) -> bool uses (mem: mut RawMem, storage: RawStorage) { storage.sload(map(epoch, map(user.inner, 1))) & 255 != 0 }
+pub fn allocate(_ epoch: u256, _ user: Address, _ lqty: u256, _ offset: u256, _ total: u256, _ total_offset: u256)
+uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let ur = user_root(user)
+    let user_head = list::head(ur)
+    let total_head = list::head(2)
+    if total_head != epoch { list::insert(2, epoch, total, total_offset, 0) }
+    else {
+        let s = list::slot(2, epoch)
+        storage.sstore(slot: s, value: total)
+        storage.sstore(slot: s + 1, value: total_offset)
+    }
+    log.emit(ModifyTotalLQTYAllocation { epoch, total_lqty_allocated: total, offset: total_offset })
+    if user_head != epoch { list::insert(ur, epoch, lqty, offset, 0) }
+    else {
+        let s = list::slot(ur, epoch)
+        storage.sstore(slot: s, value: lqty)
+        storage.sstore(slot: s + 1, value: offset)
+    }
+    log.emit(ModifyLQTYAllocation { user, epoch, lqty_allocated: lqty, offset })
+}
+pub fn claim(_ user: Address, _ epoch: u256, _ user_epoch: u256, _ total_epoch: u256, _ current: u256, _ start: u256, _ duration: u256) -> (u256, u256)
+uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    require(epoch < current, error::current())
+    require(!claimed(user, epoch), error::claimed())
+    let (bold, token, used_votes) = bribe(epoch)
+    require(bold != 0 || token != 0, error::empty())
+    let (lqty, offset, unused_prev, next) = list::item(user_root(user), user_epoch)
+    require(user_epoch <= epoch && (next > epoch || next == 0), error::user_epoch())
+    let (total, total_offset, unused_total_prev, total_next) = list::item(2, total_epoch)
+    require(total_epoch <= epoch && (total_next > epoch || total_next == 0), error::total_epoch())
+    require(total > 0, error::total_zero())
+    require(lqty > 0, error::user_zero())
+    let end = start + epoch * duration
+    let total_votes = lqty_to_votes(total, end, total_offset)
+    let votes = lqty_to_votes(lqty, end, offset)
+    let remaining = total_votes - used_votes
+    let bold_amount = bold * votes / remaining
+    let token_amount = token * votes / remaining
+    let remaining_bold = bold - bold_amount
+    let remaining_token = token - token_amount
+    let new_votes = used_votes + votes
+    let s = map(epoch, 0)
+    storage.sstore(slot: s, value: remaining_bold)
+    storage.sstore(slot: s + 1, value: remaining_token)
+    storage.sstore(slot: s + 2, value: new_votes)
+    let c = map(epoch, map(user.inner, 1))
+    storage.sstore(slot: c, value: (storage.sload(c) & ~255) | 1)
+    log.emit(ClaimBribe { user, epoch, bold_amount, bribe_token_amount: token_amount })
+    (bold_amount, token_amount)
+}

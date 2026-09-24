@@ -12,8 +12,11 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan', 'UserProxy', 'UserProxyFactory']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan', 'UserProxy', 'UserProxyFactory', 'BribeInitiative', 'CurveV2GaugeRewards', 'UniV4MerklRewards']
 DECLARATION_ONLY = {
+    # Governance SafeERC20 calls carry zero ETH; this Address error is unreachable.
+    'BribeInitiative': {('error', 'AddressInsufficientBalance(address)')},
+    'CurveV2GaugeRewards': {('error', 'AddressInsufficientBalance(address)')},
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
     'BoldToken': {('event', 'EIP712DomainChanged()'),
@@ -50,6 +53,8 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'BribeInitiative': {'bribeByEpoch', 'totalLQTYAllocatedByEpoch', 'lqtyAllocatedByUserAtEpoch', 'claimBribes'},
+    'CurveV2GaugeRewards': {'bribeByEpoch', 'totalLQTYAllocatedByEpoch', 'lqtyAllocatedByUserAtEpoch', 'claimBribes'},
     'UserProxy': {'stake', 'unstake'},
     'HybridCurveUniV3ExchangeHelpers': {'getCollFromBold'},
     'GasCompZapper': {'removeManagerReceiverOf'},
@@ -135,6 +140,14 @@ for contract in CONTRACTS:
         refinements.append('constructor creates a fixed delegate companion with immutable branch configuration; original three constructor arguments and runtime selectors are preserved')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
+        if contract == 'UniV4MerklRewards' and entry.get('name') in {'onRegisterInitiative', 'onUnregisterInitiative', 'onAfterAllocateLQTY', 'onClaimForInitiative'}:
+            assert entry['stateMutability'] == ('view' if entry['name'] == 'onClaimForInitiative' else 'pure')
+            entry['stateMutability'] = 'nonpayable'
+            refinements.append(entry['name'] + ': no-op or authorization-only callback preserves nonpayable guard')
+        if (contract == 'BribeInitiative' and entry.get('name') in {'onRegisterInitiative', 'onUnregisterInitiative', 'onClaimForInitiative'}) or (contract == 'CurveV2GaugeRewards' and entry.get('name') in {'onRegisterInitiative', 'onUnregisterInitiative'}):
+            assert entry['stateMutability'] == 'view'
+            entry['stateMutability'] = 'nonpayable'
+            refinements.append(entry['name'] + ': authorization-only callback preserves nonpayable guard')
         if contract in {'WETHZapper', 'GasCompZapper'} and entry.get('name') in {'receiveFlashLoanOnOpenLeveragedTrove', 'receiveFlashLoanOnLeverUpTrove', 'receiveFlashLoanOnLeverDownTrove'}:
             assert entry['stateMutability'] == 'pure'
             entry['stateMutability'] = 'nonpayable'

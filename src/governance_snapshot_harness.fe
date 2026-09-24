@@ -1,0 +1,51 @@
+use std::abi::sol
+use std::evm::{Address, Ctx, RawStorage, RawMem, Call, Log}
+use super::governance_snapshots as snap
+use super::governance_snapshots::SnapshotConfig
+pub msg SnapshotMsg {
+    #[selector = sol("epoch()")]
+    Epoch -> u256,
+    #[selector = sol("epochStart()")]
+    Start -> u256,
+    #[selector = sol("secondsWithinEpoch()")]
+    Seconds -> u256,
+    #[selector = sol("calculateVotingThreshold(uint256)")]
+    Threshold { votes: u256 } -> u256,
+    #[selector = sol("getLatestVotingThreshold()")]
+    Latest -> u256,
+    #[selector = sol("calculateVotingThreshold()")]
+    UpdateThreshold -> u256,
+    #[selector = sol("getTotalVotesAndState()")]
+    Total -> ((u256, u256), (u256, u256), bool),
+    #[selector = sol("getInitiativeSnapshotAndState(address)")]
+    Initiative { target: Address } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool),
+    #[selector = sol("getInitiativeState(address,(uint256,uint256),(uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256))")]
+    Status { target: Address, votes: (u256, u256), ivotes: (u256, u256, u256, u256), state: (u256, u256, u256, u256, u256) } -> (u8, u256, u256),
+    #[selector = sol("getInitiativeState(address)")]
+    UpdateStatus { target: Address } -> (u8, u256, u256),
+}
+pub contract GovernanceSnapshotHarness {
+    cfg: SnapshotConfig,
+    init(bold: Address, start: u256, duration: u256, min_claim: u256, min_accrual: u256, voting_factor: u256, unregister_factor: u256, unregister_epochs: u256) uses (mut cfg) {
+        cfg = SnapshotConfig { bold, start, duration, min_claim, min_accrual, voting_factor, unregister_factor, unregister_epochs }
+    }
+    recv SnapshotMsg {
+        Epoch -> u256 uses (cfg, ctx: Ctx) { snap::epoch(cfg) }
+        Start -> u256 uses (cfg, ctx: Ctx) { snap::epoch_start(cfg) }
+        Seconds -> u256 uses (cfg, ctx: Ctx) { (ctx.timestamp() - cfg.start) % cfg.duration }
+        Threshold { votes } -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, votes) }
+        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, storage.sload(3)) }
+        Total -> ((u256, u256), (u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::total(cfg) }
+        Initiative { target } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::initiative(cfg, target) }
+        Status { target, votes, ivotes, state } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::status(cfg, target, votes, ivotes, state) }
+        UpdateThreshold -> u256 uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
+            let (votes, state) = snap::snapshot_total(cfg)
+            snap::threshold(cfg, votes.0)
+        }
+        UpdateStatus { target } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log, mem: mut RawMem) {
+            let (votes, unused) = snap::snapshot_total(cfg)
+            let (ivotes, state) = snap::snapshot_initiative(cfg, target)
+            snap::status(cfg, target, votes, ivotes, state)
+        }
+    }
+}

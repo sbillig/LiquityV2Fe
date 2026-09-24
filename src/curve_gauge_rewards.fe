@@ -1,0 +1,111 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
+use super::bribe_state as state
+use super::bribe_errors as error
+use super::governance_list as list
+use super::revert_texts::require
+use super::bribe_initiative::{Config, auth, deposit, claim_all}
+pub msg GaugeMsg {
+    #[selector = sol("gauge()")]
+    Gauge -> Address,
+    #[selector = sol("duration()")]
+    Duration -> u256,
+    #[selector = sol("remainder()")]
+    Remainder -> u256,
+    #[selector = sol("governance()")]
+    Governance -> Address,
+    #[selector = sol("bold()")]
+    Bold -> Address,
+    #[selector = sol("bribeToken()")]
+    Token -> Address,
+    #[selector = sol("bribeByEpoch(uint256)")]
+    Bribe { epoch: u256 } -> (u256, u256, u256),
+    #[selector = sol("claimedBribeAtEpoch(address,uint256)")]
+    Claimed { user: Address, epoch: u256 } -> bool,
+    #[selector = sol("totalLQTYAllocatedByEpoch(uint256)")]
+    Total { epoch: u256 } -> (u256, u256, u256, u256),
+    #[selector = sol("lqtyAllocatedByUserAtEpoch(address,uint256)")]
+    User { user: Address, epoch: u256 } -> (u256, u256, u256, u256),
+    #[selector = sol("getMostRecentUserEpoch(address)")]
+    UserEpoch { user: Address } -> u256,
+    #[selector = sol("getMostRecentTotalEpoch()")]
+    TotalEpoch -> u256,
+    #[selector = sol("depositBribe(uint256,uint256,uint256)")]
+    Deposit { bold: u256, token: u256, epoch: u256 },
+    #[selector = sol("claimBribes((uint256,uint256,uint256)[])")]
+    Claim { data: DynArray<(u256, u256, u256)> } -> (u256, u256),
+    #[selector = sol("onRegisterInitiative(uint256)")]
+    Register { epoch: u256 },
+    #[selector = sol("onUnregisterInitiative(uint256)")]
+    Unregister { epoch: u256 },
+    #[selector = sol("onClaimForInitiative(uint256,uint256)")]
+    OnClaim { epoch: u256, amount: u256 },
+    #[selector = sol("onAfterAllocateLQTY(uint256,address,(uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256))")]
+    Allocate { epoch: u256, user: Address, user_state: (u256, u256, u256, u256), allocation: (u256, u256, u256, u256, u256), initiative: (u256, u256, u256, u256, u256) },
+}
+use super::bribe_initiative::GovernanceCalls
+use super::leftovers_sweep::BalanceMsg
+pub msg GaugeCalls {
+    #[selector = sol("approve(address,uint256)")]
+    Approve { spender: Address, amount: u256 } -> bool,
+    #[selector = sol("deposit_reward_token(address,uint256,uint256)")]
+    Deposit { token: Address, amount: u256, duration: u256 },
+}
+#[event]
+pub struct DepositIntoGauge { pub amount: u256 }
+pub contract CurveV2GaugeRewards {
+    gauge: Address,
+    duration: u256,
+    cfg: Config,
+    init(governance: Address, bold: Address, token: Address, gauge_address: Address, gauge_duration: u256) uses (mut cfg, mut gauge, mut duration, call: mut Call, mem: mut RawMem) {
+        require(token != bold, error::same_token())
+        let start = governance.static(GovernanceCalls::Start {})
+        let epoch_duration = governance.static(GovernanceCalls::Duration {})
+        cfg = Config { governance, bold, token, start, duration: epoch_duration }
+        gauge = gauge_address
+        duration = gauge_duration
+    }
+    recv GaugeMsg {
+        Gauge -> Address uses (gauge) { gauge }
+        Duration -> u256 uses (duration) { duration }
+        Remainder -> u256 uses (storage: RawStorage) { storage.sload(4) }
+        Governance -> Address uses (cfg) { cfg.governance }
+        Bold -> Address uses (cfg) { cfg.bold }
+        Token -> Address uses (cfg) { cfg.token }
+        Bribe { epoch } -> (u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { state::bribe(epoch) }
+        Claimed { user, epoch } -> bool uses (mem: mut RawMem, storage: RawStorage) { state::claimed(user, epoch) }
+        Total { epoch } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(2, epoch) }
+        User { user, epoch } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(state::user_root(user), epoch) }
+        UserEpoch { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { list::head(state::user_root(user)) }
+        TotalEpoch -> u256 uses (mem: mut RawMem, storage: RawStorage) { list::head(2) }
+        Register { epoch } uses (cfg, ctx: Ctx, mem: mut RawMem) { auth(cfg) }
+        Unregister { epoch } uses (cfg, ctx: Ctx, mem: mut RawMem) { auth(cfg) }
+        OnClaim { epoch, amount } uses (cfg, gauge, duration, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            auth(cfg)
+            let remainder = storage.sload(4)
+            let mut total = amount + remainder
+            if total < duration * 1000 {
+                storage.sstore(slot: 4, value: remainder + amount)
+                return
+            }
+            storage.sstore(slot: 4, value: 0)
+            let available = cfg.bold.static(BalanceMsg::Balance { account: ctx.address() })
+            if available < total { total = available }
+            let ignored = cfg.bold.call(GaugeCalls::Approve { spender: gauge, amount: total })
+            if ctx.extcodesize(gauge) == 0 { std::evm::revert(()) }
+            gauge.call(GaugeCalls::Deposit { token: cfg.bold, amount: total, duration })
+            log.emit(DepositIntoGauge { amount: total })
+        }
+        Allocate { epoch, user, user_state, allocation, initiative } uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            auth(cfg)
+            state::allocate(epoch, user, allocation.0, allocation.1, initiative.0, initiative.1)
+        }
+        Deposit { bold, token, epoch } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            deposit(cfg, bold, token, epoch)
+        }
+        Claim { data } -> (u256, u256) uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            claim_all(cfg, data)
+        }
+    }
+}

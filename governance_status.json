@@ -1,23 +1,52 @@
 {
   "src/BribeInitiative.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/bribe_initiative.fe",
+      "src/bribe_state.fe",
+      "src/bribe_errors.fe",
+      "src/governance_token.fe"
+    ],
+    "verification": [
+      "tests/BribeInitiativeParity.t.sol",
+      "tests/GovernanceTokenParity.t.sol",
+      "tests/results/initiatives.log"
+    ]
   },
   "src/CurveV2GaugeRewards.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/curve_gauge_rewards.fe",
+      "src/bribe_initiative.fe",
+      "src/bribe_state.fe"
+    ],
+    "verification": [
+      "tests/CurveGaugeRewardsParity.t.sol",
+      "tests/BribeInitiativeParity.t.sol",
+      "tests/results/initiatives.log"
+    ]
   },
   "src/Governance.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "partial",
+    "fe": [
+      "src/governance_snapshots.fe"
+    ],
+    "verification": [
+      "tests/GovernanceSnapshotParity.t.sol",
+      "tests/results/initiatives.log"
+    ],
+    "remaining": "Full Governance constructor, dispatch, staking, allocation/reset, actions, ownership, multicall and connected lifecycle validation are still outside the root checkpoint."
   },
   "src/UniV4MerklRewards.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/merkl_rewards.fe",
+      "src/merkl_errors.fe"
+    ],
+    "verification": [
+      "tests/MerklRewardsParity.t.sol",
+      "tests/results/initiatives.log"
+    ]
   },
   "src/UserProxy.sol": {
     "status": "implemented_differential_tests_pass",
@@ -41,9 +70,14 @@
     ]
   },
   "src/interfaces/IBribeInitiative.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/bribe_initiative.fe"
+    ],
+    "verification": [
+      "tests/BribeInitiativeParity.t.sol",
+      "tests/results/initiatives.log"
+    ]
   },
   "src/interfaces/ICurveStableswapFactoryNG.sol": {
     "status": "pending",
@@ -66,9 +100,18 @@
     "verification": []
   },
   "src/interfaces/IInitiative.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/bribe_initiative.fe",
+      "src/curve_gauge_rewards.fe",
+      "src/merkl_rewards.fe"
+    ],
+    "verification": [
+      "tests/BribeInitiativeParity.t.sol",
+      "tests/CurveGaugeRewardsParity.t.sol",
+      "tests/MerklRewardsParity.t.sol",
+      "tests/results/initiatives.log"
+    ]
   },
   "src/interfaces/ILQTY.sol": {
     "status": "pending",
