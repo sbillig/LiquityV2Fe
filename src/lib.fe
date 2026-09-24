@@ -48,3 +48,14 @@ pub use module_troveredemptions
 pub use module_troveliquidations
 pub use trove_memory_array
 pub use trove_memory_harness
+pub use borrower_data
+pub use borrower_errors
+pub use borrower_checks
+pub use borrower_open
+pub use borrower_adjust
+pub use borrower_lifecycle
+pub use borrower_batch
+pub use borrower_operations
+pub use module_borroweropening
+pub use module_borroweradjustments
+pub use module_borrowerbatches

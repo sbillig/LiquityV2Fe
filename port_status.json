@@ -34,9 +34,28 @@
     ]
   },
   "contracts/src/BorrowerOperations.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/borrower_adjust.fe",
+      "src/borrower_batch.fe",
+      "src/borrower_checks.fe",
+      "src/borrower_data.fe",
+      "src/borrower_errors.fe",
+      "src/borrower_lifecycle.fe",
+      "src/borrower_open.fe",
+      "src/borrower_operations.fe",
+      "src/module_borroweradjustments.fe",
+      "src/module_borrowerbatches.fe",
+      "src/module_borroweropening.fe"
+    ],
+    "verification": [
+      "tests/BorrowerOperationsParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/borrower-operations.log",
+      "tests/results/borrower-operations.json",
+      "tests/results/abi-audit.json"
+    ],
+    "notes": "Fixed non-upgradeable delegate modules; constructor takes registry plus opening, adjustments and batches module addresses. Connected single-branch user workflows pass; feeds, helpers, governance and multi-branch completion remain outstanding."
   },
   "contracts/src/CollSurplusPool.sol": {
     "status": "implemented_differential_tests_pass",

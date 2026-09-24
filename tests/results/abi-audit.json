@@ -303,6 +303,27 @@
     ],
     "function_count": 38
   },
+  "BorrowerOperations": {
+    "runtime_bytes": 13892,
+    "initcode_bytes_before_arguments": 17404,
+    "compiler_abi_sha256": "b0caac18799b45d6a4db5bfb02aa9cd260b46b7fff2379b53a76f9acdf7cca05",
+    "reference_artifact_sha256": "12ce9a0e2add0ec155a7daae5145694d72621a236aaae3cc0ded6f4cadc71b64",
+    "protocol_abi_sha256": "77003ed3ac1a9163f370ff67584b6675048a6c289cbe307e2ac54418bb564871",
+    "metadata_refinements": [
+      "constructor: registry plus three fixed, non-upgradeable delegate modules; each module reads immutable configuration from the same configured branch registry",
+      "getEntireBranchColl: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getEntireBranchDebt: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 41
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,
@@ -330,5 +351,26 @@
     "initcode_bytes_before_arguments": 13518,
     "runtime_sha256": "fabd0730563e9a260ae5cfb0e27b4736d0fe1243bb5aa27a2e2bc183b62d969c",
     "initcode_sha256": "864cbfbf5c73723a3f025fe92f1e6f875ac166c64b5d469bdc9b01e13d5406d7"
+  },
+  "BorrowerOpening": {
+    "implementation_companion": true,
+    "runtime_bytes": 12052,
+    "initcode_bytes_before_arguments": 13646,
+    "runtime_sha256": "c5fa31350bedefc4e6837b8442fad6996f5839e3a267a755f2f16eec496f0be9",
+    "initcode_sha256": "402276ef62488e0fcd201048c798577a441fa574268bd12c369e28caf45a3395"
+  },
+  "BorrowerAdjustments": {
+    "implementation_companion": true,
+    "runtime_bytes": 22580,
+    "initcode_bytes_before_arguments": 24174,
+    "runtime_sha256": "f585d0b97e9f67eae0cae8eded1f1210727f50b1bf520545133a9ef098c3de12",
+    "initcode_sha256": "652114c3a2822eea8fc2057d1337e7d8e3a1b93d6ccfdf395fc0fd11b086c5f2"
+  },
+  "BorrowerBatches": {
+    "implementation_companion": true,
+    "runtime_bytes": 23828,
+    "initcode_bytes_before_arguments": 25417,
+    "runtime_sha256": "edb29b1519d020d794ce55b14d33baf40122b3fecaf4197584981f58aa2c5a5a",
+    "initcode_sha256": "38294f3645fd9e073483c30bf00fdff0863e1c10114487eb2ae21ad8f8bb6965"
   }
 }

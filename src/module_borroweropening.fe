@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use super::borrower_open as opening
+use super::borrower_open::Config
+use super::borrower_data as data
+use super::borrower_checks as checks
+use super::borrower_errors::*
+use super::borrower_adjust as adjust
+use super::borrower_lifecycle as life
+use super::borrower_batch as batch
+use super::add_remove_managers as managers
+use super::trove_nft::TroveNFTMsg
+use super::trove_manager::TroveManagerMsg
+use super::trove_redemption::require_code
+use super::coll_surplus_pool::CollSurplusPoolMsg
+use super::gas_pool::TokenApprovalMsg
+use super::liquity_base as base
+use super::types::TroveChange
+use super::addresses_registry::*
+pub msg BorrowerOpeningMsg {
+    #[selector = sol("openTrove(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address)")]
+    OpenTrove { owner: Address, index: u256, coll: u256, bold: u256, upper: u256, lower: u256, rate: u256, max_fee: u256, add: Address, remove: Address, receiver: Address } -> u256,
+    #[selector = sol("openTroveAndJoinInterestBatchManager((address,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    OpenBatch { p: (Address, u256, u256, u256, u256, u256, Address, u256, Address, Address, Address) } -> u256,
+}
+pub contract BorrowerOpening {
+    cfg: Config,
+    init(registry: Address) uses (mut cfg, call: mut Call) {
+        let nft = registry.static(RegistryMsg::GettroveNFT {})
+        let coll = registry.static(RegistryMsg::GetcollToken {})
+        let weth = registry.call(RegistryMsg::GetWETH {})
+        let ccr = registry.static(RegistryMsg::GetCCR {})
+        let scr = registry.static(RegistryMsg::GetSCR {})
+        let mcr = registry.static(RegistryMsg::GetMCR {})
+        let bcr = registry.static(RegistryMsg::GetBCR {})
+        cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
+    }
+    recv BorrowerOpeningMsg {
+        OpenTrove { owner, index, coll, bold, upper, lower, rate, max_fee, add, remove, receiver } -> u256 uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            opening::individual(cfg, opening::Open { owner, index, coll, bold, upper, lower, max_fee, add, remove, receiver }, rate)
+        }
+        OpenBatch { p } -> u256 uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            opening::batched(cfg, opening::Open { owner: p.0, index: p.1, coll: p.2, bold: p.3, upper: p.4, lower: p.5, max_fee: p.7, add: p.8, remove: p.9, receiver: p.10 }, p.6)
+        }
+    }
+}

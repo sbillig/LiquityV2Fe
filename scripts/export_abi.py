@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'BorrowerOperations': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'TroveManager': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'StabilityPool': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getDepositorYieldGainWithPending(address)'}),
     'CollateralRegistry': ('STATICCALL', {'getRedemptionRateForRedeemedAmount(uint256)', 'getEffectiveRedemptionFeeInBold(uint256)'}),
@@ -34,6 +35,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'BorrowerOperations': {'removeManagerReceiverOf'},
     'TroveManager': {'Troves', 'rewardSnapshots', 'getUnbackedPortionPriceAndRedeemability'},
     'StabilityPool': {'depositSnapshots'},
     'AddRemoveManagers': {'removeManagerReceiverOf'},
@@ -61,6 +63,15 @@ for contract in CONTRACTS:
     compiled = json.loads(fe_path.read_text())
     reference = json.loads(sol_path.read_text())['abi']
     refinements = []
+    if contract == 'BorrowerOperations':
+        for companion in ['BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
+            module_abi = json.loads((ROOT / 'build' / (companion + '.abi.json')).read_text())
+            compiled += [e for e in module_abi if e['type'] in ('event', 'error')]
+        constructor = next(e for e in reference if e['type'] == 'constructor')
+        assert [typ(f) for f in constructor['inputs']] == ['address']
+        constructor['inputs'] += [dict(type='address', internalType='address', name=n)
+                                  for n in ['openingModule', 'adjustmentsModule', 'batchesModule']]
+        refinements.append('constructor: registry plus three fixed, non-upgradeable delegate modules; each module reads immutable configuration from the same configured branch registry')
     if contract == 'TroveManager':
         # Fixed delegate modules preserve runtime selectors and manager storage.
         # Deployment explicitly supplies three module addresses; export the real
@@ -133,7 +144,7 @@ for contract in CONTRACTS:
 # Implementation companions have no direct Solidity protocol ABI counterpart.
 # MetadataGeometry is created by the renderer; TroveManager modules are deployed
 # explicitly and their immutable addresses are supplied to its constructor.
-for contract in ['MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations']:
+for contract in ['MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations', 'BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
     runtime = ROOT / 'build' / (contract + '.runtime.bin')
     init = ROOT / 'build' / (contract + '.bin')
     runtime_size = len(bytes.fromhex(runtime.read_text().strip().removeprefix('0x')))

@@ -1,0 +1,133 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use super::borrower_errors::*
+use super::borrower_data as data
+use super::borrower_checks as checks
+use super::borrower_adjust::balance
+use super::borrower_open::Config
+use super::add_remove_managers as managers
+use super::trove_redemption::{require_code, PriceMsg}
+use super::trove_manager::TroveManagerMsg
+use super::trove_nft::TroveNFTMsg
+use super::active_pool::ActivePoolMsg
+use super::bold_token::BoldTokenMsg
+use super::sorted_troves::SortedTrovesMsg
+use super::token_calls::TokenMsg
+use super::types::{TroveChange, LatestBatchData}
+use super::liquity_math as math
+use super::liquity_base as base
+use super::constants::{MIN_DEBT, ETH_GAS_COMPENSATION}
+#[event]
+pub struct ShutDown { pub tcr: u256 }
+pub fn wipe(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    data::clear_delegate(id)
+    data::set_batch(id, Address::zero())
+    managers::wipe(data::managers(), id)
+}
+pub fn insert(_ id: u256, _ rate: u256, _ upper: u256, _ lower: u256, _ batch: Address, _ batch_rate: u256)
+uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
+    let sorted = data::address_at(9)
+    require_code(sorted)
+    if batch == Address::zero() {
+        sorted.call(SortedTrovesMsg::Insert { id, interest: rate, prev_id: upper, next_id: lower })
+    } else {
+        sorted.call(SortedTrovesMsg::InsertIntoBatch { id, batch, interest: batch_rate, prev_id: upper, next_id: lower })
+    }
+}
+pub fn close(_ cfg: Config, _ id: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let manager = data::address_at(5)
+    let active = data::address_at(0)
+    let bold = data::address_at(8)
+    let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+    let receiver = managers::require_owner_or_remove(data::managers(), id, owner)
+    checks::open(manager, id)
+    let t = manager.static(TroveManagerMsg::LatestTrove { id })
+    balance(bold, t.entire_debt)
+    let mut change = TroveChange::zero()
+    change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+    change.applied_redist_coll_gain = t.redist_coll_gain
+    change.coll_decrease = t.entire_coll
+    change.debt_decrease = t.entire_debt
+    let batch = data::batch_of(id)
+    let mut b = LatestBatchData::zero()
+    if batch != Address::zero() {
+        b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
+        let future = b.entire_debt_without_redistribution - (t.entire_debt - t.redist_bold_debt_gain)
+        change.batch_accrued_management_fee = b.accrued_management_fee
+        change.old_weighted_recorded_debt = b.weighted_recorded_debt
+        change.new_weighted_recorded_debt = future * b.annual_interest_rate
+        change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+        change.new_weighted_recorded_batch_management_fee = future * b.annual_management_fee
+    } else { change.old_weighted_recorded_debt = t.weighted_recorded_debt }
+    let (price, _) = data::address_at(2).call(PriceMsg::Price {})
+    let ratio = checks::new_tcr(change, price)
+    if !data::is_shutdown() { checks::tcr(ratio, cfg.ccr) }
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnCloseTrove { id, change, manager: batch, batch_coll: b.entire_coll_without_redistribution, batch_debt: b.entire_debt_without_redistribution })
+    if batch != Address::zero() { data::set_batch(id, Address::zero()) }
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch })
+    let _ok = cfg.weth.call(TokenMsg::TransferFrom { owner: data::address_at(6), receiver, amount: ETH_GAS_COMPENSATION })
+    require_code(bold)
+    bold.call(BoldTokenMsg::Burn { account: ctx.caller(), amount: t.entire_debt })
+    require_code(active)
+    active.call(ActivePoolMsg::SendColl { account: receiver, amount: t.entire_coll })
+    wipe(id)
+}
+pub fn pending(_ id: u256, _ lower: u256, _ upper: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    let manager = data::address_at(5)
+    checks::open(manager, id)
+    let t = manager.static(TroveManagerMsg::LatestTrove { id })
+    if t.entire_debt == 0 { revert_error(TroveWithZeroDebt {}) }
+    let mut change = TroveChange::zero()
+    change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+    change.applied_redist_coll_gain = t.redist_coll_gain
+    let batch = data::batch_of(id)
+    let mut b = LatestBatchData::zero()
+    if batch == Address::zero() {
+        change.old_weighted_recorded_debt = t.weighted_recorded_debt
+        change.new_weighted_recorded_debt = t.entire_debt * t.annual_interest_rate
+    } else {
+        b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
+        change.batch_accrued_management_fee = b.accrued_management_fee
+        change.old_weighted_recorded_debt = b.weighted_recorded_debt
+        change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + t.redist_bold_debt_gain) * b.annual_interest_rate
+        change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+        change.new_weighted_recorded_batch_management_fee = (b.entire_debt_without_redistribution + t.redist_bold_debt_gain) * b.annual_management_fee
+    }
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnApplyTroveInterest { id, coll: t.entire_coll, debt: t.entire_debt, manager: batch, batch_coll: b.entire_coll_without_redistribution, batch_debt: b.entire_debt_without_redistribution, change })
+    let active = data::address_at(0)
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch })
+    if manager.static(TroveManagerMsg::Status { id }) == 4 && t.entire_debt >= MIN_DEBT {
+        require_code(manager)
+        manager.call(TroveManagerMsg::HookSetTroveStatusToActive { id })
+        insert(id, t.annual_interest_rate, upper, lower, batch, b.annual_interest_rate)
+    }
+}
+pub fn apply_shutdown() uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
+    let active = data::address_at(0)
+    require_code(active)
+    active.call(ActivePoolMsg::MintAggInterest {})
+    data::shutdown()
+    let manager = data::address_at(5)
+    require_code(manager)
+    manager.call(TroveManagerMsg::Shutdown {})
+}
+pub fn shutdown(_ scr: u256) uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
+    checks::not_shutdown()
+    let active = data::address_at(0)
+    let default = data::address_at(1)
+    let coll = base::entire_coll(active, default)
+    let debt = base::entire_debt(active, default)
+    let (price, failure) = data::address_at(2).call(PriceMsg::Price {})
+    if failure { return }
+    let ratio = math::compute_cr(coll, debt, price)
+    if ratio >= scr { revert_error(TCRNotBelowSCR {}) }
+    apply_shutdown()
+    log.emit(ShutDown { tcr: ratio })
+}

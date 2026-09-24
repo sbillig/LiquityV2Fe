@@ -1,15 +1,15 @@
 # Current work state
 
 The complete Liquity V2 port goal remains active. The verified contracts below
-are a partial system; full user-facing borrowing and multi-branch workflows
-are still outstanding.
+are a partial system; production oracle integration, helpers, governance and complete multi-branch
+workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **152 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **166 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/trove-manager.json`;
-the complete log is `tests/results/trove-manager.log`.
+compiler and reference hashes are recorded in `tests/results/borrower-operations.json`;
+the complete log is `tests/results/borrower-operations.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -33,6 +33,11 @@ Implemented and differentially tested:
   preserve manager storage, caller and events; the constructor adds module addresses.
   See TROVE_MANAGER_DEPLOYMENT.md. Tests include three memory-array ABI tests,
   12 data/state tests, eight hook tests, ten flow tests and a real connected system.
+- BorrowerOperations: opening, collateral/debt adjustments, repayment caps,
+  closing, pending debt, delegation, batch registration/rates/migration,
+  fee checks and shutdown. Twelve differential tests and two connected-system
+  tests cover the full public interface, storage, logs, rollback and ABI failures.
+  Fixed module deployment is documented in BORROWER_OPERATIONS_DEPLOYMENT.md.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -52,7 +57,10 @@ a complete borrowing/liquidation deployment.
 TroveChange, LatestTroveData and LatestBatchData ABI support are integrated.
 TroveManagerSystem connects actual Fe manager modules, pools, registry, BOLDToken,
 SortedTroves, TroveNFT and GasPool. It drives BO-side hooks; collateral and price
-feed are controlled test contracts. Full BorrowerOperations is still pending.
+feed are controlled test contracts. BorrowerOperationsSystem uses the real Fe
+BorrowerOperations and its modules with those actual Fe components. It compares
+user borrowing, rate/batch changes, closing, liquidation, redemption and shutdown
+against an all-Solidity branch, with collateral and price inputs controlled.
 
 `port_status.json` retains all 102 core/helper sources; `governance_status.json`
 retains all 27 governance sources. Unused generic SVG/JSON/Utils/baseSVG entry
@@ -80,9 +88,8 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. BorrowerOperations and user-facing individual/batch borrowing, adjustments,
-   delegation, fees, repayment and closing workflows.
-2. Price feeds/shutdown, hints/getters, helpers and zappers.
+1. Price feeds/shutdown and connection to the actual borrower operations.
+2. Hints/getters, helpers and zappers.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
@@ -91,12 +98,12 @@ Native storage borrows cannot span external calls; raw handles/copies preserve
 storage access ordering without weakening compiler checks. Any newly authored
 compiler fix needs its own branch, regression tests and newsfragment.
 
-BorrowerOperations.sol (all 1,616 lines) and its interface have been read.
-Storage layout is independently verified in `/tmp/liquity-borrower-storage.json`
-using `/tmp/liquity-bo-inspect-project`: base addresses 0–2, add/remove mappings
-3–4, manager 5, gas 6, surplus 7, BOLD 8, sorted address + shutdown bool at slot 9
-(byte offset 20), delegate/batch-of/batch-manager maps 10–12. Individual delegate:
-address at 0, min/max uint128 at 1, period at 2; batch manager: min/max at 0,
-period at 1. Draft data helpers and errors are in
-`/tmp/liquity-next-borrower-data.fe` and `/tmp/liquity-next-borrower-errors.fe`;
-these drafts are not yet integrated or validated.
+BorrowerOperations preserves Solidity slots 0–12, including the packed shutdown
+flag at byte 20 of slot 9. Runtime sizes: main 13,892 bytes, opening 12,052,
+adjustments 22,580, batches 23,828. Its constructor takes the registry and three
+fixed module addresses. The registry WETH getter uses CALL as declared by the
+Solidity interface; a stateful constructor mock checks this behavior.
+
+The next price-feed draft is isolated in `/tmp/liquity-feed-project` with twelve
+passing differential tests in `/tmp/liquity-feed-inspect-project`. It is not yet
+part of the validated repository checkpoint.

@@ -51,13 +51,15 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool and TroveManager. The current suite
-passes 152 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager and BorrowerOperations. The current suite
+passes 166 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
-sorted list for liquidation, regular/urgent redemption and shutdown. BorrowerOperations
-is still driven by the test; a full user-facing borrowing deployment remains pending.
+sorted list for liquidation, regular/urgent redemption and shutdown.
+BorrowerOperationsSystem connects actual Fe borrowing operations and compares
+opening, adjustments, batch management, closing and shutdown against Solidity.
+Price inputs and collateral tokens remain controlled test dependencies.
 
 Use `build/protocol/*.abi.json` for protocol integration after `scripts/test.sh`.
 The ABI export validates every function signature, return shape and emitted event
@@ -103,3 +105,9 @@ accepts the registry plus the three module addresses; runtime function selectors
 remain unchanged. See [TROVE_MANAGER_DEPLOYMENT.md](TROVE_MANAGER_DEPLOYMENT.md)
 for deployment order, ABI metadata and the custom memory-array decoder. The
 manager and every module are checked against deployment size limits.
+
+BorrowerOperations also uses three fixed delegate modules, with the registry and
+module addresses passed to its constructor. See
+[BORROWER_OPERATIONS_DEPLOYMENT.md](BORROWER_OPERATIONS_DEPLOYMENT.md). All public
+runtime selectors and the Solidity storage layout are preserved. The complete
+validation log and source/artifact hashes are in `tests/results/borrower-operations.*`.

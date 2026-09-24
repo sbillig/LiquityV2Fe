@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::packed::keccak_packed
+use super::borrower_data as data
+use super::borrower_checks as checks
+use super::add_remove_managers as managers
+use super::trove_redemption::require_code
+use super::trove_manager::TroveManagerMsg
+use super::active_pool::ActivePoolMsg
+use super::bold_token::BoldTokenMsg
+use super::sorted_troves::SortedTrovesMsg
+use super::token_calls::{safe_transfer_from, TokenMsg}
+use super::types::TroveChange
+use super::liquity_math as math
+use super::constants::{UPFRONT_INTEREST_PERIOD, ETH_GAS_COMPENSATION}
+pub struct Config {
+    pub coll: Address, pub weth: Address, pub nft: Address,
+    pub ccr: u256, pub mcr: u256, pub bcr: u256, pub scr: u256,
+}
+impl Copy for Config {}
+pub struct Open {
+    pub owner: Address, pub index: u256, pub coll: u256, pub bold: u256,
+    pub upper: u256, pub lower: u256, pub max_fee: u256,
+    pub add: Address, pub remove: Address, pub receiver: Address,
+}
+impl Copy for Open {}
+pub fn common(_ cfg: Config, _ p: Open, _ rate: u256, _ batch: Address, _ batch_debt: u256, _ batch_fee: u256, _ initial: TroveChange) -> (u256, TroveChange)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    checks::not_shutdown()
+    let manager = data::address_at(5)
+    let active = data::address_at(0)
+    let bold = data::address_at(8)
+    let price = checks::live_price()
+    let id = keccak_packed((ctx.caller().inner, p.owner.inner, p.index))
+    checks::nonexistent(manager, id)
+    let mut change = initial
+    change.coll_increase = p.coll
+    change.debt_increase = p.bold
+    change.new_weighted_recorded_debt = (batch_debt + p.bold) * rate
+    let avg = active.static(ActivePoolMsg::NewAverage { change })
+    change.upfront_fee = math::calc_interest(p.bold * avg, UPFRONT_INTEREST_PERIOD)
+    checks::accepts_fee(change.upfront_fee, p.max_fee)
+    let debt = p.bold + change.upfront_fee
+    checks::minimum_debt(debt)
+    let icr = math::compute_cr(p.coll, debt, price)
+    if batch == Address::zero() {
+        change.new_weighted_recorded_debt = debt * rate
+    } else {
+        change.new_weighted_recorded_debt = (batch_debt + debt) * rate
+        change.new_weighted_recorded_batch_management_fee = (batch_debt + debt) * batch_fee
+    }
+    checks::icr(icr, cfg.mcr, cfg.bcr, batch != Address::zero())
+    checks::tcr(checks::new_tcr(change, price), cfg.ccr)
+    managers::set_add(data::managers(), id, p.add)
+    managers::set_remove(data::managers(), id, p.remove, p.receiver)
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch })
+    safe_transfer_from(cfg.coll, ctx.caller(), active, p.coll)
+    require_code(active)
+    active.call(ActivePoolMsg::AccountForReceivedColl { amount: p.coll })
+    require_code(bold)
+    bold.call(BoldTokenMsg::Mint { account: ctx.caller(), amount: p.bold })
+    let _ok = cfg.weth.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: data::address_at(6), amount: ETH_GAS_COMPENSATION })
+    (id, change)
+}
+pub fn individual(_ cfg: Config, _ p: Open, _ rate: u256) -> u256
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    checks::rate(rate)
+    let (id, change) = common(cfg, p, rate, Address::zero(), 0, 0, TroveChange::zero())
+    let manager = data::address_at(5)
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnOpenTrove { owner: p.owner, id, change, rate })
+    let sorted = data::address_at(9)
+    require_code(sorted)
+    sorted.call(SortedTrovesMsg::Insert { id, interest: rate, prev_id: p.upper, next_id: p.lower })
+    id
+}
+pub fn batched(_ cfg: Config, _ p: Open, _ batch: Address) -> u256
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    checks::valid_batch(batch)
+    let manager = data::address_at(5)
+    let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
+    let mut initial = TroveChange::zero()
+    initial.batch_accrued_management_fee = b.accrued_management_fee
+    initial.old_weighted_recorded_debt = b.weighted_recorded_debt
+    initial.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    let (id, change) = common(cfg, p, b.annual_interest_rate, batch, b.entire_debt_without_redistribution, b.annual_management_fee, initial)
+    data::set_batch(id, batch)
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnOpenTroveAndJoinBatch { owner: p.owner, id, change, manager: batch, batch_coll: b.entire_coll_without_redistribution, batch_debt: b.entire_debt_without_redistribution })
+    let sorted = data::address_at(9)
+    require_code(sorted)
+    sorted.call(SortedTrovesMsg::InsertIntoBatch { id, batch, interest: b.annual_interest_rate, prev_id: p.upper, next_id: p.lower })
+    id
+}

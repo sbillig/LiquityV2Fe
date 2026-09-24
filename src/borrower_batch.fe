@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use super::borrower_errors::*
+use super::borrower_data as data
+use super::borrower_checks as checks
+use super::borrower_adjust::apply_fee
+use super::borrower_open::Config
+use super::add_remove_managers as managers
+use super::trove_redemption::require_code
+use super::trove_manager::TroveManagerMsg
+use super::active_pool::ActivePoolMsg
+use super::sorted_troves::SortedTrovesMsg
+use super::types::TroveChange
+use super::liquity_math as math
+use super::constants::*
+pub fn register(_ min: u128, _ max: u128, _ rate: u128, _ fee: u128, _ period: u128)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    if data::batch_manager(ctx.caller()).max_rate > 0 { revert_error(BatchManagerExists {}) }
+    checks::rate(min as u256)
+    checks::rate(max as u256)
+    checks::ordered(min as u256, max as u256)
+    checks::range(rate as u256, min as u256, max as u256)
+    if fee > MAX_ANNUAL_BATCH_MANAGEMENT_FEE { revert_error(AnnualManagementFeeTooHigh {}) }
+    if period < MIN_INTEREST_RATE_CHANGE_PERIOD { revert_error(MinInterestRateChangePeriodTooLow {}) }
+    data::set_batch_manager(ctx.caller(), data::BatchManager { min_rate: min, max_rate: max, min_period: period as u256 })
+    let manager = data::address_at(5)
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnRegisterBatchManager { manager: ctx.caller(), rate: rate as u256, fee: fee as u256 })
+}
+pub fn lower_fee(_ fee: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    checks::valid_batch(ctx.caller())
+    let manager = data::address_at(5)
+    let b = manager.static(TroveManagerMsg::LatestBatch { manager: ctx.caller() })
+    if fee >= b.annual_management_fee { revert_error(NewFeeNotLower {}) }
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnLowerBatchManagerAnnualFee { manager: ctx.caller(), coll: b.entire_coll_without_redistribution, debt: b.entire_debt_without_redistribution, fee })
+    let mut change = TroveChange::zero()
+    change.batch_accrued_management_fee = b.accrued_management_fee
+    change.old_weighted_recorded_debt = b.weighted_recorded_debt
+    change.new_weighted_recorded_debt = b.entire_debt_without_redistribution * b.annual_interest_rate
+    change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    change.new_weighted_recorded_batch_management_fee = b.entire_debt_without_redistribution * fee
+    let active = data::address_at(0)
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch: ctx.caller() })
+}
+pub fn set_rate(_ cfg: Config, _ rate: u256, _ upper: u256, _ lower: u256, _ max_fee: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    checks::valid_batch(ctx.caller())
+    let registered = data::batch_manager(ctx.caller())
+    checks::range(rate, registered.min_rate as u256, registered.max_rate as u256)
+    let manager = data::address_at(5)
+    let active = data::address_at(0)
+    let b = manager.static(TroveManagerMsg::LatestBatch { manager: ctx.caller() })
+    if ctx.timestamp() < b.last_interest_rate_adj_time + registered.min_period { revert_error(BatchInterestRateChangePeriodNotPassed {}) }
+    let mut debt = b.entire_debt_without_redistribution
+    let mut change = TroveChange::zero()
+    change.batch_accrued_management_fee = b.accrued_management_fee
+    change.old_weighted_recorded_debt = b.weighted_recorded_debt
+    change.new_weighted_recorded_debt = debt * rate
+    change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    change.new_weighted_recorded_batch_management_fee = debt * b.annual_management_fee
+    if b.annual_interest_rate != rate && ctx.timestamp() < b.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN {
+        let price = checks::live_price()
+        let avg = active.static(ActivePoolMsg::NewAverage { change })
+        change.upfront_fee = math::calc_interest(debt * avg, UPFRONT_INTEREST_PERIOD)
+        checks::accepts_fee(change.upfront_fee, max_fee)
+        debt += change.upfront_fee
+        change.new_weighted_recorded_debt = debt * rate
+        change.new_weighted_recorded_batch_management_fee = debt * b.annual_management_fee
+        checks::tcr(checks::new_tcr(change, price), cfg.ccr)
+    }
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch: ctx.caller() })
+    let sorted = data::address_at(9)
+    if !sorted.static(SortedTrovesMsg::IsEmptyBatch { id: ctx.caller() }) {
+        require_code(sorted)
+        sorted.call(SortedTrovesMsg::ReInsertBatch { id: ctx.caller(), interest: rate, prev_id: upper, next_id: lower })
+    }
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnSetBatchManagerAnnualInterestRate { manager: ctx.caller(), coll: b.entire_coll_without_redistribution, debt, rate, upfront: change.upfront_fee })
+}
+pub fn join(_ cfg: Config, _ id: u256, _ batch: Address, _ upper: u256, _ lower: u256, _ max_fee: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    let manager = data::address_at(5)
+    let active = data::address_at(0)
+    let sorted = data::address_at(9)
+    checks::active(manager, id)
+    managers::require_borrower(cfg.nft, id)
+    checks::valid_batch(batch)
+    checks::not_in_batch(id)
+    data::set_batch(id, batch)
+    if data::delegate(id).account != Address::zero() { data::clear_delegate(id) }
+    let t = manager.static(TroveManagerMsg::LatestTrove { id })
+    let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
+    let mut change = TroveChange::zero()
+    change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+    change.applied_redist_coll_gain = t.redist_coll_gain
+    change.batch_accrued_management_fee = b.accrued_management_fee
+    change.old_weighted_recorded_debt = b.weighted_recorded_debt + t.weighted_recorded_debt
+    change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + t.entire_debt) * b.annual_interest_rate
+    let (debt, updated) = apply_fee(cfg, t.entire_coll, t.entire_debt, change, max_fee, true)
+    change = updated
+    change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + debt) * b.annual_interest_rate
+    change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    change.new_weighted_recorded_batch_management_fee = (b.entire_debt_without_redistribution + debt) * b.annual_management_fee
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch })
+    require_code(manager)
+    manager.call(TroveManagerMsg::SetBatch { params: (id, t.entire_coll, debt, change, batch, b.entire_coll_without_redistribution, b.entire_debt_without_redistribution) })
+    require_code(sorted)
+    sorted.call(SortedTrovesMsg::Remove { id })
+    require_code(sorted)
+    sorted.call(SortedTrovesMsg::InsertIntoBatch { id, batch, interest: b.annual_interest_rate, prev_id: upper, next_id: lower })
+}
+pub fn remove(_ cfg: Config, _ id: u256, _ new_rate: u256, _ upper: u256, _ lower: u256, _ max_fee: u256, _ kick: bool)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+    checks::not_shutdown()
+    let manager = data::address_at(5)
+    let sorted = data::address_at(9)
+    if kick { checks::open(manager, id) } else {
+        checks::active(manager, id)
+        managers::require_borrower(cfg.nft, id)
+        checks::rate(new_rate)
+    }
+    let batch = checks::in_batch(id)
+    let t = manager.static(TroveManagerMsg::LatestTrove { id })
+    let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
+    let mut rate = new_rate
+    if kick {
+        if b.total_debt_shares * MAX_BATCH_SHARES_RATIO >= b.entire_debt_without_redistribution { revert_error(BatchSharesRatioTooLow {}) }
+        rate = b.annual_interest_rate
+    }
+    data::set_batch(id, Address::zero())
+    if manager.static(TroveManagerMsg::Status { id }) != 4 {
+        require_code(sorted)
+        sorted.call(SortedTrovesMsg::RemoveFromBatch { id })
+        require_code(sorted)
+        sorted.call(SortedTrovesMsg::Insert { id, interest: rate, prev_id: upper, next_id: lower })
+    }
+    let future = b.entire_debt_without_redistribution - (t.entire_debt - t.redist_bold_debt_gain)
+    let mut debt = t.entire_debt
+    let mut change = TroveChange::zero()
+    change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+    change.applied_redist_coll_gain = t.redist_coll_gain
+    change.batch_accrued_management_fee = b.accrued_management_fee
+    change.old_weighted_recorded_debt = b.weighted_recorded_debt
+    change.new_weighted_recorded_debt = future * b.annual_interest_rate + debt * rate
+    if b.annual_interest_rate != rate && ctx.timestamp() < t.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN {
+        let (new_debt, updated) = apply_fee(cfg, t.entire_coll, debt, change, max_fee, false)
+        debt = new_debt
+        change = updated
+    }
+    change.new_weighted_recorded_debt = future * b.annual_interest_rate + debt * rate
+    change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
+    change.new_weighted_recorded_batch_management_fee = future * b.annual_management_fee
+    let active = data::address_at(0)
+    require_code(active)
+    active.call(ActivePoolMsg::AccountTroveChange { change, batch })
+    require_code(manager)
+    manager.call(TroveManagerMsg::HookOnRemoveFromBatch { id, coll: t.entire_coll, debt, change, manager: batch, batch_coll: b.entire_coll_without_redistribution, batch_debt: b.entire_debt_without_redistribution, rate })
+}

@@ -1,0 +1,267 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, RawOps, revert_error}
+use super::borrower_open as opening
+use super::borrower_open::Config
+use super::borrower_data as data
+use super::borrower_checks as checks
+use super::borrower_errors::*
+use super::borrower_adjust as adjust
+use super::borrower_lifecycle as life
+use super::borrower_batch as batch
+use super::add_remove_managers as managers
+use super::trove_nft::TroveNFTMsg
+use super::trove_manager::TroveManagerMsg
+use super::trove_redemption::require_code
+use super::coll_surplus_pool::CollSurplusPoolMsg
+use super::gas_pool::TokenApprovalMsg
+use super::liquity_base as base
+use super::types::TroveChange
+use super::addresses_registry::*
+// Modules are fixed at construction: no upgrade or arbitrary delegate target.
+#[inline(never)]
+fn forward(_ target: Address) -> ! uses (ctx: Ctx, ops: mut RawOps, call: mut Call) {
+    let len = ops.calldatasize()
+    let mut args = core::ptr::MemBuffer::with_capacity(len)
+    ops.calldatacopy(dest: mut args, dest_offset: 0, src_offset: 0, len: len)
+    args.set_len(len)
+    let mut output = core::ptr::MemBuffer::empty()
+    let result = call.raw_delegatecall(addr: target, gas: ctx.gas(), args: args.span(), ret: mut output)
+    let size = result.returndata_len()
+    let mut returned = core::ptr::MemBuffer::with_capacity(size)
+    ops.returndatacopy(dest: mut returned, dest_offset: 0, src_offset: 0, len: size)
+    returned.set_len(size)
+    if result.success() { ops.return_data(data: returned.span()) }
+    else { ops.revert(data: returned.span()) }
+}
+pub msg BorrowerOperationsMsg {
+    #[selector = sol("CCR()")]
+    CCR -> u256,
+    #[selector = sol("SCR()")]
+    SCR -> u256,
+    #[selector = sol("MCR()")]
+    MCR -> u256,
+    #[selector = sol("BCR()")]
+    BCR -> u256,
+    #[selector = sol("activePool()")]
+    ActivePool -> Address,
+    #[selector = sol("getEntireBranchColl()")]
+    EntireColl -> u256,
+    #[selector = sol("getEntireBranchDebt()")]
+    EntireDebt -> u256,
+    #[selector = sol("hasBeenShutDown()")]
+    HasBeenShutDown -> bool,
+    #[selector = sol("interestBatchManagerOf(uint256)")]
+    BatchOf { id: u256 } -> Address,
+    #[selector = sol("getInterestIndividualDelegateOf(uint256)")]
+    Delegate { id: u256 } -> (Address, u128, u128, u256),
+    #[selector = sol("getInterestBatchManager(address)")]
+    BatchManager { account: Address } -> (u128, u128, u256),
+    #[selector = sol("checkBatchManagerExists(address)")]
+    BatchExists { account: Address } -> bool,
+    #[selector = sol("addManagerOf(uint256)")]
+    AddManagerOf { id: u256 } -> Address,
+    #[selector = sol("removeManagerReceiverOf(uint256)")]
+    RemoveManagerReceiverOf { id: u256 } -> (Address, Address),
+    #[selector = sol("setAddManager(uint256,address)")]
+    setAddManager { id: u256, manager: Address },
+    #[selector = sol("setRemoveManager(uint256,address)")]
+    setRemoveManager { id: u256, manager: Address },
+    #[selector = sol("setRemoveManagerWithReceiver(uint256,address,address)")]
+    setRemoveManagerWithReceiver { id: u256, manager: Address, receiver: Address },
+    #[selector = sol("openTrove(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address)")]
+    OpenTrove { owner: Address, index: u256, coll: u256, bold: u256, upper: u256, lower: u256, rate: u256, max_fee: u256, add: Address, remove: Address, receiver: Address } -> u256,
+    #[selector = sol("openTroveAndJoinInterestBatchManager((address,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    OpenBatch { p: (Address, u256, u256, u256, u256, u256, Address, u256, Address, Address, Address) } -> u256,
+    #[selector = sol("addColl(uint256,uint256)")]
+    addColl { id: u256, amount: u256 },
+    #[selector = sol("withdrawColl(uint256,uint256)")]
+    withdrawColl { id: u256, amount: u256 },
+    #[selector = sol("withdrawBold(uint256,uint256,uint256)")]
+    withdrawBold { id: u256, amount: u256, max_fee: u256 },
+    #[selector = sol("repayBold(uint256,uint256)")]
+    repayBold { id: u256, amount: u256 },
+    #[selector = sol("adjustTrove(uint256,uint256,bool,uint256,bool,uint256)")]
+    adjustTrove { id: u256, coll: u256, coll_inc: bool, debt: u256, debt_inc: bool, max_fee: u256 },
+    #[selector = sol("adjustZombieTrove(uint256,uint256,bool,uint256,bool,uint256,uint256,uint256)")]
+    adjustZombieTrove { id: u256, coll: u256, coll_inc: bool, debt: u256, debt_inc: bool, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("adjustTroveInterestRate(uint256,uint256,uint256,uint256,uint256)")]
+    AdjustRate { id: u256, rate: u256, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("closeTrove(uint256)")]
+    Close { id: u256 },
+    #[selector = sol("applyPendingDebt(uint256,uint256,uint256)")]
+    ApplyPending { id: u256, lower: u256, upper: u256 },
+    #[selector = sol("onLiquidateTrove(uint256)")]
+    Liquidate { id: u256 },
+    #[selector = sol("claimCollateral()")]
+    Claim,
+    #[selector = sol("shutdown()")]
+    Shutdown,
+    #[selector = sol("shutdownFromOracleFailure()")]
+    OracleShutdown,
+    #[selector = sol("registerBatchManager(uint128,uint128,uint128,uint128,uint128)")]
+    RegisterBatch { min: u128, max: u128, rate: u128, fee: u128, period: u128 },
+    #[selector = sol("lowerBatchManagementFee(uint256)")]
+    LowerFee { fee: u256 },
+    #[selector = sol("setBatchManagerAnnualInterestRate(uint128,uint256,uint256,uint256)")]
+    BatchRate { rate: u128, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("setInterestBatchManager(uint256,address,uint256,uint256,uint256)")]
+    JoinBatch { id: u256, manager: Address, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("removeFromBatch(uint256,uint256,uint256,uint256,uint256)")]
+    RemoveBatch { id: u256, rate: u256, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("kickFromBatch(uint256,uint256,uint256)")]
+    KickBatch { id: u256, upper: u256, lower: u256 },
+    #[selector = sol("switchBatchManager(uint256,uint256,uint256,address,uint256,uint256,uint256)")]
+    SwitchBatch { id: u256, remove_upper: u256, remove_lower: u256, manager: Address, upper: u256, lower: u256, max_fee: u256 },
+    #[selector = sol("removeInterestIndividualDelegate(uint256)")]
+    RemoveDelegate { id: u256 },
+    #[selector = sol("setInterestIndividualDelegate(uint256,address,uint128,uint128,uint256,uint256,uint256,uint256,uint256)")]
+    SetDelegate { id: u256, account: Address, min: u128, max: u128, rate: u256, upper: u256, lower: u256, max_fee: u256, period: u256 },
+}
+pub contract BorrowerOperations {
+    cfg: Config,
+    opening_module: Address,
+    adjustments_module: Address,
+    batches_module: Address,
+    init(registry: Address, opening: Address, adjustments: Address, batches: Address) uses (mut opening_module, mut adjustments_module, mut batches_module, mut cfg, call: mut Call, storage: mut RawStorage, log: mut Log) {
+        opening_module = opening
+        adjustments_module = adjustments
+        batches_module = batches
+        let active = registry.static(RegistryMsg::GetactivePool {})
+        storage.sstore(slot: 0, value: active.inner)
+        let default = registry.static(RegistryMsg::GetdefaultPool {})
+        storage.sstore(slot: 1, value: default.inner)
+        let price = registry.static(RegistryMsg::GetpriceFeed {})
+        storage.sstore(slot: 2, value: price.inner)
+        log.emit(ActivePoolAddressChanged { value: active })
+        log.emit(DefaultPoolAddressChanged { value: default })
+        log.emit(PriceFeedAddressChanged { value: price })
+        let nft = registry.static(RegistryMsg::GettroveNFT {})
+        log.emit(TroveNFTAddressChanged { value: nft })
+        let coll = registry.static(RegistryMsg::GetcollToken {})
+        let weth = registry.call(RegistryMsg::GetWETH {})
+        let ccr = registry.static(RegistryMsg::GetCCR {})
+        let scr = registry.static(RegistryMsg::GetSCR {})
+        let mcr = registry.static(RegistryMsg::GetMCR {})
+        let bcr = registry.static(RegistryMsg::GetBCR {})
+        cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
+        let manager = registry.static(RegistryMsg::GettroveManager {})
+        storage.sstore(slot: 5, value: manager.inner)
+        let gas = registry.static(RegistryMsg::GetgasPoolAddress {})
+        storage.sstore(slot: 6, value: gas.inner)
+        let surplus = registry.static(RegistryMsg::GetcollSurplusPool {})
+        storage.sstore(slot: 7, value: surplus.inner)
+        let sorted = registry.static(RegistryMsg::GetsortedTroves {})
+        storage.sstore(slot: 9, value: sorted.inner)
+        let bold = registry.static(RegistryMsg::GetboldToken {})
+        storage.sstore(slot: 8, value: bold.inner)
+        log.emit(TroveManagerAddressChanged { value: manager })
+        log.emit(GasPoolAddressChanged { value: gas })
+        log.emit(CollSurplusPoolAddressChanged { value: surplus })
+        log.emit(SortedTrovesAddressChanged { value: sorted })
+        log.emit(BoldTokenAddressChanged { value: bold })
+        coll.call(TokenApprovalMsg::Approve { spender: active, amount: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff })
+    }
+    recv BorrowerOperationsMsg {
+        CCR -> u256 uses (cfg) {
+            cfg.ccr
+        }
+        SCR -> u256 uses (cfg) {
+            cfg.scr
+        }
+        MCR -> u256 uses (cfg) {
+            cfg.mcr
+        }
+        BCR -> u256 uses (cfg) {
+            cfg.bcr
+        }
+        ActivePool -> Address uses (storage: RawStorage) {
+            data::address_at(0)
+        }
+        EntireColl -> u256 uses (call: mut Call, storage: RawStorage) {
+            base::entire_coll(data::address_at(0), data::address_at(1))
+        }
+        EntireDebt -> u256 uses (call: mut Call, storage: RawStorage) {
+            base::entire_debt(data::address_at(0), data::address_at(1))
+        }
+        HasBeenShutDown -> bool uses (storage: RawStorage) {
+            data::is_shutdown()
+        }
+        BatchOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) {
+            data::batch_of(id)
+        }
+        Delegate { id } -> (Address, u128, u128, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let d = data::delegate(id)
+            (d.account, d.min_rate, d.max_rate, d.min_period)
+        }
+        BatchManager { account } -> (u128, u128, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let b = data::batch_manager(account)
+            (b.min_rate, b.max_rate, b.min_period)
+        }
+        BatchExists { account } -> bool uses (mem: mut RawMem, storage: RawStorage) {
+            data::batch_manager(account).max_rate > 0
+        }
+        AddManagerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) {
+            managers::get_add(data::managers(), id)
+        }
+        RemoveManagerReceiverOf { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) {
+            managers::get_remove(data::managers(), id)
+        }
+        setAddManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::require_borrower(cfg.nft, id)
+            managers::set_add(data::managers(), id, manager)
+        }
+        setRemoveManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let receiver = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+            managers::require_borrower(cfg.nft, id)
+            managers::set_remove(data::managers(), id, manager, receiver)
+        }
+        setRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::require_borrower(cfg.nft, id)
+            managers::set_remove(data::managers(), id, manager, receiver)
+        }
+        OpenTrove { owner, index, coll, bold, upper, lower, rate, max_fee, add, remove, receiver } -> u256 uses (opening_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(opening_module) }
+        OpenBatch { p } -> u256 uses (opening_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(opening_module) }
+        addColl { id, amount } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        withdrawColl { id, amount } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        withdrawBold { id, amount, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        repayBold { id, amount } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        adjustTrove { id, coll, coll_inc, debt, debt_inc, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        adjustZombieTrove { id, coll, coll_inc, debt, debt_inc, upper, lower, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        AdjustRate { id, rate, upper, lower, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
+        Close { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            life::close(cfg, id)
+        }
+        ApplyPending { id, lower, upper } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            life::pending(id, lower, upper)
+        }
+        Liquidate { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            if ctx.caller() != data::address_at(5) { revert_error(CallerNotTroveManager {}) }
+            life::wipe(id)
+        }
+        Claim uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let surplus = data::address_at(7)
+            require_code(surplus)
+            surplus.call(CollSurplusPoolMsg::ClaimColl { account: ctx.caller() })
+        }
+        Shutdown uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            life::shutdown(cfg.scr)
+        }
+        OracleShutdown uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            if ctx.caller() != data::address_at(2) { revert_error(CallerNotPriceFeed {}) }
+            if !data::is_shutdown() { life::apply_shutdown() }
+        }
+        RegisterBatch { min, max, rate, fee, period } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        LowerFee { fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        BatchRate { rate, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        JoinBatch { id, manager, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        RemoveBatch { id, rate, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        KickBatch { id, upper, lower } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        SwitchBatch { id, remove_upper, remove_lower, manager, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+        RemoveDelegate { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::require_borrower(cfg.nft, id)
+            data::clear_delegate(id)
+        }
+        SetDelegate { id, account, min, max, rate, upper, lower, max_fee, period } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
+    }
+}

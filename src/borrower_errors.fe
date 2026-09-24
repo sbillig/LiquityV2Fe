@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: BUSL-1.1
+#[error]
+pub struct IsShutDown {}
+#[error]
+pub struct TCRNotBelowSCR {}
+#[error]
+pub struct ZeroAdjustment {}
+#[error]
+pub struct NotOwnerNorInterestManager {}
+#[error]
+pub struct TroveInBatch {}
+#[error]
+pub struct TroveNotInBatch {}
+#[error]
+pub struct InterestNotInRange {}
+#[error]
+pub struct BatchInterestRateChangePeriodNotPassed {}
+#[error]
+pub struct DelegateInterestRateChangePeriodNotPassed {}
+#[error]
+pub struct TroveExists {}
+#[error]
+pub struct TroveNotOpen {}
+#[error]
+pub struct TroveNotActive {}
+#[error]
+pub struct TroveNotZombie {}
+#[error]
+pub struct TroveWithZeroDebt {}
+#[error]
+pub struct UpfrontFeeTooHigh {}
+#[error]
+pub struct ICRBelowMCR {}
+#[error]
+pub struct ICRBelowMCRPlusBCR {}
+#[error]
+pub struct RepaymentNotMatchingCollWithdrawal {}
+#[error]
+pub struct TCRBelowCCR {}
+#[error]
+pub struct DebtBelowMin {}
+#[error]
+pub struct CollWithdrawalTooHigh {}
+#[error]
+pub struct NotEnoughBoldBalance {}
+#[error]
+pub struct InterestRateTooLow {}
+#[error]
+pub struct InterestRateTooHigh {}
+#[error]
+pub struct InterestRateNotNew {}
+#[error]
+pub struct InvalidInterestBatchManager {}
+#[error]
+pub struct BatchManagerExists {}
+#[error]
+pub struct BatchManagerNotNew {}
+#[error]
+pub struct NewFeeNotLower {}
+#[error]
+pub struct CallerNotTroveManager {}
+#[error]
+pub struct CallerNotPriceFeed {}
+#[error]
+pub struct MinGeMax {}
+#[error]
+pub struct AnnualManagementFeeTooHigh {}
+#[error]
+pub struct MinInterestRateChangePeriodTooLow {}
+#[error]
+pub struct NewOracleFailureDetected {}
+#[error]
+pub struct BatchSharesRatioTooLow {}

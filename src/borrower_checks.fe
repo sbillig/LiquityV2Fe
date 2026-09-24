@@ -1,0 +1,80 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, revert_error}
+use super::borrower_errors::*
+use super::borrower_data as data
+use super::constants::*
+use super::liquity_base as base
+use super::liquity_math as math
+use super::types::TroveChange
+use super::trove_manager::TroveManagerMsg
+use super::trove_redemption::PriceMsg
+pub fn not_shutdown() uses (storage: RawStorage) {
+    if data::is_shutdown() { revert_error(IsShutDown {}) }
+}
+pub fn rate(_ value: u256) {
+    if value < MIN_ANNUAL_INTEREST_RATE { revert_error(InterestRateTooLow {}) }
+    if value > MAX_ANNUAL_INTEREST_RATE { revert_error(InterestRateTooHigh {}) }
+}
+pub fn range(_ value: u256, _ min: u256, _ max: u256) {
+    if min > value || value > max { revert_error(InterestNotInRange {}) }
+}
+pub fn ordered(_ min: u256, _ max: u256) {
+    if min >= max { revert_error(MinGeMax {}) }
+}
+pub fn accepts_fee(_ fee: u256, _ max: u256) {
+    if fee > max { revert_error(UpfrontFeeTooHigh {}) }
+}
+pub fn minimum_debt(_ debt: u256) {
+    if debt < MIN_DEBT { revert_error(DebtBelowMin {}) }
+}
+pub fn icr(_ value: u256, _ mcr: u256, _ bcr: u256, _ batched: bool) {
+    if batched {
+        if value < mcr + bcr { revert_error(ICRBelowMCRPlusBCR {}) }
+    } else if value < mcr { revert_error(ICRBelowMCR {}) }
+}
+pub fn tcr(_ value: u256, _ ccr: u256) {
+    if value < ccr { revert_error(TCRBelowCCR {}) }
+}
+pub fn live_price() -> u256 uses (storage: RawStorage, call: mut Call) {
+    let (price, failure) = data::address_at(2).call(PriceMsg::Price {})
+    if failure { revert_error(NewOracleFailureDetected {}) }
+    price
+}
+pub fn new_tcr(_ change: TroveChange, _ price: u256) -> u256 uses (storage: RawStorage, call: mut Call) {
+    let active = data::address_at(0)
+    let default = data::address_at(1)
+    let coll = base::entire_coll(active, default) + change.coll_increase - change.coll_decrease
+    let debt = base::entire_debt(active, default) + change.debt_increase + change.upfront_fee - change.debt_decrease
+    math::compute_cr(coll, debt, price)
+}
+pub fn nonexistent(_ manager: Address, _ id: u256) uses (call: mut Call) {
+    if manager.static(TroveManagerMsg::Status { id }) != 0 { revert_error(TroveExists {}) }
+}
+pub fn active(_ manager: Address, _ id: u256) uses (call: mut Call) {
+    if manager.static(TroveManagerMsg::Status { id }) != 1 { revert_error(TroveNotActive {}) }
+}
+pub fn open(_ manager: Address, _ id: u256) uses (call: mut Call) {
+    let status = manager.static(TroveManagerMsg::Status { id })
+    if status != 1 && status != 4 { revert_error(TroveNotOpen {}) }
+}
+pub fn zombie(_ manager: Address, _ id: u256) uses (call: mut Call) {
+    if manager.static(TroveManagerMsg::Status { id }) != 4 { revert_error(TroveNotZombie {}) }
+}
+pub fn valid_batch(_ manager: Address) uses (mem: mut RawMem, storage: RawStorage) {
+    if data::batch_manager(manager).max_rate == 0 { revert_error(InvalidInterestBatchManager {}) }
+}
+pub fn not_in_batch(_ id: u256) uses (mem: mut RawMem, storage: RawStorage) {
+    if data::batch_of(id) != Address::zero() { revert_error(TroveInBatch {}) }
+}
+pub fn in_batch(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
+    let manager = data::batch_of(id)
+    if manager == Address::zero() { revert_error(TroveNotInBatch {}) }
+    manager
+}
+pub fn delegate_adjustment(_ id: u256, _ last_adjustment: u256, _ new_rate: u256) uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+    let delegate = data::delegate(id)
+    if delegate.account == ctx.caller() {
+        range(new_rate, delegate.min_rate as u256, delegate.max_rate as u256)
+        if ctx.timestamp() < last_adjustment + delegate.min_period { revert_error(DelegateInterestRateChangePeriodNotPassed {}) }
+    }
+}
