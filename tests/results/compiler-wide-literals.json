@@ -1,0 +1,22 @@
+{
+  "branch": "fix/reject-oversized-integer-literals",
+  "revision": "b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4",
+  "base": "f00132a97429f966804d70c40206ef40ebca6960",
+  "integrated_into_protocol_compiler": false,
+  "tests": {
+    "type_check_fixtures": 243,
+    "hir_library_tests": 202,
+    "format_check": "passed"
+  },
+  "commands": [
+    "cargo test -p fe-uitest --test ty_check --locked",
+    "cargo test -p fe-hir --lib --locked",
+    "cargo fmt --all --check"
+  ],
+  "sha256": {
+    "compiler-patches/reject-oversized-integer-literals.patch": "31473cb9286c1df441904e41e2369576253de85638cc314a68f627ebee3030cf",
+    "tests/repros/oversized_integer_literal.fe": "5ae0e80f42d5e902d4b33a2452168ac125faef23dc5de53b5e9a0f999434ee46",
+    "tests/results/compiler-wide-literals-tycheck.log": "c0cc814b9fa2f3f95387a73736fc7b5a710f2e8312931655f3c36060c106d0ff",
+    "tests/results/compiler-wide-literals-hir.log": "d1ee0a92ca377834eac462c08312682aba0d7e4c591d41c610087e06624ead0a"
+  }
+}

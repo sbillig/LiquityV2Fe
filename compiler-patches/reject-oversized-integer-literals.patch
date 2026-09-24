@@ -1,0 +1,113 @@
+From b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4 Mon Sep 17 00:00:00 2001
+From: Christoph Burgdorf <christoph.burgdorf@gmail.com>
+Date: Thu, 24 Sep 2026 19:19:47 +0300
+Subject: [PATCH] Reject integer expression literals wider than 256 bits
+
+---
+ crates/hir/src/analysis/ty/ty_check/expr.rs   | 11 ++++++++
+ .../ty_check/oversized_integer_literals.fe    | 26 +++++++++++++++++
+ .../ty_check/oversized_integer_literals.snap  | 28 +++++++++++++++++++
+ .../+oversized-integer-literals.bugfix.md     |  1 +
+ 4 files changed, 66 insertions(+)
+ create mode 100644 crates/uitest/fixtures/ty_check/oversized_integer_literals.fe
+ create mode 100644 crates/uitest/fixtures/ty_check/oversized_integer_literals.snap
+ create mode 100644 newsfragments/+oversized-integer-literals.bugfix.md
+
+diff --git a/crates/hir/src/analysis/ty/ty_check/expr.rs b/crates/hir/src/analysis/ty/ty_check/expr.rs
+index 44658e43f..6e1447a40 100644
+--- a/crates/hir/src/analysis/ty/ty_check/expr.rs
++++ b/crates/hir/src/analysis/ty/ty_check/expr.rs
+@@ -373,6 +373,17 @@ impl<'db> TyChecker<'db> {
+             Expr::Lit(LitKind::String(string_id)) => {
+                 ExprProp::new(self.string_literal_ty(*string_id, expected), true)
+             }
++            Expr::Lit(LitKind::Int(integer)) if integer.data(self.db).bits() > 256 => {
++                // No primitive integer type can represent more than one EVM word.
++                // Reject before lowering can silently discard the high bits, even
++                // when the literal's contextual type has not been inferred yet.
++                self.push_diag(BodyDiag::IntLiteralOutOfRange {
++                    primary: expr.span(self.body()).into(),
++                    literal: integer.data(self.db).to_string(),
++                    ty: TyId::u256(self.db),
++                });
++                ExprProp::invalid(self.db)
++            }
+             Expr::Lit(lit) => ExprProp::new(self.lit_ty_for_expected(lit, expected), true),
+             Expr::Block(..) => self.check_block(expr, expr_data, expected, result_discarded),
+             Expr::Un(..) => self.check_unary(expr, expr_data),
+diff --git a/crates/uitest/fixtures/ty_check/oversized_integer_literals.fe b/crates/uitest/fixtures/ty_check/oversized_integer_literals.fe
+new file mode 100644
+index 000000000..255cc503a
+--- /dev/null
++++ b/crates/uitest/fixtures/ty_check/oversized_integer_literals.fe
+@@ -0,0 +1,26 @@
++fn oversized_hex_return() -> u256 {
++    0x10000000000000000000000000000000000000000000000000000000000000000
++}
++
++fn oversized_decimal_return() -> u256 {
++    115792089237316195423570985008687907853269984665640564039457584007913129639936
++}
++
++fn accepts_word(_ value: u256) {}
++
++fn oversized_argument() {
++    accepts_word(0x10000000000000000000000000000000000000000000000000000000000000001)
++}
++
++fn oversized_inferred_local() -> u256 {
++    let value = 0x48696e7448656c706572730000000000000000000000000000000000000000000000
++    value
++}
++
++fn valid_unsigned_maximum() -> u256 {
++    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
++}
++
++fn valid_signed_minimum() -> i256 {
++    -0x8000000000000000000000000000000000000000000000000000000000000000
++}
+diff --git a/crates/uitest/fixtures/ty_check/oversized_integer_literals.snap b/crates/uitest/fixtures/ty_check/oversized_integer_literals.snap
+new file mode 100644
+index 000000000..1ba44da0a
+--- /dev/null
++++ b/crates/uitest/fixtures/ty_check/oversized_integer_literals.snap
+@@ -0,0 +1,28 @@
++---
++source: crates/uitest/tests/ty_check.rs
++expression: diags
++input_file: fixtures/ty_check/oversized_integer_literals.fe
++---
++error[8-0074]: integer literal out of range
++  ┌─ oversized_integer_literals.fe:2:5
++  │
++2 │     0x10000000000000000000000000000000000000000000000000000000000000000
++  │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `115792089237316195423570985008687907853269984665640564039457584007913129639936` is not representable in `u256`
++
++error[8-0074]: integer literal out of range
++  ┌─ oversized_integer_literals.fe:6:5
++  │
++6 │     115792089237316195423570985008687907853269984665640564039457584007913129639936
++  │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `115792089237316195423570985008687907853269984665640564039457584007913129639936` is not representable in `u256`
++
++error[8-0074]: integer literal out of range
++   ┌─ oversized_integer_literals.fe:12:18
++   │
++12 │     accepts_word(0x10000000000000000000000000000000000000000000000000000000000000001)
++   │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `115792089237316195423570985008687907853269984665640564039457584007913129639937` is not representable in `u256`
++
++error[8-0074]: integer literal out of range
++   ┌─ oversized_integer_literals.fe:16:17
++   │
++16 │     let value = 0x48696e7448656c706572730000000000000000000000000000000000000000000000
++   │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `2146487918059394099708988414770462393406195837647902021766013037500894076475539456` is not representable in `u256`
+diff --git a/newsfragments/+oversized-integer-literals.bugfix.md b/newsfragments/+oversized-integer-literals.bugfix.md
+new file mode 100644
+index 000000000..5f3bcacfd
+--- /dev/null
++++ b/newsfragments/+oversized-integer-literals.bugfix.md
+@@ -0,0 +1 @@
++Reject integer expression literals larger than 256 bits during type checking instead of silently truncating them during EVM lowering.
+-- 
+2.43.0
+

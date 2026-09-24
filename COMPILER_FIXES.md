@@ -3,7 +3,8 @@
 Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
 Base upstream/master: `f00132a97429f966804d70c40206ef40ebca6960`.
 
-Three existing upstream fixes have been integrated (details below). No new compiler fixes have been authored.
+Three existing upstream fixes have been integrated. One new independently tested
+fix is ready on a separate branch; it is not merged into the protocol compiler.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.
@@ -73,8 +74,8 @@ metadata. No compiler modifications are needed for these metadata adaptations.
   jobs were explicitly stopped to evaluate this existing upstream fix.
 - The PR includes regression tests for guard size, quantification, source cache
   invalidation, summary mappings, and control-flow ordering.
-- No newsfragment is supplied by this existing upstream PR. No new compiler
-  fix has been authored locally. All 218 `fe-hir` library unit tests pass
+- No newsfragment is supplied by this existing upstream PR. This integration did not author a new compiler
+  fix. All 218 `fe-hir` library unit tests pass
   (`cargo test --release -p fe-hir --lib --locked`), recorded in
   `tests/results/compiler-1585.log`. The 10 PR #1592 and 14 PR #1587
   execution regressions also pass with this integration compiler.
@@ -86,3 +87,31 @@ Reproducibility: `reference_manifest.json` pins the complete integration tree as
 well as upstream and PR input commits. Fresh bootstrap merges can have different
 commit IDs because local merge timestamps differ; the bootstrap and validation
 recorder require the exact pinned tree and all input commits as ancestors.
+
+## New: reject integer expression literals wider than 256 bits
+
+- Branch: `fix/reject-oversized-integer-literals` in `toolchain/fe`.
+- Commit: `b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4`.
+- Base: upstream/master `f00132a97429f966804d70c40206ef40ebca6960`;
+  this is a standalone patch without the three integration PRs as dependencies.
+- Worktree: `/tmp/liquity-fe-wide-literals`.
+- Patch: [reject-oversized-integer-literals.patch](compiler-patches/reject-oversized-integer-literals.patch).
+- Trigger: a 33-byte integer used to assemble a string was accepted and silently
+  truncated to its low 256 bits. The independent reproduction
+  `tests/repros/oversized_integer_literal.fe` demonstrates that `2^256` currently
+  executes as zero on the pinned protocol compiler.
+- Fix: diagnose integer expression literals wider than 256 bits before lowering.
+  This patch concerns the maximum primitive integer width; it does not claim to
+  change all narrower integer-conversion rules.
+- Regression: `crates/uitest/fixtures/ty_check/oversized_integer_literals.fe`
+  and its diagnostic snapshot cover oversized hexadecimal/decimal returns,
+  call arguments and inferred locals; valid `u256` maximum and `i256` minimum
+  remain accepted.
+- Newsfragment: `newsfragments/+oversized-integer-literals.bugfix.md`.
+- Verification: all **243** `fe-uitest` type-check fixtures and **202** `fe-hir`
+  library tests pass on this branch; `cargo fmt --all --check` passes.
+  Logs and hashes: `tests/results/compiler-wide-literals-*`.
+- Integration status: deliberately separate from the protocol compiler while
+  its recorded validation runs use the pinned integration tree. The port's
+  erroneous constants were corrected and all source literals were checked for
+  excessive width. No PR was published or external message sent.

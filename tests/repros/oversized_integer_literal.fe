@@ -1,0 +1,7 @@
+fn too_wide() -> u256 {
+    0x10000000000000000000000000000000000000000000000000000000000000000
+}
+#[test]
+fn demonstrates_silent_truncation() {
+    assert(too_wide() == 0)
+}
