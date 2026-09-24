@@ -1,0 +1,308 @@
+// SPDX-License-Identifier: BUSL-1.1
+use core::abi::{AbiSize, AbiSpan, ByteInput, AbiDecoder, Decode, store_word}
+use std::abi::{sol, Sol, DynArray, DynArrayAccess, DynString}
+use std::evm::{Address, Call, Ctx, RawMem, RawOps, RawStorage, encode_abi_payload, revert_error}
+use std::evm::packed::keccak_packed
+use std::evm::panic::Panic
+use super::types::LatestTroveData
+use super::trove_memory_array::TroveMemoryArray
+use super::token_calls::{TokenMsg, safe_transfer}
+use super::revert_texts::{Error, require}
+// Match Solidity's eager memory-array allocation and address validation.
+pub struct AddressMemoryArray { pub values: DynArray<Address> }
+impl AbiSize for AddressMemoryArray {
+    const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = true
+}
+impl AbiSpan<Sol> for AddressMemoryArray {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 {
+        <TroveMemoryArray as AbiSpan<Sol>>::payload_end(input, base: base, pos: pos)
+    }
+}
+impl Decode<Sol> for AddressMemoryArray {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let input = d.input()
+        let pos = d.pos()
+        let end = <TroveMemoryArray as AbiSpan<Sol>>::payload_end(input, base: 0, pos: pos)
+        let values = <DynArray<Address> as Decode<Sol>>::decode_from(input, pos)
+        Self { values }
+    }
+}
+pub msg RedemptionHelperCalls {
+    #[selector = sol("totalCollaterals()")]
+    Count -> u256,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("getTroveManager(uint256)")]
+    ManagerAt { index: u256 } -> Address,
+    #[selector = sol("getToken(uint256)")]
+    TokenAt { index: u256 } -> Address,
+    #[selector = sol("troveManager()")]
+    Manager -> Address,
+    #[selector = sol("sortedTroves()")]
+    Sorted -> Address,
+    #[selector = sol("priceFeed()")]
+    Feed -> Address,
+    #[selector = sol("getUnbackedPortionPriceAndRedeemability()")]
+    Unbacked -> (u256, u256, bool),
+    #[selector = sol("getEntireBranchDebt()")]
+    Debt -> u256,
+    #[selector = sol("lastZombieTroveId()")]
+    Zombie -> u256,
+    #[selector = sol("getLast()")]
+    Last -> u256,
+    #[selector = sol("getPrev(uint256)")]
+    Prev { id: u256 } -> u256,
+    #[selector = sol("getLatestTroveData(uint256)")]
+    Trove { id: u256 } -> LatestTroveData,
+    #[selector = sol("getRedemptionRateForRedeemedAmount(uint256)")]
+    Fee { amount: u256 } -> u256,
+    #[selector = sol("fetchRedemptionPrice()")]
+    Price -> (u256, bool),
+    #[selector = sol("redeemCollateral(uint256,uint256,uint256)")]
+    Redeem { amount: u256, iterations: u256, fee: u256 },
+    #[selector = sol("balanceOf(address)")]
+    Balance { account: Address } -> u256,
+}
+pub struct SimulationContext {
+    pub trove_manager: Address, pub sorted_troves: Address, pub redeemable: bool,
+    pub price: u256, pub proportion: u256, pub attempted_bold: u256,
+    pub redeemed_bold: u256, pub iterations: u256,
+}
+pub struct Redeemed { pub bold: u256, pub coll: u256 }
+impl AbiSize for SimulationContext { const HEAD_SIZE: u256 = 256
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for SimulationContext {
+    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 256 }
+}
+impl AbiSize for Redeemed { const HEAD_SIZE: u256 = 64
+    const IS_DYNAMIC: bool = false }
+impl AbiSpan<Sol> for Redeemed {
+    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 64 }
+}
+fn array(_ n: u256, _ stride: u256) -> (*u8, u256) {
+    if n > 0xffffffffffffffff { revert_error(Panic { code: 0x41 }) }
+    let size = 32 + n * stride
+    let p = core::ptr::alloc_bytes(size)
+    core::ptr::zero_bytes(p, size)
+    store_word(ptr: p, value: n)
+    (p, size)
+}
+fn put(_ p: *u8, _ offset: u256, _ value: u256) { store_word(ptr: core::ptr::offset_bytes(p, offset), value) }
+fn read(_ p: *u8, _ offset: u256) -> u256 uses (mem: RawMem) { mem.mload(addr: core::ptr::offset_bytes(p, offset)) }
+fn branch_address(_ index: u256) -> Address uses (storage: RawStorage, mem: mut RawMem) {
+    Address { inner: storage.sload(keccak_packed(0 as u256) + index) }
+}
+fn simulate(_ count: u256, _ amount: u256, _ limit: u256) -> (*u8, u256, u256)
+uses (storage: RawStorage, call: mut Call, mem: mut RawMem) {
+    let (p, size) = array(count, 256)
+    let mut total = 0
+    let mut i = 0
+    while i < count {
+        let out = core::ptr::offset_bytes(p, 32 + 256 * i)
+        let registry = branch_address(i)
+        let manager = registry.static(RedemptionHelperCalls::Manager {})
+        let sorted = registry.static(RedemptionHelperCalls::Sorted {})
+        put(out, 0, manager.inner)
+        put(out, 32, sorted.inner)
+        let (proportion, price, active) = manager.call(RedemptionHelperCalls::Unbacked {})
+        put(out, 64, if active { 1 } else { 0 })
+        put(out, 96, price)
+        put(out, 128, proportion)
+        if active { total += proportion }
+        i += 1
+    }
+    let bold = if total > 0 && total < amount { total } else { amount }
+    if total == 0 {
+        i = 0
+        while i < count {
+            let out = core::ptr::offset_bytes(p, 32 + 256 * i)
+            let manager = Address { inner: read(out, 0) }
+            let debt = manager.static(RedemptionHelperCalls::Debt {})
+            put(out, 128, debt)
+            if read(out, 64) != 0 { total += debt }
+            i += 1
+        }
+    }
+    if total == 0 { return (p, size, total) }
+    i = 0
+    while i < count {
+        let out = core::ptr::offset_bytes(p, 32 + 256 * i)
+        i += 1
+        if read(out, 64) == 0 { continue }
+        let attempted = bold * read(out, 128) / total
+        put(out, 160, attempted)
+        if attempted == 0 { continue }
+        let manager = Address { inner: read(out, 0) }
+        let sorted = Address { inner: read(out, 32) }
+        let zombie = manager.static(RedemptionHelperCalls::Zombie {})
+        let last = sorted.static(RedemptionHelperCalls::Last {})
+        let mut current = if zombie != 0 { zombie } else { last }
+        let mut next = if zombie != 0 { last } else { sorted.static(RedemptionHelperCalls::Prev { id: last }) }
+        let mut iterations = 0
+        let mut redeemed = 0
+        while iterations < limit || limit == 0 {
+            if redeemed == attempted || current == 0 { break }
+            let trove = manager.static(RedemptionHelperCalls::Trove { id: current })
+            if trove.entire_coll * read(out, 96) / trove.entire_debt >= 1000000000000000000 {
+                let remaining = attempted - redeemed
+                redeemed += if remaining < trove.entire_debt { remaining } else { trove.entire_debt }
+            }
+            current = next
+            next = sorted.static(RedemptionHelperCalls::Prev { id: next })
+            iterations += 1
+        }
+        put(out, 192, redeemed)
+        put(out, 224, iterations)
+    }
+    (p, size, total)
+}
+pub msg RedemptionHelperMsg {
+    #[selector = sol("numBranches()")]
+    Count -> u256,
+    #[selector = sol("collateralRegistry()")]
+    Registry -> Address,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("addresses(uint256)")]
+    Branch { index: u256 } -> Address,
+    #[selector = sol("simulateRedemption(uint256,uint256)")]
+    Simulate { amount: u256, iterations: u256 } -> (DynArray<SimulationContext>, u256),
+    #[selector = sol("truncateRedemption(uint256,uint256)")]
+    Truncate { amount: u256, iterations: u256 } -> (u256, u256, DynArray<Redeemed>),
+    // Numeric selector preserves the custom Solidity memory-array decoder.
+    #[selector = 0xc8c52fb7]
+    Redeem { amount: u256, iterations: u256, fee: u256, minimum: TroveMemoryArray },
+}
+pub contract RedemptionHelper {
+    count: u256,
+    registry: Address,
+    bold: Address,
+    init(collateral_registry: Address, branches: AddressMemoryArray)
+    uses (mut count, mut registry, mut bold, storage: mut RawStorage, call: mut Call, mem: mut RawMem) {
+        let mut i = 0
+        while i < branches.values.len() { let validated = branches.values.get(i)
+            i += 1 }
+        require(branches.values.len() == collateral_registry.static(RedemptionHelperCalls::Count {}), error_count())
+        count = branches.values.len()
+        registry = collateral_registry
+        bold = collateral_registry.static(RedemptionHelperCalls::Bold {})
+        i = 0
+        while i < branches.values.len() {
+            let branch = branches.values.get(i)
+            require(collateral_registry.static(RedemptionHelperCalls::ManagerAt { index: i }) == branch.static(RedemptionHelperCalls::Manager {}), error_manager())
+            storage.sstore(slot: keccak_packed(0 as u256) + i, value: branch.inner)
+            storage.sstore(slot: 0, value: i + 1)
+            i += 1
+        }
+    }
+    recv RedemptionHelperMsg {
+        Count -> u256 uses (count) { count }
+        Registry -> Address uses (registry) { registry }
+        Bold -> Address uses (bold) { bold }
+        Branch { index } -> Address uses (storage: RawStorage, mem: mut RawMem, ops: mut RawOps) {
+            if index >= storage.sload(0) { ops.revert(data: core::ptr::MemSpan::empty()) }
+            branch_address(index)
+        }
+        Simulate { amount, iterations } -> (DynArray<SimulationContext>, u256)
+        uses (count, storage: RawStorage, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+            let (p, size, total) = simulate(count, amount, iterations)
+            let values: DynArray<SimulationContext> = DynArray::from_abi_tail(data: p, len: count, size)
+            let output = encode_abi_payload((values, total))
+            ops.return_data(data: output.span())
+        }
+        Truncate { amount, iterations } -> (u256, u256, DynArray<Redeemed>)
+        uses (count, registry, storage: RawStorage, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+            let (p, _, total) = simulate(count, amount, iterations)
+            if total == 0 {
+                let (empty, size) = array(0, 64)
+                let values: DynArray<Redeemed> = DynArray::from_abi_tail(data: empty, len: 0, size)
+                let output = encode_abi_payload((0 as u256, 0 as u256, values))
+                ops.return_data(data: output.span())
+            }
+            let mut truncated = amount
+            let mut i = 0
+            while i < count {
+                let branch = core::ptr::offset_bytes(p, 32 + 256 * i)
+                if read(branch, 64) != 0 && read(branch, 128) > 0 {
+                    let extrapolated = read(branch, 192) * total / read(branch, 128)
+                    if extrapolated < truncated { truncated = extrapolated }
+                }
+                i += 1
+            }
+            let fee = registry.static(RedemptionHelperCalls::Fee { amount: truncated })
+            let (result, size) = array(count, 64)
+            i = 0
+            while i < count {
+                let branch = core::ptr::offset_bytes(p, 32 + 256 * i)
+                if read(branch, 64) != 0 && read(branch, 128) > 0 {
+                    let feed = branch_address(i).static(RedemptionHelperCalls::Feed {})
+                    let (price, _) = feed.call(RedemptionHelperCalls::Price {})
+                    let debt = truncated * read(branch, 128) / total
+                    put(result, 32 + 64 * i, debt)
+                    put(result, 64 + 64 * i, debt * (1000000000000000000 - fee) / price)
+                }
+                i += 1
+            }
+            let values: DynArray<Redeemed> = DynArray::from_abi_tail(data: result, len: count, size)
+            let output = encode_abi_payload((truncated, fee, values))
+            ops.return_data(data: output.span())
+        }
+        Redeem { amount, iterations, fee, minimum }
+        uses (count, registry, bold, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            require(amount > 0, error_zero())
+            require(minimum.values.len() == count, error_minimum())
+            let (p, _) = array(count, 64)
+            let mut i = 0
+            while i < count {
+                let token = registry.static(RedemptionHelperCalls::TokenAt { index: i })
+                put(p, 32 + 64 * i, token.inner)
+                put(p, 64 + 64 * i, token.static(RedemptionHelperCalls::Balance { account: ctx.address() }))
+                i += 1
+            }
+            let before = bold.static(RedemptionHelperCalls::Balance { account: ctx.address() })
+            let ignored = bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
+            registry.call(RedemptionHelperCalls::Redeem { amount, iterations, fee })
+            i = 0
+            while i < count {
+                let token = Address { inner: read(p, 32 + 64 * i) }
+                let received = token.static(RedemptionHelperCalls::Balance { account: ctx.address() }) - read(p, 64 + 64 * i)
+                require(received >= minimum.values.get(i), error_slippage())
+                if received > 0 { safe_transfer(token, ctx.caller(), received) }
+                i += 1
+            }
+            let remaining = bold.static(RedemptionHelperCalls::Balance { account: ctx.address() }) - before
+            if remaining > 0 { let ignored = bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: remaining }) }
+        }
+    }
+}
+
+fn error_count() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x57726f6e67206e756d626572206f662072656769737472696573000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 26))
+}
+
+fn error_manager() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x54726f76654d616e61676572206d69736d617463680000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 21))
+}
+
+fn error_zero() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x52656465656d656420616d6f756e74206d757374206265206e6f6e2d7a65726f)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 32))
+}
+
+fn error_minimum() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x57726f6e67205f6d696e436f6c6c52656465656d6564206c656e677468000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 29))
+}
+
+fn error_slippage() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x496e73756666696369656e7420636f6c6c61746572616c2072656465656d6564)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 32))
+}

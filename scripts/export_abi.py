@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'RedemptionHelper': ('SLOAD and empty revert', {'addresses(uint256)'}),
     'DebtInFrontHelper': ('STATICCALL', {'getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)', 'getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)'}),
     'HintHelpers': ('STATICCALL', {
         'getApproxHint(uint256,uint256,uint256,uint256)',
@@ -109,8 +110,24 @@ for contract in CONTRACTS:
         constructor['inputs'] += [dict(type='address', internalType='address', name=n)
                                   for n in ['operationsModule', 'redemptionsModule', 'liquidationsModule']]
         refinements.append('constructor: registry plus three fixed, non-upgradeable delegate modules; event/error ABI includes module emissions at the manager address')
+    if contract == 'RedemptionHelper':
+        redeem_key = ('function', 'redeemCollateral(uint256,uint256,uint256,uint256[])')
+        assert redeem_key not in {key(e) for e in compiled}
+        compiled.append(copy.deepcopy(next(e for e in reference if key(e) == redeem_key)))
+        refinements.append('redeemCollateral: numeric selector with runtime-tested Solidity memory-array decoder')
+        constructor = next(e for e in compiled if e['type'] == 'constructor')
+        assert [typ(f) for f in constructor['inputs']] == ['address', '(address[])']
+        constructor['inputs'][1] = dict(type='address[]', name='branches')
+        refinements.append('constructor: AddressMemoryArray explicitly decodes a flat address[] with eager allocation panic and address validation')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
+        if contract == 'RedemptionHelper' and entry.get('name') in {'simulateRedemption', 'truncateRedemption'}:
+            outputs = entry['outputs']
+            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
+            expected = ['tuple[]', 'uint256'] if entry['name'] == 'simulateRedemption' else ['uint256', 'uint256', 'tuple[]']
+            assert [c['type'] for c in outputs[0]['components']] == expected
+            entry['outputs'] = outputs[0]['components']
+            refinements.append(entry['name'] + ': explicit flat runtime return with dynamic array')
         if contract == 'MultiTroveGetter' and key(entry) == ('function', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'):
             outputs = entry['outputs']
             assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'

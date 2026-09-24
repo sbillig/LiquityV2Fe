@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {RedemptionHelper} from "../reference/bold/contracts/src/RedemptionHelper.sol";
+import {CollateralRegistry} from "../reference/bold/contracts/src/CollateralRegistry.sol";
 import {DebtInFrontHelper} from "../reference/bold/contracts/src/DebtInFrontHelper.sol";
 import {HintHelpers} from "../reference/bold/contracts/src/HintHelpers.sol";
 import {MultiTroveGetter} from "../reference/bold/contracts/src/MultiTroveGetter.sol";
@@ -35,13 +37,15 @@ contract BorrowerOperationsSystemTest {
     PoolVm constant vm=PoolVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE=address(0xa11ce);address constant BOB=address(0xb0b);address constant ROUTER=address(0x100);
     struct System {
-        AddressesRegistry registry;ActivePool active;DefaultPool defaults;StabilityPool sp;BoldToken bold;BorrowerSystemCollateral coll;
+        CollateralRegistry cr;AddressesRegistry registry;ActivePool active;DefaultPool defaults;StabilityPool sp;BoldToken bold;BorrowerSystemCollateral coll;
         WETHPriceFeed oracleFeed;FeedOracle oracle;BorrowerOperations bo;TroveManager manager;TroveNFT nft;SortedTroves sorted;CollSurplusPool surplus;address gasPool;BorrowerSystemPrice feed;
     }
     function code(string memory name,bool fe) internal returns(bytes memory){
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("RedemptionHelper"))return type(RedemptionHelper).creationCode;
+        if(k==keccak256("CollateralRegistry"))return type(CollateralRegistry).creationCode;
         if(k==keccak256("DebtInFrontHelper"))return type(DebtInFrontHelper).creationCode;
         if(k==keccak256("HintHelpers"))return type(HintHelpers).creationCode;
         if(k==keccak256("MultiTroveGetter"))return type(MultiTroveGetter).creationCode;
@@ -62,7 +66,8 @@ contract BorrowerOperationsSystemTest {
     function predict(bytes memory init) internal view returns(address){return address(uint160(uint256(keccak256(abi.encodePacked(hex"ff",address(this),bytes32(0),keccak256(init))))));}
     function deploy(bytes memory init) internal returns(address target){require(init.length<=49152,"initcode");assembly{target:=create2(0,add(init,32),mload(init),0)}require(target.code.length>0&&target.code.length<=24576,"deploy");}
     function make(bool fe) internal returns(System memory s){return makeWithOracle(fe,false);}
-    function makeWithOracle(bool fe,bool realOracle) internal returns(System memory s){
+    function makeWithOracle(bool fe,bool realOracle) internal returns(System memory){return makeWithRegistry(fe,realOracle,false);}
+    function makeWithRegistry(bool fe,bool realOracle,bool realRegistry) internal returns(System memory s){
         s.coll=new BorrowerSystemCollateral();s.feed=new BorrowerSystemPrice();
         s.registry=AddressesRegistry(deploy(bytes.concat(code("AddressesRegistry",fe),abi.encode(address(this),15e17,11e17,1e17,11e17,5e16,1e17))));
         s.bold=BoldToken(deploy(bytes.concat(code("BoldToken",fe),abi.encode(address(this)))));
@@ -84,13 +89,14 @@ contract BorrowerOperationsSystemTest {
             s.oracle=new FeedOracle(8,2000e8);
             init[9]=bytes.concat(code("WETHPriceFeed",fe),abi.encode(s.oracle,3600,predict(init[8])));
         }
-        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=realOracle?predict(init[9]):address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=address(this);vars[16]=address(s.bold);vars[17]=address(s.coll);
+        if(realRegistry){address[] memory tokens=new address[](1);tokens[0]=address(s.coll);address[] memory managers=new address[](1);managers[0]=predict(init[3]);s.cr=CollateralRegistry(deploy(bytes.concat(code("CollateralRegistry",fe),abi.encode(s.bold,tokens,managers))));}
+        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=realOracle?predict(init[9]):address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=realRegistry?address(s.cr):address(this);vars[16]=address(s.bold);vars[17]=address(s.coll);
         (bool ok,)=address(s.registry).call(abi.encodePacked(AddressesRegistry.setAddresses.selector,abi.encode(vars)));require(ok);
         if(fe){deploy(modules[0]);deploy(modules[1]);deploy(modules[2]);deploy(borrowerModules[0]);deploy(borrowerModules[1]);deploy(borrowerModules[2]);}
         s.active=ActivePool(deploy(init[0]));s.defaults=DefaultPool(deploy(init[1]));s.sp=StabilityPool(deploy(init[2]));s.manager=TroveManager(deploy(init[3]));s.nft=TroveNFT(deploy(init[4]));s.sorted=SortedTroves(deploy(init[5]));s.gasPool=deploy(init[6]);s.surplus=CollSurplusPool(deploy(init[7]));
         s.bo=BorrowerOperations(deploy(init[8]));
         if(realOracle)s.oracleFeed=WETHPriceFeed(deploy(init[9]));
-        s.bold.setBranchAddresses(address(s.manager),address(s.sp),address(s.bo),address(s.active));s.bold.setCollateralRegistry(address(this));
+        s.bold.setBranchAddresses(address(s.manager),address(s.sp),address(s.bo),address(s.active));s.bold.setCollateralRegistry(realRegistry?address(s.cr):address(this));
     }
     function id(address owner,uint index) internal pure returns(uint){return uint(keccak256(abi.encode(owner,owner,index)));}
     function open(System memory s,uint index,address owner,uint coll,uint rate) internal {
@@ -196,5 +202,28 @@ contract BorrowerOperationsSystemTest {
     function testActualBorrowingLiquidationRedemptionAndShutdown() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=run(make(true));
         TimeVm(address(vm)).warp(1000);bytes32 expected=run(make(false));require(actual==expected,"connected borrower parity");
+    }
+    function runRedemptionHelper(bool fe) internal returns(bytes32){
+        System memory s=makeWithRegistry(fe,false,true);
+        open(s,1,ALICE,20e18,5e16);open(s,2,BOB,10e18,6e16);open(s,3,ALICE,30e18,7e16);
+        address[] memory registries=new address[](1);registries[0]=address(s.registry);
+        RedemptionHelper helper=RedemptionHelper(deploy(bytes.concat(code("RedemptionHelper",fe),abi.encode(s.cr,registries))));
+        TimeVm(address(vm)).warp(block.timestamp+14 days);
+        (uint truncated,uint fee,RedemptionHelper.Redeemed[] memory projected)=helper.truncateRedemption(4000e18,1);
+        require(truncated>3000e18&&truncated<4000e18,"iteration truncation");require(projected.length==1&&projected[0].bold==truncated,"projection");
+        uint[] memory minimum=new uint[](1);minimum[0]=projected[0].coll;
+        vm.prank(ALICE);s.bold.approve(address(helper),type(uint).max);
+        uint before=s.coll.balanceOf(ALICE);uint beforeBold=s.bold.balanceOf(ALICE);
+        vm.prank(ALICE);helper.redeemCollateral(truncated,1,fee,minimum);
+        require(s.coll.balanceOf(ALICE)-before>=minimum[0],"redemption collateral");
+        require(beforeBold-s.bold.balanceOf(ALICE)==truncated,"redeemed BOLD");
+        require(s.bold.balanceOf(address(helper))==0&&s.coll.balanceOf(address(helper))==0,"helper residual");
+        conserve(s);
+        return keccak256(abi.encode(truncated,fee,minimum,s.coll.balanceOf(ALICE)-before,s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.manager.lastZombieTroveId()));
+    }
+    function testActualRedemptionHelperAndCollateralRegistry() public {
+        TimeVm(address(vm)).warp(1000);bytes32 actual=runRedemptionHelper(true);
+        TimeVm(address(vm)).warp(1000);bytes32 expected=runRedemptionHelper(false);
+        require(actual==expected,"connected redemption helper parity");
     }
 }

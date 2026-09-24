@@ -346,9 +346,16 @@
     "verification": []
   },
   "contracts/src/Interfaces/IRedemptionHelper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/redemption_helper.fe",
+      "src/trove_memory_array.fe"
+    ],
+    "verification": [
+      "tests/RedemptionHelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/redemption-helper.log"
+    ]
   },
   "contracts/src/Interfaces/ISortedTroves.sol": {
     "status": "implemented_differential_tests_pass",
@@ -633,9 +640,16 @@
     ]
   },
   "contracts/src/RedemptionHelper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/redemption_helper.fe",
+      "src/trove_memory_array.fe"
+    ],
+    "verification": [
+      "tests/RedemptionHelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/redemption-helper.log"
+    ]
   },
   "contracts/src/SortedTroves.sol": {
     "status": "implemented_differential_tests_pass",
@@ -793,9 +807,15 @@
     "verification": []
   },
   "contracts/src/Zappers/LeftoversSweep.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/leftovers_sweep.fe",
+      "src/leftovers_harness.fe"
+    ],
+    "verification": [
+      "tests/LeftoversParity.t.sol",
+      "tests/results/redemption-helper.log"
+    ]
   },
   "contracts/src/Zappers/LeverageLSTZapper.sol": {
     "status": "pending",

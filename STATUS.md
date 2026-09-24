@@ -6,10 +6,10 @@ workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **189 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **202 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/debt-helpers.json`;
-the complete log is `tests/results/debt-helpers.log`.
+compiler and reference hashes are recorded in `tests/results/redemption-helper.json`;
+the complete log is `tests/results/redemption-helper.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -50,6 +50,12 @@ Implemented and differentially tested:
 - DebtInFrontHelper: bounded debt ranges, excluded/stop-at troves, hint selection,
   signed-overflow behavior, and connected debt-in-front queries. The legacy
   Constants query contract is also implemented and ABI-checked.
+- RedemptionHelper: full simulation, debt-based fallback allocation, iteration
+  truncation, redemption-price fetching, minimum-collateral checks and BOLD refunds.
+  Nine differential tests and one actual-registry system test cover storage,
+  malformed ABI, dependency failures and rollback. Runtime: 9,835 bytes.
+- LeftoversSweep: common zapper balance snapshots and surplus returns, with three
+  parity tests including 1,024 fuzz runs. Full zapper contracts remain outstanding.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -105,7 +111,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Integrate and fully validate RedemptionHelper, then the common zapper utilities.
+1. Finish and integrate WETHZapper, then the remaining zappers and exchange/flash-loan modules.
 2. Remaining helpers and zappers.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -121,8 +127,8 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-RedemptionHelper is prepared in `/tmp/liquity-redemption-helper`, with nine
-passing parity tests and a connected actual-registry test in
-`/tmp/liquity-redemption-inspect`. Common LeftoversSweep functions are prepared
-in `/tmp/liquity-zapper-project`, with three passing differential tests in
-`/tmp/liquity-zapper-inspect`. These drafts are not part of this checkpoint.
+The WETHZapper draft is isolated in `/tmp/liquity-zapper-project`, with test
+scaffolding in `/tmp/liquity-zapper-inspect`. Its build uses a separate debug
+compiler with existing PR #1567 for payable return handlers. The pinned release
+compiler remains unchanged. See COMPILER_FIXES.md for the preparation and the
+bootstrap conflict that must be handled before integrating this compiler update.

@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, RawMem}
+use super::leftovers_sweep::{snapshot, return_leftovers}
+pub msg SweepDriverMsg {
+    #[selector = sol("execute()")]
+    Execute,
+}
+pub msg SweepHarnessMsg {
+    #[selector = sol("sweep(address[4],address,address)")]
+    Sweep { tokens: [Address; 4], receiver: Address, driver: Address },
+}
+pub contract LeftoversHarness {
+    recv SweepHarnessMsg {
+        Sweep { tokens, receiver, driver } uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            let initial = snapshot(tokens, receiver)
+            driver.call(SweepDriverMsg::Execute {})
+            return_leftovers(initial)
+        }
+    }
+}

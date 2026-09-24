@@ -455,6 +455,32 @@
     "compiler_standard_errors": [],
     "function_count": 2
   },
+  "RedemptionHelper": {
+    "runtime_bytes": 9835,
+    "initcode_bytes_before_arguments": 12211,
+    "compiler_abi_sha256": "67ef9c7e58d6236c419a8eb81e5711a13528bbaceb62558164d7152cb5456acc",
+    "reference_artifact_sha256": "741c7b53d874c6f45fbf8e1744e1d93923d6d7870a5f041f9613e2e0f0b5b444",
+    "protocol_abi_sha256": "9af185d2ade76431dc128005390763b6fbcdd08059cfe32421b75a7c630f51f5",
+    "metadata_refinements": [
+      "redeemCollateral: numeric selector with runtime-tested Solidity memory-array decoder",
+      "constructor: AddressMemoryArray explicitly decodes a flat address[] with eager allocation panic and address validation",
+      "addresses: read-only SLOAD and empty revert; Fe capability conservatively implies nonpayable",
+      "simulateRedemption: explicit flat runtime return with dynamic array",
+      "truncateRedemption: explicit flat runtime return with dynamic array"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 7
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,
