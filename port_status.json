@@ -774,9 +774,16 @@
     ]
   },
   "contracts/src/Zappers/GasCompZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/gas_comp_zapper.fe",
+      "src/gascomp_errors.fe"
+    ],
+    "verification": [
+      "tests/GasCompZapperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/zappers.log"
+    ]
   },
   "contracts/src/Zappers/Interfaces/IExchange.sol": {
     "status": "pending",
@@ -825,14 +832,32 @@
     ]
   },
   "contracts/src/Zappers/LeverageLSTZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/leverage_lst_zapper.fe",
+      "src/leverage_lst_zapper_module.fe",
+      "src/leverage_errors.fe",
+      "src/zapper_forward.fe"
+    ],
+    "verification": [
+      "tests/LeverageZapperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/zappers.log"
+    ]
   },
   "contracts/src/Zappers/LeverageWETHZapper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/leverage_weth_zapper.fe",
+      "src/leverage_weth_zapper_module.fe",
+      "src/leverage_errors.fe",
+      "src/zapper_forward.fe"
+    ],
+    "verification": [
+      "tests/LeverageZapperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/zappers.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveFactory.sol": {
     "status": "pending",

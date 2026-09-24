@@ -1,0 +1,35 @@
+No files changed, compilation skipped
+
+Ran 9 tests for tests/BorrowerOperationsSystem.t.sol:BorrowerOperationsSystemTest
+[PASS] testActualBorrowingLiquidationRedemptionAndShutdown() (gas: 76893726)
+[PASS] testActualFeePredictionsAndSortedGetter() (gas: 84460340)
+[PASS] testActualGasCompZapperLifecycle() (gas: 83341430)
+[PASS] testActualIndividualAndBatchClosing() (gas: 74380942)
+[PASS] testActualLeverageLST() (gas: 88732033)
+[PASS] testActualLeverageWETH() (gas: 87595687)
+[PASS] testActualOracleFailureShutsDownBorrowingAndManager() (gas: 74689708)
+[PASS] testActualRedemptionHelperAndCollateralRegistry() (gas: 81535687)
+[PASS] testActualWETHZapperLifecycle() (gas: 82214775)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 40.54ms (246.53ms CPU time)
+
+Ran 6 tests for tests/GasCompZapperParity.t.sol:GasCompZapperParityTest
+[PASS] testCalldataStructValidationOrder() (gas: 12163471)
+[PASS] testETHAndBatchErrorsAndNonpayableAdjustments() (gas: 12628550)
+[PASS] testFuzzOpeningIndexAndCollateral(uint256,uint64,uint96,bool) (runs: 1025, μ: 12488513, ~: 12492390)
+[PASS] testLifecycleIndividualBatchAndFlashClose() (gas: 52078944)
+[PASS] testNoOpCallbackBoundsAndLazyAddressValidation() (gas: 12010081)
+[PASS] testOptionalTokenReturnsAndRollback() (gas: 12799953)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 987.21ms (1.02s CPU time)
+
+Ran 8 tests for tests/LeverageZapperParity.t.sol:LeverageZapperParityTest
+[PASS] testFuzzLeverageRatio(uint256,bool) (runs: 1025, μ: 16443557, ~: 16516270)
+[PASS] testFuzzLeveragedOwnerIndex(uint256,bool,bool) (runs: 1025, μ: 17220395, ~: 17284834)
+[PASS] testIndividualAndBatchLeverageLifecycleBothBranches() (gas: 70788225)
+[PASS] testMemoryAddressValidationAndUnauthorizedCallbacks() (gas: 33416045)
+[PASS] testMissingExchangeCodeRollsBackOpen() (gas: 34358951)
+[PASS] testOwnerAndReceiverChecksAndWrongValue() (gas: 34314006)
+[PASS] testRatioBoundaries() (gas: 16383646)
+[PASS] testSwapFailureRollsBackOpenAndUp() (gas: 35606158)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.05s (3.31s CPU time)
+
+Ran 3 test suites in 2.05s (3.08s CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)

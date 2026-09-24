@@ -74,3 +74,11 @@ pub use zapper_calls
 pub use zapper_base
 pub use zapper_errors
 pub use weth_zapper
+pub use gas_comp_zapper
+pub use gascomp_errors
+pub use leverage_errors
+pub use leverage_weth_zapper
+pub use leverage_lst_zapper
+pub use leverage_weth_zapper_module
+pub use leverage_lst_zapper_module
+pub use zapper_forward

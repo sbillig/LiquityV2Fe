@@ -503,6 +503,82 @@
     ],
     "function_count": 24
   },
+  "GasCompZapper": {
+    "runtime_bytes": 20868,
+    "initcode_bytes_before_arguments": 23006,
+    "compiler_abi_sha256": "ea1dcef1f73e0b912de543d08ba79b961ef20042f328ce8ac99d35a9ca887fd7",
+    "reference_artifact_sha256": "cca0bf0cd00f8d8782884c93a80aeb834c834ceb9de5315e445f0930db1b1368",
+    "protocol_abi_sha256": "a10b5ea6fba985983b71d9638269a376d09cc1f053a80cf9565edad8bb06860a",
+    "metadata_refinements": [
+      "receiveFlashLoanOnOpenLeveragedTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "receiveFlashLoanOnLeverUpTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "receiveFlashLoanOnLeverDownTrove: pure implementation of the reference no-op callback; nonpayable value guard retained",
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding",
+      "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 25
+  },
+  "LeverageWETHZapper": {
+    "runtime_bytes": 21156,
+    "initcode_bytes_before_arguments": 34674,
+    "compiler_abi_sha256": "81f1b6b596005208253f4bd96a116b2fbd71daf224634dc9c729bed92b0d21c5",
+    "reference_artifact_sha256": "b94cfe78a4d8f48dbcd19e2ba6f8f112d3104e00b0e43008da26e03d9a5d4b1c",
+    "protocol_abi_sha256": "382b8a8426f0a62c684963c7bacab674a0629d10c2cd7767b5dc63b485c52036",
+    "metadata_refinements": [
+      "constructor creates a fixed delegate companion with immutable branch configuration; original three constructor arguments and runtime selectors are preserved",
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding",
+      "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 28
+  },
+  "LeverageLSTZapper": {
+    "runtime_bytes": 20882,
+    "initcode_bytes_before_arguments": 36124,
+    "compiler_abi_sha256": "7ecc28f9e785ce68f81e67d3637706c726790d6a2a0e9d1d845957109cb60222",
+    "reference_artifact_sha256": "28244f9d88a9d06e0e6a8e1149daa2e452f39f02607eb77758435c6f93fa6de6",
+    "protocol_abi_sha256": "9e1c89373fddb22f2dd52772675a87dccca9d1c9a0ea461dea556e93404f1109",
+    "metadata_refinements": [
+      "constructor creates a fixed delegate companion with immutable branch configuration; original three constructor arguments and runtime selectors are preserved",
+      "removeManagerReceiverOf: static tuple has identical flat runtime encoding",
+      "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 29
+  },
+  "LeverageWETHZapperLeverage": {
+    "implementation_companion": true,
+    "runtime_bytes": 10606,
+    "initcode_bytes_before_arguments": 11144,
+    "runtime_sha256": "e01c3d80908571035bcb874ac4cdb24ce837412fc399c1cdda79aa841b80b6c2",
+    "initcode_sha256": "8855b0071ffac8dba8ca13ce039f8391e59b9db9d6552332091c146970ad6335"
+  },
+  "LeverageLSTZapperLeverage": {
+    "implementation_companion": true,
+    "runtime_bytes": 12087,
+    "initcode_bytes_before_arguments": 12675,
+    "runtime_sha256": "e35bc072a4bde0dd17d8853a2e7087c419b9d52ac91d74601219725b9dccedd2",
+    "initcode_sha256": "7739ba15404d9e96059eff8a940326f2b6743120c16296802260e3fcac83efae"
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,

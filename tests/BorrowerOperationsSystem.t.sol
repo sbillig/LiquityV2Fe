@@ -1,7 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {GasCompZapper} from "../reference/bold/contracts/src/Zappers/GasCompZapper.sol";
 import {WETHZapper} from "../reference/bold/contracts/src/Zappers/WETHZapper.sol";
 import {IZapper} from "../reference/bold/contracts/src/Zappers/Interfaces/IZapper.sol";
+import {ILeverageZapper} from "../reference/bold/contracts/src/Zappers/Interfaces/ILeverageZapper.sol";
+import {IFlashLoanProvider} from "../reference/bold/contracts/src/Zappers/Interfaces/IFlashLoanProvider.sol";
+import {IFlashLoanReceiver} from "../reference/bold/contracts/src/Zappers/Interfaces/IFlashLoanReceiver.sol";
+import {LeverageLSTZapper} from "../reference/bold/contracts/src/Zappers/LeverageLSTZapper.sol";
+import {LeverageWETHZapper} from "../reference/bold/contracts/src/Zappers/LeverageWETHZapper.sol";
+import {IExchange} from "../reference/bold/contracts/src/Zappers/Interfaces/IExchange.sol";
+contract LeverageSystemMarkets is IExchange {
+ BorrowerSystemCollateral public coll;BoldToken public bold;
+ constructor(BorrowerSystemCollateral c,BoldToken b){coll=c;bold=b;}
+ function makeFlashLoan(address token,uint amount,IFlashLoanProvider.Operation op,bytes calldata data) external {
+  require(token==address(coll));uint effective=amount-1;coll.mint(msg.sender,effective);IFlashLoanReceiver z=IFlashLoanReceiver(msg.sender);
+  if(op==IFlashLoanProvider.Operation.OpenTrove)z.receiveFlashLoanOnOpenLeveragedTrove(abi.decode(data,(ILeverageZapper.OpenLeveragedTroveParams)),effective);
+  else if(op==IFlashLoanProvider.Operation.LeverUpTrove)z.receiveFlashLoanOnLeverUpTrove(abi.decode(data,(ILeverageZapper.LeverUpTroveParams)),effective);
+  else if(op==IFlashLoanProvider.Operation.LeverDownTrove)z.receiveFlashLoanOnLeverDownTrove(abi.decode(data,(ILeverageZapper.LeverDownTroveParams)),effective);
+  else revert("unexpected op");
+ }
+ function swapFromBold(uint amount,uint minimum) external{bold.transferFrom(msg.sender,address(this),amount);coll.mint(msg.sender,minimum+17);}
+ function swapToBold(uint amount,uint minimum) external returns(uint){coll.transferFrom(msg.sender,address(this),amount);bold.transfer(msg.sender,minimum);return minimum;}
+ function sendBold(address receiver,uint amount) external {bold.transfer(receiver,amount);}
+}
 interface ZapperSystemVm {function deal(address,uint) external;}
 import {RedemptionHelper} from "../reference/bold/contracts/src/RedemptionHelper.sol";
 import {CollateralRegistry} from "../reference/bold/contracts/src/CollateralRegistry.sol";
@@ -43,13 +64,14 @@ contract BorrowerOperationsSystemTest {
     PoolVm constant vm=PoolVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE=address(0xa11ce);address constant BOB=address(0xb0b);address constant ROUTER=address(0x100);
     struct System {
-        CollateralRegistry cr;AddressesRegistry registry;ActivePool active;DefaultPool defaults;StabilityPool sp;BoldToken bold;BorrowerSystemCollateral coll;
+        CollateralRegistry cr;AddressesRegistry registry;ActivePool active;DefaultPool defaults;StabilityPool sp;BoldToken bold;BorrowerSystemCollateral coll;BorrowerSystemCollateral weth;
         WETHPriceFeed oracleFeed;FeedOracle oracle;BorrowerOperations bo;TroveManager manager;TroveNFT nft;SortedTroves sorted;CollSurplusPool surplus;address gasPool;BorrowerSystemPrice feed;
     }
     function code(string memory name,bool fe) internal returns(bytes memory){
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("GasCompZapper"))return type(GasCompZapper).creationCode;
         if(k==keccak256("WETHZapper"))return type(WETHZapper).creationCode;
         if(k==keccak256("RedemptionHelper"))return type(RedemptionHelper).creationCode;
         if(k==keccak256("CollateralRegistry"))return type(CollateralRegistry).creationCode;
@@ -74,8 +96,9 @@ contract BorrowerOperationsSystemTest {
     function deploy(bytes memory init) internal returns(address target){require(init.length<=49152,"initcode");assembly{target:=create2(0,add(init,32),mload(init),0)}require(target.code.length>0&&target.code.length<=24576,"deploy");}
     function make(bool fe) internal returns(System memory s){return makeWithOracle(fe,false);}
     function makeWithOracle(bool fe,bool realOracle) internal returns(System memory){return makeWithRegistry(fe,realOracle,false);}
-    function makeWithRegistry(bool fe,bool realOracle,bool realRegistry) internal returns(System memory s){
-        s.coll=new BorrowerSystemCollateral();s.feed=new BorrowerSystemPrice();
+    function makeWithRegistry(bool fe,bool realOracle,bool realRegistry) internal returns(System memory){return makeWithWeth(fe,realOracle,realRegistry,false);}
+    function makeWithWeth(bool fe,bool realOracle,bool realRegistry,bool separateWeth) internal returns(System memory s){
+        s.coll=new BorrowerSystemCollateral();s.weth=separateWeth?new BorrowerSystemCollateral():s.coll;s.feed=new BorrowerSystemPrice();
         s.registry=AddressesRegistry(deploy(bytes.concat(code("AddressesRegistry",fe),abi.encode(address(this),15e17,11e17,1e17,11e17,5e16,1e17))));
         s.bold=BoldToken(deploy(bytes.concat(code("BoldToken",fe),abi.encode(address(this)))));
         bytes[10] memory init;
@@ -97,7 +120,7 @@ contract BorrowerOperationsSystemTest {
             init[9]=bytes.concat(code("WETHPriceFeed",fe),abi.encode(s.oracle,3600,predict(init[8])));
         }
         if(realRegistry){address[] memory tokens=new address[](1);tokens[0]=address(s.coll);address[] memory managers=new address[](1);managers[0]=predict(init[3]);s.cr=CollateralRegistry(deploy(bytes.concat(code("CollateralRegistry",fe),abi.encode(s.bold,tokens,managers))));}
-        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=realOracle?predict(init[9]):address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=realRegistry?address(s.cr):address(this);vars[16]=address(s.bold);vars[17]=address(s.coll);
+        address[18] memory vars;vars[0]=address(s.coll);vars[1]=predict(init[8]);vars[2]=predict(init[3]);vars[3]=predict(init[4]);vars[5]=predict(init[2]);vars[6]=realOracle?predict(init[9]):address(s.feed);vars[7]=predict(init[0]);vars[8]=predict(init[1]);vars[9]=predict(init[6]);vars[10]=predict(init[7]);vars[11]=predict(init[5]);vars[12]=ROUTER;vars[15]=realRegistry?address(s.cr):address(this);vars[16]=address(s.bold);vars[17]=address(s.weth);
         (bool ok,)=address(s.registry).call(abi.encodePacked(AddressesRegistry.setAddresses.selector,abi.encode(vars)));require(ok);
         if(fe){deploy(modules[0]);deploy(modules[1]);deploy(modules[2]);deploy(borrowerModules[0]);deploy(borrowerModules[1]);deploy(borrowerModules[2]);}
         s.active=ActivePool(deploy(init[0]));s.defaults=DefaultPool(deploy(init[1]));s.sp=StabilityPool(deploy(init[2]));s.manager=TroveManager(deploy(init[3]));s.nft=TroveNFT(deploy(init[4]));s.sorted=SortedTroves(deploy(init[5]));s.gasPool=deploy(init[6]);s.surplus=CollSurplusPool(deploy(init[7]));
@@ -108,6 +131,7 @@ contract BorrowerOperationsSystemTest {
     function id(address owner,uint index) internal pure returns(uint){return uint(keccak256(abi.encode(owner,owner,index)));}
     function open(System memory s,uint index,address owner,uint coll,uint rate) internal {
         s.coll.mint(owner,coll+375e14);
+        if(address(s.weth)!=address(s.coll)){s.weth.mint(owner,375e14);vm.prank(owner);s.weth.approve(address(s.bo),type(uint).max);}
         vm.prank(owner);s.coll.approve(address(s.bo),type(uint).max);
         vm.prank(owner);uint opened=s.bo.openTrove(owner,index,coll,3000e18,0,0,rate,type(uint).max,address(0),address(0),address(0));
         require(opened==id(owner,index),"trove ID");
@@ -258,4 +282,57 @@ contract BorrowerOperationsSystemTest {
         TimeVm(address(vm)).warp(1000);bytes32 expected=runWETHZapper(false);
         require(actual==expected,"connected WETH zapper parity");
     }
+    function runGasCompZapper(bool fe) internal returns(bytes32){
+        System memory s=makeWithWeth(fe,false,false,true);open(s,2,BOB,10e18,6e16);
+        GasCompZapper zapper=GasCompZapper(payable(deploy(bytes.concat(code("GasCompZapper",fe),abi.encode(s.registry,address(77),address(88))))));
+        ZapperSystemVm(address(vm)).deal(ALICE,100e18);
+        IZapper.OpenTroveParams memory p=IZapper.OpenTroveParams(ALICE,1,20e18,3000e18,0,0,5e16,address(0),type(uint).max,address(0),address(0),address(0));
+        s.coll.mint(ALICE,22e18);vm.prank(ALICE);s.coll.approve(address(zapper),type(uint).max);
+        vm.prank(ALICE);uint trove=zapper.openTroveWithRawETH{value:375e14}(p);
+        uint ownerIndex=uint(keccak256(abi.encode(ALICE,uint(1))));require(trove==uint(keccak256(abi.encode(address(zapper),ALICE,ownerIndex))),"zapper trove ID");
+        vm.prank(ALICE);s.bold.approve(address(zapper),type(uint).max);
+        vm.prank(ALICE);zapper.addColl(trove,2e18);
+        vm.prank(ALICE);zapper.withdrawColl(trove,1e18);
+        vm.prank(ALICE);zapper.withdrawBold(trove,100e18,type(uint).max);
+        vm.prank(ALICE);zapper.repayBold(trove,50e18);
+        vm.prank(ALICE);zapper.adjustTrove(trove,5e17,false,100e18,true,type(uint).max);
+        require(s.manager.getLatestTroveData(trove).entireColl==205e17,"zapper collateral");
+        vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+        vm.prank(ALICE);zapper.closeTroveToRawETH(trove);
+        require(s.bold.balanceOf(address(zapper))==0&&s.coll.balanceOf(address(zapper))==0&&address(zapper).balance==0,"zapper residual");
+        conserve(s);
+        return keccak256(abi.encode(ALICE.balance,s.coll.balanceOf(ALICE),s.bold.balanceOf(ALICE),s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.sorted.getSize()));
+    }
+    function testActualGasCompZapperLifecycle() public {
+        TimeVm(address(vm)).warp(1000);bytes32 actual=runGasCompZapper(true);
+        TimeVm(address(vm)).warp(1000);bytes32 expected=runGasCompZapper(false);
+        require(actual==expected,"connected gas compensation zapper parity");
+    }
+ function runLeverage(bool fe,bool lst) internal returns(bytes32){
+  System memory s=makeWithWeth(fe,false,false,lst);open(s,2,BOB,10e18,6e16);
+  LeverageSystemMarkets markets=new LeverageSystemMarkets(s.coll,s.bold);
+  bytes memory zapperCode=fe?code(lst?"LeverageLSTZapper":"LeverageWETHZapper",true):(lst?type(LeverageLSTZapper).creationCode:type(LeverageWETHZapper).creationCode);
+  ILeverageZapper z=ILeverageZapper(deploy(bytes.concat(zapperCode,abi.encode(s.registry,markets,markets))));
+  ZapperSystemVm(address(vm)).deal(ALICE,100e18);ZapperSystemVm(address(vm)).deal(address(s.weth),1000e18);
+  if(lst){s.coll.mint(ALICE,20e18);vm.prank(ALICE);s.coll.approve(address(z),type(uint).max);}
+  ILeverageZapper.OpenLeveragedTroveParams memory p=ILeverageZapper.OpenLeveragedTroveParams(ALICE,1,20e18,5e18,3000e18,0,0,5e16,address(0),type(uint).max,address(0),address(0),address(0));
+  vm.prank(ALICE);z.openLeveragedTroveWithRawETH{value:375e14+(lst?0:20e18)}(p);
+  uint id=uint(keccak256(abi.encode(address(z),ALICE,uint(keccak256(abi.encode(ALICE,uint(1)))))));
+  require(s.nft.ownerOf(id)==ALICE&&s.manager.getLatestTroveData(id).entireColl==25e18-1,"leveraged opening");
+  vm.prank(ALICE);z.leverUpTrove(ILeverageZapper.LeverUpTroveParams(id,2e18,500e18,type(uint).max));
+  vm.prank(ALICE);z.leverDownTrove(ILeverageZapper.LeverDownTroveParams(id,1e18,300e18));
+  require(s.manager.getLatestTroveData(id).entireColl==26e18-2,"leverage adjustment");conserve(s);
+  markets.sendBold(ALICE,3200e18);vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+  vm.prank(ALICE);s.bold.approve(address(z),type(uint).max);
+  vm.prank(ALICE);WETHZapper(payable(address(z))).closeTroveToRawETH(id);
+  require(s.bold.balanceOf(address(z))==0&&s.coll.balanceOf(address(z))==0&&address(z).balance==0,"leverage residual");conserve(s);
+  return keccak256(abi.encode(ALICE.balance,s.coll.balanceOf(ALICE),s.bold.balanceOf(ALICE),s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.sorted.getSize()));
+ }
+ function compareLeverage(bool lst) internal {
+  TimeVm(address(vm)).warp(1000);bytes32 actual=runLeverage(true,lst);
+  TimeVm(address(vm)).warp(1000);bytes32 expected=runLeverage(false,lst);
+  require(actual==expected,"connected leverage parity");
+ }
+ function testActualLeverageWETH() public {compareLeverage(false);}
+ function testActualLeverageLST() public {compareLeverage(true);}
 }

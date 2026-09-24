@@ -1,0 +1,226 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, Bytes}
+use std::evm::{Address, Ctx, Call, Log, RawMem, RawOps, RawStorage, encode_abi_payload}
+use std::evm::packed::keccak_packed
+use super::zapper_calls::*
+use super::zapper_base::{Config, slots, initialize, remove_receiver, check_adjust}
+use super::add_remove_managers as managers
+use super::add_remove_managers::AddRemoveManagersMsg
+use super::addresses_registry::RegistryMsg
+use super::trove_nft::TroveNFTMsg
+use super::token_calls::{TokenMsg, safe_transfer, safe_transfer_from}
+use super::leftovers_sweep::{BalanceMsg, InitialBalances, snapshot, return_leftovers}
+use super::revert_texts::require
+use super::gascomp_errors as error
+use super::constants::{ETH_GAS_COMPENSATION, MAX_UINT256}
+pub msg GasCompZapperMsg {
+    #[selector = sol("collToken()") ]
+    CollToken -> Address,
+    #[selector = sol("borrowerOperations()")]
+    Borrower -> Address,
+    #[selector = sol("troveManager()")]
+    Manager -> Address,
+    #[selector = sol("WETH()")]
+    Weth -> Address,
+    #[selector = sol("boldToken()")]
+    Bold -> Address,
+    #[selector = sol("flashLoanProvider()")]
+    FlashProvider -> Address,
+    #[selector = sol("exchange()")]
+    Exchange -> Address,
+    #[selector = sol("openTroveWithRawETH((address,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address))")]
+    Open { p: OpenParams } -> u256,
+    #[selector = sol("addColl(uint256,uint256)")]
+    Add { id: u256, amount: u256 },
+    #[selector = sol("withdrawColl(uint256,uint256)")]
+    WithdrawColl { id: u256, amount: u256 },
+    #[selector = sol("withdrawBold(uint256,uint256,uint256)")]
+    WithdrawBold { id: u256, amount: u256, fee: u256 },
+    #[selector = sol("repayBold(uint256,uint256)")]
+    Repay { id: u256, amount: u256 },
+    #[selector = sol("adjustTrove(uint256,uint256,bool,uint256,bool,uint256)")]
+    Adjust { id: u256, coll: u256, coll_increase: bool, debt: u256, debt_increase: bool, fee: u256 },
+    #[selector = sol("adjustZombieTrove(uint256,uint256,bool,uint256,bool,uint256,uint256,uint256)")]
+    AdjustZombie { id: u256, coll: u256, coll_increase: bool, debt: u256, debt_increase: bool, upper: u256, lower: u256, fee: u256 },
+    #[selector = sol("closeTroveToRawETH(uint256)")]
+    Close { id: u256 },
+    #[selector = sol("closeTroveFromCollateral(uint256,uint256,uint256)")]
+    CloseFromColl { id: u256, amount: u256, minimum: u256 },
+    #[selector = sol("receiveFlashLoanOnCloseTroveFromCollateral((uint256,uint256,uint256,address),uint256)")]
+    FlashClose { p: CloseParams, effective: u256 },
+    #[selector = sol("receiveFlashLoanOnOpenLeveragedTrove((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address),uint256)")]
+    FlashOpen { p: LeveragedOpenParams, effective: u256 },
+    #[selector = sol("receiveFlashLoanOnLeverUpTrove((uint256,uint256,uint256,uint256),uint256)")]
+    FlashUp { p: (u256, u256, u256, u256), effective: u256 },
+    #[selector = sol("receiveFlashLoanOnLeverDownTrove((uint256,uint256,uint256),uint256)")]
+    FlashDown { p: (u256, u256, u256), effective: u256 },
+}
+fn balances(_ cfg: Config, _ token: Address, _ receiver: Address) -> InitialBalances uses (ctx: Ctx, call: mut Call) {
+    snapshot([token, cfg.bold, Address::zero(), Address::zero()], receiver)
+}
+fn send_eth(_ receiver: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    let mut out = core::ptr::MemBuffer::empty()
+    let result = call.raw_call(addr: receiver, gas: ctx.gas(), value: amount, args: core::ptr::MemSpan::empty(), ret: mut out)
+    require(result.success(), error::send_failed())
+}
+fn require_code(_ target: Address) uses (ctx: Ctx) {
+    if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
+}
+fn deposit(_ weth: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
+    require_code(weth)
+    call.call(addr: weth, gas: ctx.gas(), value: amount, message: ZapperCalls::Deposit {})
+}
+fn pre(_ cfg: Config, _ token: Address, _ id: u256, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool) -> (Address, InitialBalances)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+    let receiver = check_adjust(cfg, id, coll, coll_increase, debt_increase)
+    let initial = balances(cfg, token, ctx.caller())
+    if coll_increase { safe_transfer_from(token, ctx.caller(), ctx.address(), coll) }
+    if !debt_increase { let ignored = cfg.bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount: debt }) }
+    (receiver, initial)
+}
+fn post(_ cfg: Config, _ token: Address, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool, _ receiver: Address, _ initial: InitialBalances)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    if !coll_increase { safe_transfer(token, receiver, coll) }
+    if debt_increase { let ignored = cfg.bold.call(TokenMsg::Transfer { receiver, amount: debt }) }
+    return_leftovers(initial)
+}
+pub contract GasCompZapper {
+    cfg: Config,
+    coll_token: Address,
+    init(registry: Address, flash: Address, exchange: Address) uses (mut cfg, mut coll_token, call: mut Call, log: mut Log, mem: mut RawMem) {
+        let config = initialize(registry, flash, exchange)
+        let collateral = registry.static(RegistryMsg::GetcollToken {})
+        require(config.weth != collateral, error::wrong_branch())
+        let ignored = config.weth.call(ZapperCalls::Approve { spender: config.bo, amount: MAX_UINT256 })
+        let ignored2 = collateral.call(ZapperCalls::Approve { spender: config.bo, amount: MAX_UINT256 })
+        let ignored3 = collateral.call(ZapperCalls::Approve { spender: exchange, amount: MAX_UINT256 })
+        coll_token = collateral
+        cfg = config
+    }
+    recv {
+        GasCompZapperMsg::CollToken {} -> Address uses (coll_token) { coll_token }
+        GasCompZapperMsg::Borrower {} -> Address uses (cfg) { cfg.bo }
+        GasCompZapperMsg::Manager {} -> Address uses (cfg) { cfg.manager }
+        GasCompZapperMsg::Weth {} -> Address uses (cfg) { cfg.weth }
+        GasCompZapperMsg::Bold {} -> Address uses (cfg) { cfg.bold }
+        GasCompZapperMsg::FlashProvider {} -> Address uses (cfg) { cfg.flash }
+        GasCompZapperMsg::Exchange {} -> Address uses (cfg) { cfg.exchange }
+        #[payable]
+        GasCompZapperMsg::Open { p } -> u256 uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            require(ctx.value() == ETH_GAS_COMPENSATION, error::wrong_eth())
+            require(checked_address(p.batch) == Address::zero() || p.rate == 0, error::batch_rate())
+            deposit(cfg.weth, ctx.value())
+            safe_transfer_from(coll_token, ctx.caller(), ctx.address(), p.coll)
+            let index = keccak_packed((ctx.caller().inner, p.index))
+            let this = ctx.address()
+            let id = if checked_address(p.batch) == Address::zero() {
+                cfg.bo.call(ZapperCalls::Open { owner: checked_address(p.owner), index, coll: p.coll, bold: p.bold, upper: p.upper, lower: p.lower, rate: p.rate, fee: p.fee, add: this, remove: this, receiver: this })
+            } else {
+                cfg.bo.call(ZapperCalls::OpenBatch { p: (checked_address(p.owner), index, p.coll, p.bold, p.upper, p.lower, checked_address(p.batch), p.fee, this, this, this) })
+            }
+            let ignored = cfg.bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: p.bold })
+            managers::set_add(slots(), id, checked_address(p.add))
+            managers::set_remove(slots(), id, checked_address(p.remove), checked_address(p.receiver))
+            id
+        }
+        GasCompZapperMsg::Add { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+            managers::require_owner_or_add(slots(), id, owner)
+            safe_transfer_from(coll_token, ctx.caller(), ctx.address(), amount)
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::Add { id, amount })
+        }
+        GasCompZapperMsg::WithdrawColl { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let receiver = remove_receiver(cfg, id)
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::WithdrawColl { id, amount })
+            safe_transfer(coll_token, receiver, amount)
+        }
+        GasCompZapperMsg::WithdrawBold { id, amount, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let receiver = remove_receiver(cfg, id)
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::WithdrawBold { id, amount, fee })
+            let ignored = cfg.bold.call(TokenMsg::Transfer { receiver, amount })
+        }
+        GasCompZapperMsg::Repay { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+            managers::require_owner_or_add(slots(), id, owner)
+            let initial = balances(cfg, coll_token, ctx.caller())
+            let ignored = cfg.bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::Repay { id, amount })
+            return_leftovers(initial)
+        }
+        GasCompZapperMsg::Adjust { id, coll, coll_increase, debt, debt_increase, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let (receiver, initial) = pre(cfg, coll_token, id, coll, coll_increase, debt, debt_increase)
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::Adjust { id, coll, coll_increase, debt, debt_increase, fee })
+            post(cfg, coll_token, coll, coll_increase, debt, debt_increase, receiver, initial)
+        }
+        GasCompZapperMsg::AdjustZombie { id, coll, coll_increase, debt, debt_increase, upper, lower, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let (receiver, initial) = pre(cfg, coll_token, id, coll, coll_increase, debt, debt_increase)
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::AdjustZombie { id, coll, coll_increase, debt, debt_increase, upper, lower, fee })
+            post(cfg, coll_token, coll, coll_increase, debt, debt_increase, receiver, initial)
+        }
+        GasCompZapperMsg::Close { id } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let receiver = remove_receiver(cfg, id)
+            let trove = cfg.manager.static(ZapperCalls::Trove { id })
+            let ignored = cfg.bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount: trove.entire_debt })
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::Close { id })
+            safe_transfer(coll_token, receiver, trove.entire_coll)
+            let amount = ETH_GAS_COMPENSATION
+            require_code(cfg.weth)
+            cfg.weth.call(ZapperCalls::Withdraw { amount })
+            send_eth(receiver, amount)
+        }
+        GasCompZapperMsg::CloseFromColl { id, amount, minimum } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let receiver = remove_receiver(cfg, id)
+            let p = CloseParams { id, amount, minimum, receiver }
+            let initial = balances(cfg, coll_token, receiver)
+            let encoded = encode_abi_payload(p)
+            require_code(cfg.flash)
+            cfg.flash.call(ZapperCalls::Flash { token: coll_token, amount, operation: 1, data: Bytes::from_payload(source: encoded.span()) })
+            return_leftovers(initial)
+        }
+        GasCompZapperMsg::FlashClose { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            require(ctx.caller() == cfg.flash, error::flash_caller())
+            let trove = cfg.manager.static(ZapperCalls::Trove { id: p.id })
+            let left = trove.entire_coll - p.amount
+            require(left >= p.minimum, error::coll_minimum())
+            let ignored = cfg.exchange.call(ZapperCalls::Swap { amount: effective, minimum: trove.entire_debt })
+            require_code(cfg.bo)
+            cfg.bo.call(ZapperCalls::Close { id: p.id })
+            safe_transfer(coll_token, cfg.flash, p.amount)
+            safe_transfer(coll_token, checked_address(p.receiver), left)
+            let amount = ETH_GAS_COMPENSATION
+            require_code(cfg.weth)
+            cfg.weth.call(ZapperCalls::Withdraw { amount })
+            send_eth(checked_address(p.receiver), amount)
+        }
+        // The base gas-compensation zapper intentionally implements these as no-ops.
+        GasCompZapperMsg::FlashOpen { p, effective } {}
+        GasCompZapperMsg::FlashUp { p, effective } {}
+        GasCompZapperMsg::FlashDown { p, effective } {}
+        AddRemoveManagersMsg::AddManagerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { managers::get_add(slots(), id) }
+        AddRemoveManagersMsg::RemoveManagerReceiverOf { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) { managers::get_remove(slots(), id) }
+        AddRemoveManagersMsg::SetAddManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::require_borrower(cfg.nft, id)
+            managers::set_add(slots(), id, manager)
+        }
+        AddRemoveManagersMsg::SetRemoveManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let receiver = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
+            managers::require_borrower(cfg.nft, id)
+            managers::set_remove(slots(), id, manager, receiver)
+        }
+        AddRemoveManagersMsg::SetRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            managers::require_borrower(cfg.nft, id)
+            managers::set_remove(slots(), id, manager, receiver)
+        }
+        #[payable]
+        _ uses (ops: mut RawOps) {
+            if ops.calldatasize() != 0 { ops.revert(data: core::ptr::MemSpan::empty()) }
+        }
+    }
+}

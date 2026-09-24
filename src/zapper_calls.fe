@@ -95,6 +95,8 @@ impl Encode<Sol> for LeveragedOpenParams { fn encode(own self, _ p: *u8) {
 } }
 
 pub msg ZapperCalls {
+    #[selector = sol("swapFromBold(uint256,uint256)")]
+    SwapFrom { amount: u256, minimum: u256 },
     #[selector = sol("approve(address,uint256)")]
     Approve { spender: Address, amount: u256 } -> bool,
     #[selector = sol("deposit()")]

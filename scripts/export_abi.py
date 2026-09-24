@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -49,6 +49,9 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'GasCompZapper': {'removeManagerReceiverOf'},
+    'LeverageWETHZapper': {'removeManagerReceiverOf'},
+    'LeverageLSTZapper': {'removeManagerReceiverOf'},
     'WETHZapper': {'removeManagerReceiverOf'},
     'DebtInFrontHelper': {'getDebtBetweenInterestRates', 'getDebtBetweenInterestRateAndTrove'},
     'HintHelpers': {'getApproxHint'},
@@ -120,13 +123,17 @@ for contract in CONTRACTS:
         assert [typ(f) for f in constructor['inputs']] == ['address', '(address[])']
         constructor['inputs'][1] = dict(type='address[]', name='branches')
         refinements.append('constructor: AddressMemoryArray explicitly decodes a flat address[] with eager allocation panic and address validation')
+    if contract in {'LeverageWETHZapper', 'LeverageLSTZapper'}:
+        module_abi = json.loads((ROOT / 'build' / (contract + 'Leverage.abi.json')).read_text())
+        compiled += [e for e in module_abi if e['type'] in ('event', 'error')]
+        refinements.append('constructor creates a fixed delegate companion with immutable branch configuration; original three constructor arguments and runtime selectors are preserved')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
-        if contract == 'WETHZapper' and entry.get('name') in {'receiveFlashLoanOnOpenLeveragedTrove', 'receiveFlashLoanOnLeverUpTrove', 'receiveFlashLoanOnLeverDownTrove'}:
+        if contract in {'WETHZapper', 'GasCompZapper'} and entry.get('name') in {'receiveFlashLoanOnOpenLeveragedTrove', 'receiveFlashLoanOnLeverUpTrove', 'receiveFlashLoanOnLeverDownTrove'}:
             assert entry['stateMutability'] == 'pure'
             entry['stateMutability'] = 'nonpayable'
             refinements.append(entry['name'] + ': pure implementation of the reference no-op callback; nonpayable value guard retained')
-        if contract == 'WETHZapper' and entry['type'] == 'fallback':
+        if contract in {'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper'} and entry['type'] == 'fallback':
             assert entry['stateMutability'] == 'payable'
             entry['type'] = 'receive'
             refinements.append('receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior')
@@ -194,7 +201,7 @@ for contract in CONTRACTS:
 # Implementation companions have no direct Solidity protocol ABI counterpart.
 # MetadataGeometry is created by the renderer; TroveManager modules are deployed
 # explicitly and their immutable addresses are supplied to its constructor.
-for contract in ['MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations', 'BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
+for contract in ['LeverageWETHZapperLeverage', 'LeverageLSTZapperLeverage', 'MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations', 'BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
     runtime = ROOT / 'build' / (contract + '.runtime.bin')
     init = ROOT / 'build' / (contract + '.bin')
     runtime_size = len(bytes.fromhex(runtime.read_text().strip().removeprefix('0x')))

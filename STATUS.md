@@ -6,10 +6,10 @@ workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **210 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **227 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/weth-zapper.json`;
-the complete log is `tests/results/weth-zapper.log`.
+compiler and reference hashes are recorded in `tests/results/zappers.json`;
+the complete log is `tests/results/zappers.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -60,6 +60,14 @@ Implemented and differentially tested:
   manager permissions and surplus handling. Seven parity tests plus a connected
   lifecycle test pass; runtime 19,470 bytes, original constructor arguments.
   ABI tests preserve Solidity lazy calldata-address validation and receive behavior.
+- GasCompZapper: LST collateral lifecycle, ETH gas compensation, manager checks,
+  flash-loan closing, safe token handling and rollback. Six differential tests
+  plus a connected LST-branch lifecycle pass.
+- LeverageWETHZapper and LeverageLSTZapper: individual/batch leveraged opening,
+  lever-up/down, inherited base operations, ratio conversion and exact ABI/error
+  behavior. Eight parity tests and two actual connected protocol lifecycles pass.
+  Fixed constructor-created companions preserve the original constructor and
+  EVM size limits; see ZAPPERS_DEPLOYMENT.md.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -117,7 +125,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Integrate GasCompZapper; finish leverage zappers and exchange/flash-loan modules.
+1. Integrate the prepared exchange modules; implement exchange helpers and flash-loan provider.
 2. Remaining helper/library interfaces.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -133,8 +141,8 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-GasCompZapper is prepared in `/tmp/liquity-zapper-project`; six parity tests
-and an actual connected LST-branch lifecycle pass in `/tmp/liquity-zapper-inspect`.
-It is not yet part of the root checkpoint. Leverage zappers are under development
-in `/tmp/liquity-leverage-project`; monolithic versions exceeded EIP-170, so the
-current draft uses constructor-created fixed delegate companions.
+CurveExchange, UniV3Exchange, UniPriceConverter and HybridCurveUniV3Exchange
+are prepared separately in `/tmp/liquity-exchange-project`. Thirteen parity
+tests and four actual connected Curve/UniV3 leverage lifecycles pass in
+`/tmp/liquity-zapper-inspect`; the isolated ABI audit also passes. They are not
+yet integrated into the root checkpoint above. No new compiler fix was needed.
