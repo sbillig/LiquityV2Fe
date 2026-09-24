@@ -39,3 +39,17 @@ pub const UPFRONT_INTEREST_PERIOD: u256 = 604800
 pub const INTEREST_RATE_ADJ_COOLDOWN: u256 = 604800
 pub const SP_YIELD_SPLIT: u256 = 75 * PCT_1
 pub const MIN_BOLD_IN_SP: u256 = 1000000000000000000
+
+use std::abi::sol
+pub msg ConstantsMsg {
+    #[selector = sol("_ETH_GAS_COMPENSATION()")]
+    GasCompensation -> u256,
+    #[selector = sol("_MIN_DEBT()")]
+    MinDebt -> u256,
+}
+pub contract Constants {
+    recv ConstantsMsg {
+        GasCompensation -> u256 { ETH_GAS_COMPENSATION }
+        MinDebt -> u256 { MIN_DEBT }
+    }
+}

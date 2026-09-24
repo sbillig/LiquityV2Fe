@@ -82,9 +82,15 @@
     ]
   },
   "contracts/src/DebtInFrontHelper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/debt_in_front_helper.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/debt-helpers.log"
+    ]
   },
   "contracts/src/DefaultPool.sol": {
     "status": "implemented_differential_tests_pass",
@@ -115,12 +121,14 @@
     "verification": []
   },
   "contracts/src/Dependencies/Constants.sol": {
-    "status": "constants_ported_legacy_query_contract_pending",
+    "status": "implemented_differential_tests_pass",
     "fe": [
       "src/constants.fe"
     ],
     "verification": [
-      "tests/results/foundation.log"
+      "tests/MathParity.t.sol",
+      "tests/HelperParity.t.sol",
+      "tests/results/debt-helpers.log"
     ]
   },
   "contracts/src/Dependencies/LiquityBase.sol": {
@@ -248,9 +256,15 @@
     "verification": []
   },
   "contracts/src/Interfaces/IDebtInFrontHelper.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/debt_in_front_helper.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/debt-helpers.log"
+    ]
   },
   "contracts/src/Interfaces/IDefaultPool.sol": {
     "status": "pending",

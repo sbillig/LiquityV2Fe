@@ -5,7 +5,7 @@
   },
   "compiler": {
     "url": "https://github.com/argotorg/fe",
-    "upstream_master": "f00132a97429f966804d70c40206ef40ebca6960",
+    "upstream_master": "3dd15a62124fb75370c7931c4ee040d8566a3649",
     "fixes": [
       {
         "pr": "https://github.com/argotorg/fe/pull/1592",
@@ -27,10 +27,17 @@
         "revision": "c4856b4fb6e5383d3f31c95312f966dec9491233",
         "regression": "crates/hir/src/analysis/semantic/capability/tests.rs; crates/hir/src/analysis/semantic/borrowck/summary.rs",
         "newsfragment": null
+      },
+      {
+        "pr": null,
+        "branch": "fix/reject-oversized-integer-literals",
+        "revision": "b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4",
+        "regression": "crates/uitest/fixtures/ty_check/oversized_integer_literals.fe",
+        "newsfragment": "newsfragments/+oversized-integer-literals.bugfix.md"
       }
     ],
-    "integration_revision": "ce277a26962d60fa0c5fa58ef2219313a922903b",
-    "integration_tree": "e73c8ca674080ae9084be42209c003eb7f98db1c"
+    "integration_revision": "14779075e25fad96e0e1e1755fa6b9ff8eb9f087",
+    "integration_tree": "0d1d3cedde2c9305c0d9219ee9de866e88d8e545"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",

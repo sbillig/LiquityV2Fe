@@ -1,10 +1,10 @@
 # Compiler fixes
 
 Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
-Base upstream/master: `f00132a97429f966804d70c40206ef40ebca6960`.
+Current upstream/master: `3dd15a62124fb75370c7931c4ee040d8566a3649`.
 
-Three existing upstream fixes have been integrated. One new independently tested
-fix is ready on a separate branch; it is not merged into the protocol compiler.
+Three existing upstream fixes and one new independently tested fix have been
+integrated. The new fix remains available on its own published branch.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.
@@ -111,13 +111,25 @@ recorder require the exact pinned tree and all input commits as ancestors.
 - Verification: all **243** `fe-uitest` type-check fixtures and **202** `fe-hir`
   library tests pass on this branch; `cargo fmt --all --check` passes.
   Logs and hashes: `tests/results/compiler-wide-literals-*`.
-- Integration status: deliberately separate from the protocol compiler while
-  its recorded validation runs use the pinned integration tree. The port's
-  erroneous constants were corrected and all source literals were checked for
-  excessive width.
+- Integration status: merged locally at `14779075e25fad96e0e1e1755fa6b9ff8eb9f087`
+  after updating to upstream/master `3dd15a621`. Earlier checkpoints retain their
+  original compiler hashes. The port's erroneous constants were corrected and all
+  source literals were checked for excessive width.
 - Published branch: [fix/reject-oversized-integer-literals](https://github.com/argotorg/fe/tree/fix/reject-oversized-integer-literals),
   pushed to upstream at the user's request on 2026-09-24. No PR opened yet.
 - Duplicate check: no matching open PR among the 39 open PRs checked. Historical
   [PR #247](https://github.com/argotorg/fe/pull/247) addressed the same bound in
   the old analyzer and was merged on 2021-02-15; it should be referenced in a
   future PR description.
+
+## Updated upstream integration (2026-09-24)
+
+The local build now includes upstream/master `3dd15a621`, including #1592
+(now upstream), #1593 (bounded staticcall compatibility), and #1594 (integer
+width for view-typed constant evaluation), plus the previously integrated fixes
+and the new oversized-literal fix. Integration: `14779075e25fad96e0e1e1755fa6b9ff8eb9f087`.
+
+All 243 type-check fixtures, 218 HIR tests, and 25 dedicated execution regressions
+pass. Evidence is in `tests/results/compiler-updated.*` and the associated logs.
+Replaying every pinned merge from the new upstream base in a separate clean
+worktree produced the same integration tree `0d1d3cedde2c9305c0d9219ee9de866e88d8e545`.

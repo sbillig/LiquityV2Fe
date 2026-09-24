@@ -420,6 +420,41 @@
     ],
     "function_count": 3
   },
+  "DebtInFrontHelper": {
+    "runtime_bytes": 3735,
+    "initcode_bytes_before_arguments": 4014,
+    "compiler_abi_sha256": "376de4544c83ae46e870f4f6eaeaa1e8d9e5bc67a4cf8a82e7c137919a532fa2",
+    "reference_artifact_sha256": "840a1c2882e44deb5de2c322f94a42524a3065f47a7120dfb819c12c90ee977e",
+    "protocol_abi_sha256": "8357c1707a7149fb9b3a68197766e8545c9445070fdc87443e40af54d9c68345",
+    "metadata_refinements": [
+      "getDebtBetweenInterestRates: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getDebtBetweenInterestRates: static tuple has identical flat runtime encoding",
+      "getDebtBetweenInterestRateAndTrove: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getDebtBetweenInterestRateAndTrove: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 4
+  },
+  "Constants": {
+    "runtime_bytes": 82,
+    "initcode_bytes_before_arguments": 101,
+    "compiler_abi_sha256": "27275b3adc3ddbd359f452f8aba3600a07773f1347ccc0ac95240ea088d025e2",
+    "reference_artifact_sha256": "292d6187c275678a316b240218b1245ecb43614811bc94abf65379684d8e4a03",
+    "protocol_abi_sha256": "dc47c76c84322b28d013ef281b9e783826b480edc24dac750278e99154ec678b",
+    "metadata_refinements": [
+      "_ETH_GAS_COMPENSATION(): pure implementation of view function",
+      "_MIN_DEBT(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 2
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,

@@ -1,0 +1,31 @@
+PASS  [0.0001s] error_name_33
+PASS  [0.0000s] error_name_65
+PASS  [0.0000s] event_name_65
+PASS  [0.0002s] error_name_64
+PASS  [0.0003s] event_name_32
+PASS  [0.0003s] error_name_31
+PASS  [0.0003s] error_name_32
+PASS  [0.0003s] event_name_64
+PASS  [0.0003s] event_name_33
+PASS  [0.0003s] event_name_31
+
+test result: ok. 10 passed; 0 failed
+PASS  [0.0001s] missing_actual_bytes_rejected
+PASS  [0.0000s] missing_length_word_rejected
+PASS  [0.0000s] overflowing_length_rejected
+PASS  [0.0001s] unpadded_array_all_decode_paths_reencode_aligned
+PASS  [0.0002s] missing_nested_bytes_rejected
+PASS  [0.0002s] unpadded_strings
+PASS  [0.0002s] aligned_and_empty_bytes
+PASS  [0.0002s] canonical_array_keeps_full_span
+PASS  [0.0002s] dirty_padding_is_cleared
+PASS  [0.0003s] unpadded_bytes_all_decode_paths
+PASS  [0.0002s] unpadded_nested_bytes
+PASS  [0.0000s] short_string_all_decode_paths_respect_input_extent
+PASS  [0.0001s] deeply_nested_array_clears_partial_padding
+PASS  [0.0002s] partially_padded_array_all_decode_paths_clear_padding
+
+test result: ok. 14 passed; 0 failed
+PASS  [0.0002s] bitnot_of_cast_literal_uses_viewed_width
+
+test result: ok. 1 passed; 0 failed

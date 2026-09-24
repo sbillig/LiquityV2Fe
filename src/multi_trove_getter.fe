@@ -26,7 +26,7 @@ impl AbiSpan<Sol> for DebtPerInterestRate {
 }
 #[error]
 pub struct Error { pub reason: DynString }
-fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: mut Call, mem: mut RawMem) {
+pub fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: mut Call, mem: mut RawMem) {
     let manager = registry.static(HelperRegistryMsg::Manager { index })
     if manager == Address::zero() {
         let p = core::ptr::alloc_bytes(32)

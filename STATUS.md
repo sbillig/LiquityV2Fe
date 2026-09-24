@@ -6,10 +6,10 @@ workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **186 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **189 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/helpers.json`;
-the complete log is `tests/results/helpers.log`.
+compiler and reference hashes are recorded in `tests/results/debt-helpers.json`;
+the complete log is `tests/results/debt-helpers.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -47,6 +47,9 @@ Implemented and differentially tested:
   signed pagination, complete trove records and debt-by-rate traversal. Six
   differential tests and a connected test compare predictions with actual
   opening, rate changes and batch joining.
+- DebtInFrontHelper: bounded debt ranges, excluded/stop-at troves, hint selection,
+  signed-overflow behavior, and connected debt-in-front queries. The legacy
+  Constants query contract is also implemented and ABI-checked.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -82,14 +85,13 @@ points remain explicitly partial even though all renderer behavior is tested.
 
 - Solidity reference: `c8a5a4ee2e9dc024905856b6698a77d849c68c7e`.
 - Latest upstream/master, rechecked with ls-remote:
-  `f00132a97429f966804d70c40206ef40ebca6960`.
-- Compiler integration: `ce277a26962d60fa0c5fa58ef2219313a922903b`, branch
+  `3dd15a62124fb75370c7931c4ee040d8566a3649`.
+- Compiler integration: `14779075e25fad96e0e1e1755fa6b9ff8eb9f087`, branch
   `liquity-v2-integration`, including existing PRs #1592, #1587 and #1585.
-- All 218 HIR unit tests and 24 dedicated ABI/event execution regressions pass.
+- All 243 type-check fixtures, 218 HIR unit tests and 25 execution regressions pass.
 - New compiler fix: reject integer expression literals wider than 256 bits,
   on separate branch `fix/reject-oversized-integer-literals` at `b11dee2`.
-  All 243 type-check fixtures and 202 HIR tests pass. It is not integrated
-  into the protocol compiler. See COMPILER_FIXES.md for patch and newsfragment.
+  The independently tested branch is now integrated into the protocol compiler. See COMPILER_FIXES.md for patch and newsfragment.
 - Fresh bootstrap verifies the exact integration tree and all pinned ancestors;
   locally generated merge commit timestamps need not be identical.
 - Reference/dependency sources and five font/logo assets are hash-checked.
@@ -103,7 +105,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. DebtInFrontHelper, RedemptionHelper and the legacy Constants query contract.
+1. Integrate and fully validate RedemptionHelper, then the common zapper utilities.
 2. Remaining helpers and zappers.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -119,6 +121,8 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-A DebtInFrontHelper draft is isolated in `/tmp/liquity-helper-project`, with
-differential tests in `/tmp/liquity-helper-inspect-project` (eight helper tests
-pass). That draft is not yet part of this checkpoint.
+RedemptionHelper is prepared in `/tmp/liquity-redemption-helper`, with nine
+passing parity tests and a connected actual-registry test in
+`/tmp/liquity-redemption-inspect`. Common LeftoversSweep functions are prepared
+in `/tmp/liquity-zapper-project`, with three passing differential tests in
+`/tmp/liquity-zapper-inspect`. These drafts are not part of this checkpoint.

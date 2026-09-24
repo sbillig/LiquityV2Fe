@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: BUSL-1.1
+use core::num::IntDowncast
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, RawMem}
+use std::evm::packed::keccak_packed
+use super::helper_calls::*
+use super::hint_helpers::HintHelpersMsg
+use super::multi_trove_getter::resolve
+pub msg FindPositionMsg {
+    #[selector = sol("findInsertPosition(uint256,uint256,uint256)")]
+    Find { rate: u256, prev: u256, next: u256 } -> (u256, u256),
+}
+#[arithmetic(unchecked)]
+fn signed_abs(_ value: i256) -> u256 {
+    if value < 0 { (-value).downcast_truncate() } else { value.downcast_truncate() }
+}
+fn debt_between(_ registry: Address, _ hints: Address, _ index: u256, _ lo: u256, _ hi: u256, _ excluded: u256, _ stop: bool, _ old_hint: u256, _ trials: u256) -> (u256, u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    let (manager, sorted) = resolve(registry, index)
+    let mut hint = old_hint
+    if trials > 0 {
+        let seed = keccak_packed((ctx.timestamp(), index, lo, hi, excluded, hint, trials))
+        let diff = if hint != 0 {
+            let previous: i256 = manager.static(HelperManagerMsg::Rate { id: hint }).downcast_truncate()
+            let lower: i256 = lo.downcast_truncate()
+            signed_abs(previous - lower)
+        } else { 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff }
+        let (new_hint, new_diff, _) = hints.static(HintHelpersMsg::Approx { index, rate: lo, trials, seed })
+        if new_diff < diff { hint = new_hint }
+    }
+    let (first, _) = sorted.static(FindPositionMsg::Find { rate: lo, prev: hint, next: hint })
+    let mut current = first
+    let mut debt = 0
+    while current != 0 {
+        let t = manager.static(HelperManagerMsg::Trove { id: current })
+        if t.annual_interest_rate >= hi { break }
+        if current == excluded {
+            if stop { break }
+        } else { debt += t.entire_debt }
+        current = sorted.static(HelperSortedMsg::Prev { id: current })
+    }
+    (debt, ctx.timestamp())
+}
+pub msg DebtInFrontHelperMsg {
+    #[selector = sol("collateralRegistry()")]
+    Registry -> Address,
+    #[selector = sol("hintHelpers()")]
+    Hints -> Address,
+    #[selector = sol("getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)")]
+    Between { index: u256, lo: u256, hi: u256, excluded: u256, hint: u256, trials: u256 } -> (u256, u256),
+    #[selector = sol("getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)")]
+    Until { index: u256, lo: u256, hi: u256, excluded: u256, hint: u256, trials: u256 } -> (u256, u256),
+}
+pub contract DebtInFrontHelper {
+    registry: Address,
+    hints: Address,
+    init(collateral_registry: Address, hint_helpers: Address) uses (mut registry, mut hints) { registry = collateral_registry
+        hints = hint_helpers }
+    recv DebtInFrontHelperMsg {
+        Registry -> Address uses (registry) { registry }
+        Hints -> Address uses (hints) { hints }
+        Between { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            debt_between(registry, hints, index, lo, hi, excluded, false, hint, trials)
+        }
+        Until { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+            debt_between(registry, hints, index, lo, hi, excluded, true, hint, trials)
+        }
+    }
+}

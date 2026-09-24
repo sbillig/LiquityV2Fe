@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {DebtInFrontHelper} from "../reference/bold/contracts/src/DebtInFrontHelper.sol";
 import {HintHelpers} from "../reference/bold/contracts/src/HintHelpers.sol";
 import {MultiTroveGetter} from "../reference/bold/contracts/src/MultiTroveGetter.sol";
 import {IMultiTroveGetter} from "../reference/bold/contracts/src/Interfaces/IMultiTroveGetter.sol";
@@ -41,6 +42,7 @@ contract BorrowerOperationsSystemTest {
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("DebtInFrontHelper"))return type(DebtInFrontHelper).creationCode;
         if(k==keccak256("HintHelpers"))return type(HintHelpers).creationCode;
         if(k==keccak256("MultiTroveGetter"))return type(MultiTroveGetter).creationCode;
         if(k==keccak256("WETHPriceFeed"))return type(WETHPriceFeed).creationCode;
@@ -179,7 +181,13 @@ contract BorrowerOperationsSystemTest {
         beforeDebt=s.manager.getLatestTroveData(id(ALICE,3)).entireDebt;
         vm.prank(ALICE);s.bo.setInterestBatchManager(id(ALICE,3),address(this),0,0,expected);
         require(s.manager.getLatestTroveData(id(ALICE,3)).entireDebt==beforeDebt+expected,"batch prediction");
-        conserve(s);return helperResult(hints,getter);
+        DebtInFrontHelper debt=DebtInFrontHelper(deploy(bytes.concat(code("DebtInFrontHelper",fe),abi.encode(address(this),address(hints)))));
+        (uint total,uint timestamp)=debt.getDebtBetweenInterestRates(0,0,9e16,0,0,20);
+        require(total==s.manager.getLatestTroveData(id(ALICE,1)).entireDebt+s.manager.getLatestTroveData(id(BOB,2)).entireDebt+s.manager.getLatestTroveData(id(ALICE,3)).entireDebt,"debt range");
+        require(timestamp==block.timestamp,"timestamp");
+        (uint front,)=debt.getDebtBetweenInterestRateAndTrove(0,0,9e16,id(ALICE,3),0,20);
+        require(front==s.manager.getLatestTroveData(id(BOB,2)).entireDebt,"debt in front");
+        conserve(s);return keccak256(abi.encode(helperResult(hints,getter),total,front,timestamp));
     }
     function testActualFeePredictionsAndSortedGetter() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=runHelpers(make(true),true);

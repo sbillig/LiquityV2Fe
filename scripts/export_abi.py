@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,7 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'DebtInFrontHelper': ('STATICCALL', {'getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)', 'getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)'}),
     'HintHelpers': ('STATICCALL', {
         'getApproxHint(uint256,uint256,uint256,uint256)',
         'predictOpenTroveUpfrontFee(uint256,uint256,uint256)',
@@ -47,6 +48,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'DebtInFrontHelper': {'getDebtBetweenInterestRates', 'getDebtBetweenInterestRateAndTrove'},
     'HintHelpers': {'getApproxHint'},
     'WETHPriceFeed': {'ethUsdOracle', 'fetchPrice', 'fetchRedemptionPrice'},
     'RETHPriceFeed': {'ethUsdOracle', 'rEthEthOracle', 'fetchPrice', 'fetchRedemptionPrice'},

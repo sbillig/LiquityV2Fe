@@ -1,0 +1,16 @@
+{
+  "compiler_revision": "14779075e25fad96e0e1e1755fa6b9ff8eb9f087",
+  "compiler_tree": "0d1d3cedde2c9305c0d9219ee9de866e88d8e545",
+  "upstream_master": "3dd15a62124fb75370c7931c4ee040d8566a3649",
+  "tests": {
+    "type_check": 243,
+    "hir": 218,
+    "execution": 25
+  },
+  "bootstrap_tree_verified": true,
+  "sha256": {
+    "tests/results/compiler-updated-execution.log": "dc2e82e6e9ceb96a2046c119f26e85535cd1047ea3cf1105d8849b95791f66fb",
+    "tests/results/compiler-updated-tycheck.log": "442c06696a197892c9f15f416c7f60c5cce33a478c30fc5acd2aea907a6e68ab",
+    "tests/results/compiler-updated-hir.log": "db17e3cb99d52fb5897dafd0c87e22ea71c36d409be134a345263175b211d589"
+  }
+}
