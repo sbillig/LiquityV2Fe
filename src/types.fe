@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: MIT
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
+use std::abi::Sol
+pub struct LatestBatchData {
+    pub total_debt_shares: u256,
+    pub entire_debt_without_redistribution: u256,
+    pub entire_coll_without_redistribution: u256,
+    pub accrued_interest: u256,
+    pub recorded_debt: u256,
+    pub annual_interest_rate: u256,
+    pub weighted_recorded_debt: u256,
+    pub annual_management_fee: u256,
+    pub accrued_management_fee: u256,
+    pub weighted_recorded_batch_management_fee: u256,
+    pub last_debt_update_time: u256,
+    pub last_interest_rate_adj_time: u256,
+}
+
+pub struct LatestTroveData {
+    pub entire_debt: u256,
+    pub entire_coll: u256,
+    pub redist_bold_debt_gain: u256,
+    pub redist_coll_gain: u256,
+    pub accrued_interest: u256,
+    pub recorded_debt: u256,
+    pub annual_interest_rate: u256,
+    pub weighted_recorded_debt: u256,
+    pub accrued_batch_management_fee: u256,
+    pub last_interest_rate_adj_time: u256,
+}
+
+pub struct TroveChange {
+    pub applied_redist_bold_debt_gain: u256,
+    pub applied_redist_coll_gain: u256,
+    pub coll_increase: u256,
+    pub coll_decrease: u256,
+    pub debt_increase: u256,
+    pub debt_decrease: u256,
+    pub new_weighted_recorded_debt: u256,
+    pub old_weighted_recorded_debt: u256,
+    pub upfront_fee: u256,
+    pub batch_accrued_management_fee: u256,
+    pub new_weighted_recorded_batch_management_fee: u256,
+    pub old_weighted_recorded_batch_management_fee: u256,
+}
+
+impl AbiSize for TroveChange {
+    const HEAD_SIZE: u256 = 384
+    const IS_DYNAMIC: bool = false
+}
+impl AbiSpan<Sol> for TroveChange {
+    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 384 }
+}
+impl Decode<Sol> for TroveChange {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let applied_redist_bold_debt_gain = d.read_word()
+        let applied_redist_coll_gain = d.read_word()
+        let coll_increase = d.read_word()
+        let coll_decrease = d.read_word()
+        let debt_increase = d.read_word()
+        let debt_decrease = d.read_word()
+        let new_weighted_recorded_debt = d.read_word()
+        let old_weighted_recorded_debt = d.read_word()
+        let upfront_fee = d.read_word()
+        let batch_accrued_management_fee = d.read_word()
+        let new_weighted_recorded_batch_management_fee = d.read_word()
+        let old_weighted_recorded_batch_management_fee = d.read_word()
+        Self { applied_redist_bold_debt_gain, applied_redist_coll_gain, coll_increase, coll_decrease, debt_increase, debt_decrease, new_weighted_recorded_debt, old_weighted_recorded_debt, upfront_fee, batch_accrued_management_fee, new_weighted_recorded_batch_management_fee, old_weighted_recorded_batch_management_fee }
+    }
+}
+impl Encode<Sol> for TroveChange {
+    fn encode(own self, _ ptr: *u8) {
+        <u256 as Encode<Sol>>::encode(self.applied_redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 0))
+        <u256 as Encode<Sol>>::encode(self.applied_redist_coll_gain, core::ptr::offset_bytes(ptr, 32))
+        <u256 as Encode<Sol>>::encode(self.coll_increase, core::ptr::offset_bytes(ptr, 64))
+        <u256 as Encode<Sol>>::encode(self.coll_decrease, core::ptr::offset_bytes(ptr, 96))
+        <u256 as Encode<Sol>>::encode(self.debt_increase, core::ptr::offset_bytes(ptr, 128))
+        <u256 as Encode<Sol>>::encode(self.debt_decrease, core::ptr::offset_bytes(ptr, 160))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 192))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 224))
+        <u256 as Encode<Sol>>::encode(self.upfront_fee, core::ptr::offset_bytes(ptr, 256))
+        <u256 as Encode<Sol>>::encode(self.batch_accrued_management_fee, core::ptr::offset_bytes(ptr, 288))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 320))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 352))
+    }
+}
+
+impl Copy for TroveChange {}
+impl Copy for LatestBatchData {}
+impl Copy for LatestTroveData {}

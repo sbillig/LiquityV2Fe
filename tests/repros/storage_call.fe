@@ -1,0 +1,22 @@
+use std::evm::{Address, Ctx, Call}
+use std::abi::sol
+struct State { value: u256 }
+msg Ping { #[selector = sol("ping()")]
+    Ping,
+}
+impl State {
+    fn update(mut self, _ target: Address) uses (ctx: Ctx, call: mut Call) {
+        target.call(Ping::Ping {})
+        self.value = ctx.timestamp()
+    }
+}
+msg TestMsg {
+    #[selector = sol("update(address)")]
+    Update { target: Address },
+}
+pub contract Test uses (ctx: Ctx, call: mut Call) {
+    mut state: State,
+    recv TestMsg {
+        Update { target } uses (mut state, ctx, mut call) { state.update(target) }
+    }
+}

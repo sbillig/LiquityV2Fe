@@ -1,0 +1,286 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Aggregate debt, interest and batch-fee accounting from ActivePool.sol.
+use std::abi::{sol, DynString}
+use std::evm::{Address, Call, Ctx, Log, RawMem}
+use super::addresses_registry::{RegistryMsg, CollTokenAddressChanged, BorrowerOperationsAddressChanged, TroveManagerAddressChanged, StabilityPoolAddressChanged, DefaultPoolAddressChanged}
+use super::gas_pool::TokenApprovalMsg
+use super::default_pool::PoolReceiveMsg
+use super::types::TroveChange
+use super::constants::{ONE_YEAR, DECIMAL_PRECISION, SP_YIELD_SPLIT}
+use super::{token_calls, revert_texts as text, liquity_math}
+
+#[event]
+pub struct ActivePoolBoldDebtUpdated { pub recorded_debt: u256 }
+#[event]
+pub struct ActivePoolCollBalanceUpdated { pub balance: u256 }
+pub msg BoldMintMsg {
+    #[selector = sol("mint(address,uint256)")]
+    Mint { account: Address, amount: u256 },
+}
+pub msg RewardsMsg {
+    #[selector = sol("triggerBoldRewards(uint256)")]
+    Trigger { amount: u256 },
+}
+pub struct ActiveConfig {
+    pub coll_token: Address,
+    pub borrower_operations: Address,
+    pub manager: Address,
+    pub stability_pool: Address,
+    pub default_pool: Address,
+    pub interest_router: Address,
+    pub bold_token: Address,
+}
+impl Copy for ActiveConfig {}
+pub struct ActiveAccounting {
+    pub coll_balance: u256,
+    pub recorded_debt: u256,
+    pub weighted_debt: u256,
+    pub last_update: u256,
+    pub shutdown: u256,
+    pub batch_fees: u256,
+    pub weighted_batch_fees: u256,
+    pub last_batch_update: u256,
+}
+fn ceil_interest(_ weighted: u256, _ duration: u256) -> u256 {
+    let numerator = weighted * duration
+    if numerator == 0 { 0 } else { (numerator - 1) / (ONE_YEAR * DECIMAL_PRECISION) + 1 }
+}
+// Solidity high-level calls with no return value reject addresses without code.
+fn require_code(_ target: Address) uses (ctx: Ctx) {
+    if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
+}
+impl ActiveAccounting {
+    pub fn pending_interest(self) -> u256 uses (ctx: Ctx) {
+        if self.shutdown != 0 { return 0 }
+        ceil_interest(self.weighted_debt, ctx.timestamp() - self.last_update)
+    }
+    pub fn pending_batch_fee(self) -> u256 uses (ctx: Ctx) {
+        let end = if self.shutdown != 0 { self.shutdown } else { ctx.timestamp() }
+        let start = liquity_math::min(self.last_batch_update, end)
+        ceil_interest(self.weighted_batch_fees, end - start)
+    }
+    pub fn bold_debt(self) -> u256 uses (ctx: Ctx) {
+        self.recorded_debt + self.pending_interest() + self.batch_fees + self.pending_batch_fee()
+    }
+    pub fn new_average(self, _ change: TroveChange) -> u256 uses (ctx: Ctx) {
+        assert(change.upfront_fee == 0)
+        if self.shutdown != 0 { return 0 }
+        let mut debt = self.recorded_debt
+        debt += self.pending_interest()
+        debt += change.applied_redist_bold_debt_gain
+        debt += change.debt_increase
+        debt += change.batch_accrued_management_fee
+        debt -= change.debt_decrease
+        let mut weighted = self.weighted_debt
+        weighted += change.new_weighted_recorded_debt
+        weighted -= change.old_weighted_recorded_debt
+        if debt > 0 { weighted / debt } else { 0 }
+    }
+    pub fn account_batch_fee(mut self, _ change: TroveChange) uses (ctx: Ctx) {
+        self.recorded_debt += change.batch_accrued_management_fee
+        let mut fees = self.batch_fees
+        fees += self.pending_batch_fee()
+        fees -= change.batch_accrued_management_fee
+        self.batch_fees = fees
+        let mut weighted = self.weighted_batch_fees
+        weighted += change.new_weighted_recorded_batch_management_fee
+        weighted -= change.old_weighted_recorded_batch_management_fee
+        self.weighted_batch_fees = weighted
+    }
+    pub fn send_coll(mut self, _ amount: u256) uses (log: mut Log) {
+        self.coll_balance -= amount
+        log.emit(ActivePoolCollBalanceUpdated { balance: self.coll_balance })
+    }
+    pub fn receive_coll(mut self, _ amount: u256) uses (log: mut Log) {
+        self.coll_balance += amount
+        log.emit(ActivePoolCollBalanceUpdated { balance: self.coll_balance })
+    }
+}
+
+// No borrowed contract storage crosses the external token/rewards calls.
+fn distribute_interest(_ minted: u256, _ cfg: own ActiveConfig) uses (ctx: Ctx, call: mut Call) {
+    if minted > 0 {
+        let sp_yield = SP_YIELD_SPLIT * minted / DECIMAL_PRECISION
+        let remainder = minted - sp_yield
+        require_code(cfg.bold_token)
+        cfg.bold_token.call(BoldMintMsg::Mint { account: cfg.interest_router, amount: remainder })
+        if sp_yield > 0 {
+            require_code(cfg.bold_token)
+            cfg.bold_token.call(BoldMintMsg::Mint { account: cfg.stability_pool, amount: sp_yield })
+            require_code(cfg.stability_pool)
+            cfg.stability_pool.call(RewardsMsg::Trigger { amount: sp_yield })
+        }
+    }
+}
+fn distribute_batch_fee(_ amount: u256, _ batch: Address, _ cfg: own ActiveConfig)
+uses (ctx: Ctx, call: mut Call) {
+    if amount > 0 {
+        require_code(cfg.bold_token)
+        cfg.bold_token.call(BoldMintMsg::Mint { account: batch, amount })
+    }
+}
+
+pub msg ActivePoolMsg {
+    #[selector = sol("collToken()")]
+    GetcollToken -> Address,
+    #[selector = sol("borrowerOperationsAddress()")]
+    GetborrowerOperationsAddress -> Address,
+    #[selector = sol("troveManagerAddress()")]
+    GettroveManagerAddress -> Address,
+    #[selector = sol("defaultPoolAddress()")]
+    GetdefaultPoolAddress -> Address,
+    #[selector = sol("boldToken()")]
+    GetboldToken -> Address,
+    #[selector = sol("interestRouter()")]
+    GetinterestRouter -> Address,
+    #[selector = sol("stabilityPool()")]
+    GetstabilityPool -> Address,
+    #[selector = sol("getCollBalance()")]
+    GetgetCollBalance -> u256,
+    #[selector = sol("aggRecordedDebt()")]
+    GetaggRecordedDebt -> u256,
+    #[selector = sol("aggWeightedDebtSum()")]
+    GetaggWeightedDebtSum -> u256,
+    #[selector = sol("lastAggUpdateTime()")]
+    GetlastAggUpdateTime -> u256,
+    #[selector = sol("shutdownTime()")]
+    GetshutdownTime -> u256,
+    #[selector = sol("aggBatchManagementFees()")]
+    GetaggBatchManagementFees -> u256,
+    #[selector = sol("aggWeightedBatchManagementFeeSum()")]
+    GetaggWeightedBatchManagementFeeSum -> u256,
+    #[selector = sol("lastAggBatchManagementFeesUpdateTime()")]
+    GetlastAggBatchManagementFeesUpdateTime -> u256,
+    #[selector = sol("NAME()")]
+    Name -> DynString,
+    #[selector = sol("calcPendingAggInterest()")]
+    PendingInterest -> u256,
+    #[selector = sol("calcPendingSPYield()")]
+    PendingSPYield -> u256,
+    #[selector = sol("calcPendingAggBatchManagementFee()")]
+    PendingBatchFee -> u256,
+    #[selector = sol("getBoldDebt()")]
+    BoldDebt -> u256,
+    #[selector = sol("hasBeenShutDown()")]
+    HasBeenShutDown -> bool,
+    #[selector = sol("setShutdownFlag()")]
+    SetShutdownFlag,
+    #[selector = sol("sendColl(address,uint256)")]
+    SendColl { account: Address, amount: u256 },
+    #[selector = sol("sendCollToDefaultPool(uint256)")]
+    SendCollToDefaultPool { amount: u256 },
+    #[selector = sol("receiveColl(uint256)")]
+    ReceiveColl { amount: u256 },
+    #[selector = sol("accountForReceivedColl(uint256)")]
+    AccountForReceivedColl { amount: u256 },
+    #[selector = sol("mintAggInterest()")]
+    MintAggInterest,
+    #[selector = sol("getNewApproxAvgInterestRateFromTroveChange((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    NewAverage { change: TroveChange } -> u256,
+    #[selector = sol("mintAggInterestAndAccountForTroveChange((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address)")]
+    AccountTroveChange { change: TroveChange, batch: Address },
+    #[selector = sol("mintBatchManagementFeeAndAccountForChange((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),address)")]
+    BatchFee { change: TroveChange, batch: Address },
+}
+pub contract ActivePool uses (ctx: Ctx, call: mut Call, mem: mut RawMem, log: mut Log) {
+    cfg: ActiveConfig,
+    mut accounting: ActiveAccounting,
+    init(registry: Address) uses (mut cfg, mut call, mut log) {
+        let coll_token = registry.static(RegistryMsg::GetcollToken {})
+        let borrower_operations = registry.static(RegistryMsg::GetborrowerOperations {})
+        let manager = registry.static(RegistryMsg::GettroveManager {})
+        let stability_pool = registry.static(RegistryMsg::GetstabilityPool {})
+        let default_pool = registry.static(RegistryMsg::GetdefaultPool {})
+        let interest_router = registry.static(RegistryMsg::GetinterestRouter {})
+        let bold_token = registry.static(RegistryMsg::GetboldToken {})
+        cfg = ActiveConfig { coll_token, borrower_operations, manager, stability_pool, default_pool, interest_router, bold_token }
+        log.emit(CollTokenAddressChanged { value: coll_token })
+        log.emit(BorrowerOperationsAddressChanged { value: borrower_operations })
+        log.emit(TroveManagerAddressChanged { value: manager })
+        log.emit(StabilityPoolAddressChanged { value: stability_pool })
+        log.emit(DefaultPoolAddressChanged { value: default_pool })
+        coll_token.call(TokenApprovalMsg::Approve { spender: default_pool, amount: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff })
+    }
+    recv ActivePoolMsg {
+        GetcollToken -> Address uses (cfg) { cfg.coll_token }
+        GetborrowerOperationsAddress -> Address uses (cfg) { cfg.borrower_operations }
+        GettroveManagerAddress -> Address uses (cfg) { cfg.manager }
+        GetdefaultPoolAddress -> Address uses (cfg) { cfg.default_pool }
+        GetboldToken -> Address uses (cfg) { cfg.bold_token }
+        GetinterestRouter -> Address uses (cfg) { cfg.interest_router }
+        GetstabilityPool -> Address uses (cfg) { cfg.stability_pool }
+        GetgetCollBalance -> u256 uses (accounting) { accounting.coll_balance }
+        GetaggRecordedDebt -> u256 uses (accounting) { accounting.recorded_debt }
+        GetaggWeightedDebtSum -> u256 uses (accounting) { accounting.weighted_debt }
+        GetlastAggUpdateTime -> u256 uses (accounting) { accounting.last_update }
+        GetshutdownTime -> u256 uses (accounting) { accounting.shutdown }
+        GetaggBatchManagementFees -> u256 uses (accounting) { accounting.batch_fees }
+        GetaggWeightedBatchManagementFeeSum -> u256 uses (accounting) { accounting.weighted_batch_fees }
+        GetlastAggBatchManagementFeesUpdateTime -> u256 uses (accounting) { accounting.last_batch_update }
+        Name -> DynString uses (mut mem) { text::active_name() }
+        PendingInterest -> u256 uses (accounting, ctx) { accounting.pending_interest() }
+        PendingSPYield -> u256 uses (accounting, ctx) { accounting.pending_interest() * SP_YIELD_SPLIT / DECIMAL_PRECISION }
+        PendingBatchFee -> u256 uses (accounting, ctx) { accounting.pending_batch_fee() }
+        BoldDebt -> u256 uses (accounting, ctx) { accounting.bold_debt() }
+        NewAverage { change } -> u256 uses (accounting, ctx) { accounting.new_average(change) }
+        HasBeenShutDown -> bool uses (accounting) { accounting.shutdown != 0 }
+        SetShutdownFlag uses (cfg, mut accounting, ctx, mut mem) {
+            text::require(ctx.caller() == cfg.manager, text::active_tm())
+            accounting.shutdown = ctx.timestamp()
+        }
+        SendColl { account, amount } uses (cfg, mut accounting, ctx, mut mem, mut call, mut log) {
+            text::require(ctx.caller() == cfg.borrower_operations || ctx.caller() == cfg.manager || ctx.caller() == cfg.stability_pool, text::active_bo_tm_sp())
+            accounting.send_coll(amount)
+            token_calls::safe_transfer(cfg.coll_token, account, amount)
+        }
+        SendCollToDefaultPool { amount } uses (cfg, mut accounting, ctx, mut mem, mut call, mut log) {
+            text::require(ctx.caller() == cfg.manager, text::active_tm())
+            accounting.send_coll(amount)
+            require_code(cfg.default_pool)
+            cfg.default_pool.call(PoolReceiveMsg::ReceiveColl { amount })
+        }
+        ReceiveColl { amount } uses (cfg, mut accounting, ctx, mut mem, mut call, mut log) {
+            text::require(ctx.caller() == cfg.borrower_operations || ctx.caller() == cfg.default_pool, text::active_bo_default())
+            accounting.receive_coll(amount)
+            token_calls::safe_transfer_from(cfg.coll_token, ctx.caller(), ctx.address(), amount)
+        }
+        AccountForReceivedColl { amount } uses (cfg, mut accounting, ctx, mut mem, mut log) {
+            text::require(ctx.caller() == cfg.borrower_operations || ctx.caller() == cfg.default_pool, text::active_bo_default())
+            accounting.receive_coll(amount)
+        }
+        MintAggInterest uses (cfg, mut accounting, ctx, mut mem, mut call) {
+            text::require(ctx.caller() == cfg.borrower_operations || ctx.caller() == cfg.stability_pool, text::active_bo_sp())
+            let minted = accounting.pending_interest()
+            distribute_interest(minted, cfg.clone())
+            accounting.last_update = ctx.timestamp()
+            accounting.recorded_debt += minted
+        }
+        AccountTroveChange { change, batch } uses (cfg, mut accounting, ctx, mut mem, mut call) {
+            text::require(ctx.caller() == cfg.borrower_operations || ctx.caller() == cfg.manager, text::active_bo_tm())
+            if batch != Address::zero() {
+                accounting.account_batch_fee(change)
+                distribute_batch_fee(change.batch_accrued_management_fee, batch, cfg.clone())
+                accounting.last_batch_update = ctx.timestamp()
+            }
+            let mut debt = accounting.recorded_debt
+            let minted = accounting.pending_interest() + change.upfront_fee
+            distribute_interest(minted, cfg.clone())
+            accounting.last_update = ctx.timestamp()
+            debt += minted
+            debt += change.applied_redist_bold_debt_gain
+            debt += change.debt_increase
+            debt -= change.debt_decrease
+            accounting.recorded_debt = debt
+            let mut weighted = accounting.weighted_debt
+            weighted += change.new_weighted_recorded_debt
+            weighted -= change.old_weighted_recorded_debt
+            accounting.weighted_debt = weighted
+        }
+        BatchFee { change, batch } uses (cfg, mut accounting, ctx, mut mem, mut call) {
+            text::require(ctx.caller() == cfg.manager, text::active_tm())
+            accounting.account_batch_fee(change)
+            distribute_batch_fee(change.batch_accrued_management_fee, batch, cfg.clone())
+            accounting.last_batch_update = ctx.timestamp()
+        }
+    }
+}

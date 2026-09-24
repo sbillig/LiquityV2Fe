@@ -1,0 +1,110 @@
+{
+  "AddressesRegistry": {
+    "compiler_abi_sha256": "d07e32e3c4d4daf825ff9f25ac0c4a0f6659af33a8eea87ad8c6fbd6c8045e29",
+    "reference_artifact_sha256": "6ee088859152e91d873d5a95660bc70ae6f3a5b70f1ec7e66ae79e651b2210a8",
+    "protocol_abi_sha256": "b05b188fe23ea77c434e90ea690e3bed9a89384d193715c00b850c3c11b1b863",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 27
+  },
+  "GasPool": {
+    "compiler_abi_sha256": "c555bbbc0689fa646f193ae130220db7631f342dea033b8ffa5c02ed59b477ab",
+    "reference_artifact_sha256": "8b7d3a0fa9dab455f3b2ce386ce7ada67079972949d5490746a2c72e9a6dce3e",
+    "protocol_abi_sha256": "3bd108c091d5054318a9b89dbf661a59faa47563f440241d360aa6d031446991",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 0
+  },
+  "DefaultPool": {
+    "compiler_abi_sha256": "3ca94784d9dc8e6abc757ff8748741c4905e63f04ad69560543833c5d6604f2f",
+    "reference_artifact_sha256": "25a8b0035c5f15b70b4f423f72471f5922f440d36dab535003d98bbbb72b7eed",
+    "protocol_abi_sha256": "5bc413bde68914e88922c1aa664c2130e32c3751ab36a30b7368676853413126",
+    "metadata_refinements": [
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 10
+  },
+  "CollSurplusPool": {
+    "compiler_abi_sha256": "ddb07a3a4fab412934aeafc45e08b595c9484ffd4097e8059905cd32be65ac0f",
+    "reference_artifact_sha256": "338b4368996e3ace884b64cfb3903bdcbf210bb21cbd46ba55bec6f8986ca530",
+    "protocol_abi_sha256": "92c6312f65777d1909648912dd2ea43d74332d7920baa3eb83e198ba0c3317d3",
+    "metadata_refinements": [
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 8
+  },
+  "ActivePool": {
+    "compiler_abi_sha256": "ef9b07157dd39598ba7dabcf6cb36de689053e3a9be12ac3c05b9512f00980b2",
+    "reference_artifact_sha256": "bfca8e4342a733d0d7f7ca6a618a13481ea32511fa3f51415e30236ba46e6719",
+    "protocol_abi_sha256": "8791d999a080e1f39ef76ebde144fedc64d3a3db547c5f32ddabaf781cdaeb2d",
+    "metadata_refinements": [
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [
+      [
+        "event",
+        "ActivePoolBoldDebtUpdated(uint256)"
+      ]
+    ],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 30
+  },
+  "BoldToken": {
+    "compiler_abi_sha256": "b6f33e07b47331c8392e8ce8dd40c926650bee78dc8a123d858876e246da586a",
+    "reference_artifact_sha256": "3327fe14d487a6ccaf5e45fbea4ba814d146782d3ee59cbf2b338454454dc65e",
+    "protocol_abi_sha256": "26142ca5f7a7ce9847335aabcc945c793a13e1f427da25e38cee171f2a0cbf16",
+    "metadata_refinements": [
+      "eip712Domain: explicit flat runtime return",
+      "symbol(): pure implementation of view function",
+      "name(): pure implementation of view function",
+      "decimals(): pure implementation of view function"
+    ],
+    "declaration_only": [
+      [
+        "error",
+        "InvalidShortString()"
+      ],
+      [
+        "error",
+        "StringTooLong(string)"
+      ],
+      [
+        "event",
+        "EIP712DomainChanged()"
+      ]
+    ],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 24
+  }
+}

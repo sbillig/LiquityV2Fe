@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use super::liquity_math as math
+
+msg MathMsg {
+    #[selector = sol("min(uint256,uint256)")]
+    Min { a: u256, b: u256 } -> u256,
+    #[selector = sol("max(uint256,uint256)")]
+    Max { a: u256, b: u256 } -> u256,
+    #[selector = sol("subMinZero(uint256,uint256)")]
+    SubMinZero { a: u256, b: u256 } -> u256,
+    #[selector = sol("absoluteDifference(uint256,uint256)")]
+    AbsoluteDifference { a: u256, b: u256 } -> u256,
+    #[selector = sol("decMul(uint256,uint256)")]
+    DecMul { a: u256, b: u256 } -> u256,
+    #[selector = sol("decPow(uint256,uint256)")]
+    DecPow { a: u256, b: u256 } -> u256,
+    #[selector = sol("computeCR(uint256,uint256,uint256)")]
+    ComputeCR { coll: u256, debt: u256, price: u256 } -> u256,
+    #[selector = sol("calcInterest(uint256,uint256)")]
+    CalcInterest { a: u256, b: u256 } -> u256,
+}
+pub contract MathHarness {
+    recv MathMsg {
+        Min { a, b } -> u256 { math::min(a, b) }
+        Max { a, b } -> u256 { math::max(a, b) }
+        SubMinZero { a, b } -> u256 { math::sub_min_zero(a, b) }
+        AbsoluteDifference { a, b } -> u256 { math::absolute_difference(a, b) }
+        DecMul { a, b } -> u256 { math::dec_mul(a, b) }
+        DecPow { a, b } -> u256 { math::dec_pow(a, b) }
+        ComputeCR { coll, debt, price } -> u256 { math::compute_cr(coll, debt, price) }
+        CalcInterest { a, b } -> u256 { math::calc_interest(a, b) }
+    }
+}

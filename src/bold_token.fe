@@ -1,0 +1,248 @@
+// SPDX-License-Identifier: BUSL-1.1
+// BoldToken.sol with OpenZeppelin 4.9 ERC20 / ERC20Permit / EIP712 behavior.
+use std::abi::{sol, Bytes1, Bytes32, DynString, DynArray}
+use std::evm::{Address, Ctx, Log, RawMem, RawOps, StorageMap, encode_abi_payload, revert_error, crypto::ecrecover_raw}
+use std::evm::packed::keccak_packed
+use core::{option::Option, result::Result}
+use super::addresses_registry::{OwnershipTransferred, CollateralRegistryAddressChanged}
+use super::revert_texts as text
+// keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
+const DOMAIN_TYPEHASH: u256 = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f
+// keccak256("BOLD Stablecoin")
+const NAME_HASH: u256 = 0xe2310fa94644503315a3187d13c091ef60796335b1aa0fc5db225b92a64803dd
+// keccak256("1")
+const VERSION_HASH: u256 = 0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6
+// keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+const PERMIT_TYPEHASH: u256 = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9
+const MAX: u256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+#[event]
+pub struct Transfer {
+    #[indexed]
+    pub from: Address,
+    #[indexed]
+    pub to: Address,
+    pub value: u256,
+}
+#[event]
+pub struct Approval {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub spender: Address,
+    pub value: u256,
+}
+#[event]
+pub struct EIP712DomainChanged {}
+#[event]
+pub struct TroveManagerAddressAdded { pub value: Address }
+#[event]
+pub struct StabilityPoolAddressAdded { pub value: Address }
+#[event]
+pub struct BorrowerOperationsAddressAdded { pub value: Address }
+#[event]
+pub struct ActivePoolAddressAdded { pub value: Address }
+fn token_approve(_ owner: Address, _ spender: Address, _ amount: u256)
+uses (allowances: mut StorageMap<(Address, Address), u256>, mem: mut RawMem, log: mut Log) {
+    text::require(owner != Address::zero(), text::erc20_approve_from_zero())
+    text::require(spender != Address::zero(), text::erc20_approve_to_zero())
+    allowances.set(key: (owner, spender), value: amount)
+    log.emit(Approval { owner, spender, value: amount })
+}
+fn token_transfer(_ from: Address, _ to: Address, _ amount: u256)
+uses (balances: mut StorageMap<Address, u256>, mem: mut RawMem, log: mut Log) {
+    text::require(from != Address::zero(), text::erc20_transfer_from_zero())
+    text::require(to != Address::zero(), text::erc20_transfer_to_zero())
+    let balance = balances.get(key: from)
+    text::require(balance >= amount, text::erc20_balance())
+    balances.set(key: from, value: balance - amount)
+    balances.set(key: to, value: balances.get(key: to) + amount)
+    log.emit(Transfer { from, to, value: amount })
+}
+fn spend_allowance(_ owner: Address, _ spender: Address, _ amount: u256)
+uses (allowances: mut StorageMap<(Address, Address), u256>, mem: mut RawMem, log: mut Log) {
+    let allowance = allowances.get(key: (owner, spender))
+    if allowance != MAX {
+        text::require(allowance >= amount, text::erc20_allowance())
+        token_approve(owner, spender, allowance - amount)
+    }
+}
+fn valid_recipient(_ recipient: Address) uses (ctx: Ctx, mem: mut RawMem) {
+    text::require(recipient != Address::zero() && recipient != ctx.address(), text::bold_recipient())
+}
+fn domain_separator() -> u256 uses (ctx: Ctx, mem: mut RawMem) {
+    keccak_packed((DOMAIN_TYPEHASH, NAME_HASH, VERSION_HASH, ctx.chainid(), ctx.address().inner))
+}
+#[arithmetic(unchecked)]
+fn increment_nonce(_ nonce: u256) -> u256 { nonce + 1 }
+fn recover(_ hash: u256, _ v: u8, _ r: u256, _ s: u256) -> Address uses (mem: mut RawMem) {
+    text::require(s <= 0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0, text::ecdsa_high_s())
+    let signer = match ecrecover_raw(hash: hash, v: v as u256, r, s) {
+        Result::Ok(Option::Some(address)) => address,
+        Result::Ok(Option::None) => { revert_error(text::Error { reason: text::ecdsa_invalid() }) },
+        Result::Err(_) => { std::evm::revert(()) },
+    }
+    text::require(signer != 0, text::ecdsa_invalid())
+    Address { inner: signer }
+}
+pub msg BoldTokenMsg {
+    #[selector = sol("name()")]
+    Name -> DynString,
+    #[selector = sol("symbol()")]
+    Symbol -> DynString,
+    #[selector = sol("decimals()")]
+    Decimals -> u8,
+    #[selector = sol("totalSupply()")]
+    TotalSupply -> u256,
+    #[selector = sol("owner()")]
+    Owner -> Address,
+    #[selector = sol("isOwner()")]
+    IsOwner -> bool,
+    #[selector = sol("collateralRegistryAddress()")]
+    CollateralRegistryAddress -> Address,
+    #[selector = sol("balanceOf(address)")]
+    BalanceOf { account: Address } -> u256,
+    #[selector = sol("allowance(address,address)")]
+    Allowance { owner: Address, spender: Address } -> u256,
+    #[selector = sol("approve(address,uint256)")]
+    Approve { spender: Address, amount: u256 } -> bool,
+    #[selector = sol("increaseAllowance(address,uint256)")]
+    IncreaseAllowance { spender: Address, amount: u256 } -> bool,
+    #[selector = sol("decreaseAllowance(address,uint256)")]
+    DecreaseAllowance { spender: Address, amount: u256 } -> bool,
+    #[selector = sol("transfer(address,uint256)")]
+    Transfer { recipient: Address, amount: u256 } -> bool,
+    #[selector = sol("transferFrom(address,address,uint256)")]
+    TransferFrom { sender: Address, recipient: Address, amount: u256 } -> bool,
+    #[selector = sol("setBranchAddresses(address,address,address,address)")]
+    SetBranchAddresses { manager: Address, stability_pool: Address, borrower_operations: Address, active_pool: Address },
+    #[selector = sol("setCollateralRegistry(address)")]
+    SetCollateralRegistry { registry: Address },
+    #[selector = sol("mint(address,uint256)")]
+    Mint { account: Address, amount: u256 },
+    #[selector = sol("burn(address,uint256)")]
+    Burn { account: Address, amount: u256 },
+    #[selector = sol("sendToPool(address,address,uint256)")]
+    SendToPool { sender: Address, pool: Address, amount: u256 },
+    #[selector = sol("returnFromPool(address,address,uint256)")]
+    ReturnFromPool { pool: Address, receiver: Address, amount: u256 },
+    #[selector = sol("nonces(address)")]
+    Nonces { owner: Address } -> u256,
+    #[selector = sol("DOMAIN_SEPARATOR()")]
+    DomainSeparator -> Bytes32,
+    #[selector = sol("eip712Domain()")]
+    Eip712Domain -> (Bytes1, DynString, DynString, u256, Address, Bytes32, DynArray<u256>),
+    #[selector = sol("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")]
+    Permit { owner: Address, spender: Address, value: u256, deadline: u256, v: u8, r: Bytes32, s: Bytes32 },
+}
+pub contract BoldToken uses (ctx: Ctx, mem: mut RawMem, log: mut Log, ops: RawOps) {
+    mut owner_address: Address,
+    mut registry_address: Address,
+    mut total_supply: u256,
+    mut balances: StorageMap<Address, u256>,
+    mut allowances: StorageMap<(Address, Address), u256>,
+    mut nonces: StorageMap<Address, u256>,
+    mut managers: StorageMap<Address, bool>,
+    mut stability_pools: StorageMap<Address, bool>,
+    mut borrowers: StorageMap<Address, bool>,
+    mut active_pools: StorageMap<Address, bool>,
+    init(owner: Address) uses (mut owner_address, mut log) {
+        owner_address = owner
+        log.emit(OwnershipTransferred { previousOwner: Address::zero(), newOwner: owner })
+    }
+    recv BoldTokenMsg {
+        Name -> DynString uses (mut mem) { text::bold_name() }
+        Symbol -> DynString uses (mut mem) { text::bold_symbol() }
+        Decimals -> u8 { 18 }
+        TotalSupply -> u256 uses (total_supply) { total_supply }
+        Owner -> Address uses (owner_address) { owner_address }
+        IsOwner -> bool uses (owner_address, ctx) { ctx.caller() == owner_address }
+        CollateralRegistryAddress -> Address uses (registry_address) { registry_address }
+        BalanceOf { account } -> u256 uses (balances) { balances.get(key: account) }
+        Allowance { owner, spender } -> u256 uses (allowances) { allowances.get(key: (owner, spender)) }
+        Nonces { owner } -> u256 uses (nonces) { nonces.get(key: owner) }
+        DomainSeparator -> Bytes32 uses (ctx, mut mem) { Bytes32 { val: domain_separator() } }
+        Eip712Domain -> (Bytes1, DynString, DynString, u256, Address, Bytes32, DynArray<u256>) uses (ctx, mut mem, ops) {
+            // Solidity returns seven top-level values, not one dynamic tuple.
+            let output = encode_abi_payload((Bytes1 { val: 15 }, text::bold_name(), text::domain_version(), ctx.chainid(), ctx.address(), Bytes32 { val: 0 }, DynArray<u256>::empty()))
+            ops.return_data(data: output.span())
+        }
+        Approve { spender, amount } -> bool uses (mut allowances, ctx, mut mem, mut log) {
+            token_approve(ctx.caller(), spender, amount)
+            true
+        }
+        IncreaseAllowance { spender, amount } -> bool uses (mut allowances, ctx, mut mem, mut log) {
+            let allowance = allowances.get(key: (ctx.caller(), spender))
+            token_approve(ctx.caller(), spender, allowance + amount)
+            true
+        }
+        DecreaseAllowance { spender, amount } -> bool uses (mut allowances, ctx, mut mem, mut log) {
+            let allowance = allowances.get(key: (ctx.caller(), spender))
+            text::require(allowance >= amount, text::erc20_decrease())
+            token_approve(ctx.caller(), spender, allowance - amount)
+            true
+        }
+        Transfer { recipient, amount } -> bool uses (mut balances, ctx, mut mem, mut log) {
+            valid_recipient(recipient)
+            token_transfer(ctx.caller(), recipient, amount)
+            true
+        }
+        TransferFrom { sender, recipient, amount } -> bool uses (mut balances, mut allowances, ctx, mut mem, mut log) {
+            valid_recipient(recipient)
+            spend_allowance(sender, ctx.caller(), amount)
+            token_transfer(sender, recipient, amount)
+            true
+        }
+        SetBranchAddresses { manager, stability_pool, borrower_operations, active_pool } uses (owner_address, mut managers, mut stability_pools, mut borrowers, mut active_pools, ctx, mut mem, mut log) {
+            text::require(ctx.caller() == owner_address, text::owner_only())
+            managers.set(key: manager, value: true)
+            log.emit(TroveManagerAddressAdded { value: manager })
+            stability_pools.set(key: stability_pool, value: true)
+            log.emit(StabilityPoolAddressAdded { value: stability_pool })
+            borrowers.set(key: borrower_operations, value: true)
+            log.emit(BorrowerOperationsAddressAdded { value: borrower_operations })
+            active_pools.set(key: active_pool, value: true)
+            log.emit(ActivePoolAddressAdded { value: active_pool })
+        }
+        SetCollateralRegistry { registry } uses (mut owner_address, mut registry_address, ctx, mut mem, mut log) {
+            text::require(ctx.caller() == owner_address, text::owner_only())
+            registry_address = registry
+            log.emit(CollateralRegistryAddressChanged { value: registry })
+            log.emit(OwnershipTransferred { previousOwner: owner_address, newOwner: Address::zero() })
+            owner_address = Address::zero()
+        }
+        Mint { account, amount } uses (borrowers, active_pools, mut total_supply, mut balances, ctx, mut mem, mut log) {
+            text::require(borrowers.get(key: ctx.caller()) || active_pools.get(key: ctx.caller()), text::bold_minter())
+            text::require(account != Address::zero(), text::erc20_mint_zero())
+            total_supply += amount
+            balances.set(key: account, value: balances.get(key: account) + amount)
+            log.emit(Transfer { from: Address::zero(), to: account, value: amount })
+        }
+        Burn { account, amount } uses (registry_address, borrowers, managers, stability_pools, mut total_supply, mut balances, ctx, mut mem, mut log) {
+            text::require(ctx.caller() == registry_address || borrowers.get(key: ctx.caller()) || managers.get(key: ctx.caller()) || stability_pools.get(key: ctx.caller()), text::bold_burner())
+            text::require(account != Address::zero(), text::erc20_burn_zero())
+            let balance = balances.get(key: account)
+            text::require(balance >= amount, text::erc20_burn_balance())
+            balances.set(key: account, value: balance - amount)
+            total_supply -= amount
+            log.emit(Transfer { from: account, to: Address::zero(), value: amount })
+        }
+        SendToPool { sender, pool, amount } uses (stability_pools, mut balances, ctx, mut mem, mut log) {
+            text::require(stability_pools.get(key: ctx.caller()), text::bold_sp())
+            token_transfer(sender, pool, amount)
+        }
+        ReturnFromPool { pool, receiver, amount } uses (stability_pools, mut balances, ctx, mut mem, mut log) {
+            text::require(stability_pools.get(key: ctx.caller()), text::bold_sp())
+            token_transfer(pool, receiver, amount)
+        }
+        Permit { owner, spender, value, deadline, v, r, s } uses (mut nonces, mut allowances, ctx, mut mem, mut log) {
+            text::require(ctx.timestamp() <= deadline, text::permit_expired())
+            let nonce = nonces.get(key: owner)
+            nonces.set(key: owner, value: increment_nonce(nonce))
+            let struct_hash = keccak_packed((PERMIT_TYPEHASH, owner.inner, spender.inner, value, nonce, deadline))
+            let hash = keccak_packed((0x1901 as u16, domain_separator(), struct_hash))
+            let signer = recover(hash, v, r.val, s.val)
+            text::require(signer == owner, text::permit_invalid())
+            token_approve(owner, spender, value)
+        }
+    }
+}

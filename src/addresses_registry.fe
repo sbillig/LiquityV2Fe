@@ -1,0 +1,351 @@
+// SPDX-License-Identifier: BUSL-1.1
+// Port of AddressesRegistry.sol and its Ownable base.
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
+use std::abi::{Sol, sol, DynString}
+use std::evm::{Address, Ctx, Log, RawMem, revert_error}
+
+pub struct AddressVars {
+    pub collToken: Address,
+    pub borrowerOperations: Address,
+    pub troveManager: Address,
+    pub troveNFT: Address,
+    pub metadataNFT: Address,
+    pub stabilityPool: Address,
+    pub priceFeed: Address,
+    pub activePool: Address,
+    pub defaultPool: Address,
+    pub gasPoolAddress: Address,
+    pub collSurplusPool: Address,
+    pub sortedTroves: Address,
+    pub interestRouter: Address,
+    pub hintHelpers: Address,
+    pub multiTroveGetter: Address,
+    pub collateralRegistry: Address,
+    pub boldToken: Address,
+    pub WETH: Address,
+}
+impl Copy for AddressVars {}
+impl Encode<Sol> for AddressVars {
+    fn encode(own self, _ ptr: *u8) {
+        <Address as Encode<Sol>>::encode(self.collToken, core::ptr::offset_bytes(ptr, 0))
+        <Address as Encode<Sol>>::encode(self.borrowerOperations, core::ptr::offset_bytes(ptr, 32))
+        <Address as Encode<Sol>>::encode(self.troveManager, core::ptr::offset_bytes(ptr, 64))
+        <Address as Encode<Sol>>::encode(self.troveNFT, core::ptr::offset_bytes(ptr, 96))
+        <Address as Encode<Sol>>::encode(self.metadataNFT, core::ptr::offset_bytes(ptr, 128))
+        <Address as Encode<Sol>>::encode(self.stabilityPool, core::ptr::offset_bytes(ptr, 160))
+        <Address as Encode<Sol>>::encode(self.priceFeed, core::ptr::offset_bytes(ptr, 192))
+        <Address as Encode<Sol>>::encode(self.activePool, core::ptr::offset_bytes(ptr, 224))
+        <Address as Encode<Sol>>::encode(self.defaultPool, core::ptr::offset_bytes(ptr, 256))
+        <Address as Encode<Sol>>::encode(self.gasPoolAddress, core::ptr::offset_bytes(ptr, 288))
+        <Address as Encode<Sol>>::encode(self.collSurplusPool, core::ptr::offset_bytes(ptr, 320))
+        <Address as Encode<Sol>>::encode(self.sortedTroves, core::ptr::offset_bytes(ptr, 352))
+        <Address as Encode<Sol>>::encode(self.interestRouter, core::ptr::offset_bytes(ptr, 384))
+        <Address as Encode<Sol>>::encode(self.hintHelpers, core::ptr::offset_bytes(ptr, 416))
+        <Address as Encode<Sol>>::encode(self.multiTroveGetter, core::ptr::offset_bytes(ptr, 448))
+        <Address as Encode<Sol>>::encode(self.collateralRegistry, core::ptr::offset_bytes(ptr, 480))
+        <Address as Encode<Sol>>::encode(self.boldToken, core::ptr::offset_bytes(ptr, 512))
+        <Address as Encode<Sol>>::encode(self.WETH, core::ptr::offset_bytes(ptr, 544))
+    }
+}
+
+impl AbiSize for AddressVars {
+    const HEAD_SIZE: u256 = 576
+    const IS_DYNAMIC: bool = false
+}
+impl AbiSpan<Sol> for AddressVars {
+    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 576 }
+}
+impl Decode<Sol> for AddressVars {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let collToken_word = d.read_word()
+        if collToken_word >> 160 != 0 { std::evm::revert(()) }
+        let collToken = Address { inner: collToken_word }
+        let borrowerOperations_word = d.read_word()
+        if borrowerOperations_word >> 160 != 0 { std::evm::revert(()) }
+        let borrowerOperations = Address { inner: borrowerOperations_word }
+        let troveManager_word = d.read_word()
+        if troveManager_word >> 160 != 0 { std::evm::revert(()) }
+        let troveManager = Address { inner: troveManager_word }
+        let troveNFT_word = d.read_word()
+        if troveNFT_word >> 160 != 0 { std::evm::revert(()) }
+        let troveNFT = Address { inner: troveNFT_word }
+        let metadataNFT_word = d.read_word()
+        if metadataNFT_word >> 160 != 0 { std::evm::revert(()) }
+        let metadataNFT = Address { inner: metadataNFT_word }
+        let stabilityPool_word = d.read_word()
+        if stabilityPool_word >> 160 != 0 { std::evm::revert(()) }
+        let stabilityPool = Address { inner: stabilityPool_word }
+        let priceFeed_word = d.read_word()
+        if priceFeed_word >> 160 != 0 { std::evm::revert(()) }
+        let priceFeed = Address { inner: priceFeed_word }
+        let activePool_word = d.read_word()
+        if activePool_word >> 160 != 0 { std::evm::revert(()) }
+        let activePool = Address { inner: activePool_word }
+        let defaultPool_word = d.read_word()
+        if defaultPool_word >> 160 != 0 { std::evm::revert(()) }
+        let defaultPool = Address { inner: defaultPool_word }
+        let gasPoolAddress_word = d.read_word()
+        if gasPoolAddress_word >> 160 != 0 { std::evm::revert(()) }
+        let gasPoolAddress = Address { inner: gasPoolAddress_word }
+        let collSurplusPool_word = d.read_word()
+        if collSurplusPool_word >> 160 != 0 { std::evm::revert(()) }
+        let collSurplusPool = Address { inner: collSurplusPool_word }
+        let sortedTroves_word = d.read_word()
+        if sortedTroves_word >> 160 != 0 { std::evm::revert(()) }
+        let sortedTroves = Address { inner: sortedTroves_word }
+        let interestRouter_word = d.read_word()
+        if interestRouter_word >> 160 != 0 { std::evm::revert(()) }
+        let interestRouter = Address { inner: interestRouter_word }
+        let hintHelpers_word = d.read_word()
+        if hintHelpers_word >> 160 != 0 { std::evm::revert(()) }
+        let hintHelpers = Address { inner: hintHelpers_word }
+        let multiTroveGetter_word = d.read_word()
+        if multiTroveGetter_word >> 160 != 0 { std::evm::revert(()) }
+        let multiTroveGetter = Address { inner: multiTroveGetter_word }
+        let collateralRegistry_word = d.read_word()
+        if collateralRegistry_word >> 160 != 0 { std::evm::revert(()) }
+        let collateralRegistry = Address { inner: collateralRegistry_word }
+        let boldToken_word = d.read_word()
+        if boldToken_word >> 160 != 0 { std::evm::revert(()) }
+        let boldToken = Address { inner: boldToken_word }
+        let WETH_word = d.read_word()
+        if WETH_word >> 160 != 0 { std::evm::revert(()) }
+        let WETH = Address { inner: WETH_word }
+        Self { collToken, borrowerOperations, troveManager, troveNFT, metadataNFT, stabilityPool, priceFeed, activePool, defaultPool, gasPoolAddress, collSurplusPool, sortedTroves, interestRouter, hintHelpers, multiTroveGetter, collateralRegistry, boldToken, WETH }
+    }
+}
+#[error]
+pub struct InvalidCCR {}
+#[error]
+pub struct InvalidMCR {}
+#[error]
+pub struct InvalidBCR {}
+#[error]
+pub struct InvalidSCR {}
+#[error]
+pub struct SPPenaltyTooLow {}
+#[error]
+pub struct SPPenaltyGtRedist {}
+#[error]
+pub struct RedistPenaltyTooHigh {}
+#[error]
+pub struct Error { pub reason: DynString }
+#[event]
+pub struct OwnershipTransferred {
+    #[indexed]
+    pub previousOwner: Address,
+    #[indexed]
+    pub newOwner: Address,
+}
+#[event]
+pub struct CollTokenAddressChanged { pub value: Address }
+#[event]
+pub struct BorrowerOperationsAddressChanged { pub value: Address }
+#[event]
+pub struct TroveManagerAddressChanged { pub value: Address }
+#[event]
+pub struct TroveNFTAddressChanged { pub value: Address }
+#[event]
+pub struct MetadataNFTAddressChanged { pub value: Address }
+#[event]
+pub struct StabilityPoolAddressChanged { pub value: Address }
+#[event]
+pub struct PriceFeedAddressChanged { pub value: Address }
+#[event]
+pub struct ActivePoolAddressChanged { pub value: Address }
+#[event]
+pub struct DefaultPoolAddressChanged { pub value: Address }
+#[event]
+pub struct GasPoolAddressChanged { pub value: Address }
+#[event]
+pub struct CollSurplusPoolAddressChanged { pub value: Address }
+#[event]
+pub struct SortedTrovesAddressChanged { pub value: Address }
+#[event]
+pub struct InterestRouterAddressChanged { pub value: Address }
+#[event]
+pub struct HintHelpersAddressChanged { pub value: Address }
+#[event]
+pub struct MultiTroveGetterAddressChanged { pub value: Address }
+#[event]
+pub struct CollateralRegistryAddressChanged { pub value: Address }
+#[event]
+pub struct BoldTokenAddressChanged { pub value: Address }
+#[event]
+pub struct WETHAddressChanged { pub value: Address }
+pub msg RegistryMsg {
+    #[selector = sol("collToken()") ]
+    GetcollToken -> Address,
+    #[selector = sol("borrowerOperations()") ]
+    GetborrowerOperations -> Address,
+    #[selector = sol("troveManager()") ]
+    GettroveManager -> Address,
+    #[selector = sol("troveNFT()") ]
+    GettroveNFT -> Address,
+    #[selector = sol("metadataNFT()") ]
+    GetmetadataNFT -> Address,
+    #[selector = sol("stabilityPool()") ]
+    GetstabilityPool -> Address,
+    #[selector = sol("priceFeed()") ]
+    GetpriceFeed -> Address,
+    #[selector = sol("activePool()") ]
+    GetactivePool -> Address,
+    #[selector = sol("defaultPool()") ]
+    GetdefaultPool -> Address,
+    #[selector = sol("gasPoolAddress()") ]
+    GetgasPoolAddress -> Address,
+    #[selector = sol("collSurplusPool()") ]
+    GetcollSurplusPool -> Address,
+    #[selector = sol("sortedTroves()") ]
+    GetsortedTroves -> Address,
+    #[selector = sol("interestRouter()") ]
+    GetinterestRouter -> Address,
+    #[selector = sol("hintHelpers()") ]
+    GethintHelpers -> Address,
+    #[selector = sol("multiTroveGetter()") ]
+    GetmultiTroveGetter -> Address,
+    #[selector = sol("collateralRegistry()") ]
+    GetcollateralRegistry -> Address,
+    #[selector = sol("boldToken()") ]
+    GetboldToken -> Address,
+    #[selector = sol("WETH()") ]
+    GetWETH -> Address,
+    #[selector = sol("CCR()") ]
+    GetCCR -> u256,
+    #[selector = sol("MCR()") ]
+    GetMCR -> u256,
+    #[selector = sol("BCR()") ]
+    GetBCR -> u256,
+    #[selector = sol("SCR()") ]
+    GetSCR -> u256,
+    #[selector = sol("LIQUIDATION_PENALTY_SP()") ]
+    GetLIQUIDATION_PENALTY_SP -> u256,
+    #[selector = sol("LIQUIDATION_PENALTY_REDISTRIBUTION()") ]
+    GetLIQUIDATION_PENALTY_REDISTRIBUTION -> u256,
+    #[selector = sol("owner()")]
+    Owner -> Address,
+    #[selector = sol("isOwner()")]
+    IsOwner -> bool,
+    #[selector = sol("setAddresses((address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address))")]
+    SetAddresses { vars: AddressVars },
+}
+pub contract AddressesRegistry uses (ctx: Ctx, log: mut Log, mem: mut RawMem) {
+    mut owner_address: Address,
+    mut collToken: Address,
+    mut borrowerOperations: Address,
+    mut troveManager: Address,
+    mut troveNFT: Address,
+    mut metadataNFT: Address,
+    mut stabilityPool: Address,
+    mut priceFeed: Address,
+    mut activePool: Address,
+    mut defaultPool: Address,
+    mut gasPoolAddress: Address,
+    mut collSurplusPool: Address,
+    mut sortedTroves: Address,
+    mut interestRouter: Address,
+    mut hintHelpers: Address,
+    mut multiTroveGetter: Address,
+    mut collateralRegistry: Address,
+    mut boldToken: Address,
+    mut WETH: Address,
+    CCR: u256,
+    MCR: u256,
+    BCR: u256,
+    SCR: u256,
+    LIQUIDATION_PENALTY_SP: u256,
+    LIQUIDATION_PENALTY_REDISTRIBUTION: u256,
+    init(initial_owner: Address, ccr: u256, mcr: u256, bcr: u256, scr: u256, penalty_sp: u256, penalty_redist: u256)
+    uses (mut owner_address, mut CCR, mut MCR, mut BCR, mut SCR, mut LIQUIDATION_PENALTY_SP, mut LIQUIDATION_PENALTY_REDISTRIBUTION, mut log) {
+        owner_address = initial_owner
+        log.emit(OwnershipTransferred { previousOwner: Address::zero(), newOwner: initial_owner })
+        if ccr <= 1000000000000000000 || ccr >= 2000000000000000000 { revert_error(InvalidCCR {}) }
+        if mcr <= 1000000000000000000 || mcr >= 2000000000000000000 { revert_error(InvalidMCR {}) }
+        if bcr < 50000000000000000 || bcr >= 500000000000000000 { revert_error(InvalidBCR {}) }
+        if scr <= 1000000000000000000 || scr >= 2000000000000000000 { revert_error(InvalidSCR {}) }
+        if penalty_sp < 50000000000000000 { revert_error(SPPenaltyTooLow {}) }
+        if penalty_sp > penalty_redist { revert_error(SPPenaltyGtRedist {}) }
+        if penalty_redist > 200000000000000000 { revert_error(RedistPenaltyTooHigh {}) }
+        CCR = ccr
+        MCR = mcr
+        BCR = bcr
+        SCR = scr
+        LIQUIDATION_PENALTY_SP = penalty_sp
+        LIQUIDATION_PENALTY_REDISTRIBUTION = penalty_redist
+    }
+    recv RegistryMsg {
+        GetcollToken -> Address uses (collToken) { collToken }
+        GetborrowerOperations -> Address uses (borrowerOperations) { borrowerOperations }
+        GettroveManager -> Address uses (troveManager) { troveManager }
+        GettroveNFT -> Address uses (troveNFT) { troveNFT }
+        GetmetadataNFT -> Address uses (metadataNFT) { metadataNFT }
+        GetstabilityPool -> Address uses (stabilityPool) { stabilityPool }
+        GetpriceFeed -> Address uses (priceFeed) { priceFeed }
+        GetactivePool -> Address uses (activePool) { activePool }
+        GetdefaultPool -> Address uses (defaultPool) { defaultPool }
+        GetgasPoolAddress -> Address uses (gasPoolAddress) { gasPoolAddress }
+        GetcollSurplusPool -> Address uses (collSurplusPool) { collSurplusPool }
+        GetsortedTroves -> Address uses (sortedTroves) { sortedTroves }
+        GetinterestRouter -> Address uses (interestRouter) { interestRouter }
+        GethintHelpers -> Address uses (hintHelpers) { hintHelpers }
+        GetmultiTroveGetter -> Address uses (multiTroveGetter) { multiTroveGetter }
+        GetcollateralRegistry -> Address uses (collateralRegistry) { collateralRegistry }
+        GetboldToken -> Address uses (boldToken) { boldToken }
+        GetWETH -> Address uses (WETH) { WETH }
+        GetCCR -> u256 uses (CCR) { CCR }
+        GetMCR -> u256 uses (MCR) { MCR }
+        GetBCR -> u256 uses (BCR) { BCR }
+        GetSCR -> u256 uses (SCR) { SCR }
+        GetLIQUIDATION_PENALTY_SP -> u256 uses (LIQUIDATION_PENALTY_SP) { LIQUIDATION_PENALTY_SP }
+        GetLIQUIDATION_PENALTY_REDISTRIBUTION -> u256 uses (LIQUIDATION_PENALTY_REDISTRIBUTION) { LIQUIDATION_PENALTY_REDISTRIBUTION }
+        Owner -> Address uses (owner_address) { owner_address }
+        IsOwner -> bool uses (owner_address, ctx) { ctx.caller() == owner_address }
+        SetAddresses { vars } uses (mut owner_address, ctx, mut log, mut mem, mut collToken, mut borrowerOperations, mut troveManager, mut troveNFT, mut metadataNFT, mut stabilityPool, mut priceFeed, mut activePool, mut defaultPool, mut gasPoolAddress, mut collSurplusPool, mut sortedTroves, mut interestRouter, mut hintHelpers, mut multiTroveGetter, mut collateralRegistry, mut boldToken, mut WETH) {
+            if ctx.caller() != owner_address { revert_error(Error { reason: owner_error_text() }) }
+            collToken = vars.collToken
+            borrowerOperations = vars.borrowerOperations
+            troveManager = vars.troveManager
+            troveNFT = vars.troveNFT
+            metadataNFT = vars.metadataNFT
+            stabilityPool = vars.stabilityPool
+            priceFeed = vars.priceFeed
+            activePool = vars.activePool
+            defaultPool = vars.defaultPool
+            gasPoolAddress = vars.gasPoolAddress
+            collSurplusPool = vars.collSurplusPool
+            sortedTroves = vars.sortedTroves
+            interestRouter = vars.interestRouter
+            hintHelpers = vars.hintHelpers
+            multiTroveGetter = vars.multiTroveGetter
+            collateralRegistry = vars.collateralRegistry
+            boldToken = vars.boldToken
+            WETH = vars.WETH
+            log.emit(CollTokenAddressChanged { value: vars.collToken })
+            log.emit(BorrowerOperationsAddressChanged { value: vars.borrowerOperations })
+            log.emit(TroveManagerAddressChanged { value: vars.troveManager })
+            log.emit(TroveNFTAddressChanged { value: vars.troveNFT })
+            log.emit(MetadataNFTAddressChanged { value: vars.metadataNFT })
+            log.emit(StabilityPoolAddressChanged { value: vars.stabilityPool })
+            log.emit(PriceFeedAddressChanged { value: vars.priceFeed })
+            log.emit(ActivePoolAddressChanged { value: vars.activePool })
+            log.emit(DefaultPoolAddressChanged { value: vars.defaultPool })
+            log.emit(GasPoolAddressChanged { value: vars.gasPoolAddress })
+            log.emit(CollSurplusPoolAddressChanged { value: vars.collSurplusPool })
+            log.emit(SortedTrovesAddressChanged { value: vars.sortedTroves })
+            log.emit(InterestRouterAddressChanged { value: vars.interestRouter })
+            log.emit(HintHelpersAddressChanged { value: vars.hintHelpers })
+            log.emit(MultiTroveGetterAddressChanged { value: vars.multiTroveGetter })
+            log.emit(CollateralRegistryAddressChanged { value: vars.collateralRegistry })
+            log.emit(BoldTokenAddressChanged { value: vars.boldToken })
+            log.emit(WETHAddressChanged { value: vars.WETH })
+            log.emit(OwnershipTransferred { previousOwner: owner_address, newOwner: Address::zero() })
+            owner_address = Address::zero()
+        }
+    }
+}
+
+fn owner_error_text() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: data, value: 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
+}

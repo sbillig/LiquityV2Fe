@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::{sol, DynString}
+use std::evm::{Address, Call, Ctx, Log, RawMem, StorageMap}
+use super::addresses_registry::{RegistryMsg, BorrowerOperationsAddressChanged, TroveManagerAddressChanged}
+use super::{token_calls, revert_texts as text}
+
+#[event]
+pub struct CollBalanceUpdated {
+    #[indexed]
+    pub account: Address,
+    pub balance: u256,
+}
+#[event]
+pub struct CollSent {
+    #[indexed]
+    pub to: Address,
+    pub amount: u256,
+}
+pub msg CollSurplusPoolMsg {
+    #[selector = sol("NAME()")]
+    Name -> DynString,
+    #[selector = sol("collToken()")]
+    CollToken -> Address,
+    #[selector = sol("borrowerOperationsAddress()")]
+    BorrowerOperationsAddress -> Address,
+    #[selector = sol("troveManagerAddress()")]
+    TroveManagerAddress -> Address,
+    #[selector = sol("getCollBalance()")]
+    GetCollBalance -> u256,
+    #[selector = sol("getCollateral(address)")]
+    GetCollateral { account: Address } -> u256,
+    #[selector = sol("accountSurplus(address,uint256)")]
+    AccountSurplus { account: Address, amount: u256 },
+    #[selector = sol("claimColl(address)")]
+    ClaimColl { account: Address },
+}
+pub contract CollSurplusPool uses (ctx: Ctx, call: mut Call, log: mut Log, mem: mut RawMem) {
+    coll_token: Address,
+    borrower_operations: Address,
+    manager: Address,
+    mut coll_balance: u256,
+    mut balances: StorageMap<Address, u256>,
+    init(registry: Address) uses (mut coll_token, mut borrower_operations, mut manager, mut call, mut log) {
+        coll_token = registry.static(RegistryMsg::GetcollToken {})
+        borrower_operations = registry.static(RegistryMsg::GetborrowerOperations {})
+        manager = registry.static(RegistryMsg::GettroveManager {})
+        log.emit(BorrowerOperationsAddressChanged { value: borrower_operations })
+        log.emit(TroveManagerAddressChanged { value: manager })
+    }
+    recv CollSurplusPoolMsg {
+        Name -> DynString uses (mut mem) { text::surplus_name() }
+        CollToken -> Address uses (coll_token) { coll_token }
+        BorrowerOperationsAddress -> Address uses (borrower_operations) { borrower_operations }
+        TroveManagerAddress -> Address uses (manager) { manager }
+        GetCollBalance -> u256 uses (coll_balance) { coll_balance }
+        GetCollateral { account } -> u256 uses (balances) { balances.get(key: account) }
+        AccountSurplus { account, amount } uses (manager, mut coll_balance, mut balances, ctx, mut mem, mut log) {
+            text::require(ctx.caller() == manager, text::surplus_manager_only())
+            let new_amount = balances.get(key: account) + amount
+            balances.set(key: account, value: new_amount)
+            coll_balance = coll_balance + amount
+            log.emit(CollBalanceUpdated { account, balance: new_amount })
+        }
+        ClaimColl { account } uses (borrower_operations, coll_token, mut coll_balance, mut balances, ctx, mut mem, mut log, mut call) {
+            text::require(ctx.caller() == borrower_operations, text::surplus_bo_only())
+            let claimable = balances.get(key: account)
+            text::require(claimable > 0, text::surplus_no_collateral())
+            balances.set(key: account, value: 0)
+            log.emit(CollBalanceUpdated { account, balance: 0 })
+            coll_balance = coll_balance - claimable
+            log.emit(CollSent { to: account, amount: claimable })
+            token_calls::safe_transfer(coll_token, account, claimable)
+        }
+    }
+}

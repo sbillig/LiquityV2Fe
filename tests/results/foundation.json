@@ -1,0 +1,42 @@
+{
+  "command": "./scripts/test.sh",
+  "result": "passed",
+  "fe_unit_tests": 2,
+  "evm_differential_tests": 28,
+  "fuzz_runs_per_test": 1024,
+  "compiler_revision": "4db4b8110b49e41c3df2698d12969be011f56cde",
+  "compiler_binary_sha256": "e56b923b64dbce9dbffbcf8bda8de2203aa3edd8736b980fb26a22938b2606ce",
+  "compiler_dirty": "",
+  "sources_sha256": {
+    "src/addresses_registry.fe": "95cccd3220c693d93d955f7404e89ad349bc4683d1cb044f574c25e47ed911b9",
+    "src/constants.fe": "ccff0f9125fa5887b28837019b3db50117be2306149706bb9c31e7240eeb95cc",
+    "src/default_pool.fe": "4367d1d1b5a355cae4fa08d6a7714a8cadec17c4f60813edbf1767b07cc6a525",
+    "src/gas_pool.fe": "0141de7ce917aa74626df3c07d02f65c444595ca6efad51ed44bf7e8f5337dfe",
+    "src/lib.fe": "0984d5a50273e565df5552e4ea458adab58dab3fcde6bd7fbb8d6f30f98238e5",
+    "src/liquity_math.fe": "4a417676713031ab13ad03cf47e880695649630a51183e1179a6d817a28e12e1",
+    "src/math_harness.fe": "38e1d14b1e29878b8c87bea90d3e19b33ea3bc5317609b263a13d47892823968",
+    "src/revert_texts.fe": "f14db894e042dc7af39dd2b968d2eae6709a50ebe293732f591bfd70dbf5cf72",
+    "src/token_calls.fe": "93edb1222e3e6fb8b21c0f4fe2117629302a01603dca0dc226ef486578bfc3ba",
+    "src/types.fe": "ea4209366752ec0bc0cdcbbaa4cbe441b2c69a6f5d64e5c17a8634ea8163e32b"
+  },
+  "tests_sha256": {
+    "tests/DefaultPoolParity.t.sol": "0746fcf422cc42e07ca00d9711e76af44caf5870d45cf24af5cc2403c3ec0045",
+    "tests/GasPoolParity.t.sol": "bf089b7a919229f22584e208e69d8e25e778a73dfb10d0972439a622905692bc",
+    "tests/MathParity.t.sol": "c977c27a65a8c09a5b2b760988b609f68e80a54ba1809c01aa6aed5694cc6c26",
+    "tests/RegistryParity.t.sol": "74310b12d32c40e0957634ab782a7883eebba31820c772e727bcec5ecc482ba9"
+  },
+  "artifacts_sha256": {
+    "build/AddressesRegistry.abi.json": "d07e32e3c4d4daf825ff9f25ac0c4a0f6659af33a8eea87ad8c6fbd6c8045e29",
+    "build/AddressesRegistry.bin": "1dec89c80203da31d33a26b00bb148aa6403f9305500b40e30c35745e3db1f42",
+    "build/AddressesRegistry.runtime.bin": "3d59338800240d8453ad1d78c6e43076f6bae93f566f15d4b9f83a81a652e71b",
+    "build/DefaultPool.abi.json": "3ca94784d9dc8e6abc757ff8748741c4905e63f04ad69560543833c5d6604f2f",
+    "build/DefaultPool.bin": "21a3afb02c866f2c1ecaa3c83b96fa4f5da472b28d0e7ade1593d3b755321471",
+    "build/DefaultPool.runtime.bin": "1c7c9f410d9cf9bac58db54ef062788dfd5e9ecb8f22ea67123d9d9e2a185416",
+    "build/GasPool.abi.json": "c555bbbc0689fa646f193ae130220db7631f342dea033b8ffa5c02ed59b477ab",
+    "build/GasPool.bin": "445d23db376f286af934c5a7c3c0048be8fac3275bdff80076e7c29b6cbb588b",
+    "build/GasPool.runtime.bin": "9e270f633c982a109457ef62dc10a09da4b0086893bc6157f42d3cf6ab1bde5d",
+    "build/MathHarness.abi.json": "938aa577b169d8d0c1266aa472f6dc3d7d7fe1e16ef61465d579352c9b34aac5",
+    "build/MathHarness.bin": "fa15726d5d91b603793eba298bd83c584a349140872db2d1d50f73cd88b475df",
+    "build/MathHarness.runtime.bin": "613b72529e62333fe130933c43874de387dbd0d61d376b6fd0a3351e03a82c23"
+  }
+}

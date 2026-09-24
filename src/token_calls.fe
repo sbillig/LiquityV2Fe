@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin 4.9 SafeERC20 optional-return behavior, including revert strings.
+use std::abi::sol
+use std::evm::{Address, Call, CallOutcome, Ctx, RawMem}
+use super::revert_texts as text
+pub msg TokenMsg {
+    #[selector = sol("transfer(address,uint256)")]
+    Transfer { receiver: Address, amount: u256 } -> bool,
+    #[selector = sol("transferFrom(address,address,uint256)")]
+    TransferFrom { owner: Address, receiver: Address, amount: u256 } -> bool,
+}
+fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx, mem: mut RawMem) {
+    if !result.success() && result.returndata_len() == 0 {
+        text::require(false, text::safe_low_level())
+    }
+    if result.success() && result.returndata_len() == 0 {
+        text::require(ctx.extcodesize(token) > 0, text::non_contract())
+        return
+    }
+    let ok: bool = result.decode()
+    text::require(ok, text::safe_failed())
+}
+pub fn safe_transfer_from(_ token: Address, _ owner: Address, _ receiver: Address, _ amount: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    let result = token.try_call(TokenMsg::TransferFrom { owner, receiver, amount })
+    check(token, result)
+}
+pub fn safe_transfer(_ token: Address, _ receiver: Address, _ amount: u256)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    let result = token.try_call(TokenMsg::Transfer { receiver, amount })
+    check(token, result)
+}

@@ -1,0 +1,570 @@
+{
+  "contracts/src/ActivePool.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/active_pool.fe"
+    ],
+    "verification": [
+      "tests/ActivePoolParity.t.sol",
+      "tests/PoolSystem.t.sol",
+      "tests/results/pools-token.log",
+      "tests/results/abi-audit.json"
+    ]
+  },
+  "contracts/src/AddressesRegistry.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/addresses_registry.fe"
+    ],
+    "verification": [
+      "tests/RegistryParity.t.sol",
+      "tests/results/foundation.log"
+    ]
+  },
+  "contracts/src/BoldToken.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/bold_token.fe"
+    ],
+    "verification": [
+      "tests/BoldTokenParity.t.sol",
+      "tests/PoolSystem.t.sol",
+      "tests/results/pools-token.log",
+      "tests/results/abi-audit.json"
+    ]
+  },
+  "contracts/src/BorrowerOperations.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/CollSurplusPool.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/coll_surplus_pool.fe"
+    ],
+    "verification": [
+      "tests/SurplusPoolParity.t.sol",
+      "tests/PoolSystem.t.sol",
+      "tests/results/pools-token.log",
+      "tests/results/abi-audit.json"
+    ]
+  },
+  "contracts/src/CollateralRegistry.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/DebtInFrontHelper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/DefaultPool.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/default_pool.fe"
+    ],
+    "verification": [
+      "tests/DefaultPoolParity.t.sol",
+      "tests/results/foundation.log"
+    ]
+  },
+  "contracts/src/Dependencies/AddRemoveManagers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Dependencies/AggregatorV3Interface.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Dependencies/Constants.sol": {
+    "status": "constants_ported_legacy_query_contract_pending",
+    "fe": [
+      "src/constants.fe"
+    ],
+    "verification": [
+      "tests/results/foundation.log"
+    ]
+  },
+  "contracts/src/Dependencies/LiquityBase.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Dependencies/LiquityMath.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/liquity_math.fe"
+    ],
+    "verification": [
+      "tests/MathParity.t.sol",
+      "tests/results/foundation.log"
+    ]
+  },
+  "contracts/src/Dependencies/Ownable.sol": {
+    "status": "behavior_inlined_into_registry",
+    "fe": [
+      "src/addresses_registry.fe"
+    ],
+    "verification": [
+      "tests/RegistryParity.t.sol"
+    ]
+  },
+  "contracts/src/GasPool.sol": {
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/gas_pool.fe"
+    ],
+    "verification": [
+      "tests/GasPoolParity.t.sol",
+      "tests/results/foundation.log"
+    ]
+  },
+  "contracts/src/HintHelpers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IActivePool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IAddRemoveManagers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IAddressesRegistry.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IBoldRewardsReceiver.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IBoldToken.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IBorrowerOperations.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ICollSurplusPool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ICollateralRegistry.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ICommunityIssuance.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IDebtInFrontHelper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IDefaultPool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IHintHelpers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IInterestRouter.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ILQTYStaking.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ILQTYToken.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ILiquityBase.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IMainnetPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IMultiTroveGetter.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IRETHPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IRETHToken.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IRedemptionHelper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ISortedTroves.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IStabilityPool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IStabilityPoolEvents.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ITroveEvents.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ITroveManager.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/ITroveNFT.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IWETH.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IWSTETH.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Interfaces/IWSTETHPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/MultiTroveGetter.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/MetadataNFT.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/FixedAssets.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/JSON.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/SVG.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/Utils.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/baseSVG.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/NFTMetadata/utils/bauhaus.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/PriceFeeds/CompositePriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/PriceFeeds/MainnetPriceFeedBase.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/PriceFeeds/RETHPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/PriceFeeds/WETHPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/PriceFeeds/WSTETHPriceFeed.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/RedemptionHelper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/SortedTroves.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/StabilityPool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/TroveManager.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/TroveNFT.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Types/BatchId.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Types/LatestBatchData.sol": {
+    "status": "data_fields_ported_not_integrated",
+    "fe": [
+      "src/types.fe"
+    ],
+    "verification": []
+  },
+  "contracts/src/Types/LatestTroveData.sol": {
+    "status": "data_fields_ported_not_integrated",
+    "fe": [
+      "src/types.fe"
+    ],
+    "verification": []
+  },
+  "contracts/src/Types/TroveChange.sol": {
+    "status": "fields_and_abi_implemented_used_by_active_pool",
+    "fe": [
+      "src/types.fe"
+    ],
+    "verification": [
+      "tests/ActivePoolParity.t.sol",
+      "tests/results/pools-token.log"
+    ]
+  },
+  "contracts/src/Types/TroveId.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/BaseZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/GasCompZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IExchange.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IExchangeHelpers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IExchangeHelpersV2.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IFlashLoanProvider.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IFlashLoanReceiver.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/ILeverageZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Interfaces/IZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/LeftoversSweep.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/LeverageLSTZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/LeverageWETHZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveFactory.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/Curve/ICurvePool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGFactory.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGPool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/CurveExchange.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3Exchange.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpersV2.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniV3Exchange.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/INonfungiblePositionManager.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IPoolInitializer.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IQuoterV2.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/ISwapRouter.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Factory.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/IUniswapV3Pool.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/Exchanges/UniswapV3/UniPriceConverter.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IFlashLoanRecipient.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/FlashLoans/Balancer/vault/IVault.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/Modules/FlashLoans/BalancerFlashLoan.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "contracts/src/Zappers/WETHZapper.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  }
+}

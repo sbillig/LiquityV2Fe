@@ -1,0 +1,137 @@
+{
+  "src/BribeInitiative.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/CurveV2GaugeRewards.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/Governance.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/UniV4MerklRewards.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/UserProxy.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/UserProxyFactory.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IBribeInitiative.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ICurveStableswapFactoryNG.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ICurveStableswapNG.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IDistributionCreator.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IGovernance.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IInitiative.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ILQTY.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ILQTYStaking.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ILUSD.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/ILiquidityGauge.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IMultiDelegateCall.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IUserProxy.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/interfaces/IUserProxyFactory.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/DoubleLinkedList.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/Math.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/MultiDelegateCall.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/Ownable.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/SafeCallMinGas.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/Types.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/UniqueArray.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  },
+  "src/utils/VotingPower.sol": {
+    "status": "pending",
+    "fe": [],
+    "verification": []
+  }
+}

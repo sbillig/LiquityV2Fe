@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+// Port of GasPool.sol. Raw approve deliberately accepts false return values,
+// matching the reference constructor; missing/malformed return data reverts.
+use std::abi::sol
+use std::evm::{Address, Call}
+use super::addresses_registry::RegistryMsg
+
+pub msg TokenApprovalMsg {
+    #[selector = sol("approve(address,uint256)")]
+    Approve { spender: Address, amount: u256 } -> bool,
+}
+pub contract GasPool uses (call: mut Call) {
+    init(registry: Address) uses (mut call) {
+        let weth = registry.call(RegistryMsg::GetWETH {})
+        let borrower_operations = registry.static(RegistryMsg::GetborrowerOperations {})
+        let trove_manager = registry.static(RegistryMsg::GettroveManager {})
+        let maximum = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        weth.call(TokenApprovalMsg::Approve { spender: borrower_operations, amount: maximum })
+        weth.call(TokenApprovalMsg::Approve { spender: trove_manager, amount: maximum })
+    }
+}

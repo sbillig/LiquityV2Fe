@@ -1,0 +1,12 @@
+[profile.default]
+src = "tests/support"
+test = "tests"
+out = "tests/out"
+cache_path = "tests/cache"
+libs = []
+solc_version = "0.8.24"
+evm_version = "cancun"
+optimizer = true
+fs_permissions = [{ access = "read", path = "./build" }]
+[profile.default.fuzz]
+runs = 1024
