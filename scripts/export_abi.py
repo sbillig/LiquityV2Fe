@@ -12,8 +12,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan', 'UserProxy', 'UserProxyFactory', 'BribeInitiative', 'CurveV2GaugeRewards', 'UniV4MerklRewards']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter', 'DebtInFrontHelper', 'Constants', 'RedemptionHelper', 'WETHZapper', 'GasCompZapper', 'LeverageWETHZapper', 'LeverageLSTZapper', 'CurveExchange', 'UniV3Exchange', 'UniPriceConverter', 'HybridCurveUniV3Exchange', 'HybridCurveUniV3ExchangeHelpers', 'HybridCurveUniV3ExchangeHelpersV2', 'BalancerFlashLoan', 'UserProxy', 'UserProxyFactory', 'BribeInitiative', 'CurveV2GaugeRewards', 'UniV4MerklRewards', 'Governance']
 DECLARATION_ONLY = {
+    'Governance': {('error', 'AddressInsufficientBalance(address)')},
     # Governance SafeERC20 calls carry zero ETH; this Address error is unreachable.
     'BribeInitiative': {('error', 'AddressInsufficientBalance(address)')},
     'CurveV2GaugeRewards': {('error', 'AddressInsufficientBalance(address)')},
@@ -94,6 +95,23 @@ for contract in CONTRACTS:
     compiled = json.loads(fe_path.read_text())
     reference = json.loads(sol_path.read_text())['abi']
     refinements = []
+    if contract == 'Governance':
+        for companion in ['GovernanceStakingModule', 'GovernanceVotingModule', 'GovernanceActionsModule']:
+            module_abi = json.loads((ROOT / 'build' / (companion + '.abi.json')).read_text())
+            compiled += [e for e in module_abi if e['type'] in ('event', 'error')]
+        for name in ['depositLQTYViaPermit', 'registerInitialInitiatives', 'multiDelegateCall']:
+            entries = [e for e in reference if e.get('name') == name]
+            assert entries and not any(e.get('name') == name for e in compiled)
+            compiled += copy.deepcopy(entries)
+        refinements.append('numeric selectors: permit overloads, initial registration and multicall use custom wire decoders; differential runtime validation is required separately')
+        constructor = next(e for e in compiled if e['type'] == 'constructor')
+        assert len(constructor['inputs']) == 10 and typ(constructor['inputs'][6]) == '(address[])'
+        constructor['inputs'][6] = dict(type='address[]', name='initialInitiatives')
+        reference_constructor = next(e for e in reference if e['type'] == 'constructor')
+        assert len(reference_constructor['inputs']) == 7
+        reference_constructor['inputs'] += [dict(type='address', internalType='address', name=n)
+                                           for n in ['stakingModule', 'votingModule', 'actionsModule']]
+        refinements.append('constructor: original arguments plus three fixed delegate modules; custom InitialAddresses decoder has flat address[] wire format')
     if contract == 'UserProxy':
         compiled.append(copy.deepcopy(next(e for e in reference if e.get('name') == 'stakeViaPermit')))
         refinements.append('stakeViaPermit: numeric selector preserves Solidity lazy calldata validation; wire signature and malformed fields covered by differential tests')
@@ -140,6 +158,15 @@ for contract in CONTRACTS:
         refinements.append('constructor creates a fixed delegate companion with immutable branch configuration; original three constructor arguments and runtime selectors are preserved')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
+        if contract == 'Governance' and entry['type'] == 'function':
+            outputs = entry['outputs']
+            if len(outputs) == 1 and outputs[0]['type'] == 'tuple':
+                # All Governance return tuples are static, including nested state tuples.
+                def static(field):
+                    return all(static(c) for c in field['components']) if field['type'] == 'tuple' else field['type'] in ('uint256', 'uint8', 'address', 'bool')
+                assert static(outputs[0])
+                entry['outputs'] = outputs[0]['components']
+                refinements.append(entry['name'] + ': outer static tuple has identical flat wire encoding')
         if contract == 'UniV4MerklRewards' and entry.get('name') in {'onRegisterInitiative', 'onUnregisterInitiative', 'onAfterAllocateLQTY', 'onClaimForInitiative'}:
             assert entry['stateMutability'] == ('view' if entry['name'] == 'onClaimForInitiative' else 'pure')
             entry['stateMutability'] = 'nonpayable'
@@ -220,7 +247,7 @@ for contract in CONTRACTS:
 # Implementation companions have no direct Solidity protocol ABI counterpart.
 # MetadataGeometry is created by the renderer; TroveManager modules are deployed
 # explicitly and their immutable addresses are supplied to its constructor.
-for contract in ['LeverageWETHZapperLeverage', 'LeverageLSTZapperLeverage', 'MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations', 'BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches']:
+for contract in ['LeverageWETHZapperLeverage', 'LeverageLSTZapperLeverage', 'MetadataGeometry', 'TroveOperations', 'TroveRedemptions', 'TroveLiquidations', 'BorrowerOpening', 'BorrowerAdjustments', 'BorrowerBatches', 'GovernanceStakingModule', 'GovernanceVotingModule', 'GovernanceActionsModule']:
     runtime = ROOT / 'build' / (contract + '.runtime.bin')
     init = ROOT / 'build' / (contract + '.bin')
     runtime_size = len(bytes.fromhex(runtime.read_text().strip().removeprefix('0x')))

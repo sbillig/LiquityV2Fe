@@ -1,0 +1,30 @@
+use std::abi::sol
+use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log, Create}
+use super::governance_actions::{self as action, ActionConfig}
+use super::governance_snapshots::SnapshotConfig
+use super::user_proxy::UserProxy
+use super::user_proxy_factory::derive
+pub msg ActionMsg {
+    #[selector = sol("registerInitiative(address)")]
+    Register { target: Address },
+    #[selector = sol("unregisterInitiative(address)")]
+    Unregister { target: Address },
+    #[selector = sol("claimForInitiative(address)")]
+    Claim { target: Address } -> u256,
+    #[selector = sol("deriveUserProxyAddress(address)")]
+    Derive { user: Address } -> Address,
+}
+pub contract GovernanceActionsHarness {
+    cfg: ActionConfig,
+    init(bold: Address, staking: Address, fee: u256, factor: u256) uses (mut cfg, create: mut Create, storage: mut RawStorage) {
+        let implementation = create.create<UserProxy>(value: 0, args: (Address { inner: 1 }, Address { inner: 2 }, staking))
+        cfg = ActionConfig { snapshots: SnapshotConfig { bold, start: 1000, duration: 100, min_claim: 1000000000000000000, min_accrual: 5000000000000000000, voting_factor: 10000000000000000, unregister_factor: 2000000000000000000, unregister_epochs: 4 }, implementation, staking, fee, factor }
+        storage.sstore(slot: 0, value: 1)
+    }
+    recv ActionMsg {
+        Register { target } uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { action::register(cfg, target) }
+        Unregister { target } uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { action::unregister(cfg.snapshots, target) }
+        Claim { target } -> u256 uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { action::claim(cfg.snapshots, target) }
+        Derive { user } -> Address uses (cfg, ctx: Ctx, mem: mut RawMem) { derive(cfg.implementation, user) }
+    }
+}

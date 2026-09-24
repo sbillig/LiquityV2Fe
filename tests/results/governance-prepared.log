@@ -1,0 +1,51 @@
+Compiling 12 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.14s
+Compiler run successful!
+
+Ran 4 tests for test/GovernanceRewardsLifecycle.t.sol:GovernanceRewardsLifecycleTest
+[PASS] testConnectedCurveClaimsAndNonfatalHookFailure() (gas: 64045560)
+[PASS] testConnectedMerklAccrualAndCampaign() (gas: 28434196)
+[PASS] testFeRewardsWithReferenceGovernance() (gas: 62738048)
+[PASS] testReferenceRewardsLifecycles() (gas: 30017478)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 32.27ms (63.96ms CPU time)
+
+Ran 5 tests for test/GovernanceInitializationParity.t.sol:GovernanceInitializationParityTest
+[PASS] testConfigurationValidationOrder() (gas: 103619548)
+[PASS] testConstructorArrayMemoryBoundaries() (gas: 300148216)
+[PASS] testInitialRegistrationAndRenunciation() (gas: 40132459)
+[PASS] testInitialRegistrationDecoderBeforeOwnerCheck() (gas: 19379339)
+[PASS] testReferenceConstructorAllocationBoundary() (gas: 2972593)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 84.15ms (171.95ms CPU time)
+
+Ran 3 tests for test/GovernanceWholeSnapshotParity.t.sol:GovernanceWholeSnapshotParityTest
+[PASS] testFuzzSnapshotsAndUpdates(uint96,uint96,uint32,uint16) (runs: 1024, μ: 121330, ~: 120906)
+[PASS] testFuzzThresholdOverflow(uint256,uint256) (runs: 1024, μ: 12368, ~: 12689)
+[PASS] testStatusPrecedenceAndZeroVotes() (gas: 574895)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 618.72ms (662.38ms CPU time)
+
+Ran 3 tests for test/GovernanceWholeActionsParity.t.sol:GovernanceWholeActionsParityTest
+[PASS] testFuzzClaimCapAndHookFailure(uint96,bool) (runs: 1024, μ: 20270917, ~: 20294816)
+[PASS] testRegistrationFeeVotingPowerAndHookFailure() (gas: 85745584)
+[PASS] testUnregistrationAssertionsAndHookFailure() (gas: 84749109)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.81s (2.89s CPU time)
+
+Ran 4 tests for test/GovernanceWholeStakingParity.t.sol:GovernanceWholeStakingParityTest
+[PASS] testCallbackReentrancyAndFirstDepositRollback() (gas: 44797383)
+[PASS] testFuzzDepositWithdrawalAndRewards(uint96,uint96,bool) (runs: 1024, μ: 21612071, ~: 21619886)
+[PASS] testGuardsAndLazyPermitValidation() (gas: 21513668)
+[PASS] testNestedStakingMulticallAndRollback() (gas: 43763219)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.92s (2.97s CPU time)
+
+Ran 3 tests for test/GovernanceBribeLifecycle.t.sol:GovernanceBribeLifecycleTest
+[PASS] testFeBribeWithReferenceGovernance() (gas: 17657919)
+[PASS] testFuzzConnectedStakeVoteClaimBribeAndExit(uint64,uint64) (runs: 1024, μ: 27198304, ~: 27198304)
+[PASS] testReferenceLifecycle() (gas: 8643681)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 4.45s (4.46s CPU time)
+
+Ran 3 tests for test/GovernanceWholeVotingParity.t.sol:GovernanceWholeVotingParityTest
+[PASS] testDisabledResetAndFinalStakeCheckRollback() (gas: 21310194)
+[PASS] testFuzzAllocationResetRoundingAndCutoff(uint64,uint64,bool) (runs: 1024, μ: 21495734, ~: 21495754)
+[PASS] testValidationResetRequirementAndLateVoteLimits() (gas: 21486996)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 5.02s (5.02s CPU time)
+
+Ran 7 test suites in 5.02s (15.92s CPU time): 25 tests passed, 0 failed, 0 skipped (25 total tests)

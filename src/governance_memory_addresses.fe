@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: MIT
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
+use std::abi::{Sol, DynArray, DynArrayAccess}
+use std::evm::{Address, revert_error}
+use std::evm::panic::{Panic, PANIC_OUT_OF_MEMORY}
+pub struct RegisterAddresses { pub values: DynArray<Address> }
+impl AbiSize for RegisterAddresses {
+    fn payload_size(self) -> u256 { self.values.payload_size() }
+    const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = true
+}
+impl AbiSpan<Sol> for RegisterAddresses {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 {
+        if pos <= input.len() && input.len() - pos >= 32 {
+            if input.word_at(pos) > 576460752303423482 { revert_error(Panic::from(PANIC_OUT_OF_MEMORY)) }
+        }
+        <DynArray<Address> as AbiSpan<Sol>>::payload_end(input, base: base, pos: pos)
+    }
+}
+impl Decode<Sol> for RegisterAddresses {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let input = d.input()
+        let pos = d.pos()
+        let end = <Self as AbiSpan<Sol>>::payload_end(input, base: 0, pos: pos)
+        let values = <DynArray<Address> as Decode<Sol>>::decode_from(input, pos)
+        let mut i = 0
+        while i < values.len() { let checked = values.get(i)
+            i += 1 }
+        Self { values }
+    }
+}
+pub struct InitialAddresses { pub values: DynArray<Address> }
+impl AbiSize for InitialAddresses {
+    fn payload_size(self) -> u256 { self.values.payload_size() }
+    const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = true
+}
+impl AbiSpan<Sol> for InitialAddresses {
+    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 {
+        if pos <= input.len() && input.len() - pos >= 32 {
+            // Solidity reserves 576 bytes for its immutable constructor fields,
+            // copies all original argument bytes, then allocates the 320-byte
+            // Configuration. Our three additional module addresses add 96
+            // input bytes, which must not change the reference panic boundary.
+            let reference_free = 800 + input.len()
+            let limit = (18446744073709551615 - reference_free - 32) / 32
+            if input.word_at(pos) > limit { revert_error(Panic::from(PANIC_OUT_OF_MEMORY)) }
+        }
+        <DynArray<Address> as AbiSpan<Sol>>::payload_end(input, base: base, pos: pos)
+    }
+}
+impl Decode<Sol> for InitialAddresses {
+    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+        let input = d.input()
+        let pos = d.pos()
+        let end = <Self as AbiSpan<Sol>>::payload_end(input, base: 0, pos: pos)
+        let values = <DynArray<Address> as Decode<Sol>>::decode_from(input, pos)
+        let mut i = 0
+        while i < values.len() { let checked = values.get(i)
+            i += 1 }
+        Self { values }
+    }
+}
+impl Encode<Sol> for RegisterAddresses {
+    fn encode(own self, _ p: *u8) { <DynArray<Address> as Encode<Sol>>::encode(self.values, p) }
+}
+impl Encode<Sol> for InitialAddresses {
+    fn encode(own self, _ p: *u8) { <DynArray<Address> as Encode<Sol>>::encode(self.values, p) }
+}

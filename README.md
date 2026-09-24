@@ -8,7 +8,7 @@ accounting, liquidation and redistribution, redemptions, stability pools,
 collateral branches, authorization, token/NFT behavior, oracle shutdowns, helpers
 and zappers. The source inventory in `port_status.json` deliberately retains
 unimplemented contracts. Passing foundation tests does not establish protocol
-completion. Governance integration must also be covered before completion.
+completion. Governance and its connected initiative lifecycles are included in the current checkpoint.
 
 `reference_manifest.json` pins the Solidity reference and the Fe upstream/master
 revision used for the local compiler build. Compiler work is isolated in
@@ -52,7 +52,7 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
 EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations the WETH/rETH/wstETH price feeds, HintHelpers, MultiTroveGetter, DebtInFrontHelper and the legacy Constants query contract. The current suite
-passes 291 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+passes 331 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
@@ -141,5 +141,8 @@ see [ZAPPERS_DEPLOYMENT.md](ZAPPERS_DEPLOYMENT.md). CurveExchange, UniV3Exchange
 tests, and actual Curve/UniV3 leverage lifecycles are tested on both collateral
 branches. UniPriceConverter preserves reference rounding, integer widths and
 overflow behavior. Quote helpers and the Balancer flash-loan provider now pass differential tests
-and connected leverage lifecycles. Governance and complete multi-branch
-workflows remain in progress.
+and connected leverage lifecycles. Governance is now integrated with three fixed delegate modules; its isolated
+25-test connected validation and ABI/size audit passed. Root validation is
+pending. See [GOVERNANCE_DEPLOYMENT.md](GOVERNANCE_DEPLOYMENT.md) for the extended
+constructor. Complete multi-branch workflows and remaining utility/interface
+coverage are still in progress.

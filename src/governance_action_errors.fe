@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+use std::abi::DynString
+use std::evm::RawMem
+pub fn early() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20726567697374726174696f6e2d6e6f742d796574)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x2d656e61626c6564000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 40))
+}
+pub fn zero() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a207a65726f2d616464726573730000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 24))
+}
+pub fn registered() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20696e69746961746976652d616c72656164792d72)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6567697374657265640000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 41))
+}
+pub fn insufficient() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20696e73756666696369656e742d6c717479000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 29))
+}
+pub fn cannot_unregister() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a2063616e6e6f742d756e72656769737465722d696e)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6974696174697665000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 40))
+}

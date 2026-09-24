@@ -1,0 +1,194 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, Create, RawMem, RawStorage, Log, RawOps}
+use super::user_proxy::UserProxy
+use super::user_proxy_factory as factory
+use super::governance_staking as staking
+use super::governance_staking_harness::StakingMsg
+use super::governance_snapshot_harness::SnapshotMsg
+use super::governance_snapshots::{self as snap, SnapshotConfig, map}
+use super::governance_actions::{self as action, ActionConfig}
+use super::governance_voting as voting
+use super::governance_owner as ownership
+use super::governance_memory_addresses::{InitialAddresses, RegisterAddresses}
+use super::governance_init_errors as error
+use super::governance_guard as guard
+use super::governance_math::lqty_to_votes
+use super::revert_texts::require
+pub msg GovernanceActionsMsg {
+    #[selector = 0x415c2d96]
+    Multi,
+    #[selector = sol("registerInitiative(address)")]
+    Register { target: Address },
+    #[selector = sol("unregisterInitiative(address)")]
+    Unregister { target: Address },
+    #[selector = sol("claimForInitiative(address)")]
+    Claim { target: Address } -> u256,
+    #[selector = sol("allocateLQTY(address[],address[],int256[],int256[])")]
+    Allocate { reset: DynArray<Address>, targets: DynArray<Address>, votes: DynArray<i256>, vetos: DynArray<i256> },
+    #[selector = sol("resetAllocations(address[],bool)")]
+    Reset { targets: DynArray<Address>, check_all: bool },
+    #[selector = 0x8113630d]
+    Initial { targets: RegisterAddresses },
+    #[selector = sol("snapshotVotesForInitiative(address)")]
+    Snapshot { target: Address } -> ((u256, u256), (u256, u256, u256, u256)),
+}
+pub msg GovernanceGetters {
+    #[selector = sol("stakingV1()")]
+    Staking -> Address,
+    #[selector = sol("lqty()")]
+    Lqty -> Address,
+    #[selector = sol("bold()")]
+    Bold -> Address,
+    #[selector = sol("EPOCH_START()")]
+    EpochStart -> u256,
+    #[selector = sol("EPOCH_DURATION()")]
+    EpochDuration -> u256,
+    #[selector = sol("EPOCH_VOTING_CUTOFF()")]
+    Cutoff -> u256,
+    #[selector = sol("MIN_CLAIM()")]
+    MinClaim -> u256,
+    #[selector = sol("MIN_ACCRUAL()")]
+    MinAccrual -> u256,
+    #[selector = sol("REGISTRATION_FEE()")]
+    Fee -> u256,
+    #[selector = sol("REGISTRATION_THRESHOLD_FACTOR()")]
+    RegistrationFactor -> u256,
+    #[selector = sol("UNREGISTRATION_THRESHOLD_FACTOR()")]
+    UnregistrationFactor -> u256,
+    #[selector = sol("UNREGISTRATION_AFTER_EPOCHS()")]
+    UnregistrationEpochs -> u256,
+    #[selector = sol("VOTING_THRESHOLD_FACTOR()")]
+    VotingFactor -> u256,
+    #[selector = sol("owner()")]
+    Owner -> Address,
+    #[selector = sol("isOwner()")]
+    IsOwner -> bool,
+    #[selector = sol("boldAccrued()")]
+    Accrued -> u256,
+    #[selector = sol("votesSnapshot()")]
+    Votes -> (u256, u256),
+    #[selector = sol("votesForInitiativeSnapshot(address)")]
+    InitiativeVotes { target: Address } -> (u256, u256, u256, u256),
+    #[selector = sol("globalState()")]
+    Global -> (u256, u256),
+    #[selector = sol("initiativeStates(address)")]
+    InitiativeState { target: Address } -> (u256, u256, u256, u256, u256),
+    #[selector = sol("lqtyAllocatedByUserToInitiative(address,address)")]
+    Allocation { user: Address, target: Address } -> (u256, u256, u256, u256, u256),
+    #[selector = sol("registeredInitiatives(address)")]
+    Registered { target: Address } -> u256,
+    #[selector = sol("lqtyToVotes(uint256,uint256,uint256)")]
+    VotingPower { amount: u256, timestamp: u256, offset: u256 } -> u256,
+}
+pub contract Governance {
+    staking_module: Address,
+    voting_module: Address,
+    actions_module: Address,
+    cfg: ActionConfig,
+    implementation: Address,
+    lqty: Address,
+    cutoff: u256,
+    init(lqty_address: Address, lusd: Address, v1: Address, bold: Address, config: (u256, u256, u256, u256, u256, u256, u256, u256, u256, u256), initial_owner: Address, initial: InitialAddresses, staking_module_address: Address, voting_module_address: Address, actions_module_address: Address)
+    uses (mut cfg, mut implementation, mut lqty, mut cutoff, mut staking_module, mut voting_module, mut actions_module, create: mut Create, ctx: Ctx, storage: mut RawStorage, call: mut Call, mem: mut RawMem, log: mut Log) {
+        implementation = create.create<UserProxy>(value: 0, args: (lqty_address, lusd, v1))
+        storage.sstore(slot: 0, value: 1)
+        ownership::initialize(initial_owner)
+        require(config.5 <= config.6, error::min_claim())
+        require(config.1 < 1000000000000000000, error::registration())
+        require(config.2 > 1000000000000000000, error::unregistration())
+        require(config.4 < 1000000000000000000, error::voting())
+        require(config.7 <= ctx.timestamp(), error::future())
+        require(config.8 > 0, error::duration())
+        require(config.9 < config.8, error::cutoff())
+        staking_module = staking_module_address
+        voting_module = voting_module_address
+        actions_module = actions_module_address
+        lqty = lqty_address
+        cutoff = config.9
+        cfg = ActionConfig { snapshots: SnapshotConfig { bold, start: config.7, duration: config.8, min_claim: config.5, min_accrual: config.6, voting_factor: config.4, unregister_factor: config.2, unregister_epochs: config.3 }, implementation, staking: v1, fee: config.0, factor: config.1 }
+        if initial.values.len() > 0 { ownership::register_initial(initial.values) }
+    }
+    recv StakingMsg {
+        Implementation -> Address uses (implementation) { implementation }
+        Derive { user } -> Address uses (implementation, ctx: Ctx, mem: mut RawMem) { factory::derive(implementation, user) }
+        Deploy -> Address uses (implementation, ctx: Ctx, mem: mut RawMem, create: mut Create, log: mut Log) { factory::deploy(implementation) }
+        User { user } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let s = map(user, 8)
+            (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+        }
+        Deposit { amount } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        DepositTo { amount, send, recipient } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        DepositPermit { amount, p } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        DepositPermitTo { amount, p, send, recipient } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        Withdraw { amount } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        WithdrawTo { amount, send, recipient } uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+        Rewards { recipient } -> (u256, u256) uses (staking_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(staking_module) }
+    }
+    recv SnapshotMsg {
+        Epoch -> u256 uses (cfg, ctx: Ctx) { snap::epoch(cfg.snapshots) }
+        Start -> u256 uses (cfg, ctx: Ctx) { snap::epoch_start(cfg.snapshots) }
+        Seconds -> u256 uses (cfg, ctx: Ctx) { (ctx.timestamp() - cfg.snapshots.start) % cfg.snapshots.duration }
+        Threshold { votes } -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg.snapshots, votes) }
+        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg.snapshots, storage.sload(3)) }
+        Total -> ((u256, u256), (u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::total(cfg.snapshots) }
+        Initiative { target } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::initiative(cfg.snapshots, target) }
+        Status { target, votes, ivotes, state } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::status(cfg.snapshots, target, votes, ivotes, state) }
+        UpdateThreshold -> u256 uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
+            let (votes, state) = snap::snapshot_total(cfg.snapshots)
+            snap::threshold(cfg.snapshots, votes.0)
+        }
+        UpdateStatus { target } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log, mem: mut RawMem) {
+            let (votes, unused) = snap::snapshot_total(cfg.snapshots)
+            let (ivotes, state) = snap::snapshot_initiative(cfg.snapshots, target)
+            snap::status(cfg.snapshots, target, votes, ivotes, state)
+        }
+    }
+    recv GovernanceActionsMsg {
+        Multi uses (ctx: Ctx, call: mut Call, ops: mut RawOps, mem: mut RawMem) { super::governance_multicall::multi() }
+        Register { target } uses (actions_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(actions_module) }
+        Unregister { target } uses (actions_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(actions_module) }
+        Claim { target } -> u256 uses (actions_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(actions_module) }
+        Allocate { reset, targets, votes, vetos } uses (voting_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(voting_module) }
+        Reset { targets, check_all } uses (voting_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_forward::forward(voting_module) }
+        Initial { targets } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { ownership::register_initial(targets.values) }
+        Snapshot { target } -> ((u256, u256), (u256, u256, u256, u256)) uses (cfg, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+            guard::enter()
+            let (votes, unused) = snap::snapshot_total(cfg.snapshots)
+            let (ivotes, ignored) = snap::snapshot_initiative(cfg.snapshots, target)
+            guard::exit()
+            (votes, ivotes)
+        }
+    }
+    recv GovernanceGetters {
+        Staking -> Address uses (cfg) { cfg.staking }
+        Lqty -> Address uses (lqty) { lqty }
+        Bold -> Address uses (cfg) { cfg.snapshots.bold }
+        EpochStart -> u256 uses (cfg) { cfg.snapshots.start }
+        EpochDuration -> u256 uses (cfg) { cfg.snapshots.duration }
+        Cutoff -> u256 uses (cutoff) { cutoff }
+        MinClaim -> u256 uses (cfg) { cfg.snapshots.min_claim }
+        MinAccrual -> u256 uses (cfg) { cfg.snapshots.min_accrual }
+        Fee -> u256 uses (cfg) { cfg.fee }
+        RegistrationFactor -> u256 uses (cfg) { cfg.factor }
+        UnregistrationFactor -> u256 uses (cfg) { cfg.snapshots.unregister_factor }
+        UnregistrationEpochs -> u256 uses (cfg) { cfg.snapshots.unregister_epochs }
+        VotingFactor -> u256 uses (cfg) { cfg.snapshots.voting_factor }
+        Owner -> Address uses (storage: RawStorage) { ownership::owner() }
+        IsOwner -> bool uses (storage: RawStorage, ctx: Ctx) { ctx.caller() == ownership::owner() }
+        Accrued -> u256 uses (storage: RawStorage) { storage.sload(2) }
+        Votes -> (u256, u256) uses (storage: RawStorage) { (storage.sload(3), storage.sload(4)) }
+        Global -> (u256, u256) uses (storage: RawStorage) { (storage.sload(6), storage.sload(7)) }
+        InitiativeVotes { target } -> (u256, u256, u256, u256) uses (storage: RawStorage, mem: mut RawMem) {
+            let s = map(target, 5)
+            (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+        }
+        InitiativeState { target } -> (u256, u256, u256, u256, u256) uses (storage: RawStorage, mem: mut RawMem) {
+            let s = map(target, 9)
+            (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3), storage.sload(s + 4))
+        }
+        Allocation { user, target } -> (u256, u256, u256, u256, u256) uses (storage: RawStorage, mem: mut RawMem) { super::governance_allocation::read_allocation(user, target) }
+        Registered { target } -> u256 uses (storage: RawStorage, mem: mut RawMem) { storage.sload(map(target, 11)) }
+        VotingPower { amount, timestamp, offset } -> u256 { lqty_to_votes(amount, timestamp, offset) }
+    }
+}

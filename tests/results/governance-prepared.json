@@ -1,0 +1,303 @@
+{
+  "captured_at": "2026-09-24T20:38:56.803258+00:00",
+  "state": "25 connected integration tests passed; isolated ABI and deployment size audits passed",
+  "compiler_commit": "27976c7df7d0fca487f2c80f26241c9021dfa04c",
+  "compiler_sha256": "7284375d585c279a06b161e2ae2032786f3281e01b6309c91b0587be691e8bcf",
+  "input_sha256": {
+    "fe/fe.toml": "c8b34e843b8c7473eb1672a1203cea518bcbeff88405df8f59b9e9980ebe24cb",
+    "fe/src/bribe_errors.fe": "0d24910f626dc74bb6762a5058807b8020854aa3ee0f01e3004f55cd9b6c07ce",
+    "fe/src/bribe_initiative.fe": "656e06dc993009a49972990d74c9569a02464a8f31aaaf35c3b86197e4a89e43",
+    "fe/src/bribe_state.fe": "d7eed66b13798aba0d935dcd75479bf15ac193fd8ee5c63dce29c1ae1b8451a8",
+    "fe/src/curve_gauge_rewards.fe": "acfb51ab81c115485ca680f7b2556aaa1799cda08af15bb54dcc81856a37eda6",
+    "fe/src/governance.fe": "f909df56eda5195bfad210335b444e93dd9942902f68c33ad24804b0f6f5ce0b",
+    "fe/src/governance_action_errors.fe": "4426355006ab16444c3f9397977b82f64dc0b7ea2941272a8c4d5eeed7ecff4d",
+    "fe/src/governance_actions.fe": "96557e8e378d7409c3586b93975a7431fff1231add7a0406327cc26cd4f4a637",
+    "fe/src/governance_actions_harness.fe": "b3459af3dfb5dbd3064127b2b47e595dde5f3f7c43359f60dc43d49c1863149a",
+    "fe/src/governance_actions_module.fe": "956a1910329470834b017c3a8a141b71b4a2eaff31add61f91767b666ff92696",
+    "fe/src/governance_allocation.fe": "ed97c721201a1a0086cd6fbdf490bad7a10d43496b79ea08b7208b49d4419030",
+    "fe/src/governance_allocation_errors.fe": "27cdf78629206cd3b16abac315f7d147a8d9cf554f21e0ae49c1a14c83477157",
+    "fe/src/governance_errors.fe": "13abb5bf42df6c9aa7284ec3879eb145483b12580e13d7629f5a76cf110db663",
+    "fe/src/governance_forward.fe": "fe66abf0e18eaf30c9be8ef59e69724b4b0149e5a34edd5eed165b938335671e",
+    "fe/src/governance_guard.fe": "1b18762575ab792c7c6979b2a4bd3acf7df03086910e3c3d8e4c366e7379f16f",
+    "fe/src/governance_hooks.fe": "eca6305cb56b8776cbf0fb180854536575c449c7d4d9cfbb62e314d8678edb22",
+    "fe/src/governance_hooks_harness.fe": "1a63686c2c4c623d5972d2f1e16132388c4fe0f5fe773fffbbc17cc620bd80b7",
+    "fe/src/governance_init_errors.fe": "91de064c29b6d6db9bf1b3794b2ab2c81c97c9401d2759b2885b7e8d5eca2c1e",
+    "fe/src/governance_list.fe": "17d896bd2c09b71aaab5a9145cd3026ea7d2dede7c99af5570614852a57afdd8",
+    "fe/src/governance_list_harness.fe": "f1cafa88f01454902d5f0a59c909514ed56ace442c7118a4ae4bc2acd7b1a633",
+    "fe/src/governance_math.fe": "377e242445c7eb9f544cf777783b8096836b04e0ce4e694dff526380d6286a79",
+    "fe/src/governance_math_harness.fe": "dcf160cf5951fc4838dfe948d9a8f3b2ebb25c7e3871148fc6797a3e99d292ca",
+    "fe/src/governance_memory_addresses.fe": "40b37a4453e219e39b3a716c236523732386639d94878b756bf0cd791a5bb906",
+    "fe/src/governance_module_config.fe": "77a786bef815c5427a66536029a2f9523cb7b553a8490c411fe7cb67936fc77b",
+    "fe/src/governance_multicall.fe": "696f475599a6ac8c756b690062a75e1e2bf1aa663c287a51d112e89c0fff0e29",
+    "fe/src/governance_owner.fe": "dbc1ab4fa3aec5e78b7268a60315fe07ad7a6f82b475c0f9e245868222c2872a",
+    "fe/src/governance_snapshot_harness.fe": "ae4e2d12a49d0d71299c013938f4705839f22b7f4a6898b853ca78aab8192184",
+    "fe/src/governance_snapshots.fe": "f0253b86d55ccfc5b7665f19dde0dba115eca0045ef8cf6c000115f15abe0eb2",
+    "fe/src/governance_staking.fe": "9100e5e5280f0a6d4f21f98c1af33785da29ac4f9d5dcb2d8a276ef2dc9dbaed",
+    "fe/src/governance_staking_harness.fe": "83e5f458184bdfc18fdda0164d4a1926b6baa6f5e97d1e68ecba7a6b5a887fbd",
+    "fe/src/governance_staking_module.fe": "2ea59ca5425e3ad5e3b86070d7479c7e90ea74560c972d08505447919c314ffb",
+    "fe/src/governance_token.fe": "5e94b65f6ccdd33822b9d5f1c2dc06b75e0771d940cb5e89e7c28403f074a33c",
+    "fe/src/governance_token_harness.fe": "c2667537c84de8155b62df3a8b5a3df5de182fee0d60bed0cfce8ec437c8aeb6",
+    "fe/src/governance_voting.fe": "04b4b933828084561c9fd86a143f008543f6ba533c9a767683fdf810edc53b30",
+    "fe/src/governance_voting_harness.fe": "1732aeefd0b1dd03f5a899207d9bdff1587f28b1e5f2b6106c3f0fdb0898f321",
+    "fe/src/governance_voting_module.fe": "54d3e42e30a54effe16dc2927805cef6f093df12fe9ab51de742bebb9580fd96",
+    "fe/src/leftovers_sweep.fe": "156e46e412ce622290ad4cffec5db7f58fde09dcbcd55b73ab89aa83c6da19f5",
+    "fe/src/lib.fe": "41e05d17798a5a947f4d49972f89571b5fd7f19c1419b583bfbf4133e8da66f6",
+    "fe/src/merkl_errors.fe": "f9fed8887eb2a6998c2fad3dac1b7dc4e0b30d52c7c647ee3381d559f8bc4fcc",
+    "fe/src/merkl_rewards.fe": "0b283658d7fd865c8df6df0368c3853ff36c8025a5ad12f7c9e5ef5b8629c6cb",
+    "fe/src/revert_texts.fe": "a0a410e2b8803e54310749bc915a06687155d2b371cb122e48c99ad6de80127a",
+    "fe/src/token_calls.fe": "93edb1222e3e6fb8b21c0f4fe2117629302a01603dca0dc226ef486578bfc3ba",
+    "fe/src/user_proxy.fe": "62dfd79dec054db4b80770dea72bd7af3d2ea75aff9f700d844ae731c9b932a3",
+    "fe/src/user_proxy_errors.fe": "a968159f663447e0f7f2f4ee4d853519ddb03574384ea9575ac9d8e3934015b6",
+    "fe/src/user_proxy_factory.fe": "80dd5f8ed33539cc2b84d8e0655f06f25a7bc2e5a49525a505618dcbb599b5b6",
+    "tests/BribeInitiativeParity.t.sol": "cecfeab7013013971d9fc3888db06daa3e61f406142cd670a081fa54b48c6c1e",
+    "tests/CurveGaugeRewardsParity.t.sol": "855ba681b6dc343aac34ebdfd344f58505972a65319a9add9de1167491f28c48",
+    "tests/GovernanceActionsParity.t.sol": "0557e70d9cbc388d2aca20cb56755c5b573fb177067f6c6d8b02291193c2fb16",
+    "tests/GovernanceBribeLifecycle.t.sol": "5a8494705a0b5ae11874fee0faa44cf095a6aa75cec53d3ad739dd185e28276a",
+    "tests/GovernanceDeployment.sol": "21af4ba457b7ab7df3ef2aa10f5e840a69c88fdd71541732ffba06bef0b2b67c",
+    "tests/GovernanceHooksParity.t.sol": "72653fc0b68ae499ce928e9d6c43debd0c8ae1a2063f56f57b128d8f9ece8ada",
+    "tests/GovernanceInitializationParity.t.sol": "2f88a0aea5696cb2f25b2abb8a91548a07d9ee41915fd162e07d919cf59517cf",
+    "tests/GovernanceListParity.t.sol": "e5fe976decbf59be18a6553557e94851ff8e8a404938e060a36f83260cf2f78f",
+    "tests/GovernanceMathParity.t.sol": "12a215380ab9982e1771260c81902c1e6641382e78a0e67cda9dfc8bb2901846",
+    "tests/GovernanceMulticallParity.t.sol": "ca67c558e9436afa436d95c1354ad617b538c75b0ceecb96d8a6b38c4c7426f8",
+    "tests/GovernanceReference.sol": "1e3839d04147aa6b479c0e23043be6dc7628d5f71afe9942d63c1d84c1be1200",
+    "tests/GovernanceRewardsLifecycle.t.sol": "9b097f0bd232ad8a4d4dd8cea8a33e47dc247b7def23661e12b9c48dd325ddea",
+    "tests/GovernanceSnapshotParity.t.sol": "ac4c9c81a35d0facbbb7cfd0e842633278ebcb9a72a41a368e6fad6424dac3e4",
+    "tests/GovernanceStakingParity.t.sol": "20fe652de02845c337ffe77f62f592a81f995bc46531297a66c116085bb8fd81",
+    "tests/GovernanceTokenParity.t.sol": "976567afa926861ade9f54c9d1e72f0de00b673406e8b9f8c8bca9e3ae4b309e",
+    "tests/GovernanceVotingParity.t.sol": "ce8184603d6e205786e082e38ec5dc37697f6dcf8ead69d5b0d9e142c2576e82",
+    "tests/GovernanceWholeActionsParity.t.sol": "35f1cda80dde178b8403b35d7daf4b5751f879903c2a7d6033dc704c1c89535b",
+    "tests/GovernanceWholeSnapshotParity.t.sol": "5a7a48350ad115be0d95ae29821bd7d9486ab7a9e14c9d0a8615c08c6475af26",
+    "tests/GovernanceWholeStakingParity.t.sol": "86376faccd19abaf55874252f11b591af63c74b5e6b0110b2503c973ed130944",
+    "tests/GovernanceWholeVotingParity.t.sol": "86d39ca18d6dcc389d4cbcebf8688b3201359a612ef5ff2d54c78fb999b195b1",
+    "tests/MerklRewardsParity.t.sol": "60fda7ca6597441d60de2c3636a3d4df0c07f0ba1db8130592a3d1eacf991dab",
+    "tests/UserProxyParity.t.sol": "b04013edd22b4a7e4a08e1e5efe0a32ba42073ee611347a4be8c2a90ad7eb7b4"
+  },
+  "validation_configuration_sha256": {
+    "foundry": "3cdd3d05f8ed10c702d0a1927675fdfa5380f69149f61bac7558f10860af3ca7",
+    "runner": "b670633a6898c06ca609b6001efbf53e4ce500b145c6ab90b3ee3b9223185e16",
+    "abi_audit": "8940080c6205226bc2f476a276f5c8c356f79b9ca7a805a1c1de879a381778be"
+  },
+  "completed_at": "2026-09-24T20:43:40.260705+00:00",
+  "reference_governance_commit": "b880481d701d2b07236f2e04842c79b4fe77e5fd",
+  "artifacts": {
+    "GovernanceListHarness.abi.json": "e5dfe880835e9f5e248ab241fdb2ecd4b7e64d3dc2a29563ed66c0cb6ae98fd1",
+    "GovernanceMathHarness.runtime.bin": "fc9e1d4e444f6158af44429427dab80c8ecd0894c33e01422c80b0539e14c016",
+    "GovernanceMulticallHarness.bin": "6d1835630f306b7aa9acaf1be6bf0e4215ebf9b3e801edee7fd500dab9b42c55",
+    "GovernanceStakingModule.bin": "88ebc87eb15778e6caddefdaf88a9008cc90bfb1e2ac034964a10682f76f5b78",
+    "Governance.abi.json": "d69d7c83e421194bc7e86c0560d147ca988b8b6aa63a99d3f1890a71758698bb",
+    "GovernanceMathHarness.abi.json": "e4a007d2a360dcfd6e58fd03c247d00a986e79b55b6b168cea2102db28eede4f",
+    "GovernanceStakingModule.runtime.bin": "c2bde8f328a20c0d5f9a083f476b2586cbee135836212e4e0b4228c7f73a9b00",
+    "GovernanceVotingHarness.runtime.bin": "70c6e35b9e47bf74d251c329562f9bd5268d72258a04b80997283c21b294a5db",
+    "GovernanceActionsModule.abi.json": "0256886572928b390325f56c867916431705c866eaf86b596e8740fe266fb1a5",
+    "Governance.bin": "3f5e3249ae597b086732efb83a89b741215f3b9cfad7c7599036153798c26046",
+    "GovernanceStakingHarness.abi.json": "e498cbcadd7ab07dbe16754b8582828df937ab4829464846ea801a46c9dd8638",
+    "GovernanceSnapshotHarness.runtime.bin": "a7833f03cc56f0a0df4080d072d06ac19658841fa39709a870aa10a2ddaf49a7",
+    "GovernanceVotingModule.abi.json": "f6fa574f86cb1da3be029a52d982e29471534dd339c684b45c980f1aed88d503",
+    "GovernanceListHarness.bin": "cb2bd75d1b7dcaa69ae6084925b8ef56e68842cbbb46ce94b2c9918d5fe6b91b",
+    "GovernanceListHarness.runtime.bin": "db224dfc004dc1ec85799f59ef7f08f82a0f44a5b55e61021cb58a9e6bb9b8cc",
+    "GovernanceActionsModule.runtime.bin": "2714d828f01ed274fcd10f06927714ee6e992e714388da118fcf07bf92f469ec",
+    "GovernanceVotingHarness.bin": "30a6793742d715e37e36d3b8b82017b982f717b0760810e26e6f8bdc3ebc79ae",
+    "GovernanceVotingModule.runtime.bin": "6bddc4fc9e3b8de77d13965fa09a274d08053ab44ef2c8a707f2daf46fd02aaa",
+    "GovernanceActionsHarness.runtime.bin": "f3f520d2c4495022699b23040d6020f12df09d3862abf2e1802b9bb42b65c04a",
+    "GovernanceStakingHarness.bin": "f38d52ba2cc85f38aea421ecdb98970e53fa2eb26d5c9c21360e9eafaf1f2c2e",
+    "GovernanceSnapshotHarness.abi.json": "27f3ffd65aa07c0b8d28e4ff6a414b10bf7ff6abd1e23eb5736a537009a7cd48",
+    "GovernanceHooksHarness.abi.json": "7cbb1ea8adb472a8dbf10c4b0155a16334721bc7ccefbdde997eb97a2d12bccb",
+    "GovernanceActionsModule.bin": "4c29a6b7e6cddcee9ed61519e06eb2170a5bb05611ea02ca6c69fece191dc73a",
+    "GovernanceTokenHarness.abi.json": "953bd046513335096af4efcbea47974384a2511254e41ffe8df740cf0ad69dc4",
+    "GovernanceActionsHarness.bin": "c92aaae65c22b57066334deee36625be1d1bb2c806c028d0b3107a7c71337595",
+    "GovernanceMulticallHarness.runtime.bin": "459c1ad9dd4e3d91c56559a878b2a327e9360fb4a7a3b5bcd70bef8f0d506096",
+    "GovernanceSnapshotHarness.bin": "aeebb52005ad0959a69aafb63bdd60f5665940f94b4f438e2fbbc6a417bcc4d2",
+    "GovernanceMulticallHarness.abi.json": "6ee10b49f2142e67125c795ec90208d6b34171751c21639d0e1cd4e9a2c126b3",
+    "GovernanceMathHarness.bin": "b8dc3795c540aa14ca0bbf0c280344eae6a7d0da4e0bdb508a693a674bf46feb",
+    "GovernanceActionsHarness.abi.json": "30eefbc9b14c8c23bb815c90db2355e9d211f0c5526ad216368786a1b4603d76",
+    "Governance.runtime.bin": "40edbc78a4c446391c68636382b68251ef0b3a21cec2843628a9420ea30618b6",
+    "GovernanceStakingHarness.runtime.bin": "fe9450381f03df518bbd5dc8bfb007bbfa46d171286210e6596650cb81afa807",
+    "GovernanceHooksHarness.runtime.bin": "acfb62d79f6a7f32474b23b71657f09dc5013543d152c7c7efc4233baddb4302",
+    "GovernanceTokenHarness.runtime.bin": "313791ccbf53b9bed9fc0bbb1cf8526c4858a0c881d38830717b7c061f98b075",
+    "GovernanceStakingModule.abi.json": "e63d063ec2adb474246484ae91205d751b90f4faa15fe2ea378d152f8675d46f",
+    "GovernanceHooksHarness.bin": "93a97643509811d52741e01d1aa12aec5500e99bf44ba6819023611ff8a9c6ab",
+    "GovernanceTokenHarness.bin": "fe15f710d6a5b089b7a5c85b7807f9190b03b38fd74370e4170f58c96cd9fe19",
+    "GovernanceVotingHarness.abi.json": "205c7efc953f6a71f9777b930c33326d1fdc5c499c4786f342c894955c344bbf",
+    "GovernanceVotingModule.bin": "07ea20dde26aa0dd99ba5e0f39692bd2221ddfc89c9842464a02c8bcd10a247f"
+  },
+  "isolated_abi_report": {
+    "UserProxy": {
+      "runtime_bytes": 4923,
+      "initcode_bytes_before_arguments": 5256,
+      "compiler_abi_sha256": "de1a5566a2b174ce338307ac9ced92e8d5dda9f32fcc0b83fb7a4e08438edb76",
+      "reference_artifact_sha256": "21626a9c65d92bd6d5fb4d7549b92c6e5778ba58fe72d93dcb7fae2fcd92b3a2",
+      "protocol_abi_sha256": "1719ebc37fc0904adc12a80b5b2b7f3f2fefaeae72a8dfab330d1abcbd48559b",
+      "metadata_refinements": [
+        "stakeViaPermit: numeric selector preserves Solidity lazy calldata validation; wire signature and malformed fields covered by differential tests",
+        "staked: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+        "stake: static tuple has identical flat runtime encoding",
+        "unstake: static tuple has identical flat runtime encoding",
+        "receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior"
+      ],
+      "declaration_only": [],
+      "compiler_standard_errors": [
+        [
+          "error",
+          "Error(string)"
+        ]
+      ],
+      "function_count": 8
+    },
+    "UserProxyFactory": {
+      "runtime_bytes": 1189,
+      "initcode_bytes_before_arguments": 6902,
+      "compiler_abi_sha256": "8e4e4ed71237f3b07d0f73f0065ee958143a6b28eb1f1aaaa567b88cd66d71e5",
+      "reference_artifact_sha256": "153b5b217c3ae9687b0ab8009425e9620ceb4efe3b287dc137de66f04c90d3c2",
+      "protocol_abi_sha256": "267b2665363225959e7ed45c61147333e7f15dd6b17c0cf1da57737f37bdbdb6",
+      "metadata_refinements": [],
+      "declaration_only": [],
+      "compiler_standard_errors": [],
+      "function_count": 3
+    },
+    "BribeInitiative": {
+      "runtime_bytes": 6718,
+      "initcode_bytes_before_arguments": 7785,
+      "compiler_abi_sha256": "4a39363f39fdd8a4713e8c0e081d151aea9028c2abcdfc2fd890f9a805ed1410",
+      "reference_artifact_sha256": "8f9b2757979c8468c28310959820daea53dc2220679225bb69ebbec4280fe6c4",
+      "protocol_abi_sha256": "9de461eaf45ec306d59827107280a5c80ab785f124bde5eb0262aa364722b40a",
+      "metadata_refinements": [
+        "bribeByEpoch: static tuple has identical flat runtime encoding",
+        "totalLQTYAllocatedByEpoch: static tuple has identical flat runtime encoding",
+        "lqtyAllocatedByUserAtEpoch: static tuple has identical flat runtime encoding",
+        "onRegisterInitiative: authorization-only callback preserves nonpayable guard",
+        "onUnregisterInitiative: authorization-only callback preserves nonpayable guard",
+        "onClaimForInitiative: authorization-only callback preserves nonpayable guard",
+        "claimBribes: static tuple has identical flat runtime encoding"
+      ],
+      "declaration_only": [
+        [
+          "error",
+          "AddressInsufficientBalance(address)"
+        ]
+      ],
+      "compiler_standard_errors": [
+        [
+          "error",
+          "Error(string)"
+        ]
+      ],
+      "function_count": 15
+    },
+    "CurveV2GaugeRewards": {
+      "runtime_bytes": 8439,
+      "initcode_bytes_before_arguments": 9628,
+      "compiler_abi_sha256": "1bd779ad5c52363334839d19beaff50a0eeb9540fc4a69888f5b423e78cbdbe2",
+      "reference_artifact_sha256": "7cf19124a6c43d7ed033d08bb2fe67e48613d9eacec85989379b5ae4ed2509a0",
+      "protocol_abi_sha256": "0214e620a97ee68ea0da64102eebdf223809a4ed46087e24c0ad6cb8d9c31d81",
+      "metadata_refinements": [
+        "bribeByEpoch: static tuple has identical flat runtime encoding",
+        "totalLQTYAllocatedByEpoch: static tuple has identical flat runtime encoding",
+        "lqtyAllocatedByUserAtEpoch: static tuple has identical flat runtime encoding",
+        "onRegisterInitiative: authorization-only callback preserves nonpayable guard",
+        "onUnregisterInitiative: authorization-only callback preserves nonpayable guard",
+        "claimBribes: static tuple has identical flat runtime encoding"
+      ],
+      "declaration_only": [
+        [
+          "error",
+          "AddressInsufficientBalance(address)"
+        ]
+      ],
+      "compiler_standard_errors": [
+        [
+          "error",
+          "Error(string)"
+        ]
+      ],
+      "function_count": 18
+    },
+    "UniV4MerklRewards": {
+      "runtime_bytes": 3534,
+      "initcode_bytes_before_arguments": 5535,
+      "compiler_abi_sha256": "6bc9d07ef739c228f6079ad44627d635ec1f546fc48e6fbffa387e2106417a69",
+      "reference_artifact_sha256": "5a62a78161aa7010d788145483929816501d0f2765bf8d9c8b461fae2290f88e",
+      "protocol_abi_sha256": "d4eaf5ffc7ba3141413ded3fd9077208a7582fc794967c00ab75555ff39e24f7",
+      "metadata_refinements": [
+        "onRegisterInitiative: no-op or authorization-only callback preserves nonpayable guard",
+        "onUnregisterInitiative: no-op or authorization-only callback preserves nonpayable guard",
+        "onAfterAllocateLQTY: no-op or authorization-only callback preserves nonpayable guard",
+        "onClaimForInitiative: no-op or authorization-only callback preserves nonpayable guard",
+        "CAMPAIGN_TYPE(): pure implementation of view function",
+        "LIQUITY_FUNDS_SAFE(): pure implementation of view function"
+      ],
+      "declaration_only": [],
+      "compiler_standard_errors": [
+        [
+          "error",
+          "Error(string)"
+        ],
+        [
+          "error",
+          "Panic(uint256)"
+        ]
+      ],
+      "function_count": 15
+    },
+    "Governance": {
+      "runtime_bytes": 15847,
+      "initcode_bytes_before_arguments": 26432,
+      "compiler_abi_sha256": "d69d7c83e421194bc7e86c0560d147ca988b8b6aa63a99d3f1890a71758698bb",
+      "reference_artifact_sha256": "93979db03ae54da39af32f488d350b950d41b2ec81de7dc3c6862688ce9a1203",
+      "protocol_abi_sha256": "d1d9c769caffa46d589aac70befdd168083b0eb7d8289833395ec6a2b0800d93",
+      "metadata_refinements": [
+        "numeric selectors: permit overloads, initial registration and multicall use custom wire decoders; differential runtime validation is required separately",
+        "constructor: original arguments plus three fixed delegate modules; custom InitialAddresses decoder has flat address[] wire format",
+        "userStates: outer static tuple has identical flat wire encoding",
+        "claimFromStakingV1: outer static tuple has identical flat wire encoding",
+        "getTotalVotesAndState: outer static tuple has identical flat wire encoding",
+        "getInitiativeSnapshotAndState: outer static tuple has identical flat wire encoding",
+        "getInitiativeState: outer static tuple has identical flat wire encoding",
+        "getInitiativeState: outer static tuple has identical flat wire encoding",
+        "snapshotVotesForInitiative: outer static tuple has identical flat wire encoding",
+        "votesSnapshot: outer static tuple has identical flat wire encoding",
+        "globalState: outer static tuple has identical flat wire encoding",
+        "votesForInitiativeSnapshot: outer static tuple has identical flat wire encoding",
+        "initiativeStates: outer static tuple has identical flat wire encoding",
+        "lqtyAllocatedByUserToInitiative: outer static tuple has identical flat wire encoding"
+      ],
+      "declaration_only": [
+        [
+          "error",
+          "AddressInsufficientBalance(address)"
+        ]
+      ],
+      "compiler_standard_errors": [
+        [
+          "error",
+          "Error(string)"
+        ],
+        [
+          "error",
+          "Panic(uint256)"
+        ]
+      ],
+      "function_count": 52
+    },
+    "GovernanceStakingModule": {
+      "implementation_companion": true,
+      "runtime_bytes": 7324,
+      "initcode_bytes_before_arguments": 7344,
+      "runtime_sha256": "c2bde8f328a20c0d5f9a083f476b2586cbee135836212e4e0b4228c7f73a9b00",
+      "initcode_sha256": "88ebc87eb15778e6caddefdaf88a9008cc90bfb1e2ac034964a10682f76f5b78"
+    },
+    "GovernanceVotingModule": {
+      "implementation_companion": true,
+      "runtime_bytes": 21116,
+      "initcode_bytes_before_arguments": 21136,
+      "runtime_sha256": "6bddc4fc9e3b8de77d13965fa09a274d08053ab44ef2c8a707f2daf46fd02aaa",
+      "initcode_sha256": "07ea20dde26aa0dd99ba5e0f39692bd2221ddfc89c9842464a02c8bcd10a247f"
+    },
+    "GovernanceActionsModule": {
+      "implementation_companion": true,
+      "runtime_bytes": 13409,
+      "initcode_bytes_before_arguments": 13429,
+      "runtime_sha256": "2714d828f01ed274fcd10f06927714ee6e992e714388da118fcf07bf92f469ec",
+      "initcode_sha256": "4c29a6b7e6cddcee9ed61519e06eb2170a5bb05611ea02ca6c69fece191dc73a"
+    }
+  }
+}

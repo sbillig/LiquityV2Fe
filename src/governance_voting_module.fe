@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynArray}
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
+use super::governance_voting as voting
+use super::governance_module_config::{self as config, ConfigCalls}
+pub msg VotingModuleMsg {
+    #[selector = sol("allocateLQTY(address[],address[],int256[],int256[])")]
+    Allocate { reset: DynArray<Address>, targets: DynArray<Address>, votes: DynArray<i256>, vetos: DynArray<i256> },
+    #[selector = sol("resetAllocations(address[],bool)")]
+    Reset { targets: DynArray<Address>, check_all: bool },
+}
+pub contract GovernanceVotingModule {
+    recv VotingModuleMsg {
+        Allocate { reset, targets, votes, vetos } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let cfg = config::load()
+            let cutoff = ctx.address().static(ConfigCalls::Cutoff {})
+            voting::allocate(cfg, cutoff, reset, targets, votes, vetos)
+        }
+        Reset { targets, check_all } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            voting::reset(config::load(), targets, check_all)
+        }
+    }
+}

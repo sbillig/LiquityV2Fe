@@ -1,0 +1,9 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{RawStorage, revert_error}
+#[error]
+pub struct ReentrancyGuardReentrantCall {}
+pub fn enter() uses (storage: mut RawStorage) {
+    if storage.sload(0) == 2 { revert_error(ReentrancyGuardReentrantCall {}) }
+    storage.sstore(slot: 0, value: 2)
+}
+pub fn exit() uses (storage: mut RawStorage) { storage.sstore(slot: 0, value: 1) }

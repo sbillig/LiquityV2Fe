@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, Call}
+use super::governance_actions::ActionConfig
+use super::governance_snapshots::SnapshotConfig
+pub msg ConfigCalls {
+    #[selector = sol("userProxyImplementation()")]
+    Implementation -> Address,
+    #[selector = sol("stakingV1()")]
+    Staking -> Address,
+    #[selector = sol("bold()")]
+    Bold -> Address,
+    #[selector = sol("EPOCH_START()")]
+    Start -> u256,
+    #[selector = sol("EPOCH_DURATION()")]
+    Duration -> u256,
+    #[selector = sol("MIN_CLAIM()")]
+    MinClaim -> u256,
+    #[selector = sol("MIN_ACCRUAL()")]
+    MinAccrual -> u256,
+    #[selector = sol("VOTING_THRESHOLD_FACTOR()")]
+    VotingFactor -> u256,
+    #[selector = sol("UNREGISTRATION_THRESHOLD_FACTOR()")]
+    UnregisterFactor -> u256,
+    #[selector = sol("UNREGISTRATION_AFTER_EPOCHS()")]
+    UnregisterEpochs -> u256,
+    #[selector = sol("REGISTRATION_FEE()")]
+    Fee -> u256,
+    #[selector = sol("REGISTRATION_THRESHOLD_FACTOR()")]
+    Factor -> u256,
+    #[selector = sol("EPOCH_VOTING_CUTOFF()")]
+    Cutoff -> u256,
+}
+pub fn load() -> ActionConfig uses (ctx: Ctx, call: mut Call) {
+    let parent = ctx.address()
+    let implementation = parent.static(ConfigCalls::Implementation {})
+    let staking = parent.static(ConfigCalls::Staking {})
+    let bold = parent.static(ConfigCalls::Bold {})
+    let start = parent.static(ConfigCalls::Start {})
+    let duration = parent.static(ConfigCalls::Duration {})
+    let min_claim = parent.static(ConfigCalls::MinClaim {})
+    let min_accrual = parent.static(ConfigCalls::MinAccrual {})
+    let voting_factor = parent.static(ConfigCalls::VotingFactor {})
+    let unregister_factor = parent.static(ConfigCalls::UnregisterFactor {})
+    let unregister_epochs = parent.static(ConfigCalls::UnregisterEpochs {})
+    let fee = parent.static(ConfigCalls::Fee {})
+    let factor = parent.static(ConfigCalls::Factor {})
+    ActionConfig { snapshots: SnapshotConfig { bold, start, duration, min_claim, min_accrual, voting_factor, unregister_factor, unregister_epochs }, implementation, staking, fee, factor }
+}

@@ -47,7 +47,7 @@ report = {
     'compiler_binary_sha256': digest(ROOT / 'toolchain/fe/target/release/fe'),
     'compiler_dirty': '',
     'sources_sha256': hashes((ROOT / 'src').glob('*.fe')),
-    'tests_sha256': hashes((ROOT / 'tests').glob('*.t.sol')),
+    'tests_sha256': hashes((ROOT / 'tests').glob('*.sol')),
     'scripts_sha256': hashes(p for p in (ROOT / 'scripts').iterdir() if p.is_file()),
     # Isolated experiments under build/*-validation are outside this suite.
     'artifacts_sha256': hashes([p for p in (ROOT / 'build').iterdir() if p.is_file()] +

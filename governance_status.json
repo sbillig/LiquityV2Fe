@@ -27,15 +27,34 @@
     ]
   },
   "src/Governance.sol": {
-    "status": "partial",
+    "status": "implemented_differential_tests_pass",
     "fe": [
+      "src/governance.fe",
+      "src/governance_staking_module.fe",
+      "src/governance_voting_module.fe",
+      "src/governance_actions_module.fe",
       "src/governance_snapshots.fe"
     ],
     "verification": [
+      "tests/GovernanceActionsParity.t.sol",
+      "tests/GovernanceHooksParity.t.sol",
+      "tests/GovernanceInitializationParity.t.sol",
+      "tests/GovernanceListParity.t.sol",
+      "tests/GovernanceMathParity.t.sol",
+      "tests/GovernanceMulticallParity.t.sol",
       "tests/GovernanceSnapshotParity.t.sol",
-      "tests/results/initiatives.log"
+      "tests/GovernanceStakingParity.t.sol",
+      "tests/GovernanceTokenParity.t.sol",
+      "tests/GovernanceVotingParity.t.sol",
+      "tests/GovernanceWholeActionsParity.t.sol",
+      "tests/GovernanceWholeSnapshotParity.t.sol",
+      "tests/GovernanceWholeStakingParity.t.sol",
+      "tests/GovernanceWholeVotingParity.t.sol",
+      "tests/GovernanceBribeLifecycle.t.sol",
+      "tests/GovernanceRewardsLifecycle.t.sol",
+      "tests/results/governance.log"
     ],
-    "remaining": "Full Governance constructor, dispatch, staking, allocation/reset, actions, ownership, multicall and connected lifecycle validation are still outside the root checkpoint."
+    "deployment": "Original seven constructor arguments plus three fixed module addresses; see GOVERNANCE_DEPLOYMENT.md."
   },
   "src/UniV4MerklRewards.sol": {
     "status": "implemented_differential_tests_pass",

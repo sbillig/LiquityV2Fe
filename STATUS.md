@@ -1,15 +1,15 @@
 # Current work state
 
 The complete Liquity V2 port goal remains active. The verified contracts below
-are a partial system; remaining library/interface coverage, governance and
+are a partial system; remaining library/interface coverage and
 complete multi-branch workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **291 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **331 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/initiatives.json`;
-the complete log is `tests/results/initiatives.log`.
+compiler and reference hashes are recorded in `tests/results/governance.json`;
+the complete log is `tests/results/governance.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -155,34 +155,126 @@ only the external vault and trading venues are mocked. ABI and size audits pass.
 
 ### Governance progress
 
-The root checkpoint now includes UserProxy, UserProxyFactory, Math/VotingPower,
-DoubleLinkedList, BribeInitiative, CurveV2GaugeRewards, UniV4MerklRewards, the
-OpenZeppelin 5 token helper, and the Governance snapshot/status calculation
-module. The latter is tested against actual Solidity Governance through a
-harness; it is not the complete Governance contract. All 291 EVM tests and two
-Fe tests pass, as do the ABI and size audits. Main Governance and full-system
-completion remain outstanding.
+Full Governance is integrated into root sources and tests. It uses fixed
+Staking/Voting/Actions delegate modules, with the original seven constructor
+arguments followed by the three module addresses. See GOVERNANCE_DEPLOYMENT.md.
+Its isolated connected validation passes 25 tests plus ABI and deployment-size
+audits; input/compiler/artifact hashes and logs are preserved in
+`tests/results/governance-prepared.*`. This is not yet a root full-suite proof.
 
-The remaining Governance work is prepared in `/tmp/liquity-governance-project`,
-with tests in `/tmp/liquity-governance-inspect`, artifacts in
-`/tmp/liquity-governance-build`, and an isolated ABI audit in
-`/tmp/liquity-governance-audit`. Three staking tests, two hook tests, three action
-tests and three voting/reset tests pass against Solidity. Their logs are
-`/tmp/liquity-governance-{staking,hooks,actions,voting}-parity.log`. They cover
-real reentrancy, atomic rollback, offset rounding, event bytes/order, cached
-storage during callbacks, cutoff rules and disabled-initiative reset. The hook
-helper can also be built quickly through `/tmp/liquity-hooks-project`.
+Coverage includes staking/rewards, permits, reentrancy, allocation/reset and
+rounding, cutoff and status rules, snapshots, registration/claim/unregistration,
+initial ownership and events, extreme constructor-array lengths, and nested
+multicall rollback. Connected lifecycles exercise all three Fe initiatives
+with actual Fe Governance and UserProxy. The constructor decoder accounts for
+Solidity's immutable memory reservation and copied argument length, including
+unaligned trailing bytes. No new compiler fix was required.
 
-A composed `governance.fe` now connects these modules, the original constructor
-arguments, getters, ownership and initial registration. Its current build is
-`/tmp/liquity-governance-build.log`; it has not yet been size-checked or tested as
-a whole. Multicall is still missing. The memory-address wrappers distinguish
-ordinary function and constructor decoder allocation bounds; verify their
-extreme lengths and eager address validation against Solidity before integration.
+Runtime sizes: Governance 15,847 bytes, StakingModule 7,324, VotingModule 21,116,
+ActionsModule 13,409. Parent initcode is 26,432 bytes before arguments; module
+initcode is runtime size plus 20 bytes. All satisfy EVM limits. Modules are
+immutable and have no upgrade path. ABI exports record the actual constructor.
 
-Authoritative Solidity storage layout: `/tmp/liquity-governance-storage.json`.
-Slots: reentrancy 0, owner 1, accrued BOLD 2, global snapshot 3–4, initiative
-snapshots mapping 5, global state 6–7, users mapping 8, initiatives mapping 9,
-allocations nested mapping 10, registration mapping 11. The source inventory
-keeps Governance partial until the complete contract and connected workflows
-are validated. No new compiler fix was needed for this governance work.
+Next: full root `./scripts/test.sh`, record proof immediately before any further
+source/test/script edits, then update the inventory and commit. The previous
+complete root proof remains 291 EVM tests + two Fe tests at `bc3690b`.
+Remaining overall scope includes complete multi-branch workflows, deployment,
+invariants and the explicitly unfinished utility/interface coverage.
+
+Root full-suite session `13809` is running with output in
+`tests/results/governance.log`. Reference-source, dependency and asset checks
+have passed. Freeze root sources, tests and scripts until it finishes, then
+run `python3 scripts/record_validation.py tests/results/governance.log`
+immediately if successful. Do not restart this job solely because it is slow.
+
+### Prepared multi-branch validation
+
+Root sources/tests/scripts remain frozen during session `13809`. Independent
+work lives in `/tmp/liquity-multibranch-inspect`, using a copied, stable set of
+core build artifacts. `MultiBranchFixture.sol` and `MultiBranchSystem.t.sol`
+deploy three actual core branches sharing BOLD and a CollateralRegistry, with
+branch-specific CREATE2 salts. No root source or test has been changed for this.
+
+Three initial tests passed, including 1,024 fuzz runs of cross-branch redemption,
+local liquidation/offset/redistribution and shutdown, with exact Solidity state
+comparisons and shared supply == sum(recorded branch debt) invariants. Proof:
+`/tmp/liquity-multibranch-fuzz.{log,json}`. Additional tests pass with actual
+WETH/RETH/WSTETH Fe price feeds and with an oracle-triggered shutdown isolated
+to one branch while redemptions continue through the others. Their logs are
+`/tmp/liquity-multibranch-real-feeds.log` and
+`/tmp/liquity-multibranch-oracle-failure.log`. Tokens/oracle data providers remain
+controlled test doubles. A final five-test run is now writing
+`/tmp/liquity-multibranch-prepared.log`; record source/artifact hashes before
+editing or integrating those prepared tests. The fixture avoids inheriting
+existing tests. Integrate only after the current root validation is recorded.
+
+The final isolated five-test multi-branch run passed, including 1,024 fuzz runs.
+Proof captured before further edits in `/tmp/liquity-multibranch-prepared.json`
+with log `/tmp/liquity-multibranch-prepared.log`. Root session `13809` remains
+running; do not integrate these tests until its proof has been recorded.
+
+The prepared suite now also deploys actual Governance/BribeInitiative and routes
+all three ActivePools' interest-router payments into Governance. A voter stakes,
+allocates, deposits a bribe using actual BOLD approval/transfer, claims both real
+protocol interest and the bribe, and exits. The V1 staking mock is ETH-funded
+for its reward behavior. All six tests pass together (1,024 fuzz runs), with
+proof in `/tmp/liquity-multibranch-governance-prepared.{log,json}`. Governance
+artifacts in the isolated build directory were copied from the already verified
+isolated Governance build. The root remains frozen for session `13809`.
+Upstream master was rechecked on September 25 and remains `3dd15a62`.
+
+### Prepared metadata utilities and compiler diagnostic fix
+
+JSON and all 33 SVG function overloads are implemented separately in
+`/tmp/liquity-metadata-utils-project` and tested in
+`/tmp/liquity-metadata-utils-inspect`. Five differential tests pass, with 1,024
+runs per fuzz test, in `/tmp/liquity-metadata-json-svg-parity.{log,json}`. SVG
+uses two harness contracts to stay within deployment limits. These utility
+sources are not yet in root; remaining Utils/baseSVG coverage is still open.
+
+An unsupported inline string constant (`String<33>`) revealed a compiler panic
+instead of a type diagnostic. Minimal input: `/tmp/liquity-string-constant-repro`.
+No matching open PR was found among current PRs. Isolated compiler worktree
+`/tmp/fe-string-constants`, branch `fix/reject-oversized-string-constants`, based
+on current upstream master, now diagnoses invalid constant declaration types
+in check_const_body. Five negative input cases and the valid 31-byte boundary
+pass in two new regression tests; a newsfragment is present. Full HIR tests
+are running, CLI validation and committing/reporting remain pending. The root
+compiler checkout and release binary remain unchanged during the root build.
+The previously pushed integer-literal fix now has upstream PR #1595 (observed
+via GitHub); this agent did not create that PR.
+
+Compiler fix detail: the missing diagnostic is on the const declaration's type,
+not a need to permit inline strings above 31 bytes. The change adds existing
+TyId diagnostics at the const type span in check_const_body. Regression tests
+use initialize_analysis_pass (the focused test pass alone does not exercise all
+user-facing behavior). Targeted tests and cargo fmt --check pass. Full fe-hir
+--tests session `12102` remains live (one pre-existing exhaustive sparse-array
+capability test is slow). Debug CLI build session `5497` is queued/running against
+the separate worktree, sharing only the debug target cache; the root release
+binary is unchanged. CLI repro, final test results, commit and fix report still
+need completion. New regression test and newsfragment are untracked in that
+worktree until commit. No new fix branch has been pushed.
+
+Metadata JSON/SVG sources and tests are now frozen at their five-test passing
+proof in `/tmp/liquity-metadata-json-svg-parity.json`. Test harnesses are
+MetadataJsonHarness, MetadataSvgHarnessA and MetadataSvgHarnessB; ignore the
+obsolete single MetadataSvgHarness artifact left in that temporary build folder.
+Root full-suite `13809` has passed both Fe tests and is building all O1 artifacts
+(PID 4122545 last observed live). Record its validation before any root
+source/test/script changes.
+
+## Governance checkpoint completed
+
+Root session 13809 completed successfully: 331 EVM tests, two Fe tests, all O1
+builds, reference checks and ABI/size audit passed. Proof was recorded immediately
+in tests/results/governance.json before source/test/script changes. The source
+freeze is lifted. Full Governance is now integrated, including the constructor,
+staking, voting/reset, actions, ownership and multicall, with connected initiative
+and reward lifecycles. External tokens and V1 staking remain controlled fixtures.
+
+Compiler diagnostic fix 35502252d was pushed, at the user's request, to upstream
+branch fix/reject-oversized-string-constants. The CLI reproducer now reports
+error 3-0033 instead of panicking; both regression tests and formatting pass.
+The full HIR suite is still running in session 12102. The protocol compiler
+release binary remains unchanged. Earlier pending/push notes above are historical.

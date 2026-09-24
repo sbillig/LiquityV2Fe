@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
+use super::governance_actions as action
+use super::governance_module_config as config
+pub msg ActionsModuleMsg {
+    #[selector = sol("registerInitiative(address)")]
+    Register { target: Address },
+    #[selector = sol("unregisterInitiative(address)")]
+    Unregister { target: Address },
+    #[selector = sol("claimForInitiative(address)")]
+    Claim { target: Address } -> u256,
+}
+pub contract GovernanceActionsModule {
+    recv ActionsModuleMsg {
+        Register { target } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::register(config::load(), target) }
+        Unregister { target } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::unregister(config::load().snapshots, target) }
+        Claim { target } -> u256 uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::claim(config::load().snapshots, target) }
+    }
+}

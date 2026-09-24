@@ -157,3 +157,16 @@ worktree produced the same integration tree `0d1d3cedde2c9305c0d9219ee9de866e88d
 - `scripts/merge_compiler_fix.py` replays only the exact reviewed import conflict,
   rejecting unexpected conflicts. A fresh replay produced the pinned source tree
   `e8e5d938074145678e2ec2f01c6e14e50cb99638`.
+
+## Invalid constant type diagnostics
+
+- Branch: [fix/reject-oversized-string-constants](https://github.com/argotorg/fe/tree/fix/reject-oversized-string-constants), pushed to upstream at the user's request.
+- Commit: `35502252d6f7873e9bd1928388633319145c871b`, based on upstream/master `3dd15a621`.
+- Invalid declared constant types previously bypassed diagnostics and could panic
+  during CTFE. `check_const_body` now emits the existing type diagnostic.
+- Regression file: `crates/hir/tests/invalid_string_constants.rs`: five invalid
+  inputs plus the valid 31-byte boundary, including an associated const and UTF-8.
+- Newsfragment: `newsfragments/+invalid-constant-types.bugfix.md`.
+- Both regression tests and formatting pass. A built debug CLI reports error
+  3-0033 for the original String<33> reproducer. Full HIR tests remain running.
+- Not merged into the protocol release compiler; valid port code does not need it.

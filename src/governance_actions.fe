@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: MIT
+use std::abi::sol
+use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log, encode_msg_calldata, revert_error}
+use super::governance_snapshots::{self as snap, SnapshotConfig, map}
+use super::governance_guard as guard
+use super::governance_hooks::safe_call
+use super::governance_token::{safe_transfer, safe_transfer_from}
+use super::user_proxy_factory::derive
+use super::user_proxy::ProxyCalls
+use super::leftovers_sweep::BalanceMsg
+use super::governance_math::lqty_to_votes
+use super::revert_texts::require
+use super::governance_action_errors as error
+pub struct ActionConfig { pub snapshots: SnapshotConfig, pub implementation: Address, pub staking: Address, pub fee: u256, pub factor: u256 }
+impl Copy for ActionConfig {}
+pub msg InitiativeHooks {
+    #[selector = sol("onRegisterInitiative(uint256)")]
+    Register { epoch: u256 },
+    #[selector = sol("onUnregisterInitiative(uint256)")]
+    Unregister { epoch: u256 },
+    #[selector = sol("onClaimForInitiative(uint256,uint256)")]
+    Claim { epoch: u256, amount: u256 },
+}
+#[event]
+pub struct RegisterInitiative { pub initiative: Address, pub registrant: Address, pub at_epoch: u256, pub hook_status: u8 }
+#[event]
+pub struct UnregisterInitiative { pub initiative: Address, pub at_epoch: u256, pub hook_status: u8 }
+#[event]
+pub struct ClaimForInitiative {
+    #[indexed]
+    pub initiative: Address,
+    pub bold: u256, pub for_epoch: u256, pub hook_status: u8,
+}
+pub fn register(_ cfg: ActionConfig, _ target: Address)
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    guard::enter()
+    let current = snap::epoch(cfg.snapshots)
+    require(current > 2, error::early())
+    require(target != Address::zero(), error::zero())
+    let (vs, unused_state) = snap::snapshot_total(cfg.snapshots)
+    let (ivs, state) = snap::snapshot_initiative(cfg.snapshots, target)
+    let (status, unused_last, unused_claim) = snap::status(cfg.snapshots, target, vs, ivs, state)
+    require(status == 0, error::registered())
+    let proxy = derive(cfg.implementation, ctx.caller())
+    let (snapshot, ignored) = snap::snapshot_total(cfg.snapshots)
+    let user = map(ctx.caller(), 8)
+    let unallocated_offset = storage.sload(user + 1)
+    let allocated_offset = storage.sload(user + 3)
+    safe_transfer_from(cfg.snapshots.bold, ctx.caller(), ctx.address(), cfg.fee)
+    let total_offset = allocated_offset + unallocated_offset
+    let stakes = cfg.staking.static(ProxyCalls::Stakes { account: proxy })
+    let votes = lqty_to_votes(stakes, snap::epoch_start(cfg.snapshots), total_offset)
+    require(votes >= snapshot.0 * cfg.factor / 1000000000000000000, error::insufficient())
+    storage.sstore(slot: map(target, 11), value: current)
+    storage.sstore(slot: map(target, 9) + 4, value: current - 1)
+    let data = encode_msg_calldata(InitiativeHooks::Register { epoch: current })
+    let success = safe_call(target, 350000, 0, data.span())
+    log.emit(RegisterInitiative { initiative: target, registrant: ctx.caller(), at_epoch: current, hook_status: if success { 1 } else { 0 } })
+    guard::exit()
+}
+pub fn unregister(_ cfg: SnapshotConfig, _ target: Address)
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    guard::enter()
+    let (votes, global) = snap::snapshot_total(cfg)
+    let (ivotes, state) = snap::snapshot_initiative(cfg, target)
+    let (status, unused_last, unused_claim) = snap::status(cfg, target, votes, ivotes, state)
+    require(status == 5, error::cannot_unregister())
+    let current = snap::epoch(cfg)
+    if !(state.4 < current - 1) { revert_error(std::evm::panic::Panic::from(1)) }
+    if !(global.0 >= state.0) { revert_error(std::evm::panic::Panic::from(1)) }
+    if !(global.1 >= state.1) { revert_error(std::evm::panic::Panic::from(1)) }
+    storage.sstore(slot: 6, value: global.0 - state.0)
+    storage.sstore(slot: 7, value: global.1 - state.1)
+    storage.sstore(slot: map(target, 11), value: ~0)
+    let data = encode_msg_calldata(InitiativeHooks::Unregister { epoch: current })
+    let success = safe_call(target, 350000, 0, data.span())
+    log.emit(UnregisterInitiative { initiative: target, at_epoch: current, hook_status: if success { 1 } else { 0 } })
+    guard::exit()
+}
+pub fn claim(_ cfg: SnapshotConfig, _ target: Address) -> u256
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    guard::enter()
+    let (votes, unused) = snap::snapshot_total(cfg)
+    let (ivotes, state) = snap::snapshot_initiative(cfg, target)
+    let (status, unused_last, claimable) = snap::status(cfg, target, votes, ivotes, state)
+    if status != 3 { guard::exit()
+        return 0 }
+    if !(votes.1 == snap::epoch(cfg) - 1) { revert_error(std::evm::panic::Panic::from(1)) }
+    storage.sstore(slot: map(target, 9) + 4, value: snap::epoch(cfg) - 1)
+    let available = cfg.bold.static(BalanceMsg::Balance { account: ctx.address() })
+    let amount = if claimable > available { available } else { claimable }
+    safe_transfer(cfg.bold, target, amount)
+    let data = encode_msg_calldata(InitiativeHooks::Claim { epoch: votes.1, amount })
+    let success = safe_call(target, 350000, 0, data.span())
+    log.emit(ClaimForInitiative { initiative: target, bold: amount, for_epoch: votes.1, hook_status: if success { 1 } else { 0 } })
+    guard::exit()
+    amount
+}

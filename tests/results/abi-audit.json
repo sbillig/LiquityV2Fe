@@ -795,6 +795,46 @@
     ],
     "function_count": 15
   },
+  "Governance": {
+    "runtime_bytes": 15847,
+    "initcode_bytes_before_arguments": 26432,
+    "compiler_abi_sha256": "d69d7c83e421194bc7e86c0560d147ca988b8b6aa63a99d3f1890a71758698bb",
+    "reference_artifact_sha256": "8fdbe07bfcba97a2b8cac115ed1cb2b662f6245d1e8cf2e4f2ec587a539e0fe5",
+    "protocol_abi_sha256": "d1d9c769caffa46d589aac70befdd168083b0eb7d8289833395ec6a2b0800d93",
+    "metadata_refinements": [
+      "numeric selectors: permit overloads, initial registration and multicall use custom wire decoders; differential runtime validation is required separately",
+      "constructor: original arguments plus three fixed delegate modules; custom InitialAddresses decoder has flat address[] wire format",
+      "userStates: outer static tuple has identical flat wire encoding",
+      "claimFromStakingV1: outer static tuple has identical flat wire encoding",
+      "getTotalVotesAndState: outer static tuple has identical flat wire encoding",
+      "getInitiativeSnapshotAndState: outer static tuple has identical flat wire encoding",
+      "getInitiativeState: outer static tuple has identical flat wire encoding",
+      "getInitiativeState: outer static tuple has identical flat wire encoding",
+      "snapshotVotesForInitiative: outer static tuple has identical flat wire encoding",
+      "votesSnapshot: outer static tuple has identical flat wire encoding",
+      "globalState: outer static tuple has identical flat wire encoding",
+      "votesForInitiativeSnapshot: outer static tuple has identical flat wire encoding",
+      "initiativeStates: outer static tuple has identical flat wire encoding",
+      "lqtyAllocatedByUserToInitiative: outer static tuple has identical flat wire encoding"
+    ],
+    "declaration_only": [
+      [
+        "error",
+        "AddressInsufficientBalance(address)"
+      ]
+    ],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 52
+  },
   "LeverageWETHZapperLeverage": {
     "implementation_companion": true,
     "runtime_bytes": 10606,
@@ -857,5 +897,26 @@
     "initcode_bytes_before_arguments": 25417,
     "runtime_sha256": "edb29b1519d020d794ce55b14d33baf40122b3fecaf4197584981f58aa2c5a5a",
     "initcode_sha256": "38294f3645fd9e073483c30bf00fdff0863e1c10114487eb2ae21ad8f8bb6965"
+  },
+  "GovernanceStakingModule": {
+    "implementation_companion": true,
+    "runtime_bytes": 7324,
+    "initcode_bytes_before_arguments": 7344,
+    "runtime_sha256": "c2bde8f328a20c0d5f9a083f476b2586cbee135836212e4e0b4228c7f73a9b00",
+    "initcode_sha256": "88ebc87eb15778e6caddefdaf88a9008cc90bfb1e2ac034964a10682f76f5b78"
+  },
+  "GovernanceVotingModule": {
+    "implementation_companion": true,
+    "runtime_bytes": 21116,
+    "initcode_bytes_before_arguments": 21136,
+    "runtime_sha256": "6bddc4fc9e3b8de77d13965fa09a274d08053ab44ef2c8a707f2daf46fd02aaa",
+    "initcode_sha256": "07ea20dde26aa0dd99ba5e0f39692bd2221ddfc89c9842464a02c8bcd10a247f"
+  },
+  "GovernanceActionsModule": {
+    "implementation_companion": true,
+    "runtime_bytes": 13409,
+    "initcode_bytes_before_arguments": 13429,
+    "runtime_sha256": "2714d828f01ed274fcd10f06927714ee6e992e714388da118fcf07bf92f469ec",
+    "initcode_sha256": "4c29a6b7e6cddcee9ed61519e06eb2170a5bb05611ea02ca6c69fece191dc73a"
   }
 }

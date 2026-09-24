@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: MIT
+use core::num::IntDowncast
+use core::ptr::{MemArray, MemSpan, MemBuffer}
+use std::evm::{Ctx, Call, RawMem, RawOps}
+// Solidity indexes a calldata bytes[] lazily and uses signed comparisons for
+// its inner relative offsets. Preserve that ordering before each delegatecall.
+#[arithmetic(unchecked)]
+fn element(_ base: u256, _ position: u256, _ size: u256) -> (u256, u256) uses (ops: mut RawOps) {
+    let offset = ops.calldataload(position)
+    let signed_offset: i256 = offset.downcast_truncate()
+    let bound: i256 = (size - base - 31).downcast_truncate()
+    if !(signed_offset < bound) { ops.revert(data: MemSpan::empty()) }
+    let addr = base + offset
+    let len = ops.calldataload(addr)
+    if len > 0xffffffffffffffff { ops.revert(data: MemSpan::empty()) }
+    let start = addr + 32
+    let signed_start: i256 = start.downcast_truncate()
+    let end: i256 = (size - len).downcast_truncate()
+    if signed_start > end { ops.revert(data: MemSpan::empty()) }
+    (start, len)
+}
+pub fn multi() -> ! uses (ctx: Ctx, call: mut Call, ops: mut RawOps, mem: mut RawMem) {
+    let size = ops.calldatasize()
+    if size < 36 { ops.revert(data: MemSpan::empty()) }
+    let offset = ops.calldataload(4)
+    if offset > 0xffffffffffffffff { ops.revert(data: MemSpan::empty()) }
+    let pos = 4 + offset
+    if pos > size || size - pos < 32 { ops.revert(data: MemSpan::empty()) }
+    let count = ops.calldataload(pos)
+    if count > 0xffffffffffffffff { ops.revert(data: MemSpan::empty()) }
+    let base = pos + 32
+    if count > (size - base) / 32 { ops.revert(data: MemSpan::empty()) }
+    let results: MemArray<MemSpan> = MemArray::new_uninit(count)
+    let mut output_size = 64 + count * 32
+    let mut i: usize = 0
+    while (i as u256) < count {
+        let (start, len) = element(base, base + (i as u256) * 32, size)
+        let mut args = MemBuffer::with_capacity(len)
+        ops.calldatacopy(dest: mut args, dest_offset: 0, src_offset: start, len)
+        args.set_len(len)
+        let mut ignored = MemBuffer::empty()
+        let result = call.raw_delegatecall(addr: ctx.address(), gas: ctx.gas(), args: args.span(), ret: mut ignored)
+        let ret_len = result.returndata_len()
+        let mut returned = MemBuffer::with_capacity(ret_len)
+        ops.returndatacopy(dest: mut returned, dest_offset: 0, src_offset: 0, len: ret_len)
+        returned.set_len(ret_len)
+        if !result.success() { ops.revert(data: returned.span()) }
+        *results.ptr_at(i) = returned.span()
+        output_size += 32 + ((ret_len + 31) / 32) * 32
+        i += 1
+    }
+    let p = core::ptr::alloc_bytes(output_size)
+    core::ptr::zero_bytes(p, output_size)
+    mem.mstore(addr: p, value: 32)
+    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: count)
+    let mut tail = 64 + count * 32
+    i = 0
+    while (i as u256) < count {
+        let returned = *results.ptr_at(i)
+        mem.mstore(addr: core::ptr::offset_bytes(p, 64 + (i as u256) * 32), value: tail - 64)
+        mem.mstore(addr: core::ptr::offset_bytes(p, tail), value: returned.len())
+        core::ptr::copy(dest: core::ptr::offset_bytes(p, tail + 32), source: returned)
+        tail += 32 + ((returned.len() + 31) / 32) * 32
+        i += 1
+    }
+    ops.return_data(data: MemSpan::from_raw_parts(ptr: p, len: output_size))
+}

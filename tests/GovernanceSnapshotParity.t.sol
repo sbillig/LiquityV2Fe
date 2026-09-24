@@ -7,12 +7,13 @@ interface GSVm is UPVm {function warp(uint) external;function store(address,byte
 contract GovernanceSnapshotParityTest {
  GSVm constant vm=GSVm(address(uint160(uint(keccak256("hevm cheat code")))));
  address fe;address sol;UPToken bold;address constant TARGET=address(777);
+ function feInit(IGovernance.Configuration memory) internal virtual returns(bytes memory){return bytes.concat(vm.parseBytes(vm.readFile("build/GovernanceSnapshotHarness.bin")),abi.encode(bold,uint(1000),uint(100),uint(1e18),uint(5e18),uint(1e16),uint(2e18),uint(4)));}
  function setUp() public {
   vm.warp(1000);bold=new UPToken();
   IGovernance.Configuration memory cfg=IGovernance.Configuration(0,1e16,2e18,4,1e16,1e18,5e18,1000,100,90);
   sol=address(new Governance(address(1),address(2),address(3),address(bold),cfg,address(this),new address[](0)));
-  bytes memory init=bytes.concat(vm.parseBytes(vm.readFile("build/GovernanceSnapshotHarness.bin")),abi.encode(bold,uint(1000),uint(100),uint(1e18),uint(5e18),uint(1e16),uint(2e18),uint(4)));
-  address a;assembly{a:=create(0,add(init,32),mload(init))}require(a.code.length>0);fe=a;
+  bytes memory init=feInit(cfg);
+  address a;assembly{a:=create(0,add(init,32),mload(init))}require(a.code.length>0&&a.code.length<=24576,"snapshot runtime size");fe=a;
   bold.mint(fe,10e18);bold.mint(sol,10e18);
  }
  function put(uint slot,uint value) internal {vm.store(fe,bytes32(slot),bytes32(value));vm.store(sol,bytes32(slot),bytes32(value));}

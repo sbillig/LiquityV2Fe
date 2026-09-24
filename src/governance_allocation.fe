@@ -1,0 +1,110 @@
+// SPDX-License-Identifier: MIT
+use std::abi::{sol, DynArray, DynArrayAccess}
+use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log, encode_msg_calldata, revert_error}
+use std::evm::packed::keccak_packed
+use super::governance_actions::ActionConfig
+use super::governance_snapshots::{self as snap, map}
+use super::governance_math::{add, sub}
+use super::governance_hooks::safe_call
+use super::user_proxy_factory::derive
+use super::user_proxy::ProxyCalls
+use super::revert_texts::require
+use super::governance_allocation_errors as error
+#[event]
+pub struct AllocateLQTY {
+    #[indexed]
+    pub user: Address,
+    #[indexed]
+    pub initiative: Address,
+    pub delta_vote_lqty: i256, pub delta_veto_lqty: i256, pub at_epoch: u256, pub hook_status: u8,
+}
+pub msg AllocationHook {
+    #[selector = sol("onAfterAllocateLQTY(uint256,address,(uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256))")]
+    After { epoch: u256, user: Address, user_state: (u256, u256, u256, u256), allocation: (u256, u256, u256, u256, u256), state: (u256, u256, u256, u256, u256) },
+}
+pub fn allocation_slot(_ user: Address, _ target: Address) -> u256 uses (mem: mut RawMem) { keccak_packed((target.inner, map(user, 10))) }
+pub fn read_user(_ user: Address) -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+    let s = map(user, 8)
+    (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+}
+pub fn read_allocation(_ user: Address, _ target: Address) -> (u256, u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+    let s = allocation_slot(user, target)
+    (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3), storage.sload(s + 4))
+}
+fn assert_true(_ condition: bool) { if !condition { revert_error(std::evm::panic::Panic::from(1)) } }
+// All arrays here are memory copies. Global/user states stay cached until every
+// initiative hook and the final V1-stake check have completed, as in Solidity.
+#[inline(never)]
+pub fn apply(_ cfg: ActionConfig, _ targets: DynArray<Address>, _ votes: DynArray<i256>, _ vetos: DynArray<i256>, _ vote_offsets: DynArray<i256>, _ veto_offsets: DynArray<i256>)
+uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let (snapshot, initial_global) = snap::snapshot_total(cfg.snapshots)
+    let mut global = initial_global
+    let current = snap::epoch(cfg.snapshots)
+    let mut user = read_user(ctx.caller())
+    let mut i = 0
+    while i < targets.len() {
+        let target = targets.get(i)
+        let dv = votes.get(i)
+        let dt = vetos.get(i)
+        assert_true(dv != 0 || dt != 0)
+        let ov = vote_offsets.get(i)
+        let ot = veto_offsets.get(i)
+        let (isnapshot, previous) = snap::snapshot_initiative(cfg.snapshots, target)
+        let (status, unused_last, unused_claim) = snap::status(cfg.snapshots, target, snapshot, isnapshot, previous)
+        if dv > 0 || dt > 0 { require(status == 2 || status == 3 || status == 4, error::active()) }
+        if status == 6 { require(dv <= 0 && dt <= 0, error::withdrawal()) }
+        let mut state = previous
+        state.0 = add(state.0, dv)
+        state.2 = add(state.2, dt)
+        state.1 = add(state.1, ov)
+        state.3 = add(state.3, ot)
+        let s = map(target, 9)
+        storage.sstore(slot: s, value: state.0)
+        storage.sstore(slot: s + 1, value: state.1)
+        storage.sstore(slot: s + 2, value: state.2)
+        storage.sstore(slot: s + 3, value: state.3)
+        storage.sstore(slot: s + 4, value: state.4)
+        if status != 6 {
+            assert_true(global.0 >= previous.0)
+            global.0 -= previous.0
+            global.1 -= previous.1
+            global.0 += state.0
+            global.1 += state.1
+        }
+        let mut allocation = read_allocation(ctx.caller(), target)
+        allocation.1 = add(allocation.1, ov)
+        allocation.3 = add(allocation.3, ot)
+        allocation.0 = add(allocation.0, dv)
+        allocation.2 = add(allocation.2, dt)
+        allocation.4 = current
+        assert_true(allocation.0 * ctx.timestamp() >= allocation.1)
+        assert_true(allocation.2 * ctx.timestamp() >= allocation.3)
+        let a = allocation_slot(ctx.caller(), target)
+        storage.sstore(slot: a, value: allocation.0)
+        storage.sstore(slot: a + 1, value: allocation.1)
+        storage.sstore(slot: a + 2, value: allocation.2)
+        storage.sstore(slot: a + 3, value: allocation.3)
+        storage.sstore(slot: a + 4, value: allocation.4)
+        user.0 = sub(user.0, dv + dt)
+        user.1 = sub(user.1, ov + ot)
+        user.2 = add(user.2, dv + dt)
+        user.3 = add(user.3, ov + ot)
+        let mut hook_status: u8 = 2
+        if allocation.2 == 0 {
+            let data = encode_msg_calldata(AllocationHook::After { epoch: current, user: ctx.caller(), user_state: user, allocation, state })
+            let success = safe_call(target, 350000, 0, data.span())
+            hook_status = if success { 1 } else { 0 }
+        }
+        log.emit(AllocateLQTY { user: ctx.caller(), initiative: target, delta_vote_lqty: dv, delta_veto_lqty: dt, at_epoch: current, hook_status })
+        i += 1
+    }
+    let stake = cfg.staking.static(ProxyCalls::Stakes { account: derive(cfg.implementation, ctx.caller()) })
+    require(user.2 <= stake, error::insufficient())
+    storage.sstore(slot: 6, value: global.0)
+    storage.sstore(slot: 7, value: global.1)
+    let u = map(ctx.caller(), 8)
+    storage.sstore(slot: u, value: user.0)
+    storage.sstore(slot: u + 1, value: user.1)
+    storage.sstore(slot: u + 2, value: user.2)
+    storage.sstore(slot: u + 3, value: user.3)
+}

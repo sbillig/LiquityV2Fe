@@ -1,0 +1,12 @@
+use std::abi::{sol, Bytes}
+use std::evm::{Address, Ctx, Call, RawMem}
+use super::governance_hooks as hooks
+pub msg HookMsg {
+    #[selector = sol("run(address,uint256,uint256,bytes)")]
+    Run { target: Address, gas: u256, value: u256, data: Bytes } -> bool,
+}
+pub contract GovernanceHooksHarness {
+    recv HookMsg {
+        Run { target, gas, value, data } -> bool uses (ctx: Ctx, call: mut Call, mem: mut RawMem) { hooks::safe_call(target, gas, value, data.payload_span()) }
+    }
+}

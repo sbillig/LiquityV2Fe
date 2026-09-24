@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{Address, Ctx, Call, RawOps}
+#[inline(never)]
+pub fn forward(_ target: Address) -> ! uses (ctx: Ctx, ops: mut RawOps, call: mut Call) {
+    let len = ops.calldatasize()
+    let mut args = core::ptr::MemBuffer::with_capacity(len)
+    ops.calldatacopy(dest: mut args, dest_offset: 0, src_offset: 0, len: len)
+    args.set_len(len)
+    let mut output = core::ptr::MemBuffer::empty()
+    let result = call.raw_delegatecall(addr: target, gas: ctx.gas(), args: args.span(), ret: mut output)
+    let size = result.returndata_len()
+    let mut returned = core::ptr::MemBuffer::with_capacity(size)
+    ops.returndatacopy(dest: mut returned, dest_offset: 0, src_offset: 0, len: size)
+    returned.set_len(size)
+    if result.success() { ops.return_data(data: returned.span()) }
+    else { ops.revert(data: returned.span()) }
+}

@@ -1,0 +1,25 @@
+use std::abi::{sol, Bytes}
+use std::evm::{Address, Ctx, Call, RawMem, RawOps, RawStorage}
+pub msg MultiTest {
+    #[selector = 0x415c2d96]
+    Multi,
+    #[selector = sol("add(uint256)")]
+    Add { amount: u256 } -> (Address, u256),
+    #[selector = sol("value()")]
+    Value -> u256,
+    #[selector = sol("echo(bytes)")]
+    Echo { data: Bytes } -> Bytes,
+    #[selector = sol("fail(bytes)")]
+    Fail { data: Bytes },
+}
+pub contract GovernanceMulticallHarness {
+    recv MultiTest {
+        Multi uses (ctx: Ctx, call: mut Call, ops: mut RawOps, mem: mut RawMem) { super::governance_multicall::multi() }
+        Add { amount } -> (Address, u256) uses (ctx: Ctx, storage: mut RawStorage) { let value = storage.sload(0) + amount
+            storage.sstore(slot: 0, value)
+            (ctx.caller(), value) }
+        Value -> u256 uses (storage: RawStorage) { storage.sload(0) }
+        Echo { data } -> Bytes { data }
+        Fail { data } uses (ops: mut RawOps) { ops.revert(data: data.payload_span()) }
+    }
+}

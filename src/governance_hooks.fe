@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+use std::evm::{Address, Ctx, Call, RawMem}
+use std::abi::DynString
+use super::revert_texts::require
+#[arithmetic(unchecked)]
+pub fn has_min_gas(_ minimum: u256, _ reserved: u256) -> bool uses (ctx: Ctx) {
+    ctx.gas() * 63 >= minimum * 64 + (40000 + reserved) * 63
+}
+fn gas_error() -> DynString uses (mem: mut RawMem) {
+    let p = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: p, value: 0x4d7573742068617665206d696e47617300000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 16))
+}
+pub fn safe_call(_ target: Address, _ gas: u256, _ value: u256, _ data: core::ptr::MemSpan) -> bool
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    require(has_min_gas(gas, 1000), gas_error())
+    let mut ignored = core::ptr::MemBuffer::empty()
+    let result = call.raw_call(addr: target, gas, value, args: data, ret: mut ignored)
+    result.success()
+}

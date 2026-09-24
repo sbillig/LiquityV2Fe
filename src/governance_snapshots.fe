@@ -49,6 +49,7 @@ uses (ctx: Ctx, storage: RawStorage, mem: mut RawMem) {
         ((votes, current - 1, snapshot.2, vetos), state, true)
     } else { (snapshot, state, false) }
 }
+#[inline(never)]
 pub fn snapshot_total(_ cfg: SnapshotConfig) -> ((u256, u256), (u256, u256))
 uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     let (snapshot, state, update) = total(cfg)
@@ -62,6 +63,7 @@ uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     }
     (snapshot, state)
 }
+#[inline(never)]
 pub fn snapshot_initiative(_ cfg: SnapshotConfig, _ target: Address) -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256))
 uses (ctx: Ctx, storage: mut RawStorage, mem: mut RawMem, log: mut Log) {
     let (snapshot, state, update) = initiative(cfg, target)
@@ -75,6 +77,7 @@ uses (ctx: Ctx, storage: mut RawStorage, mem: mut RawMem, log: mut Log) {
     }
     (snapshot, state)
 }
+#[inline(never)]
 pub fn status(_ cfg: SnapshotConfig, _ target: Address, _ votes: (u256, u256), _ ivotes: (u256, u256, u256, u256), _ istate: (u256, u256, u256, u256, u256)) -> (u8, u256, u256)
 uses (ctx: Ctx, storage: RawStorage, mem: mut RawMem) {
     let registered = storage.sload(map(target, 11))

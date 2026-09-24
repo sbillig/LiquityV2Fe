@@ -1,0 +1,53 @@
+use std::abi::sol
+use std::evm::{Address, Ctx, Call, Create, RawMem, RawStorage, Log}
+use super::user_proxy::{UserProxy, PermitParams}
+use super::user_proxy_factory as factory
+use super::governance_staking as staking
+use super::governance_snapshots::map
+pub msg StakingMsg {
+    #[selector = sol("userProxyImplementation()")]
+    Implementation -> Address,
+    #[selector = sol("deriveUserProxyAddress(address)")]
+    Derive { user: Address } -> Address,
+    #[selector = sol("deployUserProxy()")]
+    Deploy -> Address,
+    #[selector = sol("userStates(address)")]
+    User { user: Address } -> (u256, u256, u256, u256),
+    #[selector = sol("depositLQTY(uint256)")]
+    Deposit { amount: u256 },
+    #[selector = sol("depositLQTY(uint256,bool,address)")]
+    DepositTo { amount: u256, send: bool, recipient: Address },
+    #[selector = 0xee1c7172]
+    DepositPermit { amount: u256, p: PermitParams },
+    #[selector = 0x394ff406]
+    DepositPermitTo { amount: u256, p: PermitParams, send: bool, recipient: Address },
+    #[selector = sol("withdrawLQTY(uint256)")]
+    Withdraw { amount: u256 },
+    #[selector = sol("withdrawLQTY(uint256,bool,address)")]
+    WithdrawTo { amount: u256, send: bool, recipient: Address },
+    #[selector = sol("claimFromStakingV1(address)")]
+    Rewards { recipient: Address } -> (u256, u256),
+}
+pub contract GovernanceStakingHarness {
+    implementation: Address,
+    init(lqty: Address, lusd: Address, v1: Address) uses (mut implementation, create: mut Create, storage: mut RawStorage) {
+        implementation = create.create<UserProxy>(value: 0, args: (lqty, lusd, v1))
+        storage.sstore(slot: 0, value: 1)
+    }
+    recv StakingMsg {
+        Implementation -> Address uses (implementation) { implementation }
+        Derive { user } -> Address uses (implementation, ctx: Ctx, mem: mut RawMem) { factory::derive(implementation, user) }
+        Deploy -> Address uses (implementation, ctx: Ctx, mem: mut RawMem, create: mut Create, log: mut Log) { factory::deploy(implementation) }
+        User { user } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+            let s = map(user, 8)
+            (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+        }
+        Deposit { amount } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, false, ctx.caller()) }
+        DepositTo { amount, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, send, recipient) }
+        DepositPermit { amount, p } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, false, ctx.caller()) }
+        DepositPermitTo { amount, p, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, send, recipient) }
+        Withdraw { amount } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, true, ctx.caller()) }
+        WithdrawTo { amount, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, send, recipient) }
+        Rewards { recipient } -> (u256, u256) uses (implementation, ctx: Ctx, mem: mut RawMem, log: mut Log, call: mut Call) { staking::rewards(implementation, recipient) }
+    }
+}
