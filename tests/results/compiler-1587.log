@@ -1,0 +1,16 @@
+PASS  [0.0001s] unpadded_bytes_all_decode_paths
+PASS  [0.0000s] missing_length_word_rejected
+PASS  [0.0000s] overflowing_length_rejected
+PASS  [0.0001s] unpadded_array_all_decode_paths_reencode_aligned
+PASS  [0.0000s] short_string_all_decode_paths_respect_input_extent
+PASS  [0.0001s] partially_padded_array_all_decode_paths_clear_padding
+PASS  [0.0000s] deeply_nested_array_clears_partial_padding
+PASS  [0.0005s] missing_nested_bytes_rejected
+PASS  [0.0005s] missing_actual_bytes_rejected
+PASS  [0.0005s] unpadded_strings
+PASS  [0.0005s] dirty_padding_is_cleared
+PASS  [0.0005s] aligned_and_empty_bytes
+PASS  [0.0005s] canonical_array_keeps_full_span
+PASS  [0.0006s] unpadded_nested_bytes
+
+test result: ok. 14 passed; 0 failed

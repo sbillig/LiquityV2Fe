@@ -239,9 +239,15 @@
     "verification": []
   },
   "contracts/src/Interfaces/ISortedTroves.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/sorted_troves.fe"
+    ],
+    "verification": [
+      "tests/SortedTrovesParity.t.sol",
+      "tests/results/sorted-nft.log",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IStabilityPool.sol": {
     "status": "pending",
@@ -264,9 +270,15 @@
     "verification": []
   },
   "contracts/src/Interfaces/ITroveNFT.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/trove_nft.fe"
+    ],
+    "verification": [
+      "tests/TroveNFTParity.t.sol",
+      "tests/results/sorted-nft.log",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Interfaces/IWETH.sol": {
     "status": "pending",
@@ -354,9 +366,15 @@
     "verification": []
   },
   "contracts/src/SortedTroves.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/sorted_troves.fe"
+    ],
+    "verification": [
+      "tests/SortedTrovesParity.t.sol",
+      "tests/results/sorted-nft.log",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/StabilityPool.sol": {
     "status": "pending",
@@ -369,14 +387,25 @@
     "verification": []
   },
   "contracts/src/TroveNFT.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/trove_nft.fe"
+    ],
+    "verification": [
+      "tests/TroveNFTParity.t.sol",
+      "tests/results/sorted-nft.log",
+      "tests/results/abi-audit.json"
+    ]
   },
   "contracts/src/Types/BatchId.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "represented_by_address_used_by_sorted_troves",
+    "fe": [
+      "src/sorted_troves.fe"
+    ],
+    "verification": [
+      "tests/SortedTrovesParity.t.sol",
+      "tests/results/sorted-nft.log"
+    ]
   },
   "contracts/src/Types/LatestBatchData.sol": {
     "status": "data_fields_ported_not_integrated",
@@ -386,11 +415,14 @@
     "verification": []
   },
   "contracts/src/Types/LatestTroveData.sol": {
-    "status": "data_fields_ported_not_integrated",
+    "status": "fields_and_abi_implemented_used_by_trove_nft",
     "fe": [
       "src/types.fe"
     ],
-    "verification": []
+    "verification": [
+      "tests/TroveNFTParity.t.sol",
+      "tests/results/sorted-nft.log"
+    ]
   },
   "contracts/src/Types/TroveChange.sol": {
     "status": "fields_and_abi_implemented_used_by_active_pool",

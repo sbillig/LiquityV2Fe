@@ -1,0 +1,218 @@
+// SPDX-License-Identifier: BUSL-1.1
+// TroveNFT.sol and its OpenZeppelin 4.9 ERC721 behavior.
+use std::abi::{sol, Bytes, Bytes4, DynString}
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log, revert}
+use std::evm::packed::{keccak_packed, encode_packed}
+use super::addresses_registry::RegistryMsg
+use super::types::LatestTroveData
+use super::storage_string
+use super::revert_texts as text
+#[event]
+pub struct Transfer {
+    #[indexed]
+    pub from: Address,
+    #[indexed]
+    pub to: Address,
+    #[indexed]
+    pub token_id: u256,
+}
+#[event]
+pub struct Approval {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub approved: Address,
+    #[indexed]
+    pub token_id: u256,
+}
+#[event]
+pub struct ApprovalForAll {
+    #[indexed]
+    pub owner: Address,
+    #[indexed]
+    pub operator: Address,
+    pub approved: bool,
+}
+fn slot(_ key: u256, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((key, root)) }
+fn owner_raw(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
+    Address { inner: storage.sload(slot(id, 2)) }
+}
+fn owner_of(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
+    let owner = owner_raw(id)
+    text::require(owner != Address::zero(), text::nft_missing())
+    owner
+}
+fn balance(_ owner: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(slot(owner.inner, 3)) }
+fn approval(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) { Address { inner: storage.sload(slot(id, 4)) } }
+fn operator_slot(_ owner: Address, _ operator: Address) -> u256 uses (mem: mut RawMem) { slot(operator.inner, slot(owner.inner, 5)) }
+fn approved_all(_ owner: Address, _ operator: Address) -> bool uses (mem: mut RawMem, storage: RawStorage) { storage.sload(operator_slot(owner, operator)) != 0 }
+fn authorize(_ id: u256) uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+    let owner = owner_of(id)
+    let caller = ctx.caller()
+    text::require(caller == owner || approved_all(owner, caller) || approval(id) == caller, text::nft_transfer_auth())
+}
+#[arithmetic(unchecked)]
+fn transfer(_ from: Address, _ to: Address, _ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    text::require(owner_of(id) == from, text::nft_wrong_from())
+    text::require(to != Address::zero(), text::nft_zero_to())
+    storage.sstore(slot: slot(id, 4), value: 0)
+    storage.sstore(slot: slot(from.inner, 3), value: balance(from) - 1)
+    storage.sstore(slot: slot(to.inner, 3), value: balance(to) + 1)
+    storage.sstore(slot: slot(id, 2), value: to.inner)
+    log.emit(Transfer { from, to, token_id: id })
+}
+#[arithmetic(unchecked)]
+fn mint(_ to: Address, _ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    text::require(to != Address::zero(), text::nft_zero_mint())
+    text::require(owner_raw(id) == Address::zero(), text::nft_duplicate())
+    storage.sstore(slot: slot(to.inner, 3), value: balance(to) + 1)
+    storage.sstore(slot: slot(id, 2), value: to.inner)
+    log.emit(Transfer { from: Address::zero(), to, token_id: id })
+}
+#[arithmetic(unchecked)]
+fn burn(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+    let owner = owner_of(id)
+    storage.sstore(slot: slot(id, 4), value: 0)
+    storage.sstore(slot: slot(owner.inner, 3), value: balance(owner) - 1)
+    storage.sstore(slot: slot(id, 2), value: 0)
+    log.emit(Transfer { from: owner, to: Address::zero(), token_id: id })
+}
+pub msg ReceiverMsg {
+    #[selector = sol("onERC721Received(address,address,uint256,bytes)")]
+    Receive { operator: Address, from: Address, id: u256, data: Bytes } -> Bytes4,
+}
+fn check_receiver(_ from: Address, _ to: Address, _ id: u256, _ data: own Bytes)
+uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    if ctx.extcodesize(to) == 0 { return }
+    let result = to.try_call(ReceiverMsg::Receive { operator: ctx.caller(), from, id, data })
+    if !result.success() && result.returndata_len() == 0 { text::require(false, text::nft_receiver()) }
+    let selector: Bytes4 = result.decode()
+    text::require(selector.word() == 0x150b7a0200000000000000000000000000000000000000000000000000000000, text::nft_receiver())
+}
+pub msg NftDependencyMsg {
+    #[selector = sol("name()")]
+    Name -> DynString,
+    #[selector = sol("symbol()")]
+    Symbol -> DynString,
+    #[selector = sol("getLatestTroveData(uint256)")]
+    Latest { id: u256 } -> LatestTroveData,
+    #[selector = sol("getTroveStatus(uint256)")]
+    Status { id: u256 } -> u8,
+    #[selector = sol("uri((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
+    Uri { data: (u256, Address, Address, Address, u256, u256, u256, u8) } -> DynString,
+}
+pub msg TroveNFTMsg {
+    #[selector = sol("supportsInterface(bytes4)")]
+    SupportsInterface { id: Bytes4 } -> bool,
+    #[selector = sol("balanceOf(address)")]
+    BalanceOf { owner: Address } -> u256,
+    #[selector = sol("ownerOf(uint256)")]
+    OwnerOf { id: u256 } -> Address,
+    #[selector = sol("name()")]
+    Name -> DynString,
+    #[selector = sol("symbol()")]
+    Symbol -> DynString,
+    #[selector = sol("tokenURI(uint256)")]
+    TokenURI { id: u256 } -> DynString,
+    #[selector = sol("troveManager()")]
+    TroveManager -> Address,
+    #[selector = sol("metadataNFT()")]
+    MetadataNFT -> Address,
+    #[selector = sol("approve(address,uint256)")]
+    Approve { to: Address, id: u256 },
+    #[selector = sol("getApproved(uint256)")]
+    GetApproved { id: u256 } -> Address,
+    #[selector = sol("setApprovalForAll(address,bool)")]
+    SetApprovalForAll { operator: Address, approved: bool },
+    #[selector = sol("isApprovedForAll(address,address)")]
+    IsApprovedForAll { owner: Address, operator: Address } -> bool,
+    #[selector = sol("transferFrom(address,address,uint256)")]
+    TransferFrom { from: Address, to: Address, id: u256 },
+    #[selector = sol("safeTransferFrom(address,address,uint256)")]
+    SafeTransferFrom { from: Address, to: Address, id: u256 },
+    #[selector = sol("safeTransferFrom(address,address,uint256,bytes)")]
+    SafeTransferFromData { from: Address, to: Address, id: u256, data: Bytes },
+    #[selector = sol("mint(address,uint256)")]
+    Mint { to: Address, id: u256 },
+    #[selector = sol("burn(uint256)")]
+    Burn { id: u256 },
+}
+pub contract TroveNFT {
+    manager: Address,
+    collateral: Address,
+    bold: Address,
+    metadata: Address,
+    init(registry: Address) uses (mut manager, mut collateral, mut bold, mut metadata, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+        let token = registry.static(RegistryMsg::GetcollToken {})
+        let name = token.static(NftDependencyMsg::Name {})
+        storage_string::initialize(0, encode_packed(("Liquity V2 - ", name.as_bytes())).as_bytes())
+        let symbol_token = registry.static(RegistryMsg::GetcollToken {})
+        let symbol = symbol_token.static(NftDependencyMsg::Symbol {})
+        storage_string::initialize(1, encode_packed(("LV2_", symbol.as_bytes())).as_bytes())
+        manager = registry.static(RegistryMsg::GettroveManager {})
+        collateral = registry.static(RegistryMsg::GetcollToken {})
+        metadata = registry.static(RegistryMsg::GetmetadataNFT {})
+        bold = registry.static(RegistryMsg::GetboldToken {})
+    }
+    recv TroveNFTMsg {
+        SupportsInterface { id } -> bool {
+            let selector = id.word() >> 224
+            selector == 0x80ac58cd || selector == 0x5b5e139f || selector == 0x01ffc9a7
+        }
+        BalanceOf { owner } -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+            text::require(owner != Address::zero(), text::nft_zero_owner())
+            balance(owner)
+        }
+        OwnerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { owner_of(id) }
+        Name -> DynString uses (mem: mut RawMem, storage: RawStorage) { storage_string::load(0) }
+        Symbol -> DynString uses (mem: mut RawMem, storage: RawStorage) { storage_string::load(1) }
+        TroveManager -> Address uses (manager) { manager }
+        MetadataNFT -> Address uses (metadata) { metadata }
+        TokenURI { id } -> DynString uses (manager, collateral, bold, metadata, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+            let latest = manager.static(NftDependencyMsg::Latest { id })
+            let owner = owner_of(id)
+            let status = manager.static(NftDependencyMsg::Status { id })
+            if status > 4 { revert(()) }
+            metadata.static(NftDependencyMsg::Uri { data: (id, owner, collateral, bold, latest.entire_coll, latest.entire_debt, latest.annual_interest_rate, status) })
+        }
+        Approve { to, id } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let owner = owner_of(id)
+            text::require(to != owner, text::nft_approval_owner())
+            text::require(ctx.caller() == owner || approved_all(owner, ctx.caller()), text::nft_approval_auth())
+            storage.sstore(slot: slot(id, 4), value: to.inner)
+            log.emit(Approval { owner, approved: to, token_id: id })
+        }
+        GetApproved { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { owner_of(id)
+            approval(id)
+        }
+        SetApprovalForAll { operator, approved } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            let owner = ctx.caller()
+            text::require(owner != operator, text::nft_self_approval())
+            storage.sstore(slot: operator_slot(owner, operator), value: if approved { 1 } else { 0 })
+            log.emit(ApprovalForAll { owner, operator, approved })
+        }
+        IsApprovedForAll { owner, operator } -> bool uses (mem: mut RawMem, storage: RawStorage) { approved_all(owner, operator) }
+        TransferFrom { from, to, id } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            authorize(id)
+            transfer(from, to, id)
+        }
+        SafeTransferFrom { from, to, id } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            authorize(id)
+            transfer(from, to, id)
+            check_receiver(from, to, id, Bytes::from_payload(source: core::ptr::MemSpan::empty()))
+        }
+        SafeTransferFromData { from, to, id, data } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            authorize(id)
+            transfer(from, to, id)
+            check_receiver(from, to, id, data)
+        }
+        Mint { to, id } uses (manager, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            text::require(ctx.caller() == manager, text::nft_manager())
+            mint(to, id)
+        }
+        Burn { id } uses (manager, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+            text::require(ctx.caller() == manager, text::nft_manager())
+            burn(id)
+        }
+    }
+}

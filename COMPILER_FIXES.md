@@ -3,7 +3,7 @@
 Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
 Base upstream/master: `f00132a97429f966804d70c40206ef40ebca6960`.
 
-One existing upstream fix has been integrated (details below). No new compiler fixes have been authored.
+Two existing upstream fixes have been integrated (details below). No new compiler fixes have been authored.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.
@@ -38,3 +38,26 @@ Solidity order of state reads/writes. BOLDToken binds its StorageMaps independen
 of scalar storage fields. Its EIP712 metadata uses an explicit flat Solidity
 return instead of Fe's single dynamic tuple return; this is ABI adaptation, not a
 compiler modification. All resulting protocol runtime tests pass.
+
+## Integrated: unpadded dynamic ABI payloads (upstream PR #1587)
+
+- PR: https://github.com/argotorg/fe/pull/1587
+- Local branch: `fix/1587-unpadded-dynamic-abi`
+- PR head: `c22b24357` (full revision pinned in `reference_manifest.json`).
+- Integration merge: `5903581eecd9ce0edf78884feeef087729973e5d`.
+- Trigger: ERC721 `safeTransferFrom(address,address,uint256,bytes)` with one
+  actual data byte and omitted trailing padding succeeds in Solidity, but the
+  previous Fe decoder reverted. `testAbiValidationAndUnpaddedBytes` reproduces it.
+- Regression: `crates/fe/tests/fixtures/fe_test/abi_unpadded_dynamic_payload.fe`;
+  checks bounded copies, zeroed allocation padding, nested dynamic arrays,
+  decode/re-encode paths and rejection of missing actual bytes.
+- Newsfragment: `newsfragments/1587.bugfix.md`.
+- Existing upstream PR; no new submission is needed for this fix.
+- Validation is recorded in `tests/results/compiler-1587.log` and the full
+  protocol run in `tests/results/sorted-nft.log`.
+
+SortedTroves and TroveNFT read-only external calls use Fe's mutable `Call`
+capability for STATICCALL. Its conservative ABI metadata says `nonpayable`;
+`export_abi.py` explicitly normalizes the three runtime-tested view functions.
+Raw-storage getters declare their capability per handler to retain `view` ABI
+metadata. No compiler modifications are needed for these metadata adaptations.

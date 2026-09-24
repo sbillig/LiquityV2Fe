@@ -10,3 +10,6 @@ pub use default_pool
 pub use coll_surplus_pool
 pub use active_pool
 pub use bold_token
+pub use sorted_troves
+pub use storage_string
+pub use trove_nft

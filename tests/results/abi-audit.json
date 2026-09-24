@@ -82,8 +82,8 @@
     "metadata_refinements": [
       "eip712Domain: explicit flat runtime return",
       "symbol(): pure implementation of view function",
-      "name(): pure implementation of view function",
-      "decimals(): pure implementation of view function"
+      "decimals(): pure implementation of view function",
+      "name(): pure implementation of view function"
     ],
     "declaration_only": [
       [
@@ -106,5 +106,43 @@
       ]
     ],
     "function_count": 24
+  },
+  "SortedTroves": {
+    "compiler_abi_sha256": "9ae77f66778df745734b30cdb94e25d9da20b50a034f2c92785ab9acb1c94251",
+    "reference_artifact_sha256": "fc10507ffe434d3a1093b16e13f524a8a7edb045651c9ede5d086c55c98e1a4e",
+    "protocol_abi_sha256": "29265a8b57de80bff0be98e5cc9d6a6dc554564b12b15d8961a907423622d46a",
+    "metadata_refinements": [
+      "nodes: static tuple has identical flat runtime encoding",
+      "batches: static tuple has identical flat runtime encoding",
+      "validInsertPosition: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
+      "findInsertPosition: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
+      "findInsertPosition: static tuple has identical flat runtime encoding",
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 23
+  },
+  "TroveNFT": {
+    "compiler_abi_sha256": "a8ee70a4b75f8af8db2eea8cdd82cb678371e518b0b44baa274ec430fabe14c5",
+    "reference_artifact_sha256": "577e2d4ce92d371e3710f711f1795e7c133ce2b9aff7c1350c9abddcd9536759",
+    "protocol_abi_sha256": "acf38ba50ddc9ddf7c0b51037fcfc21259ce65aed1a450129536fe042008e60f",
+    "metadata_refinements": [
+      "tokenURI: read-only STATICCALL; Fe Call capability conservatively implies nonpayable",
+      "supportsInterface(bytes4): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ]
+    ],
+    "function_count": 17
   }
 }

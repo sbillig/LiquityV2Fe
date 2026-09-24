@@ -50,8 +50,9 @@ Source files retain the corresponding upstream SPDX identifiers. The upstream
 Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
-DefaultPool, CollSurplusPool, ActivePool and BoldToken (including ERC20Permit and
-EIP712). The current suite passes 53 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
+EIP712), SortedTroves (including batch operations), and TroveNFT. The current suite
+passes 70 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 BorrowerOperations/TroveManager and StabilityPool are not yet ported; this pool
@@ -60,10 +61,23 @@ workflow is not a complete borrowing/liquidation deployment.
 Use `build/protocol/*.abi.json` for protocol integration after `scripts/test.sh`.
 The ABI export validates every function signature, return shape and emitted event
 against Solidity. It accounts explicitly for pure implementations of view getters,
-the flat seven-value EIP712 domain return, and unused reference declarations.
+the flat seven-value EIP712 domain return, static tuple output metadata,
+conservative STATICCALL capability metadata, and unused reference declarations.
 Original Fe compiler ABIs remain in `build/*.abi.json`; the audit is recorded in
 `tests/results/abi-audit.json`. Runtime parity is checked separately by the EVM tests.
 
 The full outstanding source inventory is in `port_status.json` (102 core/helper
 source files) and `governance_status.json` (27 governance source files). Pinned
 OpenZeppelin, Solady and governance trees are checked for source drift before tests.
+
+SortedTroves tests compare exact list and batch storage, search hints, equal-rate
+ordering, access control and stateful randomized operations. TroveNFT tests cover
+ERC721 events and approvals, callback rollback and reentrancy, constructor strings,
+metadata dependency calls and unpadded transfer calldata. Its TroveManager and
+MetadataNFT dependencies remain test doubles; actual SVG/JSON rendering is pending.
+
+The local compiler integrates existing upstream PRs #1592 and #1587; their 10 and
+14 dedicated regression tests pass. See `COMPILER_FIXES.md`. The latest complete
+validation log and source/artifact hashes are `tests/results/sorted-nft.log` and
+`tests/results/sorted-nft.json`. After a new successful logged test run, record its
+provenance with `python3 scripts/record_validation.py <log-path>` before edits.

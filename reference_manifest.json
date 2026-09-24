@@ -13,9 +13,16 @@
         "revision": "04baed1a6b2e24e3a70fda5cfb0a9d781ae743e4",
         "regression": "crates/fe/tests/fixtures/fe_test/long_error_event_names.fe",
         "newsfragment": "newsfragments/+long-error-event-names.bugfix.md"
+      },
+      {
+        "pr": "https://github.com/argotorg/fe/pull/1587",
+        "branch": "fix/1587-unpadded-dynamic-abi",
+        "revision": "c22b24357063592e282efd6efc16ce831413fce7",
+        "regression": "crates/fe/tests/fixtures/fe_test/abi_unpadded_dynamic_payload.fe",
+        "newsfragment": "newsfragments/1587.bugfix.md"
       }
     ],
-    "integration_revision": "4db4b8110b49e41c3df2698d12969be011f56cde"
+    "integration_revision": "5903581eecd9ce0edf78884feeef087729973e5d"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",

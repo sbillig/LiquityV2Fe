@@ -285,3 +285,190 @@ pub fn ecdsa_invalid() -> DynString uses (mem: mut RawMem) {
     mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45434453413a20696e76616c6964207369676e61747572650000000000000000)
     DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
 }
+
+// SortedTroves
+pub fn sorted_name() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665730000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 12))
+}
+
+// SortedTroves: List already contains the node
+pub fn sorted_duplicate() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420616c726561647920636f6e7461)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x696e7320746865206e6f64650000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 44))
+}
+
+// SortedTroves: _id cannot be the root node's ID
+pub fn sorted_root() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f69642063616e6e6f742062652074686520)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x726f6f74206e6f64652773204944000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
+}
+
+// SortedTroves: _troveId cannot be the root node's ID
+pub fn sorted_batch_root() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f74726f766549642063616e6e6f74206265)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x2074686520726f6f74206e6f6465277320494400000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 51))
+}
+
+// SortedTroves: _batchId cannot be zero
+pub fn sorted_batch_zero() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f626174636849642063616e6e6f74206265)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x207a65726f000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
+}
+
+// SortedTroves: List does not contain the id
+pub fn sorted_missing() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x61696e2074686520696400000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 42))
+}
+
+// SortedTroves: Must use removeFromBatch() to remove batched node
+pub fn sorted_remove_batched() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374207573652072656d6f766546726f)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6d4261746368282920746f2072656d6f76652062617463686564206e6f646500)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 63))
+}
+
+// SortedTroves: Must not reInsert() batched node
+pub fn sorted_reinsert_batched() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374206e6f74207265496e7365727428)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x292062617463686564206e6f6465000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
+}
+
+// SortedTroves: Must use remove() to remove non-batched node
+pub fn sorted_remove_unbatched() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374207573652072656d6f7665282920)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x746f2072656d6f7665206e6f6e2d62617463686564206e6f6465000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 58))
+}
+
+// SortedTroves: List does not contain the batch
+pub fn sorted_missing_batch() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x61696e2074686520626174636800000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 45))
+}
+
+// SortedTroves: Caller is not BorrowerOperations nor TroveManager
+pub fn sorted_bo_tm() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a2043616c6c6572206973206e6f7420426f7272)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f7765724f7065726174696f6e73206e6f722054726f76654d616e6167657200)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 63))
+}
+
+// SortedTroves: Caller is not BorrowerOperations
+pub fn sorted_bo() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a2043616c6c6572206973206e6f7420426f7272)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f7765724f7065726174696f6e73000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
+}
+
+// TroveNFT: Caller is not the TroveManager contract
+pub fn nft_manager() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x54726f76654e46543a2043616c6c6572206973206e6f74207468652054726f76)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x654d616e6167657220636f6e7472616374000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 49))
+}
+
+// ERC721: address zero is not a valid owner
+pub fn nft_zero_owner() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a2061646472657373207a65726f206973206e6f742061207661)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6c6964206f776e65720000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 41))
+}
+
+// ERC721: invalid token ID
+pub fn nft_missing() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20696e76616c696420746f6b656e2049440000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
+}
+
+// ERC721: approval to current owner
+pub fn nft_approval_owner() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f76616c20746f2063757272656e74206f776e65)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7200000000000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
+}
+
+// ERC721: approve caller is not token owner or approved for all
+pub fn nft_approval_auth() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f76652063616c6c6572206973206e6f7420746f)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6b656e206f776e6572206f7220617070726f76656420666f7220616c6c000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 61))
+}
+
+// ERC721: approve to caller
+pub fn nft_self_approval() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f766520746f2063616c6c657200000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 25))
+}
+
+// ERC721: caller is not token owner or approved
+pub fn nft_transfer_auth() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a2063616c6c6572206973206e6f7420746f6b656e206f776e65)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x72206f7220617070726f76656400000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 45))
+}
+
+// ERC721: transfer from incorrect owner
+pub fn nft_wrong_from() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e736665722066726f6d20696e636f727265637420)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f776e6572000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
+}
+
+// ERC721: transfer to the zero address
+pub fn nft_zero_to() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e7366657220746f20746865207a65726f20616464)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7265737300000000000000000000000000000000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 36))
+}
+
+// ERC721: mint to the zero address
+pub fn nft_zero_mint() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a206d696e7420746f20746865207a65726f2061646472657373)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
+}
+
+// ERC721: token already minted
+pub fn nft_duplicate() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(32)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20746f6b656e20616c7265616479206d696e74656400000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 28))
+}
+
+// ERC721: transfer to non ERC721Receiver implementer
+pub fn nft_receiver() -> DynString uses (mem: mut RawMem) {
+    let data = core::ptr::alloc_bytes(64)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e7366657220746f206e6f6e204552433732315265)
+    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x63656976657220696d706c656d656e7465720000000000000000000000000000)
+    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 50))
+}

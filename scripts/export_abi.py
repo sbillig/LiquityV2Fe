@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT']
 DECLARATION_ONLY = {
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
     'BoldToken': {('event', 'EIP712DomainChanged()'),
@@ -45,6 +45,19 @@ for contract in CONTRACTS:
             assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
             entry['outputs'] = outputs[0]['components']
             refinements.append('eip712Domain: explicit flat runtime return')
+        if (contract == 'TroveNFT' and key(entry) == ('function', 'tokenURI(uint256)')) or (contract == 'SortedTroves' and key(entry) in {
+            ('function', 'validInsertPosition(uint256,uint256,uint256)'),
+            ('function', 'findInsertPosition(uint256,uint256,uint256)'),
+        }):
+            assert entry['stateMutability'] == 'nonpayable'
+            entry['stateMutability'] = 'view'
+            refinements.append(entry['name'] + ': read-only STATICCALL; Fe Call capability conservatively implies nonpayable')
+        if contract == 'SortedTroves' and entry.get('name') in ('nodes', 'batches', 'findInsertPosition'):
+            outputs = entry['outputs']
+            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
+            assert all(c['type'] in ('uint256', 'address', 'bool') for c in outputs[0]['components'])
+            entry['outputs'] = outputs[0]['components']
+            refinements.append(entry['name'] + ': static tuple has identical flat runtime encoding')
     fe = {key(e): e for e in normalized}
     sol = {key(e): e for e in reference}
     missing = set(sol) - set(fe)
