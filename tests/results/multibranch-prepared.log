@@ -1,0 +1,12 @@
+No files changed, compilation skipped
+
+Ran 6 tests for test/MultiBranchSystem.t.sol:MultiBranchSystemTest
+[PASS] testMultiBranchAllThreeRealPriceFeeds() (gas: 262841859)
+[PASS] testMultiBranchConnectedRedemptionsAndShutdown() (gas: 252692553)
+[PASS] testMultiBranchFuzzRedemptionLiquidationAndShutdown(uint96,uint16) (runs: 1024, μ: 252691270, ~: 252691894)
+[PASS] testMultiBranchOracleFailureIsolation() (gas: 259945510)
+[PASS] testMultiBranchProtocolInterestToGovernanceAndBribes() (gas: 297488533)
+[PASS] testMultiBranchReferenceLifecycle() (gas: 64548067)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 72.25s (72.76s CPU time)
+
+Ran 1 test suite in 72.26s (72.25s CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

@@ -129,9 +129,9 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Implement Governance and integrate/validate the prepared initiatives.
+1. Finish remaining metadata utility and interface coverage.
 2. Remaining helper/library interfaces.
-3. Governance and full multi-branch deployment/lifecycle/invariant validation.
+3. Reproducible deployment and broader multi-branch stateful invariant validation.
 
 Preserve Solidity operation ordering, revert data and rounding. SortedTroves
 reinsertion occurs before updating the manager's reported interest rate.
@@ -278,3 +278,13 @@ branch fix/reject-oversized-string-constants. The CLI reproducer now reports
 error 3-0033 instead of panicking; both regression tests and formatting pass.
 The full HIR suite is still running in session 12102. The protocol compiler
 release binary remains unchanged. Earlier pending/push notes above are historical.
+
+## Multi-branch tests integrated
+
+All six MultiBranchSystem tests pass in root against the validated root artifacts,
+including 1,024 fuzz runs. The test/source/artifact hashes are captured in
+tests/results/multibranch.json. These add three-branch redemptions, liquidation,
+shutdown isolation, actual price feeds, protocol interest routed to Governance
+and bribe claims. The six tests supplement the 331-test full checkpoint; a new
+complete test.sh run has not yet been made after their addition. A reproducible
+non-test deployment command and broader stateful invariants remain outstanding.
