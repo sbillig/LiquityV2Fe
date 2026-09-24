@@ -168,9 +168,16 @@
     ]
   },
   "contracts/src/HintHelpers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/hint_helpers.fe",
+      "src/helper_calls.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/helpers.log"
+    ]
   },
   "contracts/src/Interfaces/IActivePool.sol": {
     "status": "pending",
@@ -251,9 +258,16 @@
     "verification": []
   },
   "contracts/src/Interfaces/IHintHelpers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/hint_helpers.fe",
+      "src/helper_calls.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/helpers.log"
+    ]
   },
   "contracts/src/Interfaces/IInterestRouter.sol": {
     "status": "pending",
@@ -291,9 +305,16 @@
     "verification": []
   },
   "contracts/src/Interfaces/IMultiTroveGetter.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/multi_trove_getter.fe",
+      "src/helper_calls.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/helpers.log"
+    ]
   },
   "contracts/src/Interfaces/IPriceFeed.sol": {
     "status": "pending",
@@ -411,9 +432,16 @@
     "verification": []
   },
   "contracts/src/MultiTroveGetter.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/multi_trove_getter.fe",
+      "src/helper_calls.fe"
+    ],
+    "verification": [
+      "tests/HelperParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/helpers.log"
+    ]
   },
   "contracts/src/NFTMetadata/MetadataNFT.sol": {
     "status": "implemented_differential_tests_pass",

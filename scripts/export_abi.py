@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed']
+CONTRACTS = ['AddressesRegistry', 'GasPool', 'DefaultPool', 'CollSurplusPool', 'ActivePool', 'BoldToken', 'SortedTroves', 'TroveNFT', 'FixedAssetReader', 'MetadataNFT', 'AddRemoveManagers', 'LiquityBase', 'CollateralRegistry', 'StabilityPool', 'TroveManager', 'BorrowerOperations', 'WETHPriceFeed', 'RETHPriceFeed', 'WSTETHPriceFeed', 'HintHelpers', 'MultiTroveGetter']
 DECLARATION_ONLY = {
     'AddRemoveManagers': {('error', 'NotOwnerNorAddManager()'), ('error', 'NotOwnerNorRemoveManager()')},
     'ActivePool': {('event', 'ActivePoolBoldDebtUpdated(uint256)')},
@@ -21,6 +21,18 @@ DECLARATION_ONLY = {
 }
 
 READ_ONLY_CAPABILITIES = {
+    'HintHelpers': ('STATICCALL', {
+        'getApproxHint(uint256,uint256,uint256,uint256)',
+        'predictOpenTroveUpfrontFee(uint256,uint256,uint256)',
+        'predictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)',
+        'forcePredictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)',
+        'predictAdjustTroveUpfrontFee(uint256,uint256,uint256)',
+        'predictAdjustBatchInterestRateUpfrontFee(uint256,address,uint256)',
+        'predictOpenTroveAndJoinBatchUpfrontFee(uint256,uint256,address)',
+        'predictJoinBatchInterestRateUpfrontFee(uint256,uint256,address)',
+        'predictRemoveFromBatchUpfrontFee(uint256,uint256,uint256)',
+    }),
+    'MultiTroveGetter': ('STATICCALL', {'getMultipleSortedTroves(uint256,int256,uint256)', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'}),
     'BorrowerOperations': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'TroveManager': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
     'StabilityPool': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getDepositorYieldGainWithPending(address)'}),
@@ -35,6 +47,7 @@ READ_ONLY_CAPABILITIES = {
     }),
 }
 STATIC_TUPLE_OUTPUTS = {
+    'HintHelpers': {'getApproxHint'},
     'WETHPriceFeed': {'ethUsdOracle', 'fetchPrice', 'fetchRedemptionPrice'},
     'RETHPriceFeed': {'ethUsdOracle', 'rEthEthOracle', 'fetchPrice', 'fetchRedemptionPrice'},
     'WSTETHPriceFeed': {'ethUsdOracle', 'stEthUsdOracle', 'fetchPrice', 'fetchRedemptionPrice'},
@@ -96,6 +109,12 @@ for contract in CONTRACTS:
         refinements.append('constructor: registry plus three fixed, non-upgradeable delegate modules; event/error ABI includes module emissions at the manager address')
     normalized = copy.deepcopy(compiled)
     for entry in normalized:
+        if contract == 'MultiTroveGetter' and key(entry) == ('function', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'):
+            outputs = entry['outputs']
+            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
+            assert [c['type'] for c in outputs[0]['components']] == ['tuple[]', 'uint256']
+            entry['outputs'] = outputs[0]['components']
+            refinements.append('getDebtPerInterestRateAscending: explicit flat dynamic-array and cursor runtime return')
         if contract == 'BoldToken' and key(entry) == ('function', 'eip712Domain()'):
             outputs = entry['outputs']
             assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'

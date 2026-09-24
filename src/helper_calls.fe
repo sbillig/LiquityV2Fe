@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::sol
+use std::evm::Address
+use super::types::{TroveChange, LatestTroveData, LatestBatchData}
+pub msg HelperRegistryMsg {
+    #[selector = sol("getTroveManager(uint256)")]
+    Manager { index: u256 } -> Address,
+}
+pub msg HelperManagerMsg {
+    #[selector = sol("activePool()")]
+    Active -> Address,
+    #[selector = sol("sortedTroves()")]
+    Sorted -> Address,
+    #[selector = sol("getTroveIdsCount()")]
+    Count -> u256,
+    #[selector = sol("getTroveFromTroveIdsArray(uint256)")]
+    Id { index: u256 } -> u256,
+    #[selector = sol("getTroveAnnualInterestRate(uint256)")]
+    Rate { id: u256 } -> u256,
+    #[selector = sol("getLatestTroveData(uint256)")]
+    Trove { id: u256 } -> LatestTroveData,
+    #[selector = sol("getLatestBatchData(address)")]
+    Batch { manager: Address } -> LatestBatchData,
+    #[selector = sol("Troves(uint256)")]
+    Stored { id: u256 } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256),
+    #[selector = sol("rewardSnapshots(uint256)")]
+    Snapshot { id: u256 } -> (u256, u256),
+}
+pub msg HelperPoolMsg {
+    #[selector = sol("getNewApproxAvgInterestRateFromTroveChange((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))")]
+    Average { change: TroveChange } -> u256,
+}
+pub msg HelperSortedMsg {
+    #[selector = sol("getLast()")]
+    Last -> u256,
+    #[selector = sol("getFirst()")]
+    First -> u256,
+    #[selector = sol("getNext(uint256)")]
+    Next { id: u256 } -> u256,
+    #[selector = sol("getPrev(uint256)")]
+    Prev { id: u256 } -> u256,
+    #[selector = sol("contains(uint256)")]
+    Contains { id: u256 } -> bool,
+    #[selector = sol("getSize()")]
+    Size -> u256,
+    #[selector = sol("nodes(uint256)")]
+    Node { id: u256 } -> (u256, u256, Address, bool),
+}

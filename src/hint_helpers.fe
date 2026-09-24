@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: BUSL-1.1
+use std::abi::{sol, DynString}
+use std::evm::{Address, Ctx, Call, RawMem}
+use std::evm::packed::keccak_packed
+use super::helper_calls::*
+use super::types::{TroveChange, LatestTroveData}
+use super::liquity_math as math
+use super::constants::{INTEREST_RATE_ADJ_COOLDOWN, UPFRONT_INTEREST_PERIOD}
+pub fn fee(_ pool: Address, _ change: TroveChange, _ debt: u256) -> u256 uses (call: mut Call) {
+    let avg = pool.static(HelperPoolMsg::Average { change })
+    math::calc_interest(debt * avg, UPFRONT_INTEREST_PERIOD)
+}
+pub fn individual_rate(_ pool: Address, _ trove: LatestTroveData, _ rate: u256) -> u256 uses (call: mut Call) {
+    let mut change = TroveChange::zero()
+    change.applied_redist_bold_debt_gain = trove.redist_bold_debt_gain
+    change.new_weighted_recorded_debt = trove.entire_debt * rate
+    change.old_weighted_recorded_debt = trove.weighted_recorded_debt
+    fee(pool, change, trove.entire_debt)
+}
+pub msg HintHelpersMsg {
+    #[selector = sol("NAME()")]
+    Name -> DynString,
+    #[selector = sol("collateralRegistry()")]
+    Registry -> Address,
+    #[selector = sol("getApproxHint(uint256,uint256,uint256,uint256)")]
+    Approx { index: u256, rate: u256, trials: u256, seed: u256 } -> (u256, u256, u256),
+    #[selector = sol("predictOpenTroveUpfrontFee(uint256,uint256,uint256)")]
+    Open { index: u256, amount: u256, rate: u256 } -> u256,
+    #[selector = sol("predictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)")]
+    AdjustRate { index: u256, id: u256, rate: u256 } -> u256,
+    #[selector = sol("forcePredictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)")]
+    ForceRate { index: u256, id: u256, rate: u256 } -> u256,
+    #[selector = sol("predictAdjustTroveUpfrontFee(uint256,uint256,uint256)")]
+    Adjust { index: u256, id: u256, amount: u256 } -> u256,
+    #[selector = sol("predictAdjustBatchInterestRateUpfrontFee(uint256,address,uint256)")]
+    BatchRate { index: u256, batch: Address, rate: u256 } -> u256,
+    #[selector = sol("predictOpenTroveAndJoinBatchUpfrontFee(uint256,uint256,address)")]
+    OpenBatch { index: u256, amount: u256, batch: Address } -> u256,
+    #[selector = sol("predictJoinBatchInterestRateUpfrontFee(uint256,uint256,address)")]
+    JoinBatch { index: u256, id: u256, batch: Address } -> u256,
+    #[selector = sol("predictRemoveFromBatchUpfrontFee(uint256,uint256,uint256)")]
+    RemoveBatch { index: u256, id: u256, rate: u256 } -> u256,
+}
+pub contract HintHelpers {
+    registry: Address,
+    init(collateral_registry: Address) uses (mut registry) { registry = collateral_registry }
+    recv HintHelpersMsg {
+        Name -> DynString uses (mem: mut RawMem) {
+            let p = core::ptr::alloc_bytes(32)
+            mem.mstore(addr: p, value: 0x48696e7448656c70657273000000000000000000000000000000000000000000)
+            DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 11))
+        }
+        Registry -> Address uses (registry) { registry }
+        Approx { index, rate, trials, seed } -> (u256, u256, u256) uses (registry, call: mut Call, mem: mut RawMem) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let sorted = manager.static(HelperManagerMsg::Sorted {})
+            let count = manager.static(HelperManagerMsg::Count {})
+            if count == 0 { return (0, 0, seed) }
+            let mut hint = sorted.static(HelperSortedMsg::Last {})
+            let mut diff = math::absolute_difference(rate, manager.static(HelperManagerMsg::Rate { id: hint }))
+            let mut random = seed
+            let mut i = 1
+            while i < trials {
+                random = keccak_packed(random)
+                let id = manager.static(HelperManagerMsg::Id { index: random % count })
+                if sorted.static(HelperSortedMsg::Contains { id }) {
+                    let current = manager.static(HelperManagerMsg::Rate { id })
+                    let distance = math::absolute_difference(current, rate)
+                    if distance < diff { diff = distance
+                        hint = id }
+                }
+                i += 1
+            }
+            (hint, diff, random)
+        }
+        Open { index, amount, rate } -> u256 uses (registry, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let mut change = TroveChange::zero()
+            change.debt_increase = amount
+            change.new_weighted_recorded_debt = amount * rate
+            fee(pool, change, amount)
+        }
+        AdjustRate { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let t = manager.static(HelperManagerMsg::Trove { id })
+            if rate == t.annual_interest_rate || ctx.timestamp() >= t.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
+            individual_rate(pool, t, rate)
+        }
+        ForceRate { index, id, rate } -> u256 uses (registry, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let t = manager.static(HelperManagerMsg::Trove { id })
+            individual_rate(pool, t, rate)
+        }
+        Adjust { index, id, amount } -> u256 uses (registry, call: mut Call) {
+            if amount == 0 { return 0 }
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let t = manager.static(HelperManagerMsg::Trove { id })
+            let batch = manager.static(HelperManagerMsg::Stored { id }).8
+            let mut change = TroveChange::zero()
+            change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+            change.debt_increase = amount
+            if batch == Address::zero() {
+                change.new_weighted_recorded_debt = (t.entire_debt + amount) * t.annual_interest_rate
+                change.old_weighted_recorded_debt = t.weighted_recorded_debt
+            } else {
+                let b = manager.static(HelperManagerMsg::Batch { manager: batch })
+                change.batch_accrued_management_fee = b.accrued_management_fee
+                change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + t.redist_bold_debt_gain + amount) * b.annual_interest_rate
+                change.old_weighted_recorded_debt = b.weighted_recorded_debt
+            }
+            fee(pool, change, amount)
+        }
+        BatchRate { index, batch, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let b = manager.static(HelperManagerMsg::Batch { manager: batch })
+            if rate == b.annual_interest_rate || ctx.timestamp() >= b.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
+            let mut change = TroveChange::zero()
+            change.batch_accrued_management_fee = b.accrued_management_fee
+            change.new_weighted_recorded_debt = b.entire_debt_without_redistribution * rate
+            change.old_weighted_recorded_debt = b.weighted_recorded_debt
+            fee(pool, change, b.entire_debt_without_redistribution)
+        }
+        OpenBatch { index, amount, batch } -> u256 uses (registry, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let b = manager.static(HelperManagerMsg::Batch { manager: batch })
+            let mut change = TroveChange::zero()
+            change.debt_increase = amount
+            change.batch_accrued_management_fee = b.accrued_management_fee
+            change.old_weighted_recorded_debt = b.weighted_recorded_debt
+            change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + amount) * b.annual_interest_rate
+            fee(pool, change, amount)
+        }
+        JoinBatch { index, id, batch } -> u256 uses (registry, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let t = manager.static(HelperManagerMsg::Trove { id })
+            let b = manager.static(HelperManagerMsg::Batch { manager: batch })
+            let mut change = TroveChange::zero()
+            change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+            change.batch_accrued_management_fee = b.accrued_management_fee
+            change.old_weighted_recorded_debt = b.weighted_recorded_debt + t.weighted_recorded_debt
+            change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + t.entire_debt) * b.annual_interest_rate
+            fee(pool, change, t.entire_debt)
+        }
+        RemoveBatch { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+            let manager = registry.static(HelperRegistryMsg::Manager { index })
+            let pool = manager.static(HelperManagerMsg::Active {})
+            let t = manager.static(HelperManagerMsg::Trove { id })
+            let batch = manager.static(HelperManagerMsg::Stored { id }).8
+            let b = manager.static(HelperManagerMsg::Batch { manager: batch })
+            if rate == b.annual_interest_rate || ctx.timestamp() >= t.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
+            let mut change = TroveChange::zero()
+            change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
+            change.batch_accrued_management_fee = b.accrued_management_fee
+            change.old_weighted_recorded_debt = b.weighted_recorded_debt
+            change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution - (t.entire_debt - t.redist_bold_debt_gain)) * b.annual_interest_rate + t.entire_debt * rate
+            fee(pool, change, t.entire_debt)
+        }
+    }
+}

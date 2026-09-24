@@ -373,6 +373,53 @@
     "compiler_standard_errors": [],
     "function_count": 8
   },
+  "HintHelpers": {
+    "runtime_bytes": 8106,
+    "initcode_bytes_before_arguments": 8343,
+    "compiler_abi_sha256": "f698be6dc585afcfc1a2d590db982f4c6f2f10a0b2ae067a8a9524bce46e9514",
+    "reference_artifact_sha256": "c9f3d6a5a84f533b7b2ce53fea9d14aff7179dba0b02ec731dc867ff22f8b2f9",
+    "protocol_abi_sha256": "69d3d150e5db286a026785f693f6c85cc4ef9ba1fce4e88fa7b5eb8a7fde4e73",
+    "metadata_refinements": [
+      "getApproxHint: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getApproxHint: static tuple has identical flat runtime encoding",
+      "predictOpenTroveUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictAdjustInterestRateUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "forcePredictAdjustInterestRateUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictAdjustTroveUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictAdjustBatchInterestRateUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictOpenTroveAndJoinBatchUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictJoinBatchInterestRateUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "predictRemoveFromBatchUpfrontFee: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "NAME(): pure implementation of view function"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [],
+    "function_count": 11
+  },
+  "MultiTroveGetter": {
+    "runtime_bytes": 4741,
+    "initcode_bytes_before_arguments": 4920,
+    "compiler_abi_sha256": "f31708fcbf35bda2680e7cb2e894da5c90acab0246028067f1aa3419468973df",
+    "reference_artifact_sha256": "c00b20a48c591650f7d95c3f377d80358673d5e5ed1299b6fa8dfba776f67433",
+    "protocol_abi_sha256": "9da869e1102c0500586dcbd7e24bcd3a7e86c92f7a7e17d6cec886970704430b",
+    "metadata_refinements": [
+      "getMultipleSortedTroves: read-only STATICCALL; Fe capability conservatively implies nonpayable",
+      "getDebtPerInterestRateAscending: explicit flat dynamic-array and cursor runtime return",
+      "getDebtPerInterestRateAscending: read-only STATICCALL; Fe capability conservatively implies nonpayable"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 3
+  },
   "MetadataGeometry": {
     "implementation_companion": true,
     "runtime_bytes": 18538,

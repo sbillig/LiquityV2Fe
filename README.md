@@ -51,8 +51,8 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
-EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations and the WETH/rETH/wstETH price feeds. The current suite
-passes 179 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations the WETH/rETH/wstETH price feeds, HintHelpers and MultiTroveGetter. The current suite
+passes 186 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
@@ -86,8 +86,8 @@ arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes ar
 
 The local compiler integrates existing upstream PRs #1592, #1587 and #1585; their 10 and
 14 execution regressions and 218 HIR unit tests pass. See `COMPILER_FIXES.md`. The latest complete
-validation log and source/artifact hashes are `tests/results/trove-manager.log` and
-`tests/results/trove-manager.json`. After a new successful logged test run, record its
+validation log and source/artifact hashes are `tests/results/helpers.log` and
+`tests/results/helpers.json`. After a new successful logged test run, record its
 provenance with `python3 scripts/record_validation.py <log-path>` before edits.
 
 CollateralRegistry tests cover branch allocation, rounding remainders, fallback
@@ -117,4 +117,11 @@ validation log and source/artifact hashes are in `tests/results/borrower-operati
 The three price feeds retain the original Solidity constructors and public ABI.
 Their tests cover normal/redemption prices, strict staleness, malformed answers,
 precision errors, shutdown fallback and protection against external-call gas
-exhaustion. The latest complete validation is `tests/results/price-feeds.*`.
+exhaustion. The price-feed checkpoint is recorded in `tests/results/price-feeds.*`.
+
+HintHelpers and MultiTroveGetter preserve hint sampling, fee calculations, signed
+pagination and cursor behavior. Connected tests verify predicted fees against
+actual borrowing operations. The latest complete validation is
+`tests/results/helpers.*`. A separately tested compiler fix rejects integer
+expression literals wider than 256 bits; its branch, regression tests and
+newsfragment are documented in [COMPILER_FIXES.md](COMPILER_FIXES.md).

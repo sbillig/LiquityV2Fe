@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
+import {HintHelpers} from "../reference/bold/contracts/src/HintHelpers.sol";
+import {MultiTroveGetter} from "../reference/bold/contracts/src/MultiTroveGetter.sol";
+import {IMultiTroveGetter} from "../reference/bold/contracts/src/Interfaces/IMultiTroveGetter.sol";
 import {WETHPriceFeed} from "../reference/bold/contracts/src/PriceFeeds/WETHPriceFeed.sol";
 import {FeedOracle} from "./PriceFeedParity.t.sol";
 import {BorrowerOperations} from "../reference/bold/contracts/src/BorrowerOperations.sol";
@@ -38,6 +41,8 @@ contract BorrowerOperationsSystemTest {
         if(fe&&(keccak256(bytes(name))==keccak256("BorrowerOperations")||keccak256(bytes(name))==keccak256("BorrowerOpening")||keccak256(bytes(name))==keccak256("BorrowerAdjustments")||keccak256(bytes(name))==keccak256("BorrowerBatches")))return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_BORROWER_ARTIFACTS","build"),"/",name,".bin")));
         if(fe)return vm.parseBytes(vm.readFile(string.concat(BOSystemVm(address(vm)).envOr("LIQUITY_TEST_ARTIFACTS","build"),"/",name,".bin")));
         bytes32 k=keccak256(bytes(name));
+        if(k==keccak256("HintHelpers"))return type(HintHelpers).creationCode;
+        if(k==keccak256("MultiTroveGetter"))return type(MultiTroveGetter).creationCode;
         if(k==keccak256("WETHPriceFeed"))return type(WETHPriceFeed).creationCode;
         if(k==keccak256("BorrowerOperations"))return type(BorrowerOperations).creationCode;
         if(k==keccak256("AddressesRegistry"))return type(AddressesRegistry).creationCode;
@@ -149,6 +154,36 @@ contract BorrowerOperationsSystemTest {
     function testActualOracleFailureShutsDownBorrowingAndManager() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=runOracleShutdown(makeWithOracle(true,true));
         TimeVm(address(vm)).warp(1000);bytes32 expected=runOracleShutdown(makeWithOracle(false,true));require(actual==expected,"connected oracle shutdown parity");
+    }
+    address internal helperManager;
+    function getTroveManager(uint index) external view returns(address){return index==0?helperManager:address(0);}
+    function helperResult(HintHelpers hints,MultiTroveGetter getter) internal view returns(bytes32){
+        bytes32 page=keccak256(abi.encode(getter.getMultipleSortedTroves(0,0,10),getter.getMultipleSortedTroves(0,-1,10)));
+        (uint hint,uint distance,uint seed)=hints.getApproxHint(0,7e16,20,123);
+        (IMultiTroveGetter.DebtPerInterestRate[] memory data,uint cursor)=getter.getDebtPerInterestRateAscending(0,0,5);
+        return keccak256(abi.encode(page,hint,distance,seed,data,cursor));
+    }
+    function runHelpers(System memory s,bool fe) internal returns(bytes32){
+        helperManager=address(s.manager);
+        HintHelpers hints=HintHelpers(deploy(bytes.concat(code("HintHelpers",fe),abi.encode(address(this)))));
+        MultiTroveGetter getter=MultiTroveGetter(deploy(bytes.concat(code("MultiTroveGetter",fe),abi.encode(address(this)))));
+        uint expected=hints.predictOpenTroveUpfrontFee(0,3000e18,5e16);
+        open(s,1,ALICE,20e18,5e16);require(s.manager.getLatestTroveData(id(ALICE,1)).entireDebt==3000e18+expected,"open prediction");
+        open(s,2,BOB,10e18,6e16);open(s,3,ALICE,30e18,7e16);
+        expected=hints.predictAdjustInterestRateUpfrontFee(0,id(ALICE,1),8e16);
+        uint beforeDebt=s.manager.getLatestTroveData(id(ALICE,1)).entireDebt;
+        vm.prank(ALICE);s.bo.adjustTroveInterestRate(id(ALICE,1),8e16,0,0,expected);
+        require(s.manager.getLatestTroveData(id(ALICE,1)).entireDebt==beforeDebt+expected,"rate prediction");
+        s.bo.registerBatchManager(5e15,25e17,7e16,1e16,3600);
+        expected=hints.predictJoinBatchInterestRateUpfrontFee(0,id(ALICE,3),address(this));
+        beforeDebt=s.manager.getLatestTroveData(id(ALICE,3)).entireDebt;
+        vm.prank(ALICE);s.bo.setInterestBatchManager(id(ALICE,3),address(this),0,0,expected);
+        require(s.manager.getLatestTroveData(id(ALICE,3)).entireDebt==beforeDebt+expected,"batch prediction");
+        conserve(s);return helperResult(hints,getter);
+    }
+    function testActualFeePredictionsAndSortedGetter() public {
+        TimeVm(address(vm)).warp(1000);bytes32 actual=runHelpers(make(true),true);
+        TimeVm(address(vm)).warp(1000);bytes32 expected=runHelpers(make(false),false);require(actual==expected,"connected helper parity");
     }
     function testActualBorrowingLiquidationRedemptionAndShutdown() public {
         TimeVm(address(vm)).warp(1000);bytes32 actual=run(make(true));
