@@ -903,14 +903,30 @@
     ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/hybrid_helpers.fe",
+      "src/quote_calls.fe",
+      "src/hybrid_path.fe"
+    ],
+    "verification": [
+      "tests/HybridHelpersParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/flash-helpers.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpersV2.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/hybrid_helpers_v2.fe",
+      "src/quote_calls.fe",
+      "src/hybrid_path.fe"
+    ],
+    "verification": [
+      "tests/HybridHelpersParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/flash-helpers.log"
+    ]
   },
   "contracts/src/Zappers/Modules/Exchanges/UniV3Exchange.sol": {
     "status": "implemented_differential_tests_pass",
@@ -976,9 +992,16 @@
     "verification": []
   },
   "contracts/src/Zappers/Modules/FlashLoans/BalancerFlashLoan.sol": {
-    "status": "pending",
-    "fe": [],
-    "verification": []
+    "status": "implemented_differential_tests_pass",
+    "fe": [
+      "src/balancer_flash_loan.fe",
+      "src/balancer_errors.fe"
+    ],
+    "verification": [
+      "tests/BalancerFlashLoanParity.t.sol",
+      "tests/BorrowerOperationsSystem.t.sol",
+      "tests/results/flash-helpers.log"
+    ]
   },
   "contracts/src/Zappers/WETHZapper.sol": {
     "status": "implemented_differential_tests_pass",

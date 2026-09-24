@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+use core::num::IntDowncast
+use std::abi::{sol, Uint24}
+use std::evm::{Address, Call, RawMem, RawOps}
+use super::quote_calls::{QuoteCalls, quote}
+use super::hybrid_path::path
+pub struct Config { pub usdc: Address, pub weth: Address, pub pool: Address, pub usdc_index: i128, pub bold_index: i128, pub fee_uw: Uint24, pub fee_wc: Uint24, pub quoter: Address }
+impl Copy for Config {}
+pub msg HelperMsg {
+    #[selector = sol("USDC()")]
+    Usdc -> Address,
+    #[selector = sol("WETH()")]
+    Weth -> Address,
+    #[selector = sol("curvePool()")]
+    Pool -> Address,
+    #[selector = sol("USDC_INDEX()")]
+    UsdcIndex -> i128,
+    #[selector = sol("BOLD_TOKEN_INDEX()")]
+    BoldIndex -> i128,
+    #[selector = sol("feeUsdcWeth()")]
+    FeeUW -> Uint24,
+    #[selector = sol("feeWethColl()")]
+    FeeWC -> Uint24,
+    #[selector = sol("uniV3Quoter()")]
+    Quoter -> Address,
+    #[selector = sol("quoteExactInput(uint256,bool,address)")]
+    Input { amount: u256, reverse: bool, coll: Address } -> u256,
+    #[selector = sol("quoteExactOutput(uint256,bool,address)")]
+    Output { amount: u256, reverse: bool, coll: Address } -> u256,
+}
+pub contract HybridCurveUniV3ExchangeHelpersV2 {
+    cfg: Config,
+    init(usdc: Address, weth: Address, pool: Address, usdc_index: i128, bold_index: i128, fee_uw: Uint24, fee_wc: Uint24, quoter: Address) uses (mut cfg) {
+        cfg = Config { usdc, weth, pool, usdc_index, bold_index, fee_uw, fee_wc, quoter }
+    }
+    recv HelperMsg {
+        Usdc -> Address uses (cfg) { cfg.usdc }
+        Weth -> Address uses (cfg) { cfg.weth }
+        Pool -> Address uses (cfg) { cfg.pool }
+        UsdcIndex -> i128 uses (cfg) { cfg.usdc_index }
+        BoldIndex -> i128 uses (cfg) { cfg.bold_index }
+        FeeUW -> Uint24 uses (cfg) { cfg.fee_uw }
+        FeeWC -> Uint24 uses (cfg) { cfg.fee_wc }
+        Quoter -> Address uses (cfg) { cfg.quoter }
+        Input { amount, reverse, coll } -> u256 uses (cfg, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+            if reverse {
+                let route = path(cfg.usdc, cfg.weth, coll, cfg.fee_uw, cfg.fee_wc, true)
+                let quoted = quote(cfg.quoter, route, amount, false, false)
+                cfg.pool.static(QuoteCalls::Dy { input: cfg.usdc_index, output: cfg.bold_index, amount: quoted })
+            } else {
+                let intermediate = cfg.pool.static(QuoteCalls::Dy { input: cfg.bold_index, output: cfg.usdc_index, amount })
+                let route = path(cfg.usdc, cfg.weth, coll, cfg.fee_uw, cfg.fee_wc, false)
+                let quoted = quote(cfg.quoter, route, intermediate, false, true)
+                quoted
+            }
+        }
+        Output { amount, reverse, coll } -> u256 uses (cfg, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+            if reverse {
+                let intermediate = cfg.pool.static(QuoteCalls::Dx { input: cfg.usdc_index, output: cfg.bold_index, amount })
+                let route = path(cfg.usdc, cfg.weth, coll, cfg.fee_uw, cfg.fee_wc, false)
+                let quoted = quote(cfg.quoter, route, intermediate, true, true)
+                quoted
+            } else {
+                let route = path(cfg.usdc, cfg.weth, coll, cfg.fee_uw, cfg.fee_wc, true)
+                let quoted = quote(cfg.quoter, route, amount, true, false)
+                cfg.pool.static(QuoteCalls::Dx { input: cfg.bold_index, output: cfg.usdc_index, amount: quoted })
+            }
+        }
+    }
+}

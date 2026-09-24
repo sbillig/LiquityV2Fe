@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: MIT
+use core::abi::ByteInput
+use std::abi::{sol, Bytes}
+use std::evm::{Address, Call, RawOps, revert_error}
+use std::evm::panic::{Panic, PANIC_OUT_OF_MEMORY}
+pub msg QuoteCalls {
+    #[selector = sol("get_dy(int128,int128,uint256)")]
+    Dy { input: i128, output: i128, amount: u256 } -> u256,
+    #[selector = sol("get_dx(int128,int128,uint256)")]
+    Dx { input: i128, output: i128, amount: u256 } -> u256,
+    #[selector = sol("quoteExactInput(bytes,uint256)")]
+    Input { path: Bytes, amount: u256 },
+    #[selector = sol("quoteExactOutput(bytes,uint256)")]
+    Output { path: Bytes, amount: u256 },
+}
+fn validate_array<I: ByteInput>(_ input: I, _ offset: u256, _ bits: u256, _ free: u256) -> u256 {
+    if offset > 0xffffffffffffffff { std::evm::revert(()) }
+    if offset > input.len() || input.len() - offset < 32 { std::evm::revert(()) }
+    let count = input.word_at(offset)
+    if count > (0xffffffffffffffff - free - 32) / 32 { revert_error(Panic::from(PANIC_OUT_OF_MEMORY)) }
+    let start = offset + 32
+    if count > (input.len() - start) / 32 { std::evm::revert(()) }
+    let mut i: u256 = 0
+    while i < count {
+        if input.word_at(start + i * 32) >> bits != 0 { std::evm::revert(()) }
+        i += 1
+    }
+    free + 32 + count * 32
+}
+// Solidity decodes four flat outputs and allocates both memory arrays even when
+// unused. Track its allocation cursor to retain Panic(0x41) before bounds checks.
+// Legacy Solidity codegen leaves abi.encodePacked allocations unaligned, then
+// allocates the optional scalar Curve result and word-rounded returndata.
+pub fn quote(_ quoter: Address, _ route: own Bytes, _ amount: u256, _ output: bool, _ curve_first: bool) -> u256 uses (call: mut Call, ops: mut RawOps) {
+    let path_allocation = route.len() + 32
+    let result = if output {
+        quoter.try_call(QuoteCalls::Output { path: route, amount })
+    } else {
+        quoter.try_call(QuoteCalls::Input { path: route, amount })
+    }
+    let input = result.returndata()
+    if !result.success() { ops.revert(data: input) }
+    if input.len() < 128 { std::evm::revert(()) }
+    let curve_allocation: u256 = if curve_first { 32 } else { 0 }
+    let free = 128 + path_allocation + curve_allocation + (input.len() + 31) / 32 * 32
+    let next = validate_array(input, input.word_at(32), 160, free)
+    let end = validate_array(input, input.word_at(64), 32, next)
+    input.word_at(0)
+}

@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: MIT
+use core::abi::{ByteInput, Decode}
+use std::abi::{sol, Sol, Bytes, DynArray, DynArrayAccess, MemVec}
+use std::evm::{Address, Ctx, Call, RawMem, RawStorage, encode_abi_payload}
+use super::zapper_calls::{LeveragedOpenParams, CloseParams, checked_address}
+use super::token_calls::safe_transfer
+use super::revert_texts::require
+use super::balancer_errors as error
+const VAULT: Address = Address { inner: 0xba12222222228d8ba445958a75a0704d566bf2c8 }
+pub msg VaultCalls {
+    #[selector = sol("flashLoan(address,address[],uint256[],bytes)")]
+    Flash { receiver: Address, tokens: DynArray<Address>, amounts: DynArray<u256>, data: Bytes },
+}
+pub msg ReceiverCalls {
+    #[selector = sol("receiveFlashLoanOnOpenLeveragedTrove((address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256,address,address,address),uint256)")]
+    Open { p: LeveragedOpenParams, effective: u256 },
+    #[selector = sol("receiveFlashLoanOnCloseTroveFromCollateral((uint256,uint256,uint256,address),uint256)")]
+    Close { p: CloseParams, effective: u256 },
+    #[selector = sol("receiveFlashLoanOnLeverUpTrove((uint256,uint256,uint256,uint256),uint256)")]
+    Up { p: (u256, u256, u256, u256), effective: u256 },
+    #[selector = sol("receiveFlashLoanOnLeverDownTrove((uint256,uint256,uint256),uint256)")]
+    Down { p: (u256, u256, u256), effective: u256 },
+}
+pub msg BalancerMsg {
+    #[selector = sol("receiver()")]
+    Receiver -> Address,
+    #[selector = sol("makeFlashLoan(address,uint256,uint8,bytes)")]
+    Make { token: Address, amount: u256, operation: u8, data: Bytes },
+    #[selector = sol("receiveFlashLoan(address[],uint256[],uint256[],bytes)")]
+    Receive { tokens: DynArray<Address>, amounts: DynArray<u256>, fees: DynArray<u256>, data: Bytes },
+}
+fn receiver() -> Address uses (storage: RawStorage) { Address { inner: storage.sload(0) & ((1 << 160) - 1) } }
+fn set_receiver(_ value: Address) uses (storage: mut RawStorage) {
+    storage.sstore(slot: 0, value: (storage.sload(0) >> 160 << 160) | value.inner)
+}
+fn require_code(_ target: Address) uses (ctx: Ctx) {
+    if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
+}
+fn validate_open(_ p: LeveragedOpenParams) {
+    let owner = checked_address(p.owner)
+    let batch = checked_address(p.batch)
+    let add = checked_address(p.add)
+    let remove = checked_address(p.remove)
+    let receiver = checked_address(p.receiver)
+}
+fn params_size(_ operation: u256) -> u256 {
+    if operation == 0 { 416 } else if operation == 3 { 96 } else { 128 }
+}
+fn encode_data(_ operation: u8, _ data: Bytes) -> Bytes {
+    let input = data.payload_span()
+    if input.len() < params_size(operation as u256) { std::evm::revert(()) }
+    if operation == 0 {
+        let p = <LeveragedOpenParams as Decode<Sol>>::decode_from(input, 0)
+        validate_open(p)
+        let encoded = encode_abi_payload((operation, p))
+        Bytes::from_payload(source: encoded.span())
+    } else if operation == 1 {
+        let p = <CloseParams as Decode<Sol>>::decode_from(input, 0)
+        let receiver = checked_address(p.receiver)
+        let encoded = encode_abi_payload((operation, p))
+        Bytes::from_payload(source: encoded.span())
+    } else if operation == 2 {
+        let p = <(u256, u256, u256, u256) as Decode<Sol>>::decode_from(input, 0)
+        let encoded = encode_abi_payload((operation, p))
+        Bytes::from_payload(source: encoded.span())
+    } else {
+        let p = <(u256, u256, u256) as Decode<Sol>>::decode_from(input, 0)
+        let encoded = encode_abi_payload((operation, p))
+        Bytes::from_payload(source: encoded.span())
+    }
+}
+pub contract BalancerFlashLoan {
+    recv BalancerMsg {
+        Receiver -> Address uses (storage: RawStorage) { receiver() }
+        Make { token, amount, operation, data } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
+            if operation > 3 { std::evm::revert(()) }
+            let mut tokens: MemVec<Address> = MemVec::zeroed(1)
+            tokens.set(index: 0, value: token)
+            let mut amounts: MemVec<u256> = MemVec::zeroed(1)
+            amounts.set(index: 0, value: amount)
+            let user_data = encode_data(operation, data)
+            set_receiver(ctx.caller())
+            require_code(VAULT)
+            VAULT.call(VaultCalls::Flash { receiver: ctx.address(), tokens: tokens.to_dyn_array(), amounts: amounts.to_dyn_array(), data: user_data })
+        }
+        Receive { tokens, amounts, fees, data } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, mem: mut RawMem) {
+            require(ctx.caller() == VAULT, error::vault())
+            let cached = receiver()
+            require(cached != Address::zero(), error::initiated())
+            set_receiver(Address::zero())
+            let input = data.payload_span()
+            if input.len() < 32 { std::evm::revert(()) }
+            let operation = input.word_at(0)
+            if operation > 3 { std::evm::revert(()) }
+            if input.len() - 32 < params_size(operation) { std::evm::revert(()) }
+            if operation == 0 {
+                let p = <LeveragedOpenParams as Decode<Sol>>::decode_from(input, 32)
+                validate_open(p)
+                let effective = amounts.get(0) - fees.get(0)
+                safe_transfer(tokens.get(0), cached, effective)
+                require_code(cached)
+                cached.call(ReceiverCalls::Open { p, effective })
+            } else if operation == 1 {
+                let p = <CloseParams as Decode<Sol>>::decode_from(input, 32)
+                let receiver = checked_address(p.receiver)
+                let effective = amounts.get(0) - fees.get(0)
+                safe_transfer(tokens.get(0), cached, effective)
+                require_code(cached)
+                cached.call(ReceiverCalls::Close { p, effective })
+            } else if operation == 2 {
+                let p = <(u256, u256, u256, u256) as Decode<Sol>>::decode_from(input, 32)
+                let effective = amounts.get(0) - fees.get(0)
+                safe_transfer(tokens.get(0), cached, effective)
+                require_code(cached)
+                cached.call(ReceiverCalls::Up { p, effective })
+            } else {
+                let p = <(u256, u256, u256) as Decode<Sol>>::decode_from(input, 32)
+                let effective = amounts.get(0) - fees.get(0)
+                safe_transfer(tokens.get(0), cached, effective)
+                require_code(cached)
+                cached.call(ReceiverCalls::Down { p, effective })
+            }
+            safe_transfer(tokens.get(0), VAULT, amounts.get(0) + fees.get(0))
+        }
+    }
+}

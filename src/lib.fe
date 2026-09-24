@@ -87,3 +87,8 @@ pub use uni_price_converter
 pub use uni_v3_exchange
 pub use hybrid_path
 pub use hybrid_exchange
+pub use hybrid_helpers
+pub use hybrid_helpers_v2
+pub use quote_calls
+pub use balancer_flash_loan
+pub use balancer_errors

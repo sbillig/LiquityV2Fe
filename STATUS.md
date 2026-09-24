@@ -1,15 +1,15 @@
 # Current work state
 
 The complete Liquity V2 port goal remains active. The verified contracts below
-are a partial system; helpers, zappers, governance and complete multi-branch
-workflows are still outstanding.
+are a partial system; remaining library/interface coverage, governance and
+complete multi-branch workflows are still outstanding.
 
 ## Validated checkpoint
 
-`./scripts/test.sh` passes **244 EVM tests and 2 Fe tests**, with 1,024 runs per
+`./scripts/test.sh` passes **264 EVM tests and 2 Fe tests**, with 1,024 runs per
 fuzz test plus cached regression inputs. Sources, scripts, tests, artifacts,
-compiler and reference hashes are recorded in `tests/results/exchanges.json`;
-the complete log is `tests/results/exchanges.log`.
+compiler and reference hashes are recorded in `tests/results/flash-helpers.json`;
+the complete log is `tests/results/flash-helpers.log`.
 
 Implemented and differentially tested:
 - LiquityMath and protocol constants.
@@ -71,7 +71,7 @@ Implemented and differentially tested:
 - CurveExchange, UniV3Exchange, UniPriceConverter and HybridCurveUniV3Exchange:
   exact-input/output swaps, refunds, packed paths, fee/index widths, price rounding
   and checked arithmetic. Thirteen differential tests and four actual connected
-  Curve/UniV3 leverage lifecycles pass; the quote helpers remain separate below.
+  Curve/UniV3 leverage lifecycles pass; quote helpers and the flash-loan provider are covered below.
 - AddRemoveManagers: authorization, configuration, receiver selection and clearing.
 - LiquityBase: registry configuration, branch totals, ratios and interest helpers.
 
@@ -129,7 +129,7 @@ are reproducible with `scripts/generate_bauhaus.py` and
 
 ## Next work
 
-1. Integrate the prepared quote helpers and Balancer flash-loan provider.
+1. Integrate the prepared governance proxies and utilities; implement Governance and initiatives.
 2. Remaining helper/library interfaces.
 3. Governance and full multi-branch deployment/lifecycle/invariant validation.
 
@@ -145,20 +145,28 @@ adjustments 22,580, batches 23,828. Its constructor takes the registry and three
 fixed module addresses. The registry WETH getter uses CALL as declared by the
 Solidity interface; a stateful constructor mock checks this behavior.
 
-HybridCurveUniV3ExchangeHelpers and its V2 variant are prepared separately in
-`/tmp/liquity-quote-only-project` (the current, minimal build project). The source
-copies in `/tmp/liquity-helper-project` are synchronized. Five differential tests
-in `/tmp/liquity-zapper-inspect/test/HybridHelpersParity.t.sol` pass, including
-both quote directions, signed indices, packed paths, deviation arithmetic,
-malformed dynamic results and exact memory-allocation panic boundaries. The
-boundary test covers both helper versions, both path lengths, both returned
-arrays and additional trailing return bytes. The isolated ABI audit passes.
-Artifacts: `/tmp/liquity-helper-build`; logs are copied into tests/results.
-BalancerFlashLoan is prepared in `/tmp/liquity-balancer-project`, with artifacts
-in `/tmp/liquity-balancer-build`. Seven parity tests and eight connected actual
-Balancer/Curve/UniV3 leverage lifecycles pass. They cover WETH and LST, normal
-closing and flash-loan closing. Only the external vault and trading venues are
-mocked; the provider, exchanges, zappers and protocol are actual Fe contracts.
-The isolated Balancer ABI audit passes. These additions are not yet included in
-the root checkpoint above.
-No new compiler fix was needed during the exchange work.
+HybridCurveUniV3ExchangeHelpers, its V2 variant and BalancerFlashLoan are now
+included in the completed root checkpoint. Five quote-helper parity tests cover
+both quote directions, signed indices, packed paths, malformed returndata and
+memory-allocation panic boundaries. Seven provider parity tests cover all four
+flash callbacks, fees, ABI validation and rollback. Eight connected lifecycles
+use the actual Fe provider, Curve/UniV3 exchanges, WETH/LST zappers and core;
+only the external vault and trading venues are mocked. ABI and size audits pass.
+
+### Governance preparation
+
+UserProxy, UserProxyFactory, DoubleLinkedList and governance Math/VotingPower are prepared in
+`/tmp/liquity-governance-project`. Ten differential tests pass in
+`/tmp/liquity-governance-inspect`, including six fuzz properties at 1,024 cases
+each. Coverage includes CREATE2 predictions and exact EIP-1167 clone bytecode,
+immutable configuration through delegatecall, duplicate deployment, stake and
+unstake reward accounting, accumulated balances, permit failure and lazy
+calldata validation, authorization, token return rules, ETH failure rollback,
+signed arithmetic boundaries and voting-power overflow. Stateful list tests
+check sixteen sequential insertions, sentinel links, duplicate IDs and missing
+successors against Solidity after every operation. The isolated ABI audit
+passes for both contracts (`/tmp/liquity-governance-audit`). Build artifacts and
+logs: `/tmp/liquity-governance-build`, `/tmp/liquity-governance-parity.log`.
+These governance changes are not yet integrated into the root checkpoint.
+The main Governance contract, initiatives, and remaining governance utilities
+still require porting and connected validation. No new compiler fix was needed.

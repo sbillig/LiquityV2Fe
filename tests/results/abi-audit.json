@@ -624,6 +624,60 @@
     ],
     "function_count": 12
   },
+  "HybridCurveUniV3ExchangeHelpers": {
+    "runtime_bytes": 2391,
+    "initcode_bytes_before_arguments": 3484,
+    "compiler_abi_sha256": "a5660485c4637bd4c2cf8f44e65a0b07a2173f0409cd0e81624db3a42d2d1688",
+    "reference_artifact_sha256": "6cdf3a01690d46331137d7fbce0725b29eab1d7a3e2274330563073cebf713d5",
+    "protocol_abi_sha256": "e44dcd9e59bdf04b3df5ff498dc4cec76974f9e569912426d4bbc95c2dd3fdf1",
+    "metadata_refinements": [
+      "getCollFromBold: static tuple has identical flat runtime encoding"
+    ],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 9
+  },
+  "HybridCurveUniV3ExchangeHelpersV2": {
+    "runtime_bytes": 3469,
+    "initcode_bytes_before_arguments": 4602,
+    "compiler_abi_sha256": "ed1a384a916459b327317dc7074596f93b1d94c6afd2685dc5e84d991cfce573",
+    "reference_artifact_sha256": "390ed6cb91e6a953d1c8db25e98bc240112c6bf587bdced9469f2a392cbb1048",
+    "protocol_abi_sha256": "ceeb224c932e7658b66993170770e078011f6f53489b5660964711e1a76a5a04",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 10
+  },
+  "BalancerFlashLoan": {
+    "runtime_bytes": 5724,
+    "initcode_bytes_before_arguments": 5744,
+    "compiler_abi_sha256": "32bc31cd296e16d4caf8f809241cbc8a80199b411432599e78690195ab521136",
+    "reference_artifact_sha256": "67aa07f127039a04c345a04c4190dd43eb0f8a11840c066b0632bd2d10ca38b8",
+    "protocol_abi_sha256": "4aa0aa930c56899137855ad37c08c9388d994db3aa35f0d1d038ce237b6bad5a",
+    "metadata_refinements": [],
+    "declaration_only": [],
+    "compiler_standard_errors": [
+      [
+        "error",
+        "Error(string)"
+      ],
+      [
+        "error",
+        "Panic(uint256)"
+      ]
+    ],
+    "function_count": 3
+  },
   "LeverageWETHZapperLeverage": {
     "implementation_companion": true,
     "runtime_bytes": 10606,

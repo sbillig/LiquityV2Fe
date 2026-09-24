@@ -48,6 +48,8 @@ contract ExchangeSystemMarket {
  }
  function returnBold(address receiver) external {bold.safeTransfer(receiver,bold.balanceOf(address(this)));}
 }
+import {BalancerFlashLoan} from "../reference/bold/contracts/src/Zappers/Modules/FlashLoans/BalancerFlashLoan.sol";
+import {BLVault,BLVm} from "./BalancerFlashLoanParity.t.sol";
 interface ZapperSystemVm {function deal(address,uint) external;}
 import {RedemptionHelper} from "../reference/bold/contracts/src/RedemptionHelper.sol";
 import {CollateralRegistry} from "../reference/bold/contracts/src/CollateralRegistry.sol";
@@ -389,4 +391,53 @@ contract BorrowerOperationsSystemTest {
  function testActualCurveLST() public {compareActualExchange(true,false);}
  function testActualUniWETH() public {compareActualExchange(false,true);}
  function testActualUniLST() public {compareActualExchange(true,true);}
+ function makeBalancer(System memory s,bool fe) internal returns(BalancerFlashLoan){
+  address vault=0xBA12222222228d8Ba445958a75a0704d566BF2C8;BLVm(address(vm)).etch(vault,type(BLVault).runtimeCode);BLVault(vault).configure(1,false,false);s.coll.mint(vault,100e18);
+  bytes memory flashCode=fe?vm.parseBytes(vm.readFile("build/BalancerFlashLoan.bin")):type(BalancerFlashLoan).creationCode;
+  return BalancerFlashLoan(deploy(flashCode));
+ }
+ function balancerState(System memory s,address market) internal view returns(bytes32){
+  return keccak256(abi.encode(ALICE.balance,s.coll.balanceOf(ALICE),s.bold.balanceOf(ALICE),s.bold.totalSupply(),s.active.getBoldDebt(),s.active.getCollBalance(),s.sorted.getSize(),s.bold.balanceOf(market)));
+ }
+ function runBalancerExchange(bool fe,bool lst,bool uni,bool flashClose) internal returns(bytes32){
+  System memory s=makeWithWeth(fe,false,false,lst);open(s,2,BOB,10e18,6e16);
+  BalancerFlashLoan flash=makeBalancer(s,fe);ExchangeSystemMarket market=new ExchangeSystemMarket(s.coll,IERC20(address(s.bold)));
+  bytes memory exchangeCode=fe?vm.parseBytes(vm.readFile(uni?"build/UniV3Exchange.bin":"build/CurveExchange.bin")):(uni?type(UniV3Exchange).creationCode:type(CurveExchange).creationCode);
+  address exchange=deploy(bytes.concat(exchangeCode,uni?abi.encode(s.coll,s.bold,uint24(3000),market):abi.encode(s.coll,s.bold,market,uint(0),uint(1))));
+  bytes memory zapperCode=fe?vm.parseBytes(vm.readFile(lst?"build/LeverageLSTZapper.bin":"build/LeverageWETHZapper.bin")):(lst?type(LeverageLSTZapper).creationCode:type(LeverageWETHZapper).creationCode);
+  ILeverageZapper z=ILeverageZapper(deploy(bytes.concat(zapperCode,abi.encode(s.registry,flash,exchange))));
+  ZapperSystemVm(address(vm)).deal(ALICE,100e18);ZapperSystemVm(address(vm)).deal(address(s.weth),1000e18);
+  if(lst){s.coll.mint(ALICE,20e18);vm.prank(ALICE);s.coll.approve(address(z),type(uint).max);}
+  ILeverageZapper.OpenLeveragedTroveParams memory p=ILeverageZapper.OpenLeveragedTroveParams(ALICE,1,20e18,1e18,3000e18,0,0,5e16,address(0),type(uint).max,address(0),address(0),address(0));
+  vm.prank(ALICE);z.openLeveragedTroveWithRawETH{value:375e14+(lst?0:20e18)}(p);
+  uint trove=uint(keccak256(abi.encode(address(z),ALICE,uint(keccak256(abi.encode(ALICE,uint(1)))))));
+  require(s.manager.getLatestTroveData(trove).entireColl==21e18-1,"open collateral");
+  vm.prank(ALICE);z.leverUpTrove(ILeverageZapper.LeverUpTroveParams(trove,1e17,500e18,type(uint).max));
+  vm.prank(ALICE);z.leverDownTrove(ILeverageZapper.LeverDownTroveParams(trove,1e17,199e18));
+  require(s.manager.getLatestTroveData(trove).entireColl==21e18-2,"adjust collateral");conserve(s);
+  require(address(flash.receiver())==address(0)&&s.coll.balanceOf(address(flash))==0,"flash reset");
+  if(flashClose){
+   vm.prank(BOB);s.bold.transfer(address(market),2000e18);
+   uint loan=s.manager.getLatestTroveData(trove).entireDebt/2000+1e15;
+   vm.prank(ALICE);WETHZapper(payable(address(z))).closeTroveFromCollateral(trove,loan,18e18);
+  }else{
+   market.returnBold(ALICE);vm.prank(BOB);s.bold.transfer(ALICE,100e18);
+   vm.prank(ALICE);s.bold.approve(address(z),type(uint).max);vm.prank(ALICE);WETHZapper(payable(address(z))).closeTroveToRawETH(trove);
+  }
+  conserve(s);
+  require(s.bold.balanceOf(address(z))==0&&s.coll.balanceOf(address(z))==0&&s.bold.balanceOf(exchange)==0&&s.coll.balanceOf(exchange)==0,"residual balances");
+  return balancerState(s,address(market));
+ }
+ function compareBalancerExchange(bool lst,bool uni,bool flashClose) internal {
+  TimeVm(address(vm)).warp(1000);bytes32 actual=runBalancerExchange(true,lst,uni,flashClose);
+  TimeVm(address(vm)).warp(1000);bytes32 expected=runBalancerExchange(false,lst,uni,flashClose);require(actual==expected,"connected exchange parity");
+ }
+ function testActualBalancerCurveWETH() public {compareBalancerExchange(false,false,false);}
+ function testActualBalancerCurveLST() public {compareBalancerExchange(true,false,false);}
+ function testActualBalancerUniWETH() public {compareBalancerExchange(false,true,false);}
+ function testActualBalancerUniLST() public {compareBalancerExchange(true,true,false);}
+ function testActualBalancerCurveWETHFlashClose() public {compareBalancerExchange(false,false,true);}
+ function testActualBalancerCurveLSTFlashClose() public {compareBalancerExchange(true,false,true);}
+ function testActualBalancerUniWETHFlashClose() public {compareBalancerExchange(false,true,true);}
+ function testActualBalancerUniLSTFlashClose() public {compareBalancerExchange(true,true,true);}
 }

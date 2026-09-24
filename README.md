@@ -52,7 +52,7 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
 EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations the WETH/rETH/wstETH price feeds, HintHelpers, MultiTroveGetter, DebtInFrontHelper and the legacy Constants query contract. The current suite
-passes 244 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
+passes 264 EVM tests plus 2 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
@@ -122,7 +122,7 @@ exhaustion. The price-feed checkpoint is recorded in `tests/results/price-feeds.
 HintHelpers and MultiTroveGetter preserve hint sampling, fee calculations, signed
 pagination and cursor behavior. Connected tests verify predicted fees against
 actual borrowing operations. The latest complete validation is
-`tests/results/exchanges.*`. The separately tested and now locally integrated compiler fix rejects integer
+`tests/results/flash-helpers.*`. The separately tested and now locally integrated compiler fix rejects integer
 expression literals wider than 256 bits; its branch, regression tests and
 newsfragment are documented in [COMPILER_FIXES.md](COMPILER_FIXES.md).
 
@@ -140,5 +140,6 @@ EVM code-size limits while retaining the original three constructor arguments;
 see [ZAPPERS_DEPLOYMENT.md](ZAPPERS_DEPLOYMENT.md). CurveExchange, UniV3Exchange and HybridCurveUniV3Exchange now pass differential
 tests, and actual Curve/UniV3 leverage lifecycles are tested on both collateral
 branches. UniPriceConverter preserves reference rounding, integer widths and
-overflow behavior. Quote helpers, the flash-loan provider, governance and complete
-multi-branch workflows remain in progress.
+overflow behavior. Quote helpers and the Balancer flash-loan provider now pass differential tests
+and connected leverage lifecycles. Governance and complete multi-branch
+workflows remain in progress.
