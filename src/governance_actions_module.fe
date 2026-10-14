@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
+use std::evm::{Address, Ctx, Call, RawStorage, Log}
 use super::governance_actions as action
 use super::governance_module_config as config
 pub msg ActionsModuleMsg {
@@ -13,8 +13,8 @@ pub msg ActionsModuleMsg {
 }
 pub contract GovernanceActionsModule {
     recv ActionsModuleMsg {
-        Register { target } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::register(config::load(), target) }
-        Unregister { target } uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::unregister(config::load().snapshots, target) }
-        Claim { target } -> u256 uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { action::claim(config::load().snapshots, target) }
+        Register { target } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) { action::register(config::load(), target) }
+        Unregister { target } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) { action::unregister(config::load().snapshots, target) }
+        Claim { target } -> u256 uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) { action::claim(config::load().snapshots, target) }
     }
 }

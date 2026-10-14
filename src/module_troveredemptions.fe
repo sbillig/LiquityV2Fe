@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Full TroveManager public interface and registry configuration.
 use std::abi::{sol, DynArray}
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use super::trove_hooks as hooks
 use super::types::{TroveChange, LatestTroveData, LatestBatchData}
 use super::trove_data as data
@@ -21,7 +21,7 @@ pub msg TroveRedemptionsMsg {
 pub contract TroveRedemptions {
     init() {}
     recv TroveRedemptionsMsg {
-        Redeem { user, amount, price, rate, iterations } -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::redeem(user, amount, price, rate, iterations) }
-        Urgent { amount, ids, min_coll } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::urgent(amount, ids, min_coll) }
+        Redeem { user, amount, price, rate, iterations } -> u256 uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::redeem(user, amount, price, rate, iterations) }
+        Urgent { amount, ids, min_coll } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_redemption::urgent(amount, ids, min_coll) }
     }
 }

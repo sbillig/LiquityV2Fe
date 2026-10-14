@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_open as opening
 use super::borrower_open::Config
 use super::borrower_data as data
@@ -37,10 +37,10 @@ pub contract BorrowerOpening {
         cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
     }
     recv BorrowerOpeningMsg {
-        OpenTrove { owner, index, coll, bold, upper, lower, rate, max_fee, add, remove, receiver } -> u256 uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        OpenTrove { owner, index, coll, bold, upper, lower, rate, max_fee, add, remove, receiver } -> u256 uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             opening::individual(cfg, opening::Open { owner, index, coll, bold, upper, lower, max_fee, add, remove, receiver }, rate)
         }
-        OpenBatch { p } -> u256 uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        OpenBatch { p } -> u256 uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             opening::batched(cfg, opening::Open { owner: p.0, index: p.1, coll: p.2, bold: p.3, upper: p.4, lower: p.5, max_fee: p.7, add: p.8, remove: p.9, receiver: p.10 }, p.6)
         }
     }

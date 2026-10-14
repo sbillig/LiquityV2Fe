@@ -31,11 +31,10 @@ impl AbiSpan<Sol> for SimulationContext {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 256, input.len()) }
 }
 impl Decode<Sol> for SimulationContext {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 256, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 256, input.len())
         d.set_pos(end)
-        let input = d.input()
         let trove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let sorted_troves = <Address as Decode<Sol>>::decode_from(input, pos + 32)
         let redeemable = <bool as Decode<Sol>>::decode_from(input, pos + 64)
@@ -48,14 +47,14 @@ impl Decode<Sol> for SimulationContext {
     }
 }
 impl Encode<Sol> for SimulationContext {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.trove_manager, core::ptr::offset_bytes(ptr, 0))
-        <Address as Encode<Sol>>::encode(self.sorted_troves, core::ptr::offset_bytes(ptr, 32))
-        <bool as Encode<Sol>>::encode(self.redeemable, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.price, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.proportion, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.attempted_bold, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.redeemed_bold, core::ptr::offset_bytes(ptr, 192))
-        <u256 as Encode<Sol>>::encode(self.iterations, core::ptr::offset_bytes(ptr, 224))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.trove_manager, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.sorted_troves, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <bool as Encode<Sol>>::encode(self.redeemable, out.slice(offset: 64, len: <bool as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.price, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.proportion, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.attempted_bold, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.redeemed_bold, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.iterations, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }

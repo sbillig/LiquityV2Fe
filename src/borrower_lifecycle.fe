@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_errors::*
 use super::borrower_data as data
 use super::borrower_checks as checks
@@ -19,7 +19,7 @@ use super::liquity_base as base
 use super::constants::{MIN_DEBT, ETH_GAS_COMPENSATION}
 #[event]
 pub struct ShutDown { pub tcr: u256 }
-pub fn wipe(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+pub fn wipe(_ id: u256) uses ( storage: mut RawStorage, log: mut Log) {
     data::clear_delegate(id)
     data::set_batch(id, Address::zero())
     managers::wipe(data::managers(), id)
@@ -35,7 +35,7 @@ uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
     }
 }
 pub fn close(_ cfg: Config, _ id: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     let manager = data::address_at(5)
     let active = data::address_at(0)
     let bold = data::address_at(8)
@@ -44,13 +44,13 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     checks::open(manager, id)
     let t = manager.static(TroveManagerMsg::LatestTrove { id })
     balance(bold, t.entire_debt)
-    let mut change = TroveChange::zero()
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
     change.applied_redist_coll_gain = t.redist_coll_gain
     change.coll_decrease = t.entire_coll
     change.debt_decrease = t.entire_debt
     let batch = data::batch_of(id)
-    let mut b = LatestBatchData::zero()
+    var b = LatestBatchData::zero()
     if batch != Address::zero() {
         b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
         let future = b.entire_debt_without_redistribution - (t.entire_debt - t.redist_bold_debt_gain)
@@ -76,17 +76,17 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     wipe(id)
 }
 pub fn pending(_ id: u256, _ lower: u256, _ upper: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     let manager = data::address_at(5)
     checks::open(manager, id)
     let t = manager.static(TroveManagerMsg::LatestTrove { id })
     if t.entire_debt == 0 { revert_error(TroveWithZeroDebt {}) }
-    let mut change = TroveChange::zero()
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
     change.applied_redist_coll_gain = t.redist_coll_gain
     let batch = data::batch_of(id)
-    let mut b = LatestBatchData::zero()
+    var b = LatestBatchData::zero()
     if batch == Address::zero() {
         change.old_weighted_recorded_debt = t.weighted_recorded_debt
         change.new_weighted_recorded_debt = t.entire_debt * t.annual_interest_rate

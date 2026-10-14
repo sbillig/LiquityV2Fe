@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::{sol, DynString}
-use std::evm::{Address, Ctx, Call, RawMem}
+use std::evm::{Address, Ctx, Call}
 use std::evm::packed::keccak_packed
 use super::helper_calls::*
 use super::types::{TroveChange, LatestTroveData}
@@ -11,7 +11,7 @@ pub fn fee(_ pool: Address, _ change: TroveChange, _ debt: u256) -> u256 uses (c
     math::calc_interest(debt * avg, UPFRONT_INTEREST_PERIOD)
 }
 pub fn individual_rate(_ pool: Address, _ trove: LatestTroveData, _ rate: u256) -> u256 uses (call: mut Call) {
-    let mut change = TroveChange::zero()
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = trove.redist_bold_debt_gain
     change.new_weighted_recorded_debt = trove.entire_debt * rate
     change.old_weighted_recorded_debt = trove.weighted_recorded_debt
@@ -45,21 +45,21 @@ pub contract HintHelpers {
     registry: Address,
     init(collateral_registry: Address) uses (mut registry) { registry = collateral_registry }
     recv HintHelpersMsg {
-        Name -> DynString uses (mem: mut RawMem) {
+        Name -> DynString {
             let p = core::ptr::alloc_bytes(32)
-            mem.mstore(addr: p, value: 0x48696e7448656c70657273000000000000000000000000000000000000000000)
-            DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 11))
+            unsafe { core::abi::store_word(ptr: p, value: 0x48696e7448656c70657273000000000000000000000000000000000000000000) }
+            DynString::from_payload(source: unsafe { core::ptr::MemSpan::from_raw_parts(ptr: p, len: 11) })
         }
         Registry -> Address uses (registry) { registry }
-        Approx { index, rate, trials, seed } -> (u256, u256, u256) uses (registry, call: mut Call, mem: mut RawMem) {
+        Approx { index, rate, trials, seed } -> (u256, u256, u256) uses (registry, call: mut Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let sorted = manager.static(HelperManagerMsg::Sorted {})
             let count = manager.static(HelperManagerMsg::Count {})
             if count == 0 { return (0, 0, seed) }
-            let mut hint = sorted.static(HelperSortedMsg::Last {})
-            let mut diff = math::absolute_difference(rate, manager.static(HelperManagerMsg::Rate { id: hint }))
-            let mut random = seed
-            let mut i = 1
+            var hint = sorted.static(HelperSortedMsg::Last {})
+            var diff = math::absolute_difference(rate, manager.static(HelperManagerMsg::Rate { id: hint }))
+            var random = seed
+            var i = 1
             while i < trials {
                 random = keccak_packed(random)
                 let id = manager.static(HelperManagerMsg::Id { index: random % count })
@@ -76,7 +76,7 @@ pub contract HintHelpers {
         Open { index, amount, rate } -> u256 uses (registry, call: mut Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.debt_increase = amount
             change.new_weighted_recorded_debt = amount * rate
             fee(pool, change, amount)
@@ -100,7 +100,7 @@ pub contract HintHelpers {
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })
             let batch = manager.static(HelperManagerMsg::Stored { id }).8
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
             change.debt_increase = amount
             if batch == Address::zero() {
@@ -119,7 +119,7 @@ pub contract HintHelpers {
             let pool = manager.static(HelperManagerMsg::Active {})
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
             if rate == b.annual_interest_rate || ctx.timestamp() >= b.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.batch_accrued_management_fee = b.accrued_management_fee
             change.new_weighted_recorded_debt = b.entire_debt_without_redistribution * rate
             change.old_weighted_recorded_debt = b.weighted_recorded_debt
@@ -129,7 +129,7 @@ pub contract HintHelpers {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.debt_increase = amount
             change.batch_accrued_management_fee = b.accrued_management_fee
             change.old_weighted_recorded_debt = b.weighted_recorded_debt
@@ -141,7 +141,7 @@ pub contract HintHelpers {
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
             change.batch_accrued_management_fee = b.accrued_management_fee
             change.old_weighted_recorded_debt = b.weighted_recorded_debt + t.weighted_recorded_debt
@@ -155,7 +155,7 @@ pub contract HintHelpers {
             let batch = manager.static(HelperManagerMsg::Stored { id }).8
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
             if rate == b.annual_interest_rate || ctx.timestamp() >= t.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
             change.batch_accrued_management_fee = b.accrued_management_fee
             change.old_weighted_recorded_debt = b.weighted_recorded_debt

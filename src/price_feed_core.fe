@@ -19,23 +19,23 @@ pub msg OracleMsg {
     Shutdown,
 }
 pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) {
-    Address { inner: storage.sload(slot) & 0xffffffffffffffffffffffffffffffffffffffff }
+    Address { inner: unsafe { storage.sload(slot) } & 0xffffffffffffffffffffffffffffffffffffffff }
 }
-pub fn source() -> u8 uses (storage: RawStorage) { (storage.sload(0) & 255).downcast_truncate() }
-pub fn set_source(_ value: u256) uses (storage: mut RawStorage) { storage.sstore(slot: 0, value: (storage.sload(0) & ~255) | value) }
+pub fn source() -> u8 uses (storage: RawStorage) { (unsafe { storage.sload(0) } & 255).downcast_truncate() }
+pub fn set_source(_ value: u256) uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 0, value: (unsafe { storage.sload(0) } & ~255) | value) } }
 pub fn oracle(_ slot: u256) -> (Address, u256, u8) uses (storage: RawStorage) {
-    (address_at(slot), storage.sload(slot + 1), (storage.sload(slot + 2) & 255).downcast_truncate())
+    (address_at(slot), unsafe { storage.sload(slot + 1) }, (unsafe { storage.sload(slot + 2) } & 255).downcast_truncate())
 }
 pub fn init_oracle(_ slot: u256, _ aggregator: Address, _ threshold: u256) uses (storage: mut RawStorage, call: mut Call) {
-    storage.sstore(slot: slot, value: aggregator.inner)
-    storage.sstore(slot: slot + 1, value: threshold)
+    unsafe { storage.sstore(slot: slot, value: aggregator.inner) }
+    unsafe { storage.sstore(slot: slot + 1, value: threshold) }
     let decimals = aggregator.static(OracleMsg::Decimals {})
-    storage.sstore(slot: slot + 2, value: decimals as u256)
+    unsafe { storage.sstore(slot: slot + 2, value: decimals as u256) }
 }
 pub fn init_base(_ aggregator: Address, _ threshold: u256, _ borrower: Address) uses (storage: mut RawStorage, call: mut Call) {
     init_oracle(2, aggregator, threshold)
-    storage.sstore(slot: 5, value: borrower.inner)
-    assert(storage.sload(4) == 8)
+    unsafe { storage.sstore(slot: 5, value: borrower.inner) }
+    assert(unsafe { storage.sload(4) } == 8)
 }
 pub fn answer(_ slot: u256) -> (u256, bool) uses (ctx: Ctx, storage: RawStorage, call: mut Call) {
     let (aggregator, threshold, decimals) = oracle(slot)
@@ -49,8 +49,8 @@ pub fn answer(_ slot: u256) -> (u256, bool) uses (ctx: Ctx, storage: RawStorage,
     if decoded.0 >> 80 != 0 || decoded.4 >> 80 != 0 { std::evm::revert(()) }
     if ctx.timestamp() - decoded.3 >= threshold || decoded.1 <= 0 { return (0, true) }
     let exponent = 18 - (decimals as u256)
-    let mut scale: u256 = 1
-    let mut i = 0
+    var scale: u256 = 1
+    var i = 0
     while i < exponent { scale *= 10
 i += 1 }
     let value: u256 = decoded.1.downcast_truncate()
@@ -85,39 +85,39 @@ pub fn fallback_price(_ eth: u256, _ reth: bool) -> u256 uses (ctx: Ctx, storage
     assert(source() == 1)
     let (rate, down) = canonical(reth)
     if down { set_source(2)
-return storage.sload(1) }
+return unsafe { storage.sload(1) } }
     let price = eth * rate / 1000000000000000000
-    let best = min(price, storage.sload(1))
-    storage.sstore(slot: 1, value: best)
+    let best = min(price, unsafe { storage.sload(1) })
+    unsafe { storage.sstore(slot: 1, value: best) }
     best
 }
 pub fn during_shutdown(_ reth: bool) -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call) {
     if source() == 1 {
         let (eth, down) = answer(2)
         if down { set_source(2)
-return (storage.sload(1), false) }
+return (unsafe { storage.sload(1) }, false) }
         return (fallback_price(eth, reth), false)
     }
     assert(source() == 2)
-    (storage.sload(1), false)
+    (unsafe { storage.sload(1) }, false)
 }
 pub fn weth() -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     if source() != 0 { assert(source() == 2)
-return (storage.sload(1), false) }
+return (unsafe { storage.sload(1) }, false) }
     let (price, down) = answer(2)
     if down { shutdown(address_at(2), 2)
-return (storage.sload(1), true) }
-    storage.sstore(slot: 1, value: price)
+return (unsafe { storage.sload(1) }, true) }
+    unsafe { storage.sstore(slot: 1, value: price) }
     (price, false)
 }
 pub fn composite(_ reth: bool, _ redemption: bool) -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     if source() != 0 { return during_shutdown(reth) }
-    let mut eth = 0
-    let mut eth_down = false
-    let mut market = 0
-    let mut market_down = false
-    let mut rate = 0
-    let mut rate_down = false
+    var eth = 0
+    var eth_down = false
+    var market = 0
+    var market_down = false
+    var rate = 0
+    var rate_down = false
     if reth {
         let (v, d) = answer(2)
 eth = v
@@ -129,9 +129,9 @@ market_down = d2
 rate = v3
 rate_down = d3
         if eth_down { shutdown(address_at(2), 2)
-return (storage.sload(1), true) }
+return (unsafe { storage.sload(1) }, true) }
         if rate_down { shutdown(address_at(6), 2)
-return (storage.sload(1), true) }
+return (unsafe { storage.sload(1) }, true) }
     } else {
         let (v, d) = answer(7)
 market = v
@@ -143,9 +143,9 @@ rate_down = d2
 eth = v3
 eth_down = d3
         if rate_down { shutdown(address_at(6), 2)
-return (storage.sload(1), true) }
+return (unsafe { storage.sload(1) }, true) }
         if eth_down { shutdown(address_at(2), 2)
-return (storage.sload(1), true) }
+return (unsafe { storage.sload(1) }, true) }
     }
     if market_down {
         shutdown(address_at(7), 1)
@@ -159,6 +159,6 @@ return (storage.sload(1), true) }
         let underlying = if redemption && within(market, eth, 10000000000000000) { max(market, eth) } else { market }
         underlying * rate / 1000000000000000000
     }
-    storage.sstore(slot: 1, value: price)
+    unsafe { storage.sstore(slot: 1, value: price) }
     (price, false)
 }

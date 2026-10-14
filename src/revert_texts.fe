@@ -1,574 +1,210 @@
 // SPDX-License-Identifier: MIT
 // Exact ABI strings from the pinned Solidity reference.
 use std::abi::DynString
-use std::evm::{RawMem, revert_error}
+use std::evm::{revert_error}
 #[error]
 pub struct Error { pub reason: DynString }
 pub fn require(_ condition: bool, _ reason: own DynString) {
     if !condition { revert_error(Error { reason }) }
 }
 
-pub fn default_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x44656661756c74506f6f6c000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 11))
-}
+pub fn default_name() -> DynString { "DefaultPool" }
 
-pub fn default_active_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x44656661756c74506f6f6c3a2043616c6c6572206973206e6f74207468652041)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6374697665506f6f6c0000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 41))
-}
+pub fn default_active_only() -> DynString { "DefaultPool: Caller is not the ActivePool" }
 
-pub fn default_manager_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x44656661756c74506f6f6c3a2043616c6c6572206973206e6f74207468652054)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x726f76654d616e61676572000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 43))
-}
+pub fn default_manager_only() -> DynString { "DefaultPool: Caller is not the TroveManager" }
 
-pub fn safe_low_level() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x5361666545524332303a206c6f772d6c6576656c2063616c6c206661696c6564)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
-}
+pub fn safe_low_level() -> DynString { "SafeERC20: low-level call failed" }
 
-pub fn safe_failed() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x5361666545524332303a204552433230206f7065726174696f6e20646964206e)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f74207375636365656400000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 42))
-}
+pub fn safe_failed() -> DynString { "SafeERC20: ERC20 operation did not succeed" }
 
-pub fn non_contract() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416464726573733a2063616c6c20746f206e6f6e2d636f6e7472616374000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 29))
-}
+pub fn non_contract() -> DynString { "Address: call to non-contract" }
 
-pub fn surplus_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c537572706c7573506f6f6c0000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 15))
-}
+pub fn surplus_name() -> DynString { "CollSurplusPool" }
 
-pub fn surplus_bo_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c537572706c7573506f6f6c3a2043616c6c6572206973206e6f742042)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f72726f776572204f7065726174696f6e730000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 50))
-}
+pub fn surplus_bo_only() -> DynString { "CollSurplusPool: Caller is not Borrower Operations" }
 
-pub fn surplus_manager_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c537572706c7573506f6f6c3a2043616c6c6572206973206e6f742054)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x726f76654d616e61676572000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 43))
-}
+pub fn surplus_manager_only() -> DynString { "CollSurplusPool: Caller is not TroveManager" }
 
-pub fn surplus_no_collateral() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c537572706c7573506f6f6c3a204e6f20636f6c6c61746572616c2061)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7661696c61626c6520746f20636c61696d000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 49))
-}
+pub fn surplus_no_collateral() -> DynString { "CollSurplusPool: No collateral available to claim" }
 
-pub fn active_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c00000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 10))
-}
+pub fn active_name() -> DynString { "ActivePool" }
 
-pub fn active_bo_default() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c3a2043616c6c6572206973206e65697468657220424f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x206e6f722044656661756c7420506f6f6c000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 49))
-}
+pub fn active_bo_default() -> DynString { "ActivePool: Caller is neither BO nor Default Pool" }
 
-pub fn active_bo_tm_sp() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(96)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c3a2043616c6c6572206973206e65697468657220426f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x72726f7765724f7065726174696f6e73206e6f722054726f76654d616e616765)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 64), value: 0x72206e6f722053746162696c697479506f6f6c00000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 83))
-}
+pub fn active_bo_tm_sp() -> DynString { "ActivePool: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool" }
 
-pub fn active_bo_sp() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c3a2043616c6c6572206973206e6f7420426f72726f77)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x65724f7065726174696f6e73206e6f722053746162696c697479506f6f6c0000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 62))
-}
+pub fn active_bo_sp() -> DynString { "ActivePool: Caller is not BorrowerOperations nor StabilityPool" }
 
-pub fn active_bo_tm() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(96)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c3a2043616c6c6572206973206e65697468657220426f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x72726f7765724f7065726174696f6e73206e6f722054726f76654d616e616765)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 64), value: 0x7200000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 65))
-}
+pub fn active_bo_tm() -> DynString { "ActivePool: Caller is neither BorrowerOperations nor TroveManager" }
 
-pub fn active_tm() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x416374697665506f6f6c3a2043616c6c6572206973206e6f742054726f76654d)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x616e616765720000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 38))
-}
+pub fn active_tm() -> DynString { "ActivePool: Caller is not TroveManager" }
 
 // BOLD Stablecoin
-pub fn bold_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x424f4c4420537461626c65636f696e0000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 15))
-}
+pub fn bold_name() -> DynString { "BOLD Stablecoin" }
 
 // BOLD
-pub fn bold_symbol() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x424f4c4400000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 4))
-}
+pub fn bold_symbol() -> DynString { "BOLD" }
 
 // 1
-pub fn domain_version() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x3100000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 1))
-}
+pub fn domain_version() -> DynString { "1" }
 
 // Ownable: caller is not the owner
-pub fn owner_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
-}
+pub fn owner_only() -> DynString { "Ownable: caller is not the owner" }
 
 // BoldToken: Cannot transfer tokens directly to the Bold token contract or the zero address
-pub fn bold_recipient() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(96)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x426f6c64546f6b656e3a2043616e6e6f74207472616e7366657220746f6b656e)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x73206469726563746c7920746f2074686520426f6c6420746f6b656e20636f6e)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 64), value: 0x7472616374206f7220746865207a65726f206164647265737300000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 89))
-}
+pub fn bold_recipient() -> DynString { "BoldToken: Cannot transfer tokens directly to the Bold token contract or the zero address" }
 
 // BoldToken: Caller is not BO or AP
-pub fn bold_minter() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x426f6c64546f6b656e3a2043616c6c6572206973206e6f7420424f206f722041)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x5000000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
-}
+pub fn bold_minter() -> DynString { "BoldToken: Caller is not BO or AP" }
 
 // BoldToken: Caller is neither CR nor BorrowerOperations nor TroveManager nor StabilityPool
-pub fn bold_burner() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(96)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x426f6c64546f6b656e3a2043616c6c6572206973206e65697468657220435220)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6e6f7220426f72726f7765724f7065726174696f6e73206e6f722054726f7665)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 64), value: 0x4d616e61676572206e6f722053746162696c697479506f6f6c00000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 89))
-}
+pub fn bold_burner() -> DynString { "BoldToken: Caller is neither CR nor BorrowerOperations nor TroveManager nor StabilityPool" }
 
 // BoldToken: Caller is not the StabilityPool
-pub fn bold_sp() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x426f6c64546f6b656e3a2043616c6c6572206973206e6f742074686520537461)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x62696c697479506f6f6c00000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 42))
-}
+pub fn bold_sp() -> DynString { "BoldToken: Caller is not the StabilityPool" }
 
 // ERC20: transfer from the zero address
-pub fn erc20_transfer_from_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a207472616e736665722066726f6d20746865207a65726f206164)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6472657373000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
-}
+pub fn erc20_transfer_from_zero() -> DynString { "ERC20: transfer from the zero address" }
 
 // ERC20: transfer to the zero address
-pub fn erc20_transfer_to_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a207472616e7366657220746f20746865207a65726f2061646472)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6573730000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 35))
-}
+pub fn erc20_transfer_to_zero() -> DynString { "ERC20: transfer to the zero address" }
 
 // ERC20: transfer amount exceeds balance
-pub fn erc20_balance() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a207472616e7366657220616d6f756e7420657863656564732062)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x616c616e63650000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 38))
-}
+pub fn erc20_balance() -> DynString { "ERC20: transfer amount exceeds balance" }
 
 // ERC20: mint to the zero address
-pub fn erc20_mint_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a206d696e7420746f20746865207a65726f206164647265737300)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
-}
+pub fn erc20_mint_zero() -> DynString { "ERC20: mint to the zero address" }
 
 // ERC20: burn from the zero address
-pub fn erc20_burn_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a206275726e2066726f6d20746865207a65726f20616464726573)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7300000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
-}
+pub fn erc20_burn_zero() -> DynString { "ERC20: burn from the zero address" }
 
 // ERC20: burn amount exceeds balance
-pub fn erc20_burn_balance() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a206275726e20616d6f756e7420657863656564732062616c616e)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6365000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 34))
-}
+pub fn erc20_burn_balance() -> DynString { "ERC20: burn amount exceeds balance" }
 
 // ERC20: approve from the zero address
-pub fn erc20_approve_from_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a20617070726f76652066726f6d20746865207a65726f20616464)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7265737300000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 36))
-}
+pub fn erc20_approve_from_zero() -> DynString { "ERC20: approve from the zero address" }
 
 // ERC20: approve to the zero address
-pub fn erc20_approve_to_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a20617070726f766520746f20746865207a65726f206164647265)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7373000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 34))
-}
+pub fn erc20_approve_to_zero() -> DynString { "ERC20: approve to the zero address" }
 
 // ERC20: insufficient allowance
-pub fn erc20_allowance() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a20696e73756666696369656e7420616c6c6f77616e6365000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 29))
-}
+pub fn erc20_allowance() -> DynString { "ERC20: insufficient allowance" }
 
 // ERC20: decreased allowance below zero
-pub fn erc20_decrease() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332303a2064656372656173656420616c6c6f77616e63652062656c6f77)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x207a65726f000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
-}
+pub fn erc20_decrease() -> DynString { "ERC20: decreased allowance below zero" }
 
 // ERC20Permit: expired deadline
-pub fn permit_expired() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332305065726d69743a206578706972656420646561646c696e65000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 29))
-}
+pub fn permit_expired() -> DynString { "ERC20Permit: expired deadline" }
 
 // ERC20Permit: invalid signature
-pub fn permit_invalid() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45524332305065726d69743a20696e76616c6964207369676e61747572650000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 30))
-}
+pub fn permit_invalid() -> DynString { "ERC20Permit: invalid signature" }
 
 // ECDSA: invalid signature 's' value
-pub fn ecdsa_high_s() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45434453413a20696e76616c6964207369676e6174757265202773272076616c)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7565000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 34))
-}
+pub fn ecdsa_high_s() -> DynString { "ECDSA: invalid signature 's' value" }
 
 // ECDSA: invalid signature
-pub fn ecdsa_invalid() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x45434453413a20696e76616c6964207369676e61747572650000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
-}
+pub fn ecdsa_invalid() -> DynString { "ECDSA: invalid signature" }
 
 // SortedTroves
-pub fn sorted_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665730000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 12))
-}
+pub fn sorted_name() -> DynString { "SortedTroves" }
 
 // SortedTroves: List already contains the node
-pub fn sorted_duplicate() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420616c726561647920636f6e7461)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x696e7320746865206e6f64650000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 44))
-}
+pub fn sorted_duplicate() -> DynString { "SortedTroves: List already contains the node" }
 
 // SortedTroves: _id cannot be the root node's ID
-pub fn sorted_root() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f69642063616e6e6f742062652074686520)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x726f6f74206e6f64652773204944000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
-}
+pub fn sorted_root() -> DynString { "SortedTroves: _id cannot be the root node's ID" }
 
 // SortedTroves: _troveId cannot be the root node's ID
-pub fn sorted_batch_root() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f74726f766549642063616e6e6f74206265)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x2074686520726f6f74206e6f6465277320494400000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 51))
-}
+pub fn sorted_batch_root() -> DynString { "SortedTroves: _troveId cannot be the root node's ID" }
 
 // SortedTroves: _batchId cannot be zero
-pub fn sorted_batch_zero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a205f626174636849642063616e6e6f74206265)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x207a65726f000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
-}
+pub fn sorted_batch_zero() -> DynString { "SortedTroves: _batchId cannot be zero" }
 
 // SortedTroves: List does not contain the id
-pub fn sorted_missing() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x61696e2074686520696400000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 42))
-}
+pub fn sorted_missing() -> DynString { "SortedTroves: List does not contain the id" }
 
 // SortedTroves: Must use removeFromBatch() to remove batched node
-pub fn sorted_remove_batched() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374207573652072656d6f766546726f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6d4261746368282920746f2072656d6f76652062617463686564206e6f646500)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 63))
-}
+pub fn sorted_remove_batched() -> DynString { "SortedTroves: Must use removeFromBatch() to remove batched node" }
 
 // SortedTroves: Must not reInsert() batched node
-pub fn sorted_reinsert_batched() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374206e6f74207265496e7365727428)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x292062617463686564206e6f6465000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
-}
+pub fn sorted_reinsert_batched() -> DynString { "SortedTroves: Must not reInsert() batched node" }
 
 // SortedTroves: Must use remove() to remove non-batched node
-pub fn sorted_remove_unbatched() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204d757374207573652072656d6f7665282920)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x746f2072656d6f7665206e6f6e2d62617463686564206e6f6465000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 58))
-}
+pub fn sorted_remove_unbatched() -> DynString { "SortedTroves: Must use remove() to remove non-batched node" }
 
 // SortedTroves: List does not contain the batch
-pub fn sorted_missing_batch() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x61696e2074686520626174636800000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 45))
-}
+pub fn sorted_missing_batch() -> DynString { "SortedTroves: List does not contain the batch" }
 
 // SortedTroves: Caller is not BorrowerOperations nor TroveManager
-pub fn sorted_bo_tm() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a2043616c6c6572206973206e6f7420426f7272)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f7765724f7065726174696f6e73206e6f722054726f76654d616e6167657200)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 63))
-}
+pub fn sorted_bo_tm() -> DynString { "SortedTroves: Caller is not BorrowerOperations nor TroveManager" }
 
 // SortedTroves: Caller is not BorrowerOperations
-pub fn sorted_bo() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x536f7274656454726f7665733a2043616c6c6572206973206e6f7420426f7272)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f7765724f7065726174696f6e73000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 46))
-}
+pub fn sorted_bo() -> DynString { "SortedTroves: Caller is not BorrowerOperations" }
 
 // TroveNFT: Caller is not the TroveManager contract
-pub fn nft_manager() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x54726f76654e46543a2043616c6c6572206973206e6f74207468652054726f76)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x654d616e6167657220636f6e7472616374000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 49))
-}
+pub fn nft_manager() -> DynString { "TroveNFT: Caller is not the TroveManager contract" }
 
 // ERC721: address zero is not a valid owner
-pub fn nft_zero_owner() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a2061646472657373207a65726f206973206e6f742061207661)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6c6964206f776e65720000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 41))
-}
+pub fn nft_zero_owner() -> DynString { "ERC721: address zero is not a valid owner" }
 
 // ERC721: invalid token ID
-pub fn nft_missing() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20696e76616c696420746f6b656e2049440000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
-}
+pub fn nft_missing() -> DynString { "ERC721: invalid token ID" }
 
 // ERC721: approval to current owner
-pub fn nft_approval_owner() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f76616c20746f2063757272656e74206f776e65)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7200000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
-}
+pub fn nft_approval_owner() -> DynString { "ERC721: approval to current owner" }
 
 // ERC721: approve caller is not token owner or approved for all
-pub fn nft_approval_auth() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f76652063616c6c6572206973206e6f7420746f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6b656e206f776e6572206f7220617070726f76656420666f7220616c6c000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 61))
-}
+pub fn nft_approval_auth() -> DynString { "ERC721: approve caller is not token owner or approved for all" }
 
 // ERC721: approve to caller
-pub fn nft_self_approval() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20617070726f766520746f2063616c6c657200000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 25))
-}
+pub fn nft_self_approval() -> DynString { "ERC721: approve to caller" }
 
 // ERC721: caller is not token owner or approved
-pub fn nft_transfer_auth() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a2063616c6c6572206973206e6f7420746f6b656e206f776e65)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x72206f7220617070726f76656400000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 45))
-}
+pub fn nft_transfer_auth() -> DynString { "ERC721: caller is not token owner or approved" }
 
 // ERC721: transfer from incorrect owner
-pub fn nft_wrong_from() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e736665722066726f6d20696e636f727265637420)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6f776e6572000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 37))
-}
+pub fn nft_wrong_from() -> DynString { "ERC721: transfer from incorrect owner" }
 
 // ERC721: transfer to the zero address
-pub fn nft_zero_to() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e7366657220746f20746865207a65726f20616464)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x7265737300000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 36))
-}
+pub fn nft_zero_to() -> DynString { "ERC721: transfer to the zero address" }
 
 // ERC721: mint to the zero address
-pub fn nft_zero_mint() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a206d696e7420746f20746865207a65726f2061646472657373)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
-}
+pub fn nft_zero_mint() -> DynString { "ERC721: mint to the zero address" }
 
 // ERC721: token already minted
-pub fn nft_duplicate() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a20746f6b656e20616c7265616479206d696e74656400000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 28))
-}
+pub fn nft_duplicate() -> DynString { "ERC721: token already minted" }
 
 // ERC721: transfer to non ERC721Receiver implementer
-pub fn nft_receiver() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4552433732313a207472616e7366657220746f206e6f6e204552433732315265)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x63656976657220696d706c656d656e7465720000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 50))
-}
+pub fn nft_receiver() -> DynString { "ERC721: transfer to non ERC721Receiver implementer" }
 
 // FixedAssetReader: Invalid input
-pub fn asset_invalid_input() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: data, value: 0x466978656441737365745265616465723a20496e76616c696420696e70757400)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
-}
+pub fn asset_invalid_input() -> DynString { "FixedAssetReader: Invalid input" }
 
-pub fn registry_empty_collateral() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c206c6973742063616e6e6f7420626520656d70747900)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 31))
-}
+pub fn registry_empty_collateral() -> DynString { "Collateral list cannot be empty" }
 
-pub fn registry_too_many_collaterals() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c206c69737420746f6f206c6f6e670000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 24))
-}
+pub fn registry_too_many_collaterals() -> DynString { "Collateral list too long" }
 
-pub fn registry_invalid_index() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x496e76616c696420696e64657800000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 13))
-}
+pub fn registry_invalid_index() -> DynString { "Invalid index" }
 
-pub fn registry_invalid_fee() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x4d6178206665652070657263656e74616765206d757374206265206265747765)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x656e20302e352520616e64203130302500000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 48))
-}
+pub fn registry_invalid_fee() -> DynString { "Max fee percentage must be between 0.5% and 100%" }
 
-pub fn registry_zero_amount() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x436f6c6c61746572616c52656769737472793a20416d6f756e74206d75737420)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x62652067726561746572207468616e207a65726f000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 52))
-}
+pub fn registry_zero_amount() -> DynString { "CollateralRegistry: Amount must be greater than zero" }
 
-pub fn registry_fee_exceeded() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x43523a204665652065786365656465642070726f7669646564206d6178696d75)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6d00000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 33))
-}
+pub fn registry_fee_exceeded() -> DynString { "CR: Fee exceeded provided maximum" }
 
-pub fn stability_name() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c00000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 13))
-}
+pub fn stability_name() -> DynString { "StabilityPool" }
 
-pub fn stability_nonzero() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a20416d6f756e74206d757374206265206e6f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6e2d7a65726f0000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 38))
-}
+pub fn stability_nonzero() -> DynString { "StabilityPool: Amount must be non-zero" }
 
-pub fn stability_has_deposit() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2055736572206d7573742068617665206120)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x6e6f6e2d7a65726f206465706f73697400000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 48))
-}
+pub fn stability_has_deposit() -> DynString { "StabilityPool: User must have a non-zero deposit" }
 
-pub fn stability_no_deposit() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2055736572206d7573742068617665206e6f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x206465706f736974000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 40))
-}
+pub fn stability_no_deposit() -> DynString { "StabilityPool: User must have no deposit" }
 
-pub fn stability_minimum() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x5769746864726177616c206d757374206c6561766520746f74616c426f6c6444)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x65706f73697473203e3d204d494e5f424f4c445f494e5f535000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 57))
-}
+pub fn stability_minimum() -> DynString { "Withdrawal must leave totalBoldDeposits >= MIN_BOLD_IN_SP" }
 
-pub fn stability_nonzero_p() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x50206d757374206e6576657220646563726561736520746f2030000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 26))
-}
+pub fn stability_nonzero_p() -> DynString { "P must never decrease to 0" }
 
-pub fn stability_active_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2043616c6c6572206973206e6f7420416374)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x697665506f6f6c00000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 39))
-}
+pub fn stability_active_only() -> DynString { "StabilityPool: Caller is not ActivePool" }
 
-pub fn stability_manager_only() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 0), value: 0x53746162696c697479506f6f6c3a2043616c6c6572206973206e6f742054726f)
-    mem.mstore(addr: core::ptr::offset_bytes(data, 32), value: 0x76654d616e616765720000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 41))
-}
+pub fn stability_manager_only() -> DynString { "StabilityPool: Caller is not TroveManager" }

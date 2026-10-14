@@ -1,70 +1,69 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
 use super::metadata_string::{cat, fragment, text, decimal}
 #[inline(never)]
-pub fn el_2(_ tag: DynString, _ props: DynString) -> DynString uses (mem: mut RawMem) { cat((cat((cat((cat((text(fragment("<"))).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())).as_bytes(), (text(fragment("/>"))).as_bytes()) }
+pub fn el_2(_ tag: DynString, _ props: DynString) -> DynString { cat((cat((cat((cat((text(fragment("<"))).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())).as_bytes(), (text(fragment("/>"))).as_bytes()) }
 #[inline(never)]
-pub fn el_3(_ tag: DynString, _ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { cat((cat((cat((cat((cat((cat((cat((cat((text(fragment("<"))).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())).as_bytes(), (text(fragment(">"))).as_bytes())).as_bytes(), (children).as_bytes())).as_bytes(), (text(fragment("</"))).as_bytes())).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(">"))).as_bytes()) }
+pub fn el_3(_ tag: DynString, _ props: DynString, _ children: DynString) -> DynString { cat((cat((cat((cat((cat((cat((cat((cat((text(fragment("<"))).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())).as_bytes(), (text(fragment(">"))).as_bytes())).as_bytes(), (children).as_bytes())).as_bytes(), (text(fragment("</"))).as_bytes())).as_bytes(), (tag).as_bytes())).as_bytes(), (text(fragment(">"))).as_bytes()) }
 #[inline(never)]
-pub fn prop_3(_ key: DynString, _ value: DynString, _ last: bool) -> DynString uses (mem: mut RawMem) { cat((cat((cat((key).as_bytes(), (text(fragment("=\""))).as_bytes())).as_bytes(), (value).as_bytes())).as_bytes(), (if last { text(fragment("\"")) } else { text(fragment("\" ")) }).as_bytes()) }
+pub fn prop_3(_ key: DynString, _ value: DynString, _ last: bool) -> DynString { cat((cat((cat((key).as_bytes(), (text(fragment("=\""))).as_bytes())).as_bytes(), (value).as_bytes())).as_bytes(), (if last { text(fragment("\"")) } else { text(fragment("\" ")) }).as_bytes()) }
 #[inline(never)]
-pub fn prop_2(_ key: DynString, _ value: DynString) -> DynString uses (mem: mut RawMem) { prop_3(key, value, false) }
+pub fn prop_2(_ key: DynString, _ value: DynString) -> DynString { prop_3(key, value, false) }
 #[inline(never)]
-pub fn g_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("g")), props, children) }
+pub fn g_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("g")), props, children) }
 #[inline(never)]
-pub fn text_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("text")), props, children) }
+pub fn text_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("text")), props, children) }
 #[inline(never)]
-pub fn filter_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("filter")), props, children) }
+pub fn filter_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("filter")), props, children) }
 #[inline(never)]
-pub fn radialGradient_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("radialGradient")), props, children) }
+pub fn radialGradient_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("radialGradient")), props, children) }
 #[inline(never)]
-pub fn linearGradient_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("linearGradient")), props, children) }
+pub fn linearGradient_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("linearGradient")), props, children) }
 #[inline(never)]
-pub fn line_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("line")), props) }
+pub fn line_1(_ props: DynString) -> DynString { el_2(text(fragment("line")), props) }
 #[inline(never)]
-pub fn line_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("line")), props, children) }
+pub fn line_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("line")), props, children) }
 #[inline(never)]
-pub fn ellipse_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("ellipse")), props) }
+pub fn ellipse_1(_ props: DynString) -> DynString { el_2(text(fragment("ellipse")), props) }
 #[inline(never)]
-pub fn ellipse_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("ellipse")), props, children) }
+pub fn ellipse_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("ellipse")), props, children) }
 #[inline(never)]
-pub fn polygon_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("polygon")), props) }
+pub fn polygon_1(_ props: DynString) -> DynString { el_2(text(fragment("polygon")), props) }
 #[inline(never)]
-pub fn polygon_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("polygon")), props, children) }
+pub fn polygon_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("polygon")), props, children) }
 #[inline(never)]
-pub fn polyline_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("polyline")), props) }
+pub fn polyline_1(_ props: DynString) -> DynString { el_2(text(fragment("polyline")), props) }
 #[inline(never)]
-pub fn polyline_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("polyline")), props, children) }
+pub fn polyline_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("polyline")), props, children) }
 #[inline(never)]
-pub fn rect_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("rect")), props) }
+pub fn rect_1(_ props: DynString) -> DynString { el_2(text(fragment("rect")), props) }
 #[inline(never)]
-pub fn rect_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("rect")), props, children) }
+pub fn rect_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("rect")), props, children) }
 #[inline(never)]
-pub fn circle_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("circle")), props) }
+pub fn circle_1(_ props: DynString) -> DynString { el_2(text(fragment("circle")), props) }
 #[inline(never)]
-pub fn circle_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("circle")), props, children) }
+pub fn circle_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("circle")), props, children) }
 #[inline(never)]
-pub fn animateTransform_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("animateTransform")), props) }
+pub fn animateTransform_1(_ props: DynString) -> DynString { el_2(text(fragment("animateTransform")), props) }
 #[inline(never)]
-pub fn animate_1(_ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("animate")), props) }
+pub fn animate_1(_ props: DynString) -> DynString { el_2(text(fragment("animate")), props) }
 #[inline(never)]
-pub fn svg_2(_ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("svg")), cat((cat((text(fragment("xmlns=\"http://www.w3.org/2000/s"))).as_bytes(), (text(fragment("vg\" "))).as_bytes())).as_bytes(), (props).as_bytes()), children) }
+pub fn svg_2(_ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("svg")), cat((cat((text(fragment("xmlns=\"http://www.w3.org/2000/s"))).as_bytes(), (text(fragment("vg\" "))).as_bytes())).as_bytes(), (props).as_bytes()), children) }
 #[inline(never)]
-pub fn style_2(_ title: DynString, _ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("style")), cat((cat((cat((text(fragment("."))).as_bytes(), (title).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())) }
+pub fn style_2(_ title: DynString, _ props: DynString) -> DynString { el_2(text(fragment("style")), cat((cat((cat((text(fragment("."))).as_bytes(), (title).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes())) }
 #[inline(never)]
-pub fn path_1(_ d: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("path")), prop_3(text(fragment("d")), d, true)) }
+pub fn path_1(_ d: DynString) -> DynString { el_2(text(fragment("path")), prop_3(text(fragment("d")), d, true)) }
 #[inline(never)]
-pub fn path_2(_ d: DynString, _ props: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("path")), cat((prop_2(text(fragment("d")), d)).as_bytes(), (props).as_bytes())) }
+pub fn path_2(_ d: DynString, _ props: DynString) -> DynString { el_2(text(fragment("path")), cat((prop_2(text(fragment("d")), d)).as_bytes(), (props).as_bytes())) }
 #[inline(never)]
-pub fn path_3(_ d: DynString, _ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("path")), cat((prop_2(text(fragment("d")), d)).as_bytes(), (props).as_bytes()), children) }
+pub fn path_3(_ d: DynString, _ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("path")), cat((prop_2(text(fragment("d")), d)).as_bytes(), (props).as_bytes()), children) }
 #[inline(never)]
-pub fn circle_3(_ cx: DynString, _ cy: DynString, _ r: DynString) -> DynString uses (mem: mut RawMem) { el_2(text(fragment("circle")), cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, true)).as_bytes())) }
+pub fn circle_3(_ cx: DynString, _ cy: DynString, _ r: DynString) -> DynString { el_2(text(fragment("circle")), cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, true)).as_bytes())) }
 #[inline(never)]
-pub fn circle_4(_ cx: DynString, _ cy: DynString, _ r: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("circle")), cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, true)).as_bytes()), children) }
+pub fn circle_4(_ cx: DynString, _ cy: DynString, _ r: DynString, _ children: DynString) -> DynString { el_3(text(fragment("circle")), cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, true)).as_bytes()), children) }
 #[inline(never)]
-pub fn circle_5(_ cx: DynString, _ cy: DynString, _ r: DynString, _ props: DynString, _ children: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("circle")), cat((cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, false)).as_bytes())).as_bytes(), (props).as_bytes()), children) }
+pub fn circle_5(_ cx: DynString, _ cy: DynString, _ r: DynString, _ props: DynString, _ children: DynString) -> DynString { el_3(text(fragment("circle")), cat((cat((cat((prop_2(text(fragment("cx")), cx)).as_bytes(), (prop_2(text(fragment("cy")), cy)).as_bytes())).as_bytes(), (prop_3(text(fragment("r")), r, false)).as_bytes())).as_bytes(), (props).as_bytes()), children) }
 #[inline(never)]
-pub fn cdata_1(_ content: DynString) -> DynString uses (mem: mut RawMem) { cat((cat((text(fragment("<![CDATA["))).as_bytes(), (content).as_bytes())).as_bytes(), (text(fragment("]]>"))).as_bytes()) }
+pub fn cdata_1(_ content: DynString) -> DynString { cat((cat((text(fragment("<![CDATA["))).as_bytes(), (content).as_bytes())).as_bytes(), (text(fragment("]]>"))).as_bytes()) }
 #[inline(never)]
-pub fn gradientStop_3(_ offset: u256, _ color: DynString, _ props: DynString) -> DynString uses (mem: mut RawMem) { el_3(text(fragment("stop")), cat((cat((cat((cat((prop_2(text(fragment("stop-color")), color)).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (prop_2(text(fragment("offset")), cat((decimal(offset)).as_bytes(), (text(fragment("%"))).as_bytes()))).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes()), DynString::empty()) }
+pub fn gradientStop_3(_ offset: u256, _ color: DynString, _ props: DynString) -> DynString { el_3(text(fragment("stop")), cat((cat((cat((cat((prop_2(text(fragment("stop-color")), color)).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (prop_2(text(fragment("offset")), cat((decimal(offset)).as_bytes(), (text(fragment("%"))).as_bytes()))).as_bytes())).as_bytes(), (text(fragment(" "))).as_bytes())).as_bytes(), (props).as_bytes()), DynString::empty()) }

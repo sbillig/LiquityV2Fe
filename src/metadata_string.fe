@@ -1,111 +1,120 @@
 // SPDX-License-Identifier: MIT
 // String primitives for the reference NFT renderer. Numeric formatting retains
 // the exact truncation and zero formatting of NFTMetadata/utils/Utils.sol.
-use core::ptr
+// All byte assembly goes through the checked `BytesBuilder`; no raw pointers.
 use core::num::IntDowncast
 use std::abi::DynString
-use std::evm::{Address, RawMem}
+use std::evm::{Address}
 use std::evm::packed::keccak_packed
+use super::bytes_builder::BytesBuilder
 pub use super::metadata_concat::{cat, text, fragment}
+
 #[inline(never)]
-pub fn decimal(mut _ value: own u256) -> DynString uses (mem: mut RawMem) {
-    let p = ptr::alloc_bytes(78)
-    let mut i: u256 = 78
+pub fn decimal(var _ value: own u256) -> DynString {
+    var out = BytesBuilder::zeroed(78)
+    var i: u256 = 78
     while true {
         i -= 1
-        mem.mstore8(addr: ptr::offset_bytes(p, i), value: (48 + value % 10).downcast_truncate())
+        out.write_byte(at: i, value: (48 + value % 10).downcast_truncate())
         value /= 10
         if value == 0 { break }
     }
-    DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: ptr::offset_bytes(p, i), len: 78 - i))
+    DynString::from_payload(source: out.span().slice(offset: i, len: 78 - i))
 }
+
 #[inline(never)]
 fn digit(_ value: u256) -> u8 { (if value < 10 { 48 + value } else { 87 + value }).downcast_truncate() }
+
 #[inline(never)]
-pub fn hex_fixed(mut _ value: own u256, _ bytes: u256) -> DynString uses (mem: mut RawMem) {
+pub fn hex_fixed(var _ value: own u256, _ bytes: u256) -> DynString {
     let len = 2 + bytes * 2
-    let p = ptr::alloc_bytes(len)
-    mem.mstore8(addr: p, value: 48)
-    mem.mstore8(addr: ptr::offset_bytes(p, 1), value: 120)
-    let mut i = len
+    var out = BytesBuilder::zeroed(len)
+    out.write_byte(at: 0, value: 48)
+    out.write_byte(at: 1, value: 120)
+    var i = len
     while i > 2 {
         i -= 1
-        mem.mstore8(addr: ptr::offset_bytes(p, i), value: digit(value & 15))
+        out.write_byte(at: i, value: digit(value & 15))
         value >>= 4
     }
-    DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: p, len))
+    out.into_string()
 }
+
 #[inline(never)]
-pub fn hex_number(_ value: u256) -> DynString uses (mem: mut RawMem) {
-    let mut bytes: u256 = 1
-    let mut remaining = value >> 8
+pub fn hex_number(_ value: u256) -> DynString {
+    var bytes: u256 = 1
+    var remaining = value >> 8
     while remaining != 0 { bytes += 1
         remaining >>= 8
     }
     hex_fixed(value, bytes)
 }
+
 #[inline(never)]
-pub fn checksum(_ address: Address) -> DynString uses (mem: mut RawMem) {
+pub fn checksum(_ address: Address) -> DynString {
     let lower = hex_fixed(address.inner, 20)
-    let span = lower.payload_span()
     let hash = keccak_packed(slice(lower, 2, 42).as_bytes())
-    let p = ptr::alloc_bytes(42)
-    ptr::copy(dest: p, source: span)
-    let mut i: u256 = 0
+    var out = BytesBuilder::with_capacity(42)
+    out.append(lower.payload_span())
+    var i: u256 = 0
     while i < 40 {
-        let at = ptr::offset_bytes(p, i + 2)
-        let c = *at
-        if c >= 97 && ((hash >> ((63 - i) * 4)) & 15) >= 8 { mem.mstore8(addr: at, value: c - 32) }
+        let c = out.byte_at(i + 2)
+        if c >= 97 && ((hash >> ((63 - i) * 4)) & 15) >= 8 { out.write_byte(at: i + 2, value: c - 32) }
         i += 1
     }
-    DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: p, len: 42))
+    out.into_string()
 }
+
 #[inline(never)]
 pub fn slice(_ value: DynString, _ start: u256, _ end: u256) -> DynString {
     let end = if end < value.len() { end } else { value.len() }
     if start >= end { return DynString::empty() }
-    DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: ptr::offset_bytes(value.payload_span().ptr(), start), len: end - start))
+    DynString::from_payload(source: value.payload_span().slice(offset: start, len: end - start))
 }
+
 #[inline(never)]
 fn base64_char(_ i: u256) -> u8 {
     (if i < 26 { 65 + i } else if i < 52 { 97 + i - 26 } else if i < 62 { 48 + i - 52 } else if i == 62 { 43 } else { 47 }).downcast_truncate()
 }
+
 #[inline(never)]
-pub fn base64(_ data: DynString) -> DynString uses (mem: mut RawMem) {
+pub fn base64(_ data: DynString) -> DynString {
     let len = 4 * ((data.len() + 2) / 3)
-    let p = ptr::alloc_bytes(len)
-    let input = data.payload_span().ptr()
-    let mut i: u256 = 0
-    let mut j: u256 = 0
+    var out = BytesBuilder::zeroed(len)
+    let input = data.payload_span()
+    var i: u256 = 0
+    var j: u256 = 0
     while i < data.len() {
-        let a = (*ptr::offset_bytes(input, i)) as u256
-        let b = if i + 1 < data.len() { (*ptr::offset_bytes(input, i + 1)) as u256 } else { 0 }
-        let c = if i + 2 < data.len() { (*ptr::offset_bytes(input, i + 2)) as u256 } else { 0 }
+        let a = input.byte_at(i) as u256
+        let b = if i + 1 < data.len() { input.byte_at(i + 1) as u256 } else { 0 }
+        let c = if i + 2 < data.len() { input.byte_at(i + 2) as u256 } else { 0 }
         let value = (a << 16) | (b << 8) | c
-        mem.mstore8(addr: ptr::offset_bytes(p, j), value: base64_char((value >> 18) & 63))
-        mem.mstore8(addr: ptr::offset_bytes(p, j + 1), value: base64_char((value >> 12) & 63))
-        mem.mstore8(addr: ptr::offset_bytes(p, j + 2), value: if i + 1 < data.len() { base64_char((value >> 6) & 63) } else { 61 })
-        mem.mstore8(addr: ptr::offset_bytes(p, j + 3), value: if i + 2 < data.len() { base64_char(value & 63) } else { 61 })
+        out.write_byte(at: j, value: base64_char((value >> 18) & 63))
+        out.write_byte(at: j + 1, value: base64_char((value >> 12) & 63))
+        out.write_byte(at: j + 2, value: if i + 1 < data.len() { base64_char((value >> 6) & 63) } else { 61 })
+        out.write_byte(at: j + 3, value: if i + 2 < data.len() { base64_char(value & 63) } else { 61 })
         i += 3
         j += 4
     }
-    DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: p, len))
+    out.into_string()
 }
+
 #[inline(never)]
 fn pow10(_ exponent: u256) -> u256 {
-    let mut value: u256 = 1
-    let mut i: u256 = 0
+    var value: u256 = 1
+    var i: u256 = 0
     while i < exponent { value *= 10
         i += 1
     }
     value
 }
+
 #[inline(never)]
-pub fn locale(_ value: u256, _ divisor: u8, _ precision: u8) -> DynString uses (mem: mut RawMem) {
+pub fn locale(_ value: u256, _ divisor: u8, _ precision: u8) -> DynString {
     let div = divisor as u256
     let prec = precision as u256
-    let mut whole = value
-    let mut fraction: u256 = 0
+    var whole = value
+    var fraction: u256 = 0
     if div > 0 {
         let scale = pow10(div)
         whole = value / scale
@@ -117,29 +126,26 @@ pub fn locale(_ value: u256, _ divisor: u8, _ precision: u8) -> DynString uses (
     let digits = decimal(whole)
     let len = digits.len()
     let out_len = len + (len - 1) / 3
-    let p = ptr::alloc_bytes(out_len)
-    let mut j: u256 = 0
-    let mut i: u256 = 0
+    var grouped = BytesBuilder::with_capacity(out_len)
+    var i: u256 = 0
     while i < len {
         if i > 0 && (len - i) % 3 == 0 {
-            mem.mstore8(addr: ptr::offset_bytes(p, j), value: 44)
-            j += 1
+            grouped.push_byte(44)
         }
-        mem.mstore8(addr: ptr::offset_bytes(p, j), value: *ptr::offset_bytes(digits.payload_span().ptr(), i))
-        j += 1
+        grouped.push_byte(digits.payload_span().byte_at(i))
         i += 1
     }
-    let mut output = DynString::from_payload(source: ptr::MemSpan::from_raw_parts(ptr: p, len: out_len))
+    var output = grouped.into_string()
     if fraction == 0 {
         if whole > 0 && prec > 0 { output = cat(output.as_bytes(), fragment(".")) }
-        let mut k: u256 = 0
+        var k: u256 = 0
         while k < prec { output = cat(output.as_bytes(), fragment("0"))
             k += 1
         }
         return output
     }
     let number = decimal(fraction)
-    let mut fraction_str = slice(number, 0, prec)
+    var fraction_str = slice(number, 0, prec)
     while fraction_str.len() < prec { fraction_str = cat(fragment("0"), fraction_str.as_bytes()) }
     if prec > 0 { cat(cat(output.as_bytes(), fragment(".")).as_bytes(), fraction_str.as_bytes()) } else { cat(output.as_bytes(), fraction_str.as_bytes()) }
 }

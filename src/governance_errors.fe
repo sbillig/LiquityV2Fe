@@ -1,20 +1,5 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
-pub fn zero_amount() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a207a65726f2d6c7174792d616d6f756e7400000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 28))
-}
-pub fn no_proxy() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20757365722d70726f78792d6e6f742d6465706c6f)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x7965640000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 35))
-}
-pub fn insufficient() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20696e73756666696369656e742d756e616c6c6f63)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x617465642d6c7174790000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 41))
-}
+pub fn zero_amount() -> DynString { "Governance: zero-lqty-amount" }
+pub fn no_proxy() -> DynString { "Governance: user-proxy-not-deployed" }
+pub fn insufficient() -> DynString { "Governance: insufficient-unallocated-lqty" }

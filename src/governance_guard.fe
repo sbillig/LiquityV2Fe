@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
-use std::evm::{RawStorage, revert_error}
+use std::evm::{RawStorage, revert_error, storage_at_mut}
+use super::governance_snapshots::GovernanceLayout
 #[error]
 pub struct ReentrancyGuardReentrantCall {}
 pub fn enter() uses (storage: mut RawStorage) {
-    if storage.sload(0) == 2 { revert_error(ReentrancyGuardReentrantCall {}) }
-    storage.sstore(slot: 0, value: 2)
+    let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+    if gov.guard_status == 2 { revert_error(ReentrancyGuardReentrantCall {}) }
+    gov.guard_status = 2
 }
-pub fn exit() uses (storage: mut RawStorage) { storage.sstore(slot: 0, value: 1) }
+pub fn exit() uses (storage: mut RawStorage) {
+    let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+    gov.guard_status = 1
+}

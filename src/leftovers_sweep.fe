@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Port of Zappers/LeftoversSweep.sol. Value snapshots avoid native borrows across calls.
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, RawMem}
+use std::evm::{Address, Ctx, Call}
 use super::token_calls::safe_transfer
 pub msg BalanceMsg {
     #[selector = sol("balanceOf(address)")]
@@ -14,8 +14,8 @@ pub struct InitialBalances {
 }
 impl Copy for InitialBalances {}
 pub fn snapshot(_ tokens: [Address; 4], _ receiver: Address) -> InitialBalances uses (ctx: Ctx, call: mut Call) {
-    let mut balances: [u256; 4] = [0; 4]
-    let mut i: usize = 0
+    var balances: [u256; 4] = [0; 4]
+    var i: usize = 0
     while i < 4 {
         let token = tokens[i]
         if token == Address::zero() { break }
@@ -24,8 +24,8 @@ pub fn snapshot(_ tokens: [Address; 4], _ receiver: Address) -> InitialBalances 
     }
     InitialBalances { tokens, balances, receiver }
 }
-pub fn return_leftovers(_ initial: InitialBalances) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
-    let mut i: usize = 0
+pub fn return_leftovers(_ initial: InitialBalances) uses (ctx: Ctx, call: mut Call) {
+    var i: usize = 0
     while i < 4 {
         let token = initial.tokens[i]
         if token == Address::zero() { break }

@@ -3,88 +3,92 @@
 // Match the Solidity storage layout: size at 0, nodes at mapping root 1,
 // batches at mapping root 2. Immutable registry addresses live in contract code.
 use std::abi::{sol, DynString}
-use std::evm::{Address, Ctx, Call, RawMem, RawStorage, Log}
-use std::evm::packed::keccak_packed
+use std::evm::{Address, Ctx, Call, Log, StorageMap}
 use super::addresses_registry::{RegistryMsg, TroveManagerAddressChanged, BorrowerOperationsAddressChanged}
 use super::revert_texts as text
+
+// Solidity `Node` packs `batch` (low 160 bits) and `exists` (bit 160) into
+// the third word. Fe has no declarative Solidity-packed storage struct yet,
+// so the packed word is modeled explicitly and decoded by the accessors
+// below; everything else is a plain typed field place.
+pub struct Node {
+    pub next_id: u256,
+    pub prev_id: u256,
+    pub packed: u256,
+}
+
 const ADDRESS_MASK: u256 = 0xffffffffffffffffffffffffffffffffffffffff
 const EXISTS_BIT: u256 = 1 << 160
+impl Copy for Node {}
+
+pub struct Batch {
+    pub head: u256,
+    pub tail: u256,
+}
+impl Copy for Batch {}
 pub msg TroveRateMsg {
     #[selector = sol("getTroveAnnualInterestRate(uint256)")]
     Rate { id: u256 } -> u256,
 }
-fn node_slot(_ id: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((id, 1 as u256)) }
-fn batch_slot(_ id: Address) -> u256 uses (mem: mut RawMem) { keccak_packed((id.inner, 2 as u256)) }
-#[arithmetic(unchecked)]
-fn add_slot(_ slot: u256, _ offset: u256) -> u256 { slot + offset }
-fn next(_ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(node_slot(id)) }
-fn prev(_ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(add_slot(node_slot(id), 1)) }
-fn batch_of(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
-    Address { inner: storage.sload(add_slot(node_slot(id), 2)) & ADDRESS_MASK }
-}
-fn contains(_ id: u256) -> bool uses (mem: mut RawMem, storage: RawStorage) {
-    storage.sload(add_slot(node_slot(id), 2)) & EXISTS_BIT != 0
-}
-fn batch_head(_ id: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(batch_slot(id)) }
-fn batch_tail(_ id: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(add_slot(batch_slot(id), 1)) }
-fn set_next(_ id: u256, _ value: u256) uses (mem: mut RawMem, storage: mut RawStorage) { storage.sstore(slot: node_slot(id), value) }
-fn set_prev(_ id: u256, _ value: u256) uses (mem: mut RawMem, storage: mut RawStorage) { storage.sstore(slot: add_slot(node_slot(id), 1), value) }
-fn set_head(_ id: Address, _ value: u256) uses (mem: mut RawMem, storage: mut RawStorage) { storage.sstore(slot: batch_slot(id), value) }
-fn set_tail(_ id: Address, _ value: u256) uses (mem: mut RawMem, storage: mut RawStorage) { storage.sstore(slot: add_slot(batch_slot(id), 1), value) }
-fn mark_node(_ id: u256, _ batch: Address) uses (mem: mut RawMem, storage: mut RawStorage) {
-    storage.sstore(slot: add_slot(node_slot(id), 2), value: batch.inner | EXISTS_BIT)
-}
-fn delete_node(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
-    let slot = node_slot(id)
-    storage.sstore(slot, value: 0)
-    storage.sstore(slot: add_slot(slot, 1), value: 0)
-    storage.sstore(slot: add_slot(slot, 2), value: 0)
+fn next(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>) { nodes[id].next_id }
+fn prev(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>) { nodes[id].prev_id }
+fn batch_of(_ id: u256) -> Address uses (nodes: StorageMap<u256, Node>) { Address { inner: nodes[id].packed & ADDRESS_MASK } }
+fn contains(_ id: u256) -> bool uses (nodes: StorageMap<u256, Node>) { nodes[id].packed & EXISTS_BIT != 0 }
+fn batch_head(_ id: Address) -> u256 uses (batches: StorageMap<Address, Batch>) { batches[id].head }
+fn batch_tail(_ id: Address) -> u256 uses (batches: StorageMap<Address, Batch>) { batches[id].tail }
+fn set_next(_ id: u256, _ value: u256) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].next_id = value }
+fn set_prev(_ id: u256, _ value: u256) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].prev_id = value }
+fn set_head(_ id: Address, _ value: u256) uses (batches: mut StorageMap<Address, Batch>) { batches[id].head = value }
+fn set_tail(_ id: Address, _ value: u256) uses (batches: mut StorageMap<Address, Batch>) { batches[id].tail = value }
+fn mark_node(_ id: u256, _ batch: Address) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].packed = batch.inner | EXISTS_BIT }
+fn delete_node(_ id: u256) uses (nodes: mut StorageMap<u256, Node>) {
+    nodes[id] = Node { next_id: 0, prev_id: 0, packed: 0 }
 }
 fn insert_verified(_ head: u256, _ tail: u256, _ prev_id: u256, _ next_id: u256)
-uses (mem: mut RawMem, storage: mut RawStorage) {
+uses (nodes: mut StorageMap<u256, Node>) {
     set_next(prev_id, head)
     set_prev(head, prev_id)
     set_next(tail, next_id)
     set_prev(next_id, tail)
 }
-fn remove_slice(_ head: u256, _ tail: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+fn remove_slice(_ head: u256, _ tail: u256) uses (nodes: mut StorageMap<u256, Node>) {
     set_next(prev(head), next(tail))
     set_prev(next(tail), prev(head))
 }
 fn rate(_ manager: Address, _ id: u256) -> u256 uses (call: mut Call) { manager.static(TroveRateMsg::Rate { id }) }
 fn valid(_ manager: Address, _ interest: u256, _ prev_id: u256, _ next_id: u256) -> bool
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
     let batch = batch_of(prev_id)
     next(prev_id) == next_id && prev(next_id) == prev_id
         && (batch != batch_of(next_id) || batch == Address::zero())
         && (prev_id == 0 || rate(manager, prev_id) >= interest)
         && (next_id == 0 || interest > rate(manager, next_id))
 }
-fn skip_tail(_ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+fn skip_tail(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>) {
     let batch = batch_of(id)
     if batch != Address::zero() { batch_tail(batch) } else { id }
 }
-fn skip_head(_ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+fn skip_head(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>) {
     let batch = batch_of(id)
     if batch != Address::zero() { batch_head(batch) } else { id }
 }
 struct Position { prev: u256, next: u256 }
 impl Copy for Position {}
 fn descend_one(_ manager: Address, _ interest: u256, _ pos: own Position) -> (bool, Position)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
     if pos.next == 0 || interest > rate(manager, pos.next) { return (true, pos) }
     let prev_id = skip_tail(pos.next)
     (false, Position { prev: prev_id, next: next(prev_id) })
 }
 fn ascend_one(_ manager: Address, _ interest: u256, _ pos: own Position) -> (bool, Position)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
     if pos.prev == 0 || rate(manager, pos.prev) >= interest { return (true, pos) }
     let next_id = skip_head(pos.prev)
     (false, Position { prev: prev(next_id), next: next_id })
 }
 fn descend(_ manager: Address, _ interest: u256, _ start: u256) -> (u256, u256)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
-    let mut pos = Position { prev: start, next: next(start) }
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var pos = Position { prev: start, next: next(start) }
     while true {
         let (found, updated) = descend_one(manager, interest, pos)
         pos = updated
@@ -93,8 +97,8 @@ uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
     core::panic()
 }
 fn ascend(_ manager: Address, _ interest: u256, _ start: u256) -> (u256, u256)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
-    let mut pos = Position { prev: prev(start), next: start }
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var pos = Position { prev: prev(start), next: start }
     while true {
         let (found, updated) = ascend_one(manager, interest, pos)
         pos = updated
@@ -103,9 +107,9 @@ uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
     core::panic()
 }
 fn search_both(_ manager: Address, _ interest: u256, _ descent_start: u256, _ ascent_start: u256) -> (u256, u256)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
-    let mut down = Position { prev: descent_start, next: next(descent_start) }
-    let mut up = Position { prev: prev(ascent_start), next: ascent_start }
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var down = Position { prev: descent_start, next: next(descent_start) }
+    var up = Position { prev: prev(ascent_start), next: ascent_start }
     while true {
         let (found_down, updated_down) = descend_one(manager, interest, down)
         down = updated_down
@@ -117,9 +121,9 @@ uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
     core::panic()
 }
 fn find(_ manager: Address, _ interest: u256, _ prev_hint: u256, _ next_hint: u256) -> (u256, u256)
-uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
-    let mut prev_id = prev_hint
-    let mut next_id = next_hint
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var prev_id = prev_hint
+    var next_id = next_hint
     if prev_id == 0 { return descend(manager, interest, 0) }
     if !contains(prev_id) || rate(manager, prev_id) < interest { prev_id = 0 }
     if next_id == 0 { return ascend(manager, interest, 0) }
@@ -130,9 +134,9 @@ uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
     search_both(manager, interest, skip_tail(prev_id), skip_head(next_id))
 }
 fn insert_slice(_ manager: Address, _ head: u256, _ tail: u256, _ interest: u256, _ prev_hint: u256, _ next_hint: u256)
-uses (mem: mut RawMem, storage: mut RawStorage, call: mut Call) {
-    let mut prev_id = prev_hint
-    let mut next_id = next_hint
+uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var prev_id = prev_hint
+    var next_id = next_hint
     if !valid(manager, interest, prev_id, next_id) {
         let (p, n) = find(manager, interest, prev_id, next_id)
         prev_id = p
@@ -141,9 +145,9 @@ uses (mem: mut RawMem, storage: mut RawStorage, call: mut Call) {
     insert_verified(head, tail, prev_id, next_id)
 }
 fn reinsert_slice(_ manager: Address, _ head: u256, _ tail: u256, _ interest: u256, _ prev_hint: u256, _ next_hint: u256)
-uses (mem: mut RawMem, storage: mut RawStorage, call: mut Call) {
-    let mut prev_id = prev_hint
-    let mut next_id = next_hint
+uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+    var prev_id = prev_hint
+    var next_id = next_hint
     if !valid(manager, interest, prev_id, next_id) {
         let (p, n) = find(manager, interest, prev_id, next_id)
         prev_id = p
@@ -203,58 +207,59 @@ pub msg SortedTrovesMsg {
     #[selector = sol("reInsertBatch(address,uint256,uint256,uint256)")]
     ReInsertBatch { id: Address, interest: u256, prev_id: u256, next_id: u256 },
 }
-pub contract SortedTroves uses (ctx: Ctx, call: mut Call, mem: mut RawMem, log: mut Log) {
+pub contract SortedTroves uses (ctx: Ctx, call: mut Call, log: mut Log) {
     manager: Address,
     borrower_operations: Address,
-    init(registry: Address) uses (mut manager, mut borrower_operations, mut call, mut mem, storage: mut RawStorage, mut log) {
-        set_next(0, 0)
-        set_prev(0, 0)
+    mut size: u256,
+    mut nodes: StorageMap<u256, Node>,
+    mut batches: StorageMap<Address, Batch>,
+    init(registry: Address) uses (mut manager, mut borrower_operations, mut call, mut log) {
         manager = registry.static(RegistryMsg::GettroveManager {})
         borrower_operations = registry.static(RegistryMsg::GetborrowerOperations {})
         log.emit(TroveManagerAddressChanged { value: manager })
         log.emit(BorrowerOperationsAddressChanged { value: borrower_operations })
     }
     recv SortedTrovesMsg {
-        Name -> DynString uses (mut mem) { text::sorted_name() }
+        Name -> DynString { text::sorted_name() }
         BorrowerOperationsAddress -> Address uses (borrower_operations) { borrower_operations }
         TroveManager -> Address uses (manager) { manager }
-        Size -> u256 uses (storage: RawStorage) { storage.sload(0) }
-        GetSize -> u256 uses (storage: RawStorage) { storage.sload(0) }
-        IsEmpty -> bool uses (storage: RawStorage) { storage.sload(0) == 0 }
-        GetFirst -> u256 uses (mut mem, storage: RawStorage) { next(0) }
-        GetLast -> u256 uses (mut mem, storage: RawStorage) { prev(0) }
-        GetNext { id } -> u256 uses (mut mem, storage: RawStorage) { next(id) }
-        GetPrev { id } -> u256 uses (mut mem, storage: RawStorage) { prev(id) }
-        Contains { id } -> bool uses (mut mem, storage: RawStorage) { contains(id) }
-        IsBatchedNode { id } -> bool uses (mut mem, storage: RawStorage) { batch_of(id) != Address::zero() }
-        IsEmptyBatch { id } -> bool uses (mut mem, storage: RawStorage) { batch_head(id) == 0 }
-        Nodes { id } -> (u256, u256, Address, bool) uses (mut mem, storage: RawStorage) { (next(id), prev(id), batch_of(id), contains(id)) }
-        Batches { id } -> (u256, u256) uses (mut mem, storage: RawStorage) { (batch_head(id), batch_tail(id)) }
-        ValidInsertPosition { interest, prev_id, next_id } -> bool uses (manager, mut mem, storage: RawStorage, mut call) { valid(manager, interest, prev_id, next_id) }
-        FindInsertPosition { interest, prev_id, next_id } -> (u256, u256) uses (manager, mut mem, storage: RawStorage, mut call) { find(manager, interest, prev_id, next_id) }
-        Insert { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage, mut call) {
+        Size -> u256 uses (size) { size }
+        GetSize -> u256 uses (size) { size }
+        IsEmpty -> bool uses (size) { size == 0 }
+        GetFirst -> u256 uses (nodes, batches) { next(0) }
+        GetLast -> u256 uses (nodes, batches) { prev(0) }
+        GetNext { id } -> u256 uses (nodes, batches) { next(id) }
+        GetPrev { id } -> u256 uses (nodes, batches) { prev(id) }
+        Contains { id } -> bool uses (nodes, batches) { contains(id) }
+        IsBatchedNode { id } -> bool uses (nodes, batches) { batch_of(id) != Address::zero() }
+        IsEmptyBatch { id } -> bool uses (nodes, batches) { batch_head(id) == 0 }
+        Nodes { id } -> (u256, u256, Address, bool) uses (nodes, batches) { (next(id), prev(id), batch_of(id), contains(id)) }
+        Batches { id } -> (u256, u256) uses (nodes, batches) { (batch_head(id), batch_tail(id)) }
+        ValidInsertPosition { interest, prev_id, next_id } -> bool uses (manager, nodes, batches, mut call) { valid(manager, interest, prev_id, next_id) }
+        FindInsertPosition { interest, prev_id, next_id } -> (u256, u256) uses (manager, nodes, batches, mut call) { find(manager, interest, prev_id, next_id) }
+        Insert { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut nodes, batches, mut size, mut call) {
             text::require(ctx.caller() == borrower_operations, text::sorted_bo())
             text::require(!contains(id), text::sorted_duplicate())
             text::require(id != 0, text::sorted_root())
             insert_slice(manager, id, id, interest, prev_id, next_id)
             mark_node(id, Address::zero())
-            storage.sstore(slot: 0, value: storage.sload(0) + 1)
+            size += 1
         }
-        Remove { id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage) {
+        Remove { id } uses (manager, borrower_operations, ctx, mut nodes, mut size) {
             text::require(ctx.caller() == borrower_operations || ctx.caller() == manager, text::sorted_bo_tm())
             text::require(contains(id), text::sorted_missing())
             text::require(batch_of(id) == Address::zero(), text::sorted_remove_batched())
             remove_slice(id, id)
             delete_node(id)
-            storage.sstore(slot: 0, value: storage.sload(0) - 1)
+            size -= 1
         }
-        ReInsert { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage, mut call) {
+        ReInsert { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut nodes, batches, mut call) {
             text::require(ctx.caller() == borrower_operations, text::sorted_bo())
             text::require(contains(id), text::sorted_missing())
             text::require(batch_of(id) == Address::zero(), text::sorted_reinsert_batched())
             reinsert_slice(manager, id, id, interest, prev_id, next_id)
         }
-        InsertIntoBatch { id, batch, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage, mut call) {
+        InsertIntoBatch { id, batch, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut nodes, mut batches, mut size, mut call) {
             text::require(ctx.caller() == borrower_operations, text::sorted_bo())
             text::require(!contains(id), text::sorted_duplicate())
             text::require(id != 0, text::sorted_batch_root())
@@ -268,9 +273,9 @@ pub contract SortedTroves uses (ctx: Ctx, call: mut Call, mem: mut RawMem, log: 
             }
             set_tail(batch, id)
             mark_node(id, batch)
-            storage.sstore(slot: 0, value: storage.sload(0) + 1)
+            size += 1
         }
-        RemoveFromBatch { id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage) {
+        RemoveFromBatch { id } uses (manager, borrower_operations, ctx, mut nodes, mut batches, mut size) {
             text::require(ctx.caller() == borrower_operations || ctx.caller() == manager, text::sorted_bo_tm())
             let batch = batch_of(id)
             text::require(batch != Address::zero(), text::sorted_remove_unbatched())
@@ -284,9 +289,9 @@ pub contract SortedTroves uses (ctx: Ctx, call: mut Call, mem: mut RawMem, log: 
             else if tail == id { set_tail(batch, prev(id)) }
             remove_slice(id, id)
             delete_node(id)
-            storage.sstore(slot: 0, value: storage.sload(0) - 1)
+            size -= 1
         }
-        ReInsertBatch { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut mem, storage: mut RawStorage, mut call) {
+        ReInsertBatch { id, interest, prev_id, next_id } uses (manager, borrower_operations, ctx, mut nodes, batches, mut call) {
             let head = batch_head(id)
             let tail = batch_tail(id)
             text::require(ctx.caller() == borrower_operations, text::sorted_bo())

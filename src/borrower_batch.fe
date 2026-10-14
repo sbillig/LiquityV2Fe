@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_errors::*
 use super::borrower_data as data
 use super::borrower_checks as checks
@@ -14,7 +14,7 @@ use super::types::TroveChange
 use super::liquity_math as math
 use super::constants::*
 pub fn register(_ min: u128, _ max: u128, _ rate: u128, _ fee: u128, _ period: u128)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     if data::batch_manager(ctx.caller()).max_rate > 0 { revert_error(BatchManagerExists {}) }
     checks::rate(min as u256)
@@ -28,7 +28,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     require_code(manager)
     manager.call(TroveManagerMsg::HookOnRegisterBatchManager { manager: ctx.caller(), rate: rate as u256, fee: fee as u256 })
 }
-pub fn lower_fee(_ fee: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+pub fn lower_fee(_ fee: u256) uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     checks::valid_batch(ctx.caller())
     let manager = data::address_at(5)
@@ -36,7 +36,7 @@ pub fn lower_fee(_ fee: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, s
     if fee >= b.annual_management_fee { revert_error(NewFeeNotLower {}) }
     require_code(manager)
     manager.call(TroveManagerMsg::HookOnLowerBatchManagerAnnualFee { manager: ctx.caller(), coll: b.entire_coll_without_redistribution, debt: b.entire_debt_without_redistribution, fee })
-    let mut change = TroveChange::zero()
+    var change = TroveChange::zero()
     change.batch_accrued_management_fee = b.accrued_management_fee
     change.old_weighted_recorded_debt = b.weighted_recorded_debt
     change.new_weighted_recorded_debt = b.entire_debt_without_redistribution * b.annual_interest_rate
@@ -47,7 +47,7 @@ pub fn lower_fee(_ fee: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, s
     active.call(ActivePoolMsg::AccountTroveChange { change, batch: ctx.caller() })
 }
 pub fn set_rate(_ cfg: Config, _ rate: u256, _ upper: u256, _ lower: u256, _ max_fee: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     checks::valid_batch(ctx.caller())
     let registered = data::batch_manager(ctx.caller())
@@ -56,8 +56,8 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     let active = data::address_at(0)
     let b = manager.static(TroveManagerMsg::LatestBatch { manager: ctx.caller() })
     if ctx.timestamp() < b.last_interest_rate_adj_time + registered.min_period { revert_error(BatchInterestRateChangePeriodNotPassed {}) }
-    let mut debt = b.entire_debt_without_redistribution
-    let mut change = TroveChange::zero()
+    var debt = b.entire_debt_without_redistribution
+    var change = TroveChange::zero()
     change.batch_accrued_management_fee = b.accrued_management_fee
     change.old_weighted_recorded_debt = b.weighted_recorded_debt
     change.new_weighted_recorded_debt = debt * rate
@@ -84,7 +84,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     manager.call(TroveManagerMsg::HookOnSetBatchManagerAnnualInterestRate { manager: ctx.caller(), coll: b.entire_coll_without_redistribution, debt, rate, upfront: change.upfront_fee })
 }
 pub fn join(_ cfg: Config, _ id: u256, _ batch: Address, _ upper: u256, _ lower: u256, _ max_fee: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     let manager = data::address_at(5)
     let active = data::address_at(0)
@@ -97,7 +97,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     if data::delegate(id).account != Address::zero() { data::clear_delegate(id) }
     let t = manager.static(TroveManagerMsg::LatestTrove { id })
     let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
-    let mut change = TroveChange::zero()
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
     change.applied_redist_coll_gain = t.redist_coll_gain
     change.batch_accrued_management_fee = b.accrued_management_fee
@@ -118,7 +118,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     sorted.call(SortedTrovesMsg::InsertIntoBatch { id, batch, interest: b.annual_interest_rate, prev_id: upper, next_id: lower })
 }
 pub fn remove(_ cfg: Config, _ id: u256, _ new_rate: u256, _ upper: u256, _ lower: u256, _ max_fee: u256, _ kick: bool)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     let manager = data::address_at(5)
     let sorted = data::address_at(9)
@@ -130,7 +130,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     let batch = checks::in_batch(id)
     let t = manager.static(TroveManagerMsg::LatestTrove { id })
     let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
-    let mut rate = new_rate
+    var rate = new_rate
     if kick {
         if b.total_debt_shares * MAX_BATCH_SHARES_RATIO >= b.entire_debt_without_redistribution { revert_error(BatchSharesRatioTooLow {}) }
         rate = b.annual_interest_rate
@@ -143,8 +143,8 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
         sorted.call(SortedTrovesMsg::Insert { id, interest: rate, prev_id: upper, next_id: lower })
     }
     let future = b.entire_debt_without_redistribution - (t.entire_debt - t.redist_bold_debt_gain)
-    let mut debt = t.entire_debt
-    let mut change = TroveChange::zero()
+    var debt = t.entire_debt
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
     change.applied_redist_coll_gain = t.redist_coll_gain
     change.batch_accrued_management_fee = b.accrued_management_fee

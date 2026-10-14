@@ -25,8 +25,7 @@ impl AbiSpan<Sol> for TroveMemoryArray {
     }
 }
 impl Decode<Sol> for TroveMemoryArray {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let input = d.input()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
         validate_size(input, pos)
         let values = <DynArray<u256> as Decode<Sol>>::decode_from(input, pos)
@@ -34,5 +33,5 @@ impl Decode<Sol> for TroveMemoryArray {
     }
 }
 impl Encode<Sol> for TroveMemoryArray {
-    fn encode(own self, _ ptr: *u8) { <DynArray<u256> as Encode<Sol>>::encode(self.values, ptr) }
+    fn encode(own self, _ out: core::abi::AbiFrame) { <DynArray<u256> as Encode<Sol>>::encode(self.values, out) }
 }

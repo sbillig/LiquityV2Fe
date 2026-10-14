@@ -24,10 +24,10 @@ impl AbiSpan<Sol> for BatchId {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 32, input.len()) }
 }
 impl Decode<Sol> for BatchId {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let value = d.read_word()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let value = d.read_word(input)
         if value >> 160 != 0 { std::evm::revert(()) }
         Self { value: Address { inner: value } }
     }
 }
-impl Encode<Sol> for BatchId { fn encode(own self, _ ptr: *u8) { <Address as Encode<Sol>>::encode(self.value, ptr) } }
+impl Encode<Sol> for BatchId { fn encode(own self, _ out: core::abi::AbiFrame) { <Address as Encode<Sol>>::encode(self.value, out) } }

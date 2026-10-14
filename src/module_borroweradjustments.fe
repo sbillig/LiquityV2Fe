@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_open as opening
 use super::borrower_open::Config
 use super::borrower_data as data
@@ -47,58 +47,58 @@ pub contract BorrowerAdjustments {
         cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
     }
     recv BorrowerAdjustmentsMsg {
-        addColl { id, amount } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        addColl { id, amount } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::active(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.coll_increase = amount
             adjust::adjust(cfg, manager, id, change, 0)
         }
-        withdrawColl { id, amount } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        withdrawColl { id, amount } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::active(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.coll_decrease = amount
             adjust::adjust(cfg, manager, id, change, 0)
         }
-        withdrawBold { id, amount, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        withdrawBold { id, amount, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::active(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.debt_increase = amount
             adjust::adjust(cfg, manager, id, change, max_fee)
         }
-        repayBold { id, amount } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        repayBold { id, amount } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::active(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             change.debt_decrease = amount
             adjust::adjust(cfg, manager, id, change, 0)
         }
-        adjustTrove { id, coll, coll_inc, debt, debt_inc, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        adjustTrove { id, coll, coll_inc, debt, debt_inc, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::active(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             if coll_inc { change.coll_increase = coll } else { change.coll_decrease = coll }
             if debt_inc { change.debt_increase = debt } else { change.debt_decrease = debt }
             adjust::adjust(cfg, manager, id, change, max_fee)
         }
-        adjustZombieTrove { id, coll, coll_inc, debt, debt_inc, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        adjustZombieTrove { id, coll, coll_inc, debt, debt_inc, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let manager = data::address_at(5)
             checks::zombie(manager, id)
-            let mut change = TroveChange::zero()
+            var change = TroveChange::zero()
             if coll_inc { change.coll_increase = coll } else { change.coll_decrease = coll }
             if debt_inc { change.debt_increase = debt } else { change.debt_decrease = debt }
             adjust::adjust(cfg, manager, id, change, max_fee)
             require_code(manager)
             manager.call(TroveManagerMsg::HookSetTroveStatusToActive { id })
             let batch = data::batch_of(id)
-            let mut batch_rate = 0
+            var batch_rate = 0
             if batch != Address::zero() { batch_rate = manager.static(TroveManagerMsg::LatestBatch { manager: batch }).annual_interest_rate }
             let rate = manager.static(TroveManagerMsg::AnnualRate { id })
             life::insert(id, rate, upper, lower, batch, batch_rate)
         }
-        AdjustRate { id, rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        AdjustRate { id, rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             adjust::interest_rate(cfg, id, rate, upper, lower, max_fee)
         }
     }

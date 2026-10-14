@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_errors::*
 use super::borrower_data as data
 use super::borrower_checks as checks
@@ -22,7 +22,7 @@ pub fn balance(_ bold: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) 
 pub fn apply_fee(_ cfg: Config, _ coll: u256, _ debt: u256, _ initial: TroveChange, _ max: u256, _ batched: bool) -> (u256, TroveChange)
 uses (storage: RawStorage, call: mut Call) {
     let price = checks::live_price()
-    let mut change = initial
+    var change = initial
     let avg = data::address_at(0).static(ActivePoolMsg::NewAverage { change })
     change.upfront_fee = math::calc_interest(debt * avg, UPFRONT_INTEREST_PERIOD)
     checks::accepts_fee(change.upfront_fee, max)
@@ -32,7 +32,7 @@ uses (storage: RawStorage, call: mut Call) {
     (new_debt, change)
 }
 pub fn adjust(_ cfg: Config, _ manager: Address, _ id: u256, _ initial: TroveChange, _ max_fee: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     checks::not_shutdown()
     let active = data::address_at(0)
     let bold = data::address_at(8)
@@ -40,8 +40,8 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     let below = base::below_critical(active, data::address_at(1), price, cfg.ccr)
     checks::open(manager, id)
     let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
-    let mut receiver = owner
-    let mut change = initial
+    var receiver = owner
+    var change = initial
     if change.coll_decrease > 0 || change.debt_increase > 0 {
         receiver = managers::require_owner_or_remove(data::managers(), id, owner)
     } else { managers::require_owner_or_add(data::managers(), id, owner) }
@@ -54,11 +54,11 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     if change.coll_increase == 0 && change.coll_decrease == 0 && change.debt_increase == 0 && change.debt_decrease == 0 { revert_error(ZeroAdjustment {}) }
     if change.coll_decrease > t.entire_coll { revert_error(CollWithdrawalTooHigh {}) }
     let coll = t.entire_coll + change.coll_increase - change.coll_decrease
-    let mut debt = t.entire_debt + change.debt_increase - change.debt_decrease
+    var debt = t.entire_debt + change.debt_increase - change.debt_decrease
     let batch = data::batch_of(id)
     let batched = batch != Address::zero()
-    let mut b = LatestBatchData::zero()
-    let mut future = 0
+    var b = LatestBatchData::zero()
+    var future = 0
     if batched {
         b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
         future = b.entire_debt_without_redistribution + t.redist_bold_debt_gain + change.debt_increase - change.debt_decrease
@@ -116,7 +116,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     }
 }
 pub fn interest_rate(_ cfg: Config, _ id: u256, _ rate: u256, _ upper: u256, _ lower: u256, _ max_fee: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
     checks::not_shutdown()
     let manager = data::address_at(5)
     checks::rate(rate)
@@ -127,8 +127,8 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage) {
     let t = manager.static(TroveManagerMsg::LatestTrove { id })
     checks::delegate_adjustment(id, t.last_interest_rate_adj_time, rate)
     if rate == t.annual_interest_rate { revert_error(InterestRateNotNew {}) }
-    let mut debt = t.entire_debt
-    let mut change = TroveChange::zero()
+    var debt = t.entire_debt
+    var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = t.redist_bold_debt_gain
     change.applied_redist_coll_gain = t.redist_coll_gain
     change.new_weighted_recorded_debt = debt * rate

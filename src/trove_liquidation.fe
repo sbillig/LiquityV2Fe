@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 use core::num::IntDowncast
 use std::abi::{sol, DynArray, DynArrayAccess}
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::trove_data as data
 use super::trove_hooks as hooks
 use super::trove_events as events
@@ -37,8 +37,8 @@ pub fn penalty(_ coll: u256, _ debt: u256, _ ratio: u256, _ price: u256) -> (u25
     if coll > maximum { (maximum, coll - maximum) } else { (coll, 0) }
 }
 pub fn offset_values(_ debt: u256, _ coll: u256, _ sp: u256, _ price: u256, _ sp_penalty: u256, _ redist_penalty: u256) -> Values {
-    let mut v = Values::zero()
-    let mut portion: u256 = 0
+    var v = Values::zero()
+    var portion: u256 = 0
     if sp > 0 {
         v.debt_offset = math::min(debt, sp)
         portion = coll * v.debt_offset / debt
@@ -58,16 +58,16 @@ pub fn offset_values(_ debt: u256, _ coll: u256, _ sp: u256, _ price: u256, _ sp
     }
     v
 }
-pub fn single(_ id: u256, _ sp: u256, _ price: u256, _ sp_penalty: u256, _ redist_penalty: u256) -> (LatestTroveData, Values) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
-    let nft = Address { inner: storage.sload(3) }
+pub fn single(_ id: u256, _ sp: u256, _ price: u256, _ sp_penalty: u256, _ redist_penalty: u256) -> (LatestTroveData, Values) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    let nft = Address { inner: unsafe { storage.sload(3) } }
     let owner = nft.static(TroveNFTMsg::OwnerOf { id })
     let t = data::latest_trove(id)
     let manager = data::load_trove(id).batch_manager
-    let mut b = LatestBatchData::zero()
+    var b = LatestBatchData::zero()
     if manager != Address::zero() { b = data::latest_batch(manager) }
     hooks::move_rewards(t.redist_bold_debt_gain, t.redist_coll_gain)
-    let mut v = offset_values(t.entire_debt, t.entire_coll, sp, price, sp_penalty, redist_penalty)
-    let mut change = TroveChange::zero()
+    var v = offset_values(t.entire_debt, t.entire_coll, sp, price, sp_penalty, redist_penalty)
+    var change = TroveChange::zero()
     change.coll_decrease = t.entire_coll
     change.debt_decrease = t.entire_debt
     change.applied_redist_coll_gain = t.redist_coll_gain
@@ -79,16 +79,16 @@ pub fn single(_ id: u256, _ sp: u256, _ price: u256, _ sp_penalty: u256, _ redis
         change.batch_accrued_management_fee = b.accrued_management_fee
         change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee + (t.entire_debt - t.redist_bold_debt_gain) * b.annual_management_fee
         change.new_weighted_recorded_batch_management_fee = b.entire_debt_without_redistribution * b.annual_management_fee
-        let active = Address { inner: storage.sload(0) }
+        let active = Address { inner: unsafe { storage.sload(0) } }
         require_code(active)
         active.call(ActivePoolMsg::BatchFee { change, batch: manager })
     } else { v.old_weighted = t.weighted_recorded_debt }
     if v.surplus > 0 {
-        let surplus = Address { inner: storage.sload(7) }
+        let surplus = Address { inner: unsafe { storage.sload(7) } }
         require_code(surplus)
         surplus.call(CollSurplusPoolMsg::AccountSurplus { account: owner, amount: v.surplus })
     }
-    let bo = Address { inner: storage.sload(4) }
+    let bo = Address { inner: unsafe { storage.sload(4) } }
     require_code(bo)
     bo.call(LiquidationBorrowerMsg::Liquidate { id })
     log.emit(events::TroveUpdated { id, debt: 0, coll: 0, stake: 0, rate: 0, l_coll: 0, l_debt: 0 })
@@ -103,32 +103,32 @@ pub fn single(_ id: u256, _ sp: u256, _ price: u256, _ sp_penalty: u256, _ redis
 }
 pub fn redistribute(_ active: Address, _ default_pool: Address, _ debt: u256, _ coll: u256) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call) {
     if debt == 0 { return }
-    let coll_num = coll * DECIMAL_PRECISION + storage.sload(data::COLL_ERROR)
-    let debt_num = debt * DECIMAL_PRECISION + storage.sload(data::DEBT_ERROR)
-    let stakes = storage.sload(data::TOTAL_STAKES)
+    let coll_num = coll * DECIMAL_PRECISION + unsafe { storage.sload(data::COLL_ERROR) }
+    let debt_num = debt * DECIMAL_PRECISION + unsafe { storage.sload(data::DEBT_ERROR) }
+    let stakes = unsafe { storage.sload(data::TOTAL_STAKES) }
     let coll_reward = coll_num / stakes
     let debt_reward = debt_num / stakes
-    storage.sstore(slot: data::COLL_ERROR, value: coll_num - coll_reward * stakes)
-    storage.sstore(slot: data::DEBT_ERROR, value: debt_num - debt_reward * stakes)
-    storage.sstore(slot: data::L_COLL, value: storage.sload(data::L_COLL) + coll_reward)
-    storage.sstore(slot: data::L_DEBT, value: storage.sload(data::L_DEBT) + debt_reward)
+    unsafe { storage.sstore(slot: data::COLL_ERROR, value: coll_num - coll_reward * stakes) }
+    unsafe { storage.sstore(slot: data::DEBT_ERROR, value: debt_num - debt_reward * stakes) }
+    unsafe { storage.sstore(slot: data::L_COLL, value: unsafe { storage.sload(data::L_COLL) } + coll_reward) }
+    unsafe { storage.sstore(slot: data::L_DEBT, value: unsafe { storage.sload(data::L_DEBT) } + debt_reward) }
     require_code(default_pool)
     default_pool.call(DefaultPoolMsg::IncreaseBoldDebt { amount: debt })
     require_code(active)
     active.call(ActivePoolMsg::SendCollToDefaultPool { amount: coll })
 }
-pub fn liquidate(_ ids: DynArray<u256>, _ mcr: u256, _ sp_penalty: u256, _ redist_penalty: u256, _ weth: Address) uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+pub fn liquidate(_ ids: DynArray<u256>, _ mcr: u256, _ sp_penalty: u256, _ redist_penalty: u256, _ weth: Address) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     if ids.len() == 0 { revert_error(EmptyData {}) }
-    let active = Address { inner: storage.sload(0) }
-    let default_pool = Address { inner: storage.sload(1) }
-    let sp = Address { inner: storage.sload(5) }
-    let mut change = TroveChange::zero()
-    let mut total = Values::zero()
-    let feed = Address { inner: storage.sload(2) }
+    let active = Address { inner: unsafe { storage.sload(0) } }
+    let default_pool = Address { inner: unsafe { storage.sload(1) } }
+    let sp = Address { inner: unsafe { storage.sload(5) } }
+    var change = TroveChange::zero()
+    var total = Values::zero()
+    let feed = Address { inner: unsafe { storage.sload(2) } }
     let price = feed.call(PriceMsg::Price {}).0
     let deposits = sp.static(StabilityPoolMsg::TotalBoldDeposits {})
-    let mut remaining = deposits - math::min(MIN_BOLD_IN_SP, deposits)
-    let mut i: u256 = 0
+    var remaining = deposits - math::min(MIN_BOLD_IN_SP, deposits)
+    var i: u256 = 0
     while i < ids.len() {
         let id = ids.get(i)
         i += 1
@@ -163,18 +163,18 @@ pub fn liquidate(_ ids: DynArray<u256>, _ mcr: u256, _ sp_penalty: u256, _ redis
     }
     redistribute(active, default_pool, total.debt_redist, total.coll_redist)
     if total.surplus > 0 {
-        let surplus = Address { inner: storage.sload(7) }
+        let surplus = Address { inner: unsafe { storage.sload(7) } }
         require_code(active)
         active.call(ActivePoolMsg::SendColl { account: surplus, amount: total.surplus })
     }
-    storage.sstore(slot: data::STAKES_SNAPSHOT, value: storage.sload(data::TOTAL_STAKES))
+    unsafe { storage.sstore(slot: data::STAKES_SNAPSHOT, value: unsafe { storage.sload(data::TOTAL_STAKES) }) }
     let active_coll = active.static(BranchPoolMsg::CollBalance {})
-    let current_default = Address { inner: storage.sload(1) }
+    let current_default = Address { inner: unsafe { storage.sload(1) } }
     let default_coll = current_default.static(BranchPoolMsg::CollBalance {})
-    storage.sstore(slot: data::COLL_SNAPSHOT, value: active_coll - total.coll_gas + default_coll)
-    log.emit(events::Liquidation { debt_offset: total.debt_offset, debt_redistributed: total.debt_redist, bold_gas: total.eth_gas, coll_gas: total.coll_gas, coll_sp: total.coll_sp, coll_redistributed: total.coll_redist, surplus: total.surplus, l_coll: storage.sload(data::L_COLL), l_debt: storage.sload(data::L_DEBT), price })
+    unsafe { storage.sstore(slot: data::COLL_SNAPSHOT, value: active_coll - total.coll_gas + default_coll) }
+    log.emit(events::Liquidation { debt_offset: total.debt_offset, debt_redistributed: total.debt_redist, bold_gas: total.eth_gas, coll_gas: total.coll_gas, coll_sp: total.coll_sp, coll_redistributed: total.coll_redist, surplus: total.surplus, l_coll: unsafe { storage.sload(data::L_COLL) }, l_debt: unsafe { storage.sload(data::L_DEBT) }, price })
     if total.eth_gas > 0 {
-        let gas_pool = Address { inner: storage.sload(6) }
+        let gas_pool = Address { inner: unsafe { storage.sload(6) } }
         let ignored = weth.call(TokenMsg::TransferFrom { owner: gas_pool, receiver: ctx.caller(), amount: total.eth_gas })
     }
     if total.coll_gas > 0 {

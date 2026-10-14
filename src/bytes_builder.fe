@@ -1,0 +1,176 @@
+// SPDX-License-Identifier: MIT
+// Safe byte building for computed strings. All `unsafe` for byte assembly in
+// this project is contained in this module: callers get bounds-checked
+// writes (a bad offset panics, like indexing) and never touch a raw pointer.
+//
+// The allocation reserves a 32-byte length prefix before the payload, so
+// `into_string`/`into_bytes` can hand the buffer to `from_abi_tail` without
+// a second allocation or copy.
+use core::abi::AbiSize
+use core::ptr::{self, MemBuffer, MemSpan}
+use std::abi::{Bytes, DynArray, DynString}
+
+pub struct BytesBuilder {
+    head: *u8,
+    len: u256,
+    capacity: u256,
+}
+
+fn padded(_ len: u256) -> u256 {
+    ((len + 31) / 32) * 32
+}
+
+impl BytesBuilder {
+    /// An empty builder that can hold `capacity` payload bytes.
+    pub fn with_capacity(_ capacity: u256) -> Self {
+        BytesBuilder { head: ptr::alloc_bytes(32 + padded(capacity)), len: 0, capacity }
+    }
+
+    /// A builder pre-sized to `len` zero bytes, for fill-in-place formatting.
+    pub fn zeroed(_ len: u256) -> Self {
+        var b = Self::with_capacity(len)
+        unsafe { ptr::zero_bytes(b.payload(), len) }
+        b.len = len
+        b
+    }
+
+    fn payload(self) -> *u8 {
+        ptr::offset_bytes(self.head, 32)
+    }
+
+    pub fn len(self) -> u256 {
+        self.len
+    }
+
+    pub fn span(self) -> ref MemSpan {
+        unsafe { MemSpan::from_raw_parts(ptr: self.payload(), len: self.len) }
+    }
+
+    pub fn byte_at(self, _ index: u256) -> u8 {
+        assert!(index < self.len)
+        unsafe { *ptr::offset_bytes(self.payload(), index) }
+    }
+
+    /// Write a full word at payload offset `at`, extending the extent (any
+    /// gap is zeroed). Panics if the word does not fit in the capacity.
+    pub fn write_word(mut self, at: u256, value: u256) {
+        assert!(at <= self.capacity && 32 <= self.capacity - at)
+        unsafe {
+            if at > self.len {
+                ptr::zero_bytes(ptr::offset_bytes(self.payload(), self.len), at - self.len)
+            }
+            core::abi::store_word(ptr: ptr::offset_bytes(self.payload(), at), value)
+        }
+        if at + 32 > self.len {
+            self.len = at + 32
+        }
+    }
+
+    /// Write one byte at payload offset `at`, extending the extent (any gap
+    /// is zeroed). Panics if `at` is outside the capacity.
+    pub fn write_byte(mut self, at: u256, value: u8) {
+        assert!(at < self.capacity)
+        unsafe {
+            if at > self.len {
+                ptr::zero_bytes(ptr::offset_bytes(self.payload(), self.len), at - self.len)
+            }
+            *ptr::offset_bytes(self.payload(), at) = value
+        }
+        if at >= self.len {
+            self.len = at + 1
+        }
+    }
+
+    /// Append one byte at the end.
+    pub fn push_byte(mut self, _ value: u8) {
+        self.write_byte(at: self.len, value)
+    }
+
+    /// Append a byte span at the end.
+    pub fn append(mut self, _ data: MemSpan) {
+        assert!(self.len <= self.capacity && data.len() <= self.capacity - self.len)
+        if !data.is_empty() {
+            unsafe { ptr::copy(dest: ptr::offset_bytes(self.payload(), self.len), source: data) }
+            self.len += data.len()
+        }
+    }
+
+    pub fn truncate(mut self, _ len: u256) {
+        assert!(len <= self.len)
+        self.len = len
+    }
+
+    /// Write the ABI length prefix and zero the tail padding. The allocation
+    /// is exactly an ABI tail afterwards: length word + padded payload.
+    fn finish_tail(mut self) {
+        unsafe {
+            core::abi::store_word(ptr: self.head, value: self.len)
+            let pad = padded(self.len) - self.len
+            if pad > 0 {
+                ptr::zero_bytes(ptr::offset_bytes(self.payload(), self.len), pad)
+            }
+        }
+    }
+
+    pub fn into_string(var own self) -> DynString {
+        self.finish_tail()
+        unsafe { DynString::from_abi_tail(data: self.head, len: self.len, size: 32 + padded(self.len)) }
+    }
+
+    pub fn into_bytes(var own self) -> Bytes {
+        self.finish_tail()
+        unsafe { Bytes::from_abi_tail(data: self.head, len: self.len, size: 32 + padded(self.len)) }
+    }
+
+    /// Read a full word at payload offset `at`. Panics out of bounds.
+    pub fn read_word(self, at: u256) -> u256 {
+        assert!(at <= self.len && 32 <= self.len - at)
+        unsafe { core::abi::load_word(ptr::offset_bytes(self.payload(), at)) }
+    }
+
+    /// Freeze as a dynamic array of `count` elements. The caller must have
+    /// built exactly `count` stride-sized elements as the payload extent;
+    /// the length prefix then holds the element count, not a byte length.
+    pub fn into_dyn_array<T>(var own self, _ count: u256) -> DynArray<T>
+        where T: AbiSize
+    {
+        unsafe {
+            core::abi::store_word(ptr: self.head, value: count)
+            let pad = padded(self.len) - self.len
+            if pad > 0 {
+                ptr::zero_bytes(ptr::offset_bytes(self.payload(), self.len), pad)
+            }
+        }
+        unsafe { DynArray::from_abi_tail(data: self.head, len: count, size: 32 + padded(self.len)) }
+    }
+
+    /// Copy the payload out as a plain buffer (the freeze paths above do not copy).
+    pub fn into_buffer(own self) -> MemBuffer {
+        MemBuffer::from_span(self.span())
+    }
+}
+
+#[test]
+fn builds_words_and_bytes() {
+    var b = BytesBuilder::zeroed(4)
+    b.write_byte(at: 0, value: 65)
+    b.write_byte(at: 3, value: 68)
+    assert!(b.len() == 4)
+    assert!(b.byte_at(0) == 65)
+    assert!(b.byte_at(1) == 0)
+    assert!(b.byte_at(3) == 68)
+}
+
+#[test]
+fn appends_and_truncates() {
+    var b = BytesBuilder::with_capacity(8)
+    b.push_byte(104)
+    b.push_byte(105)
+    let bang: DynString = "!"
+    b.append(bang.payload_span())
+    assert!(b.into_string() == "hi!")
+    var c = BytesBuilder::zeroed(32)
+    c.write_word(at: 0, value: 0x6869000000000000000000000000000000000000000000000000000000000000)
+    c.truncate(2)
+    assert!(c.into_string() == "hi")
+}

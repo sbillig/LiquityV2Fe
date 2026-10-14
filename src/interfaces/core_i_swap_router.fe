@@ -34,11 +34,10 @@ impl AbiSpan<Sol> for ExactInputSingleParams {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 256, input.len()) }
 }
 impl Decode<Sol> for ExactInputSingleParams {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 256, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 256, input.len())
         d.set_pos(end)
-        let input = d.input()
         let token_in = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let token_out = <Address as Decode<Sol>>::decode_from(input, pos + 32)
         let fee = <Uint24 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -51,15 +50,15 @@ impl Decode<Sol> for ExactInputSingleParams {
     }
 }
 impl Encode<Sol> for ExactInputSingleParams {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.token_in, core::ptr::offset_bytes(ptr, 0))
-        <Address as Encode<Sol>>::encode(self.token_out, core::ptr::offset_bytes(ptr, 32))
-        <Uint24 as Encode<Sol>>::encode(self.fee, core::ptr::offset_bytes(ptr, 64))
-        <Address as Encode<Sol>>::encode(self.recipient, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.amount_in, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.amount_out_minimum, core::ptr::offset_bytes(ptr, 192))
-        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, core::ptr::offset_bytes(ptr, 224))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.token_in, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.token_out, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Uint24 as Encode<Sol>>::encode(self.fee, out.slice(offset: 64, len: <Uint24 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.recipient, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.deadline, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.amount_in, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.amount_out_minimum, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, out.slice(offset: 224, len: <Uint160 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 pub struct ExactOutputSingleParams {
@@ -78,11 +77,10 @@ impl AbiSpan<Sol> for ExactOutputSingleParams {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 256, input.len()) }
 }
 impl Decode<Sol> for ExactOutputSingleParams {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 256, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 256, input.len())
         d.set_pos(end)
-        let input = d.input()
         let token_in = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let token_out = <Address as Decode<Sol>>::decode_from(input, pos + 32)
         let fee = <Uint24 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -95,14 +93,14 @@ impl Decode<Sol> for ExactOutputSingleParams {
     }
 }
 impl Encode<Sol> for ExactOutputSingleParams {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.token_in, core::ptr::offset_bytes(ptr, 0))
-        <Address as Encode<Sol>>::encode(self.token_out, core::ptr::offset_bytes(ptr, 32))
-        <Uint24 as Encode<Sol>>::encode(self.fee, core::ptr::offset_bytes(ptr, 64))
-        <Address as Encode<Sol>>::encode(self.recipient, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.amount_out, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.amount_in_maximum, core::ptr::offset_bytes(ptr, 192))
-        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, core::ptr::offset_bytes(ptr, 224))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.token_in, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.token_out, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Uint24 as Encode<Sol>>::encode(self.fee, out.slice(offset: 64, len: <Uint24 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.recipient, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.deadline, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.amount_out, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.amount_in_maximum, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Uint160 as Encode<Sol>>::encode(self.sqrt_price_limit_x96, out.slice(offset: 224, len: <Uint160 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }

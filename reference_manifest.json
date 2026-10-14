@@ -4,48 +4,10 @@
     "revision": "c8a5a4ee2e9dc024905856b6698a77d849c68c7e"
   },
   "compiler": {
-    "url": "https://github.com/argotorg/fe",
-    "upstream_master": "f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d",
-    "fixes": [
-      {
-        "pr": "https://github.com/argotorg/fe/pull/1592",
-        "branch": "fix/1592-long-signature-hashing",
-        "revision": "04baed1a6b2e24e3a70fda5cfb0a9d781ae743e4",
-        "regression": "crates/fe/tests/fixtures/fe_test/long_error_event_names.fe",
-        "newsfragment": "newsfragments/+long-error-event-names.bugfix.md"
-      },
-      {
-        "pr": "https://github.com/argotorg/fe/pull/1587",
-        "branch": "fix/1587-unpadded-dynamic-abi",
-        "revision": "c22b24357063592e282efd6efc16ce831413fce7",
-        "regression": "crates/fe/tests/fixtures/fe_test/abi_unpadded_dynamic_payload.fe",
-        "newsfragment": "newsfragments/1587.bugfix.md"
-      },
-      {
-        "pr": "https://github.com/argotorg/fe/pull/1585",
-        "branch": "fix/1585-borrow-analysis-performance",
-        "revision": "c4856b4fb6e5383d3f31c95312f966dec9491233",
-        "regression": "crates/hir/src/analysis/semantic/capability/tests.rs; crates/hir/src/analysis/semantic/borrowck/summary.rs",
-        "newsfragment": null
-      },
-      {
-        "pr": "https://github.com/argotorg/fe/pull/1595",
-        "branch": "fix/reject-oversized-integer-literals",
-        "revision": "b11dee2befde6aabfc8d7fef4fa7eac5ce4a44b4",
-        "regression": "crates/uitest/fixtures/ty_check/oversized_integer_literals.fe",
-        "newsfragment": "newsfragments/+oversized-integer-literals.bugfix.md"
-      },
-      {
-        "pr": "https://github.com/argotorg/fe/pull/1567",
-        "branch": "fix/1567-payable-returns",
-        "revision": "8557f3f5e56c17801743469f6d46377ecd58c572",
-        "regression": "crates/fe/tests/fixtures/fe_test/payable_return.fe",
-        "newsfragment": "newsfragments/1567.bugfix.md",
-        "merge_resolution": "payable_return_imports"
-      }
-    ],
-    "integration_revision": "0617639002e12e599fd7bfb68bd2722215c8a935",
-    "integration_tree": "17b20419e39a12c49b0e09d5b67053812c16504e"
+    "url": "https://github.com/sbillig/fe",
+    "branch": "mvs",
+    "revision": "1b4e287c65a0981b385a18c9d49195c92f8f2197",
+    "tree": "3e962275d12efe0d454d7c9507e96a483831e480"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, DynString, Bytes}
-use std::evm::RawMem
 use super::metadata_json as json
 pub msg JsonMsg {
     #[selector = sol("property(string,string,bool)")]
@@ -18,11 +17,11 @@ pub msg JsonMsg {
 }
 pub contract MetadataJsonHarness {
     recv JsonMsg {
-        Property { key, value, last } -> DynString uses (mem: mut RawMem) { json::property(key, value, last) }
-        PropertyMore { key, value } -> DynString uses (mem: mut RawMem) { json::property(key, value, false) }
-        Object { key, value } -> DynString uses (mem: mut RawMem) { json::object(key, value) }
-        Image { value } -> DynString uses (mem: mut RawMem) { json::xml_image(value) }
-        Encode { value } -> DynString uses (mem: mut RawMem) { super::metadata_string::base64(DynString::from_payload(source: value.payload_span())) }
-        Format { name, description, svg, attributes } -> DynString uses (mem: mut RawMem) { json::formatted_metadata(name, description, svg, attributes) }
+        Property { key, value, last } -> DynString { json::property(key, value, last) }
+        PropertyMore { key, value } -> DynString { json::property(key, value, false) }
+        Object { key, value } -> DynString { json::object(key, value) }
+        Image { value } -> DynString { json::xml_image(value) }
+        Encode { value } -> DynString { super::metadata_string::base64(DynString::from_payload(source: value.payload_span())) }
+        Format { name, description, svg, attributes } -> DynString { json::formatted_metadata(name, description, svg, attributes) }
     }
 }

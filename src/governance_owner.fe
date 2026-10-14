@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{DynArray, DynArrayAccess}
-use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log, encode_msg_calldata}
-use super::governance_snapshots::map
+use std::evm::{Address, Ctx, RawStorage, Call, Log, encode_msg_calldata, storage_at_mut}
+use super::governance_snapshots::{map, GovernanceLayout}
 use super::governance_actions::{InitiativeHooks, RegisterInitiative}
 use super::governance_hooks::safe_call
 use super::revert_texts::require
@@ -14,23 +14,26 @@ pub struct OwnershipTransferred {
     #[indexed]
     pub new_owner: Address,
 }
-pub fn owner() -> Address uses (storage: RawStorage) { Address { inner: storage.sload(1) & MASK } }
+pub fn owner() -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(1) } & MASK } }
 pub fn initialize(_ initial: Address) uses (storage: mut RawStorage, log: mut Log) {
-    storage.sstore(slot: 1, value: (storage.sload(1) & ~MASK) | initial.inner)
+    let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+    gov.owner_word = (gov.owner_word & ~MASK) | initial.inner
     log.emit(OwnershipTransferred { previous_owner: Address::zero(), new_owner: initial })
 }
 pub fn register_initial(_ targets: DynArray<Address>)
-uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     require(ctx.caller() == owner(), error::owner())
-    let mut i = 0
+    var i = 0
     while i < targets.len() {
         let target = targets.get(i)
-        storage.sstore(slot: map(target, 11), value: 1)
+        let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+        gov.registered[target] = 1
         let data = encode_msg_calldata(InitiativeHooks::Register { epoch: 1 })
         let success = safe_call(target, 350000, 0, data.span())
         log.emit(RegisterInitiative { initiative: target, registrant: ctx.caller(), at_epoch: 1, hook_status: if success { 1 } else { 0 } })
         i += 1
     }
     log.emit(OwnershipTransferred { previous_owner: owner(), new_owner: Address::zero() })
-    storage.sstore(slot: 1, value: storage.sload(1) & ~MASK)
+    let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+    gov.owner_word &= ~MASK
 }

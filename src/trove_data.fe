@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // TroveManager storage layout and exact individual/batch debt calculations.
 use core::num::IntDowncast
-use std::evm::{Address, Ctx, RawMem, RawStorage}
+use std::evm::{Address, Ctx, RawStorage, SolArray, StorageMap, storage_at, storage_at_mut}
 use std::evm::packed::keccak_packed
 use super::constants::DECIMAL_PRECISION
 use super::liquity_math as math
@@ -22,10 +22,80 @@ pub const DEBT_ERROR: u256 = 23
 pub const SHUTDOWN: u256 = 24
 pub const MASK64: u256 = 0xffffffffffffffff
 pub const MASK160: u256 = 0xffffffffffffffffffffffffffffffffffffffff
-pub fn map_slot(_ key: u256, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((key, root)) }
-pub fn trove_slot(_ id: u256) -> u256 uses (mem: mut RawMem) { map_slot(id, TROVES) }
-pub fn batch_slot(_ manager: Address) -> u256 uses (mem: mut RawMem) { map_slot(manager.inner, BATCHES) }
-pub fn reward_slot(_ id: u256) -> u256 uses (mem: mut RawMem) { map_slot(id, REWARDS) }
+pub fn map_slot(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
+pub fn trove_slot(_ id: u256) -> u256 { map_slot(id, TROVES) }
+pub fn batch_slot(_ manager: Address) -> u256 { map_slot(manager.inner, BATCHES) }
+pub fn reward_slot(_ id: u256) -> u256 { map_slot(id, REWARDS) }
+
+// The TroveManager storage region reinterpreted as typed places. One
+// raw `storage_at` or `storage_at_mut` projection establishes the region; every
+// field and entry access after that is a checked place. Entries model the
+// Solidity-packed word explicitly (`packed`), as in `sorted_troves.fe`.
+// `status`/`array_index`/timestamps pack into the fourth word exactly as in
+// Solidity: small-integer struct fields share a slot in declaration order.
+pub struct TroveEntry {
+    pub debt: u256,
+    pub coll: u256,
+    pub stake: u256,
+    pub status: u8,
+    pub array_index: u64,
+    pub last_debt_update: u64,
+    pub last_rate_adjustment: u64,
+    pub annual_rate: u256,
+    // The batch manager occupies the low 160 bits; bits above are padding
+    // that Solidity field writes preserve. A typed `Address` field would
+    // overwrite the whole word (its storage lane is the full `u256`), so
+    // this word stays explicit until Fe lanes `Address` at 160 bits.
+    pub batch_word: u256,
+    pub batch_shares: u256,
+}
+impl Copy for TroveEntry {}
+
+pub struct BatchEntry {
+    pub debt: u256,
+    pub coll: u256,
+    pub array_index: u64,
+    pub last_debt_update: u64,
+    pub last_rate_adjustment: u64,
+    pub annual_rate: u256,
+    pub annual_fee: u256,
+    pub total_shares: u256,
+}
+impl Copy for BatchEntry {}
+
+pub struct RewardSnapshot {
+    pub coll: u256,
+    pub debt: u256,
+}
+impl Copy for RewardSnapshot {}
+
+pub struct TroveManagerLayout {
+    pub active_pool: Address,
+    pub default_pool: Address,
+    pub price_feed: Address,
+    pub trove_nft: Address,
+    pub borrower_operations: Address,
+    pub stability_pool: Address,
+    pub gas_pool: Address,
+    pub coll_surplus_pool: Address,
+    pub bold_token: Address,
+    pub sorted_troves: Address,
+    pub collateral_registry: Address,
+    pub troves: StorageMap<u256, TroveEntry>,
+    pub batches: StorageMap<Address, BatchEntry>,
+    pub total_stakes: u256,
+    pub total_stakes_snapshot: u256,
+    pub total_coll_snapshot: u256,
+    pub l_coll: u256,
+    pub l_bold_debt: u256,
+    pub reward_snapshots: StorageMap<u256, RewardSnapshot>,
+    pub trove_ids: SolArray<u256>,
+    pub batch_ids: SolArray<Address>,
+    pub last_zombie_trove_id: u256,
+    pub last_coll_error: u256,
+    pub last_debt_error: u256,
+    pub shutdown_time: u256,
+}
 pub struct TroveRecord {
     pub debt: u256, pub coll: u256, pub stake: u256, pub status: u8,
     pub array_index: u64, pub last_debt_update: u64, pub last_rate_adjustment: u64,
@@ -38,28 +108,29 @@ pub struct BatchRecord {
     pub annual_rate: u256, pub annual_fee: u256, pub total_shares: u256,
 }
 impl Copy for BatchRecord {}
-pub fn load_trove(_ id: u256) -> TroveRecord uses (mem: mut RawMem, storage: RawStorage) {
-    let base = trove_slot(id)
-    let packed = storage.sload(base + 3)
-    TroveRecord { debt: storage.sload(base), coll: storage.sload(base + 1), stake: storage.sload(base + 2),
-        status: packed.downcast_truncate(), array_index: (packed >> 8).downcast_truncate(),
-        last_debt_update: (packed >> 72).downcast_truncate(), last_rate_adjustment: (packed >> 136).downcast_truncate(),
-        annual_rate: storage.sload(base + 4), batch_manager: Address { inner: storage.sload(base + 5) & MASK160 }, batch_shares: storage.sload(base + 6) }
+pub fn load_trove(_ id: u256) -> TroveRecord uses (storage: RawStorage) {
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    let e = tm.troves[id]
+    TroveRecord { debt: e.debt, coll: e.coll, stake: e.stake,
+        status: e.status, array_index: e.array_index,
+        last_debt_update: e.last_debt_update, last_rate_adjustment: e.last_rate_adjustment,
+        annual_rate: e.annual_rate, batch_manager: Address { inner: e.batch_word & MASK160 }, batch_shares: e.batch_shares }
 }
-pub fn load_batch(_ manager: Address) -> BatchRecord uses (mem: mut RawMem, storage: RawStorage) {
-    let base = batch_slot(manager)
-    let packed = storage.sload(base + 2)
-    BatchRecord { debt: storage.sload(base), coll: storage.sload(base + 1), array_index: packed.downcast_truncate(),
-        last_debt_update: (packed >> 64).downcast_truncate(), last_rate_adjustment: (packed >> 128).downcast_truncate(),
-        annual_rate: storage.sload(base + 3), annual_fee: storage.sload(base + 4), total_shares: storage.sload(base + 5) }
+pub fn load_batch(_ manager: Address) -> BatchRecord uses (storage: RawStorage) {
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    let e = tm.batches[manager]
+    BatchRecord { debt: e.debt, coll: e.coll, array_index: e.array_index,
+        last_debt_update: e.last_debt_update, last_rate_adjustment: e.last_rate_adjustment,
+        annual_rate: e.annual_rate, annual_fee: e.annual_fee, total_shares: e.total_shares }
 }
 pub fn interest_period(_ last: u256) -> u256 uses (ctx: Ctx, storage: RawStorage) {
-    let stop = storage.sload(SHUTDOWN)
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    let stop = tm.shutdown_time
     if stop == 0 { ctx.timestamp() - last } else if last < stop { stop - last } else { 0 }
 }
-pub fn latest_batch(_ manager: Address) -> LatestBatchData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+pub fn latest_batch(_ manager: Address) -> LatestBatchData uses (ctx: Ctx, storage: RawStorage) {
     let b = load_batch(manager)
-    let mut result = LatestBatchData::zero()
+    var result = LatestBatchData::zero()
     result.total_debt_shares = b.total_shares
     result.recorded_debt = b.debt
     result.annual_interest_rate = b.annual_rate
@@ -75,12 +146,12 @@ pub fn latest_batch(_ manager: Address) -> LatestBatchData uses (ctx: Ctx, mem: 
     result.last_interest_rate_adj_time = b.last_rate_adjustment as u256
     result
 }
-pub fn latest_from_batch(_ id: u256, _ batch: LatestBatchData) -> LatestTroveData uses (mem: mut RawMem, storage: RawStorage) {
+pub fn latest_from_batch(_ id: u256, _ batch: LatestBatchData) -> LatestTroveData uses (storage: RawStorage) {
     let t = load_trove(id)
-    let rewards = reward_slot(id)
-    let mut result = LatestTroveData::zero()
-    result.redist_bold_debt_gain = t.stake * (storage.sload(L_DEBT) - storage.sload(rewards + 1)) / DECIMAL_PRECISION
-    result.redist_coll_gain = t.stake * (storage.sload(L_COLL) - storage.sload(rewards)) / DECIMAL_PRECISION
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    var result = LatestTroveData::zero()
+    result.redist_bold_debt_gain = t.stake * (tm.l_bold_debt - tm.reward_snapshots[id].debt) / DECIMAL_PRECISION
+    result.redist_coll_gain = t.stake * (tm.l_coll - tm.reward_snapshots[id].coll) / DECIMAL_PRECISION
     if batch.total_debt_shares > 0 {
         result.recorded_debt = batch.recorded_debt * t.batch_shares / batch.total_debt_shares
         result.weighted_recorded_debt = result.recorded_debt * batch.annual_interest_rate
@@ -93,13 +164,13 @@ pub fn latest_from_batch(_ id: u256, _ batch: LatestBatchData) -> LatestTroveDat
     result.last_interest_rate_adj_time = math::max(batch.last_interest_rate_adj_time, t.last_rate_adjustment as u256)
     result
 }
-pub fn latest_trove(_ id: u256) -> LatestTroveData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+pub fn latest_trove(_ id: u256) -> LatestTroveData uses (ctx: Ctx, storage: RawStorage) {
     let t = load_trove(id)
     if t.batch_manager != Address::zero() { return latest_from_batch(id, latest_batch(t.batch_manager)) }
-    let rewards = reward_slot(id)
-    let mut result = LatestTroveData::zero()
-    result.redist_bold_debt_gain = t.stake * (storage.sload(L_DEBT) - storage.sload(rewards + 1)) / DECIMAL_PRECISION
-    result.redist_coll_gain = t.stake * (storage.sload(L_COLL) - storage.sload(rewards)) / DECIMAL_PRECISION
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    var result = LatestTroveData::zero()
+    result.redist_bold_debt_gain = t.stake * (tm.l_bold_debt - tm.reward_snapshots[id].debt) / DECIMAL_PRECISION
+    result.redist_coll_gain = t.stake * (tm.l_coll - tm.reward_snapshots[id].coll) / DECIMAL_PRECISION
     result.recorded_debt = t.debt
     result.annual_interest_rate = t.annual_rate
     result.weighted_recorded_debt = t.debt * t.annual_rate
@@ -109,24 +180,24 @@ pub fn latest_trove(_ id: u256) -> LatestTroveData uses (ctx: Ctx, mem: mut RawM
     result.last_interest_rate_adj_time = t.last_rate_adjustment as u256
     result
 }
-pub fn annual_rate(_ id: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+pub fn annual_rate(_ id: u256) -> u256 uses (storage: RawStorage) {
     let t = load_trove(id)
-    if t.batch_manager != Address::zero() { storage.sload(batch_slot(t.batch_manager) + 3) } else { t.annual_rate }
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    if t.batch_manager != Address::zero() { tm.batches[t.batch_manager].annual_rate } else { t.annual_rate }
 }
 pub fn new_stake(_ coll: u256) -> u256 uses (storage: RawStorage) {
-    let total_coll = storage.sload(COLL_SNAPSHOT)
-    if total_coll == 0 { coll } else { coll * storage.sload(STAKES_SNAPSHOT) / total_coll }
+    let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }
+    if tm.total_coll_snapshot == 0 { coll } else { coll * tm.total_stakes_snapshot / tm.total_coll_snapshot }
 }
-pub fn update_stake(_ id: u256, _ coll: u256) -> u256 uses (mem: mut RawMem, storage: mut RawStorage) {
+pub fn update_stake(_ id: u256, _ coll: u256) -> u256 uses (storage: mut RawStorage) {
     let stake = new_stake(coll)
-    let slot = trove_slot(id) + 2
-    let old = storage.sload(slot)
-    storage.sstore(slot: slot, value: stake)
-    storage.sstore(slot: TOTAL_STAKES, value: storage.sload(TOTAL_STAKES) - old + stake)
+    let tm = unsafe { storage_at_mut<TroveManagerLayout>(0) }
+    let old = tm.troves[id].stake
+    tm.troves[id].stake = stake
+    tm.total_stakes = tm.total_stakes - old + stake
     stake
 }
-pub fn update_rewards(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
-    let slot = reward_slot(id)
-    storage.sstore(slot: slot, value: storage.sload(L_COLL))
-    storage.sstore(slot: slot + 1, value: storage.sload(L_DEBT))
+pub fn update_rewards(_ id: u256) uses (storage: mut RawStorage) {
+    let tm = unsafe { storage_at_mut<TroveManagerLayout>(0) }
+    tm.reward_snapshots[id] = RewardSnapshot { coll: tm.l_coll, debt: tm.l_bold_debt }
 }

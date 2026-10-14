@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Pinned governance OpenZeppelin 5 SafeERC20/Address error behavior.
-use std::evm::{Address, Call, CallOutcome, Ctx, RawMem, revert_error}
+use std::evm::{Address, Call, CallOutcome, Ctx, revert_error}
 use super::token_calls::TokenMsg
 #[error]
 pub struct FailedInnerCall {}
@@ -8,7 +8,7 @@ pub struct FailedInnerCall {}
 pub struct AddressEmptyCode { pub target: Address }
 #[error]
 pub struct SafeERC20FailedOperation { pub token: Address }
-fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx, mem: mut RawMem) {
+fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx) {
     if !result.success() && result.returndata_len() == 0 { revert_error(FailedInnerCall {}) }
     if result.success() && result.returndata_len() == 0 {
         if ctx.extcodesize(token) == 0 { revert_error(AddressEmptyCode { target: token }) }
@@ -18,12 +18,12 @@ fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx, mem: mut R
     if !ok { revert_error(SafeERC20FailedOperation { token }) }
 }
 pub fn safe_transfer(_ token: Address, _ receiver: Address, _ amount: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     let result = token.try_call(TokenMsg::Transfer { receiver, amount })
     check(token, result)
 }
 pub fn safe_transfer_from(_ token: Address, _ owner: Address, _ receiver: Address, _ amount: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     let result = token.try_call(TokenMsg::TransferFrom { owner, receiver, amount })
     check(token, result)
 }

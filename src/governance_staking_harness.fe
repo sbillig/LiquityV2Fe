@@ -1,5 +1,5 @@
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Create, RawMem, RawStorage, Log}
+use std::evm::{Address, Ctx, Call, Create, RawStorage, Log}
 use super::user_proxy::{UserProxy, PermitParams}
 use super::user_proxy_factory as factory
 use super::governance_staking as staking
@@ -32,22 +32,22 @@ pub contract GovernanceStakingHarness {
     implementation: Address,
     init(lqty: Address, lusd: Address, v1: Address) uses (mut implementation, create: mut Create, storage: mut RawStorage) {
         implementation = create.create<UserProxy>(value: 0, args: (lqty, lusd, v1))
-        storage.sstore(slot: 0, value: 1)
+        unsafe { storage.sstore(slot: 0, value: 1) }
     }
     recv StakingMsg {
         Implementation -> Address uses (implementation) { implementation }
-        Derive { user } -> Address uses (implementation, ctx: Ctx, mem: mut RawMem) { factory::derive(implementation, user) }
-        Deploy -> Address uses (implementation, ctx: Ctx, mem: mut RawMem, create: mut Create, log: mut Log) { factory::deploy(implementation) }
-        User { user } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        Derive { user } -> Address uses (implementation, ctx: Ctx) { factory::derive(implementation, user) }
+        Deploy -> Address uses (implementation, ctx: Ctx, create: mut Create, log: mut Log) { factory::deploy(implementation) }
+        User { user } -> (u256, u256, u256, u256) uses ( storage: RawStorage) {
             let s = map(user, 8)
-            (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+            (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
         }
-        Deposit { amount } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, false, ctx.caller()) }
-        DepositTo { amount, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, send, recipient) }
-        DepositPermit { amount, p } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, false, ctx.caller()) }
-        DepositPermitTo { amount, p, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, send, recipient) }
-        Withdraw { amount } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, true, ctx.caller()) }
-        WithdrawTo { amount, send, recipient } uses (implementation, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, send, recipient) }
-        Rewards { recipient } -> (u256, u256) uses (implementation, ctx: Ctx, mem: mut RawMem, log: mut Log, call: mut Call) { staking::rewards(implementation, recipient) }
+        Deposit { amount } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, false, ctx.caller()) }
+        DepositTo { amount, send, recipient } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, send, recipient) }
+        DepositPermit { amount, p } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, false, ctx.caller()) }
+        DepositPermitTo { amount, p, send, recipient } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit_permit(implementation, amount, p, send, recipient) }
+        Withdraw { amount } uses (implementation, ctx: Ctx, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, true, ctx.caller()) }
+        WithdrawTo { amount, send, recipient } uses (implementation, ctx: Ctx, storage: mut RawStorage, log: mut Log, call: mut Call) { staking::withdraw(implementation, amount, send, recipient) }
+        Rewards { recipient } -> (u256, u256) uses (implementation, ctx: Ctx, log: mut Log, call: mut Call) { staking::rewards(implementation, recipient) }
     }
 }

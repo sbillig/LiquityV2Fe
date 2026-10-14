@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Full TroveManager public interface and registry configuration.
 use std::abi::{sol, DynArray}
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use super::trove_memory_array::TroveMemoryArray
 use super::trove_hooks as hooks
 use super::types::{TroveChange, LatestTroveData, LatestBatchData}
@@ -30,6 +30,6 @@ pub contract TroveLiquidations {
         weth = registry.static(RegistryMsg::GetWETH {})
     }
     recv TroveLiquidationsMsg {
-        batchLiquidateTroves { ids } uses (mcr, sp_penalty, redist_penalty, weth, ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_liquidation::liquidate(ids.values, mcr, sp_penalty, redist_penalty, weth) }
+        batchLiquidateTroves { ids } uses (mcr, sp_penalty, redist_penalty, weth, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { super::trove_liquidation::liquidate(ids.values, mcr, sp_penalty, redist_penalty, weth) }
     }
 }

@@ -1,14 +1,4 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
-pub fn vault() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x43616c6c6572206973206e6f74205661756c7400000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 19))
-}
-pub fn initiated() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x466c617368206c6f616e206e6f742070726f7065726c7920696e697469617465)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6400000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 33))
-}
+pub fn vault() -> DynString { "Caller is not Vault" }
+pub fn initiated() -> DynString { "Flash loan not properly initiated" }

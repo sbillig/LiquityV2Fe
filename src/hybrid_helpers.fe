@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use core::num::IntDowncast
 use std::abi::{sol, Uint24}
-use std::evm::{Address, Call, RawMem, RawOps}
+use std::evm::{Address, Call, RawOps}
 use super::quote_calls::{QuoteCalls, quote}
 use super::hybrid_path::path
 pub struct Config { pub usdc: Address, pub weth: Address, pub pool: Address, pub usdc_index: u128, pub bold_index: u128, pub fee_uw: Uint24, pub fee_wc: Uint24, pub quoter: Address }
@@ -40,7 +40,7 @@ pub contract HybridCurveUniV3ExchangeHelpers {
         FeeUW -> Uint24 uses (cfg) { cfg.fee_uw }
         FeeWC -> Uint24 uses (cfg) { cfg.fee_wc }
         Quoter -> Address uses (cfg) { cfg.quoter }
-        FromBold { amount, coll, desired } -> (u256, u256) uses (cfg, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+        FromBold { amount, coll, desired } -> (u256, u256) uses (cfg, call: mut Call, ops: mut RawOps) {
             let intermediate = cfg.pool.static(QuoteCalls::Dy { input: cfg.bold_index.downcast_truncate(), output: cfg.usdc_index.downcast_truncate(), amount })
             let route = path(cfg.usdc, cfg.weth, coll, cfg.fee_uw, cfg.fee_wc, false)
             let quoted = quote(cfg.quoter, route, intermediate, false, true)

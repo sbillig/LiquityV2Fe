@@ -2,36 +2,37 @@
 use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
 use core::num::IntDowncast
 use std::abi::{sol, Sol, Bytes32}
-use std::evm::{Address, Ctx, Call, RawMem, RawOps}
+use std::evm::{Address, Ctx, Call, RawOps}
 use super::token_calls::TokenMsg
 use super::leftovers_sweep::BalanceMsg
 use super::revert_texts::require
 use super::user_proxy_errors as error
 pub struct PermitParams { pub owner: Address, pub spender: Address, pub value: u256, pub deadline: u256, pub v: u256, pub r: Bytes32, pub s: Bytes32 }
+impl Copy for PermitParams {}
 impl AbiSize for PermitParams { const HEAD_SIZE: u256 = 224
     const IS_DYNAMIC: bool = false }
 impl AbiSpan<Sol> for PermitParams { fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 224 } }
 impl Decode<Sol> for PermitParams {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let owner = Address { inner: d.read_word() }
-        let spender = Address { inner: d.read_word() }
-        let value = d.read_word()
-        let deadline = d.read_word()
-        let v = d.read_word()
-        let r = Bytes32 { val: d.read_word() }
-        let s = Bytes32 { val: d.read_word() }
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let owner = Address { inner: d.read_word(input) }
+        let spender = Address { inner: d.read_word(input) }
+        let value = d.read_word(input)
+        let deadline = d.read_word(input)
+        let v = d.read_word(input)
+        let r = Bytes32 { val: d.read_word(input) }
+        let s = Bytes32 { val: d.read_word(input) }
         Self { owner, spender, value, deadline, v, r, s }
     }
 }
 impl Encode<Sol> for PermitParams {
-    fn encode(own self, _ p: *u8) {
-        <u256 as Encode<Sol>>::encode(self.owner.inner, p)
-        <u256 as Encode<Sol>>::encode(self.spender.inner, core::ptr::offset_bytes(p, 32))
-        <u256 as Encode<Sol>>::encode(self.value, core::ptr::offset_bytes(p, 64))
-        <u256 as Encode<Sol>>::encode(self.deadline, core::ptr::offset_bytes(p, 96))
-        <u256 as Encode<Sol>>::encode(self.v, core::ptr::offset_bytes(p, 128))
-        <Bytes32 as Encode<Sol>>::encode(self.r, core::ptr::offset_bytes(p, 160))
-        <Bytes32 as Encode<Sol>>::encode(self.s, core::ptr::offset_bytes(p, 192))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.owner.inner, out)
+        <u256 as Encode<Sol>>::encode(self.spender.inner, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.value, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.deadline, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.v, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Bytes32 as Encode<Sol>>::encode(self.r, out.slice(offset: 160, len: <Bytes32 as core::abi::AbiSize>::HEAD_SIZE))
+        <Bytes32 as Encode<Sol>>::encode(self.s, out.slice(offset: 192, len: <Bytes32 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 pub struct Config { pub lqty: Address, pub lusd: Address, pub staking: Address, pub v2: Address }
@@ -73,17 +74,17 @@ fn require_code(_ target: Address) uses (ctx: Ctx) {
     if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
 }
 fn send_rewards(_ cfg: Config, _ recipient: Address, _ lusd: u256, _ eth: u256) -> (u256, u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     if lusd > 0 { let ignored = cfg.lusd.call(TokenMsg::Transfer { receiver: recipient, amount: lusd }) }
     if eth > 0 {
-        let mut output = core::ptr::MemBuffer::empty()
+        var output = core::ptr::MemBuffer::empty()
         let result = call.raw_call(addr: recipient, gas: ctx.gas(), value: eth, args: core::ptr::MemSpan::empty(), ret: mut output)
         require(result.success(), error::eth())
     }
     (lusd, eth)
 }
 fn stake(_ cfg: Config, _ amount: u256, _ from: Address, _ send: bool, _ recipient: Address) -> (u256, u256, u256, u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     require(ctx.caller() == cfg.v2, error::caller())
     let before_lusd = cfg.lusd.static(BalanceMsg::Balance { account: ctx.address() })
     let before_eth = ctx.selfbalance()
@@ -108,10 +109,10 @@ pub contract UserProxy {
         UserProxyMsg::V1 {} -> Address uses (cfg) { cfg.staking }
         UserProxyMsg::V2 {} -> Address uses (cfg) { cfg.v2 }
         UserProxyMsg::Staked {} -> u256 uses (cfg, ctx: Ctx, call: mut Call) { cfg.staking.static(ProxyCalls::Stakes { account: ctx.address() }) }
-        UserProxyMsg::Stake { amount, from, send, recipient } -> (u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        UserProxyMsg::Stake { amount, from, send, recipient } -> (u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call) {
             stake(cfg, amount, from, send, recipient)
         }
-        UserProxyMsg::StakePermit { amount, from, p, send, recipient } -> (u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        UserProxyMsg::StakePermit { amount, from, p, send, recipient } -> (u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call) {
             require(ctx.caller() == cfg.v2, error::caller())
             require(from == checked_address(p.owner), error::owner())
             let owner = checked_address(p.owner)
@@ -121,7 +122,7 @@ pub contract UserProxy {
             let ignored = cfg.lqty.try_call(ProxyCalls::Permit { owner, spender, value: p.value, deadline: p.deadline, v: p.v.downcast_truncate(), r: p.r, s: p.s })
             stake(cfg, amount, from, send, recipient)
         }
-        UserProxyMsg::Unstake { amount, send, recipient } -> (u256, u256, u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        UserProxyMsg::Unstake { amount, send, recipient } -> (u256, u256, u256, u256, u256, u256) uses (cfg, ctx: Ctx, call: mut Call) {
             require(ctx.caller() == cfg.v2, error::caller())
             let before_lqty = cfg.lqty.static(BalanceMsg::Balance { account: ctx.address() })
             let before_lusd = cfg.lusd.static(BalanceMsg::Balance { account: ctx.address() })

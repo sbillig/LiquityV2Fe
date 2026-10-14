@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Full TroveManager public interface and registry configuration.
 use std::abi::{sol, DynArray}
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, RawOps}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, RawOps, storage_at_mut}
 use super::trove_memory_array::TroveMemoryArray
 use super::trove_hooks as hooks
 use super::types::{TroveChange, LatestTroveData, LatestBatchData}
@@ -17,15 +17,15 @@ use super::trove_redemption::{PriceMsg, require_code}
 #[inline(never)]
 fn forward(_ target: Address) -> ! uses (ctx: Ctx, ops: mut RawOps, call: mut Call) {
     let len = ops.calldatasize()
-    let mut args = core::ptr::MemBuffer::with_capacity(len)
+    var args = core::ptr::MemBuffer::with_capacity(len)
     ops.calldatacopy(dest: mut args, dest_offset: 0, src_offset: 0, len: len)
-    args.set_len(len)
-    let mut output = core::ptr::MemBuffer::empty()
+    unsafe { args.set_len(len) }
+    var output = core::ptr::MemBuffer::empty()
     let result = call.raw_delegatecall(addr: target, gas: ctx.gas(), args: args.span(), ret: mut output)
     let size = result.returndata_len()
-    let mut returned = core::ptr::MemBuffer::with_capacity(size)
+    var returned = core::ptr::MemBuffer::with_capacity(size)
     ops.returndatacopy(dest: mut returned, dest_offset: 0, src_offset: 0, len: size)
-    returned.set_len(size)
+    unsafe { returned.set_len(size) }
     if result.success() { ops.return_data(data: returned.span()) }
     else { ops.revert(data: returned.span()) }
 }
@@ -127,36 +127,43 @@ pub contract TroveManager {
         redemptions = redemptions_module
         liquidations = liquidations_module
         let active = registry.static(RegistryMsg::GetactivePool {})
-        storage.sstore(slot: 0, value: active.inner)
         let default_pool = registry.static(RegistryMsg::GetdefaultPool {})
-        storage.sstore(slot: 1, value: default_pool.inner)
         let feed = registry.static(RegistryMsg::GetpriceFeed {})
-        storage.sstore(slot: 2, value: feed.inner)
+        let ccr_value = registry.static(RegistryMsg::GetCCR {})
+        let mcr_value = registry.static(RegistryMsg::GetMCR {})
+        let scr_value = registry.static(RegistryMsg::GetSCR {})
+        let sp_penalty_value = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_SP {})
+        let redist_penalty_value = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_REDISTRIBUTION {})
+        let nft = registry.static(RegistryMsg::GettroveNFT {})
+        let bo = registry.static(RegistryMsg::GetborrowerOperations {})
+        let sp = registry.static(RegistryMsg::GetstabilityPool {})
+        let gas_pool = registry.static(RegistryMsg::GetgasPoolAddress {})
+        let surplus = registry.static(RegistryMsg::GetcollSurplusPool {})
+        let bold = registry.static(RegistryMsg::GetboldToken {})
+        let sorted = registry.static(RegistryMsg::GetsortedTroves {})
+        let weth_value = registry.static(RegistryMsg::GetWETH {})
+        let collateral_registry = registry.static(RegistryMsg::GetcollateralRegistry {})
+        let tm = unsafe { storage_at_mut<data::TroveManagerLayout>(0) }
+        tm.active_pool = active
+        tm.default_pool = default_pool
+        tm.price_feed = feed
         log.emit(ActivePoolAddressChanged { value: active })
         log.emit(DefaultPoolAddressChanged { value: default_pool })
         log.emit(PriceFeedAddressChanged { value: feed })
-        ccr = registry.static(RegistryMsg::GetCCR {})
-        mcr = registry.static(RegistryMsg::GetMCR {})
-        scr = registry.static(RegistryMsg::GetSCR {})
-        sp_penalty = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_SP {})
-        redist_penalty = registry.static(RegistryMsg::GetLIQUIDATION_PENALTY_REDISTRIBUTION {})
-        let nft = registry.static(RegistryMsg::GettroveNFT {})
-        storage.sstore(slot: 3, value: nft.inner)
-        let bo = registry.static(RegistryMsg::GetborrowerOperations {})
-        storage.sstore(slot: 4, value: bo.inner)
-        let sp = registry.static(RegistryMsg::GetstabilityPool {})
-        storage.sstore(slot: 5, value: sp.inner)
-        let gas_pool = registry.static(RegistryMsg::GetgasPoolAddress {})
-        storage.sstore(slot: 6, value: gas_pool.inner)
-        let surplus = registry.static(RegistryMsg::GetcollSurplusPool {})
-        storage.sstore(slot: 7, value: surplus.inner)
-        let bold = registry.static(RegistryMsg::GetboldToken {})
-        storage.sstore(slot: 8, value: bold.inner)
-        let sorted = registry.static(RegistryMsg::GetsortedTroves {})
-        storage.sstore(slot: 9, value: sorted.inner)
-        weth = registry.static(RegistryMsg::GetWETH {})
-        let collateral_registry = registry.static(RegistryMsg::GetcollateralRegistry {})
-        storage.sstore(slot: 10, value: collateral_registry.inner)
+        tm.trove_nft = nft
+        tm.borrower_operations = bo
+        tm.stability_pool = sp
+        tm.gas_pool = gas_pool
+        tm.coll_surplus_pool = surplus
+        tm.bold_token = bold
+        tm.sorted_troves = sorted
+        tm.collateral_registry = collateral_registry
+        ccr = ccr_value
+        mcr = mcr_value
+        scr = scr_value
+        sp_penalty = sp_penalty_value
+        redist_penalty = redist_penalty_value
+        weth = weth_value
         log.emit(TroveNFTAddressChanged { value: nft })
         log.emit(BorrowerOperationsAddressChanged { value: bo })
         log.emit(StabilityPoolAddressChanged { value: sp })
@@ -167,48 +174,48 @@ pub contract TroveManager {
         log.emit(CollateralRegistryAddressChanged { value: collateral_registry })
     }
     recv TroveManagerMsg {
-        GetactivePool -> Address uses (storage: RawStorage) { Address { inner: storage.sload(0) } }
-        GettroveNFT -> Address uses (storage: RawStorage) { Address { inner: storage.sload(3) } }
-        GetborrowerOperations -> Address uses (storage: RawStorage) { Address { inner: storage.sload(4) } }
-        GetstabilityPool -> Address uses (storage: RawStorage) { Address { inner: storage.sload(5) } }
-        GetsortedTroves -> Address uses (storage: RawStorage) { Address { inner: storage.sload(9) } }
-        GetshutdownTime -> u256 uses (storage: RawStorage) { storage.sload(24) }
-        GetlastZombieTroveId -> u256 uses (storage: RawStorage) { storage.sload(21) }
-        GetgetTroveIdsCount -> u256 uses (storage: RawStorage) { storage.sload(19) }
+        GetactivePool -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(0) } } }
+        GettroveNFT -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(3) } } }
+        GetborrowerOperations -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(4) } } }
+        GetstabilityPool -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(5) } } }
+        GetsortedTroves -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(9) } } }
+        GetshutdownTime -> u256 uses (storage: RawStorage) { unsafe { storage.sload(24) } }
+        GetlastZombieTroveId -> u256 uses (storage: RawStorage) { unsafe { storage.sload(21) } }
+        GetgetTroveIdsCount -> u256 uses (storage: RawStorage) { unsafe { storage.sload(19) } }
         CCR -> u256 uses (ccr) { ccr }
-        BatchIds { index } -> Address uses (mem: mut RawMem, storage: RawStorage) { Address { inner: state::array_get(data::BATCH_IDS, index) & data::MASK160 } }
-        TroveIds { index } -> u256 uses (mem: mut RawMem, storage: RawStorage) { state::array_get(data::TROVE_IDS, index) }
-        GetgetEntireBranchColl -> u256 uses (storage: RawStorage, call: mut Call) { base::entire_coll(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) }) }
-        GetgetEntireBranchDebt -> u256 uses (storage: RawStorage, call: mut Call) { base::entire_debt(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) }) }
-        LatestTrove { id } -> LatestTroveData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_trove(id) }
-        LatestBatch { manager } -> LatestBatchData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_batch(manager) }
-        AnnualRate { id } -> u256 uses (mem: mut RawMem, storage: RawStorage) { data::annual_rate(id) }
-        CurrentICR { id, price } -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+        BatchIds { index } -> Address uses ( storage: RawStorage) { Address { inner: state::array_get(data::BATCH_IDS, index) & data::MASK160 } }
+        TroveIds { index } -> u256 uses ( storage: RawStorage) { state::array_get(data::TROVE_IDS, index) }
+        GetgetEntireBranchColl -> u256 uses (storage: RawStorage, call: mut Call) { base::entire_coll(Address { inner: unsafe { storage.sload(0) } }, Address { inner: unsafe { storage.sload(1) } }) }
+        GetgetEntireBranchDebt -> u256 uses (storage: RawStorage, call: mut Call) { base::entire_debt(Address { inner: unsafe { storage.sload(0) } }, Address { inner: unsafe { storage.sload(1) } }) }
+        LatestTrove { id } -> LatestTroveData uses (ctx: Ctx, storage: mut RawStorage) { data::latest_trove(id) }
+        LatestBatch { manager } -> LatestBatchData uses (ctx: Ctx, storage: mut RawStorage) { data::latest_batch(manager) }
+        AnnualRate { id } -> u256 uses (storage: mut RawStorage) { data::annual_rate(id) }
+        CurrentICR { id, price } -> u256 uses (ctx: Ctx, storage: mut RawStorage) {
             let t = data::latest_trove(id)
             math::compute_cr(t.entire_coll, t.entire_debt, price)
         }
-        Status { id } -> u8 uses (mem: mut RawMem, storage: RawStorage) { data::load_trove(id).status }
-        Troves { id } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        Status { id } -> u8 uses (storage: mut RawStorage) { data::load_trove(id).status }
+        Troves { id } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256) uses (storage: mut RawStorage) {
             let t = data::load_trove(id)
             (t.debt, t.coll, t.stake, t.status, t.array_index, t.last_debt_update, t.last_rate_adjustment, t.annual_rate, t.batch_manager, t.batch_shares)
         }
-        RewardSnapshots { id } -> (u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        RewardSnapshots { id } -> (u256, u256) uses ( storage: RawStorage) {
             let slot = data::reward_slot(id)
-            (storage.sload(slot), storage.sload(slot + 1))
+            (unsafe { storage.sload(slot) }, unsafe { storage.sload(slot + 1) })
         }
 
-        Shutdown uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call) { hooks::require_bo()
-            storage.sstore(slot: data::SHUTDOWN, value: ctx.timestamp())
-            let active = Address { inner: storage.sload(0) }
+        Shutdown uses (ctx: Ctx, storage: mut RawStorage, call: mut Call) { hooks::require_bo()
+            unsafe { storage.sstore(slot: data::SHUTDOWN, value: ctx.timestamp()) }
+            let active = Address { inner: unsafe { storage.sload(0) } }
             require_code(active)
             active.call(ActivePoolMsg::SetShutdownFlag {}) }
-        Unbacked -> (u256, u256, bool) uses (scr, storage: RawStorage, call: mut Call) { let debt = base::entire_debt(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) })
-            let sp = Address { inner: storage.sload(5) }
+        Unbacked -> (u256, u256, bool) uses (scr, storage: RawStorage, call: mut Call) { let debt = base::entire_debt(Address { inner: unsafe { storage.sload(0) } }, Address { inner: unsafe { storage.sload(1) } })
+            let sp = Address { inner: unsafe { storage.sload(5) } }
             let deposits = sp.static(StabilityPoolMsg::TotalBoldDeposits {})
             let unbacked = if debt > deposits { debt - deposits } else { 0 }
-            let feed = Address { inner: storage.sload(2) }
+            let feed = Address { inner: unsafe { storage.sload(2) } }
             let price = feed.call(PriceMsg::Price {}).0
-            let redeemable = base::tcr(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) }, price) >= scr && storage.sload(data::SHUTDOWN) == 0
+            let redeemable = base::tcr(Address { inner: unsafe { storage.sload(0) } }, Address { inner: unsafe { storage.sload(1) } }, price) >= scr && unsafe { storage.sload(data::SHUTDOWN) } == 0
             (unbacked, price, redeemable) }
         batchLiquidateTroves { ids } uses (liquidations, ctx: Ctx, ops: mut RawOps, call: mut Call) { forward(liquidations) }
         Redeem { user, amount, price, rate, iterations } -> u256 uses (redemptions, ctx: Ctx, ops: mut RawOps, call: mut Call) { forward(redemptions) }

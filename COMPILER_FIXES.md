@@ -1,13 +1,13 @@
 # Compiler fixes
 
-Local integration checkout: `toolchain/fe`, branch `liquity-v2-integration`.
-Current upstream/master: `f1f89a9ddf4a730c7dd11a66a37af0add7a23d0d`.
-Current local integration: `0617639002e12e599fd7bfb68bd2722215c8a935`.
+Current compiler: `toolchain/fe`, detached at `1b4e287c65a0981b385a18c9d49195c92f8f2197`
+from [`sbillig/fe`'s `mvs` branch](https://github.com/sbillig/fe/tree/mvs).
+`reference_manifest.json` pins its revision and source tree; no local compiler
+patches are applied. `scripts/verify_compiler.py --binary` checks both the
+checkout and the release CLI before protocol verification.
 
-The release compiler includes the pinned upstream fixes described below. Of the
-two independently authored fixes, the integer-width fix is merged upstream as
-#1595; the string-constant diagnostic fix is published on its own branch and is
-not needed by valid port code. Older integration revisions below are historical.
+The integration revisions and fixes below describe the historical pre-MVS
+compiler. They are retained as investigation history.
 
 Build setup: `npm ci --prefix crates/tree-sitter-fe` is needed before Cargo can
 generate the parser. This is an environment dependency, not a compiler defect.

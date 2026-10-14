@@ -31,11 +31,10 @@ impl AbiSpan<Sol> for Allocation {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
 }
 impl Decode<Sol> for Allocation {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 160, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 160, input.len())
         d.set_pos(end)
-        let input = d.input()
         let vote_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
         let vote_offset = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
         let veto_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -45,12 +44,12 @@ impl Decode<Sol> for Allocation {
     }
 }
 impl Encode<Sol> for Allocation {
-    fn encode(own self, _ ptr: *u8) {
-        <u256 as Encode<Sol>>::encode(self.vote_l_q_t_y, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.vote_offset, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.veto_l_q_t_y, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.veto_offset, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.at_epoch, core::ptr::offset_bytes(ptr, 128))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.vote_l_q_t_y, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.vote_offset, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.veto_l_q_t_y, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.veto_offset, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.at_epoch, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 pub struct InitiativeState {
@@ -66,11 +65,10 @@ impl AbiSpan<Sol> for InitiativeState {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
 }
 impl Decode<Sol> for InitiativeState {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 160, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 160, input.len())
         d.set_pos(end)
-        let input = d.input()
         let vote_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
         let vote_offset = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
         let veto_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -80,11 +78,11 @@ impl Decode<Sol> for InitiativeState {
     }
 }
 impl Encode<Sol> for InitiativeState {
-    fn encode(own self, _ ptr: *u8) {
-        <u256 as Encode<Sol>>::encode(self.vote_l_q_t_y, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.vote_offset, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.veto_l_q_t_y, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.veto_offset, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.last_epoch_claim, core::ptr::offset_bytes(ptr, 128))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.vote_l_q_t_y, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.vote_offset, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.veto_l_q_t_y, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.veto_offset, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.last_epoch_claim, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }

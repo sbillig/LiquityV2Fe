@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::{sol, DynString}
-use std::evm::{Address, Call, Ctx, Log, RawMem}
+use std::evm::{Address, Call, Ctx, Log}
 use super::addresses_registry::{RegistryMsg, CollTokenAddressChanged, TroveManagerAddressChanged, ActivePoolAddressChanged}
 use super::gas_pool::TokenApprovalMsg
 use super::{token_calls, revert_texts as text}
@@ -35,7 +35,7 @@ pub msg DefaultPoolMsg {
     #[selector = sol("decreaseBoldDebt(uint256)")]
     DecreaseBoldDebt { amount: u256 },
 }
-pub contract DefaultPool uses (ctx: Ctx, call: mut Call, log: mut Log, mem: mut RawMem) {
+pub contract DefaultPool uses (ctx: Ctx, call: mut Call, log: mut Log) {
     coll_token: Address,
     manager: Address,
     active: Address,
@@ -51,31 +51,31 @@ pub contract DefaultPool uses (ctx: Ctx, call: mut Call, log: mut Log, mem: mut 
         coll_token.call(TokenApprovalMsg::Approve { spender: active, amount: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff })
     }
     recv DefaultPoolMsg {
-        Name -> DynString uses (mut mem) { text::default_name() }
+        Name -> DynString { text::default_name() }
         CollToken -> Address uses (coll_token) { coll_token }
         TroveManagerAddress -> Address uses (manager) { manager }
         ActivePoolAddress -> Address uses (active) { active }
         GetCollBalance -> u256 uses (coll_balance) { coll_balance }
         GetBoldDebt -> u256 uses (bold_debt) { bold_debt }
-        SendCollToActivePool { amount } uses (manager, active, mut coll_balance, ctx, mut log, mut mem, mut call) {
+        SendCollToActivePool { amount } uses (manager, active, mut coll_balance, ctx, mut log, mut call) {
             text::require(ctx.caller() == manager, text::default_manager_only())
             coll_balance = coll_balance - amount
             log.emit(DefaultPoolCollBalanceUpdated { balance: coll_balance })
             if ctx.extcodesize(active) == 0 { std::evm::revert(()) }
             active.call(PoolReceiveMsg::ReceiveColl { amount })
         }
-        ReceiveColl { amount } uses (active, coll_token, mut coll_balance, ctx, mut log, mut mem, mut call) {
+        ReceiveColl { amount } uses (active, coll_token, mut coll_balance, ctx, mut log, mut call) {
             text::require(ctx.caller() == active, text::default_active_only())
             coll_balance = coll_balance + amount
             token_calls::safe_transfer_from(coll_token, ctx.caller(), ctx.address(), amount)
             log.emit(DefaultPoolCollBalanceUpdated { balance: coll_balance })
         }
-        IncreaseBoldDebt { amount } uses (manager, mut bold_debt, ctx, mut mem, mut log) {
+        IncreaseBoldDebt { amount } uses (manager, mut bold_debt, ctx, mut log) {
             text::require(ctx.caller() == manager, text::default_manager_only())
             bold_debt = bold_debt + amount
             log.emit(DefaultPoolBoldDebtUpdated { debt: bold_debt })
         }
-        DecreaseBoldDebt { amount } uses (manager, mut bold_debt, ctx, mut mem, mut log) {
+        DecreaseBoldDebt { amount } uses (manager, mut bold_debt, ctx, mut log) {
             text::require(ctx.caller() == manager, text::default_manager_only())
             bold_debt = bold_debt - amount
             log.emit(DefaultPoolBoldDebtUpdated { debt: bold_debt })

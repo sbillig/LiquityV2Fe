@@ -1,24 +1,22 @@
 // SPDX-License-Identifier: MIT
-use core::ptr
 use std::abi::{Bytes, DynString}
-use std::evm::RawMem
-pub fn fragment(_ value: String<31>) -> Bytes uses (mem: mut RawMem) {
-    let p = ptr::alloc_bytes(64)
+use super::bytes_builder::BytesBuilder
+
+pub fn fragment(_ value: String<31>) -> Bytes {
     let len = value.len() as u256
-    mem.mstore(addr: p, value: len)
-    mem.mstore(addr: ptr::offset_bytes(p, 32), value: (value as u256) << ((32 - len) * 8))
-    Bytes::from_abi_tail(data: p, len, size: if len == 0 { 32 } else { 64 })
+    var out = BytesBuilder::zeroed(32)
+    out.write_word(at: 0, value: (value as u256) << ((32 - len) * 8))
+    out.truncate(len)
+    out.into_bytes()
 }
+
 #[inline(never)]
 pub fn text(_ value: Bytes) -> DynString { DynString::from_payload(source: value.payload_span()) }
+
 #[inline(never)]
-pub fn cat(_ left: Bytes, _ right: Bytes) -> DynString uses (mem: mut RawMem) {
-    let len = left.len() + right.len()
-    let size = 32 + ((len + 31) / 32) * 32
-    let output = ptr::alloc_bytes(size)
-    mem.mstore(addr: output, value: len)
-    if len % 32 != 0 { mem.mstore(addr: ptr::offset_bytes(output, size - 32), value: 0) }
-    ptr::copy(dest: ptr::offset_bytes(output, 32), source: left.payload_span())
-    ptr::copy(dest: ptr::offset_bytes(output, 32 + left.len()), source: right.payload_span())
-    DynString::from_abi_tail(data: output, len, size)
+pub fn cat(_ left: Bytes, _ right: Bytes) -> DynString {
+    var out = BytesBuilder::with_capacity(left.len() + right.len())
+    out.append(left.payload_span())
+    out.append(right.payload_span())
+    out.into_string()
 }

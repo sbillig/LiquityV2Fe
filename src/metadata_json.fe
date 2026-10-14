@@ -1,25 +1,24 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
 use super::metadata_string::{cat, fragment, base64}
 pub const DOUBLE_QUOTES: String<2> = "\\\""
-pub fn property(_ key: DynString, _ value: DynString, _ last: bool) -> DynString uses (mem: mut RawMem) {
+pub fn property(_ key: DynString, _ value: DynString, _ last: bool) -> DynString {
     let a = cat(fragment("\""), key.as_bytes())
     let b = cat(a.as_bytes(), fragment("\": \""))
     let c = cat(b.as_bytes(), value.as_bytes())
     cat(c.as_bytes(), fragment(if last { "\"" } else { "\", " }))
 }
-pub fn object(_ key: DynString, _ value: DynString) -> DynString uses (mem: mut RawMem) {
+pub fn object(_ key: DynString, _ value: DynString) -> DynString {
     let a = cat(fragment("\""), key.as_bytes())
     let b = cat(a.as_bytes(), fragment("\": {"))
     let c = cat(b.as_bytes(), value.as_bytes())
     cat(c.as_bytes(), fragment("}"))
 }
-pub fn xml_image(_ svg: DynString) -> DynString uses (mem: mut RawMem) {
+pub fn xml_image(_ svg: DynString) -> DynString {
     let image = cat(fragment("data:image/svg+xml;base64,"), base64(svg).as_bytes())
     property(super::metadata_string::text(fragment("image")), image, true)
 }
-pub fn formatted_metadata(_ name: DynString, _ description: DynString, _ svg: DynString, _ attributes: DynString) -> DynString uses (mem: mut RawMem) {
+pub fn formatted_metadata(_ name: DynString, _ description: DynString, _ svg: DynString, _ attributes: DynString) -> DynString {
     let a = cat(fragment("{"), property(super::metadata_string::text(fragment("name")), name, false).as_bytes())
     let b = cat(a.as_bytes(), property(super::metadata_string::text(fragment("description")), description, false).as_bytes())
     let c = cat(b.as_bytes(), xml_image(svg).as_bytes())

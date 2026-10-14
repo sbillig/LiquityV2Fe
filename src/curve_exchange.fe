@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::sol
-use std::evm::{Address, Call, Ctx, RawMem}
+use std::evm::{Address, Call, Ctx}
 use super::token_calls::{TokenMsg, safe_transfer, safe_transfer_from}
 use super::leftovers_sweep::BalanceMsg
 pub msg CurveCalls {
@@ -45,7 +45,7 @@ pub contract CurveExchange {
         Pool -> Address uses (pool) { pool }
         CollIndex -> u256 uses (coll_index) { coll_index }
         BoldIndex -> u256 uses (bold_index) { bold_index }
-        FromBold { amount, minimum } uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        FromBold { amount, minimum } uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call) {
             let initial = bold.static(BalanceMsg::Balance { account: ctx.address() })
             let ignored_transfer = bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
             let ignored_approval = bold.call(CurveCalls::Approve { spender: pool, amount })
@@ -56,7 +56,7 @@ pub contract CurveExchange {
                 let ignored_return = bold.call(TokenMsg::Transfer { receiver: ctx.caller(), amount: current - initial })
             }
         }
-        ToBold { amount, minimum } -> u256 uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        ToBold { amount, minimum } -> u256 uses (coll, bold, pool, coll_index, bold_index, ctx: Ctx, call: mut Call) {
             let initial = coll.static(BalanceMsg::Balance { account: ctx.address() })
             safe_transfer_from(coll, ctx.caller(), ctx.address(), amount)
             let ignored_approval = coll.call(CurveCalls::Approve { spender: pool, amount })

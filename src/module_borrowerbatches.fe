@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
 use super::borrower_open as opening
 use super::borrower_open::Config
 use super::borrower_data as data
@@ -49,32 +49,32 @@ pub contract BorrowerBatches {
         cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
     }
     recv BorrowerBatchesMsg {
-        RegisterBatch { min, max, rate, fee, period } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        RegisterBatch { min, max, rate, fee, period } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::register(min, max, rate, fee, period)
         }
-        LowerFee { fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LowerFee { fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::lower_fee(fee)
         }
-        BatchRate { rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        BatchRate { rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::set_rate(cfg, rate as u256, upper, lower, max_fee)
         }
-        JoinBatch { id, manager, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        JoinBatch { id, manager, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::join(cfg, id, manager, upper, lower, max_fee)
         }
-        RemoveBatch { id, rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        RemoveBatch { id, rate, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::remove(cfg, id, rate, upper, lower, max_fee, false)
         }
-        KickBatch { id, upper, lower } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        KickBatch { id, upper, lower } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             batch::remove(cfg, id, 0, upper, lower, 0, true)
         }
-        SwitchBatch { id, remove_upper, remove_lower, manager, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        SwitchBatch { id, remove_upper, remove_lower, manager, upper, lower, max_fee } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let old = checks::in_batch(id)
             if old == manager { revert_error(BatchManagerNotNew {}) }
             let b = data::address_at(5).static(TroveManagerMsg::LatestBatch { manager: old })
             batch::remove(cfg, id, b.annual_interest_rate, remove_upper, remove_lower, 0, false)
             batch::join(cfg, id, manager, upper, lower, max_fee)
         }
-        SetDelegate { id, account, min, max, rate, upper, lower, max_fee, period } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        SetDelegate { id, account, min, max, rate, upper, lower, max_fee, period } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             checks::not_shutdown()
             checks::active(data::address_at(5), id)
             managers::require_borrower(cfg.nft, id)

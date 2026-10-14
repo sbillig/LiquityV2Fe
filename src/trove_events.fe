@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use core::num::IntDowncast
-use std::evm::{Address, Log, RawMem, RawStorage}
+use std::evm::{Address, Log, RawStorage}
 use super::trove_data as data
 use super::types::TroveChange
 #[event]
@@ -37,17 +37,17 @@ pub struct BatchedTroveUpdated {
     pub id: u256,
     pub manager: Address, pub shares: u256, pub coll: u256, pub stake: u256, pub l_coll: u256, pub l_debt: u256,
 }
-pub fn updated(_ id: u256, _ debt: u256, _ coll: u256, _ stake: u256, _ rate: u256) uses (storage: RawStorage, log: mut Log) {
-    log.emit(TroveUpdated { id, debt, coll, stake, rate, l_coll: storage.sload(data::L_COLL), l_debt: storage.sload(data::L_DEBT) })
+pub fn updated(_ id: u256, _ debt: u256, _ coll: u256, _ stake: u256, _ rate: u256) uses (storage: mut RawStorage, log: mut Log) {
+    log.emit(TroveUpdated { id, debt, coll, stake, rate, l_coll: unsafe { storage.sload(data::L_COLL) }, l_debt: unsafe { storage.sload(data::L_DEBT) } })
 }
-pub fn batched(_ id: u256, _ manager: Address, _ coll: u256, _ stake: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
-    log.emit(BatchedTroveUpdated { id, manager, shares: data::load_trove(id).batch_shares, coll, stake, l_coll: storage.sload(data::L_COLL), l_debt: storage.sload(data::L_DEBT) })
+pub fn batched(_ id: u256, _ manager: Address, _ coll: u256, _ stake: u256) uses ( storage: mut RawStorage, log: mut Log) {
+    log.emit(BatchedTroveUpdated { id, manager, shares: data::load_trove(id).batch_shares, coll, stake, l_coll: unsafe { storage.sload(data::L_COLL) }, l_debt: unsafe { storage.sload(data::L_DEBT) } })
 }
-pub fn batch(_ manager: Address, _ operation: u8, _ debt: u256, _ coll: u256, _ upfront: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
+pub fn batch(_ manager: Address, _ operation: u8, _ debt: u256, _ coll: u256, _ upfront: u256) uses ( storage: mut RawStorage, log: mut Log) {
     let b = data::load_batch(manager)
     log.emit(BatchUpdated { manager, operation, debt, coll, rate: b.annual_rate, fee: b.annual_fee, shares: b.total_shares, upfront })
 }
-pub fn current_batch(_ manager: Address, _ operation: u8, _ upfront: u256) uses (mem: mut RawMem, storage: RawStorage, log: mut Log) {
+pub fn current_batch(_ manager: Address, _ operation: u8, _ upfront: u256) uses ( storage: mut RawStorage, log: mut Log) {
     let b = data::load_batch(manager)
     batch(manager, operation, b.debt, b.coll, upfront)
 }

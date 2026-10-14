@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use super::addresses_registry::{RegistryMsg, TroveNFTAddressChanged}
 use super::add_remove_managers as managers
 use super::add_remove_managers::{ManagerSlots, AddRemoveManagersMsg}
@@ -18,18 +18,18 @@ pub fn initialize(_ registry: Address, _ flash: Address, _ exchange: Address) ->
     let weth = registry.call(RegistryMsg::GetWETH {})
     Config { nft, bo, manager, bold, weth, flash, exchange }
 }
-pub fn require_receiver(_ cfg: Config, _ id: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+pub fn require_receiver(_ cfg: Config, _ id: u256) uses (ctx: Ctx, call: mut Call) {
     let (_, receiver) = cfg.bo.static(AddRemoveManagersMsg::RemoveManagerReceiverOf { id })
     require(receiver == ctx.address(), error::not_receiver())
 }
-pub fn remove_receiver(_ cfg: Config, _ id: u256) -> Address uses (ctx: Ctx, call: mut Call, storage: RawStorage, mem: mut RawMem) {
+pub fn remove_receiver(_ cfg: Config, _ id: u256) -> Address uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
     let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
     let receiver = managers::require_owner_or_remove(slots(), id, owner)
     require_receiver(cfg, id)
     receiver
 }
 pub fn check_adjust(_ cfg: Config, _ id: u256, _ coll: u256, _ coll_increase: bool, _ debt_increase: bool) -> Address
-uses (ctx: Ctx, call: mut Call, storage: RawStorage, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
     let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
     if (!coll_increase && coll > 0) || debt_increase {
         let receiver = managers::require_owner_or_remove(slots(), id, owner)

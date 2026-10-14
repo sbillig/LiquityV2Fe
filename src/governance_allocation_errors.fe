@@ -1,70 +1,15 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
-pub fn active() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a206163746976652d766f74652d66736d0000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 27))
-}
-pub fn withdrawal() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4d7573742062652061207769746864726177616c000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 20))
-}
-pub fn insufficient() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20696e73756666696369656e742d6f722d616c6c6f)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x63617465642d6c71747900000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 42))
-}
-pub fn length() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a2061727261792d6c656e6774682d6d69736d617463)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6800000000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 33))
-}
-pub fn duplicate() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x6475700000000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 3))
-}
-pub fn negative() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x43616e6e6f74206265206e656761746976650000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 18))
-}
-pub fn nop() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20766f74696e67206e6f7468696e67000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 26))
-}
-pub fn simultaneous() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a20766f74652d616e642d7665746f00000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 25))
-}
-pub fn nothing() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a206e6f7468696e6720746f20726573657400000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 28))
-}
-pub fn reset() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x6d75737420626520612072657365740000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 15))
-}
-pub fn reset_all() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f7665726e616e63653a206d75737420626520612072657365740000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 27))
-}
-pub fn increase() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x43616e6e6f7420696e6372656173650000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 15))
-}
-pub fn new_votes() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4d757374206265207a65726f20666f72206e657720696e697469617469766573)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 32))
-}
+pub fn active() -> DynString { "Governance: active-vote-fsm" }
+pub fn withdrawal() -> DynString { "Must be a withdrawal" }
+pub fn insufficient() -> DynString { "Governance: insufficient-or-allocated-lqty" }
+pub fn length() -> DynString { "Governance: array-length-mismatch" }
+pub fn duplicate() -> DynString { "dup" }
+pub fn negative() -> DynString { "Cannot be negative" }
+pub fn nop() -> DynString { "Governance: voting nothing" }
+pub fn simultaneous() -> DynString { "Governance: vote-and-veto" }
+pub fn nothing() -> DynString { "Governance: nothing to reset" }
+pub fn reset() -> DynString { "must be a reset" }
+pub fn reset_all() -> DynString { "Governance: must be a reset" }
+pub fn increase() -> DynString { "Cannot increase" }
+pub fn new_votes() -> DynString { "Must be zero for new initiatives" }

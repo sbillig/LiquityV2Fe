@@ -1,5 +1,5 @@
 use std::abi::sol
-use std::evm::{Address, Ctx, RawStorage, RawMem, Call, Log}
+use std::evm::{Address, Ctx, RawStorage, Call, Log}
 use super::governance_snapshots as snap
 use super::governance_snapshots::SnapshotConfig
 pub msg SnapshotMsg {
@@ -34,15 +34,15 @@ pub contract GovernanceSnapshotHarness {
         Start -> u256 uses (cfg, ctx: Ctx) { snap::epoch_start(cfg) }
         Seconds -> u256 uses (cfg, ctx: Ctx) { (ctx.timestamp() - cfg.start) % cfg.duration }
         Threshold { votes } -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, votes) }
-        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, storage.sload(3)) }
+        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, unsafe { storage.sload(3) }) }
         Total -> ((u256, u256), (u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::total(cfg) }
-        Initiative { target } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::initiative(cfg, target) }
-        Status { target, votes, ivotes, state } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: RawStorage, mem: mut RawMem) { snap::status(cfg, target, votes, ivotes, state) }
+        Initiative { target } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::initiative(cfg, target) }
+        Status { target, votes, ivotes, state } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::status(cfg, target, votes, ivotes, state) }
         UpdateThreshold -> u256 uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
             let (votes, state) = snap::snapshot_total(cfg)
             snap::threshold(cfg, votes.0)
         }
-        UpdateStatus { target } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log, mem: mut RawMem) {
+        UpdateStatus { target } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
             let (votes, unused) = snap::snapshot_total(cfg)
             let (ivotes, state) = snap::snapshot_initiative(cfg, target)
             snap::status(cfg, target, votes, ivotes, state)

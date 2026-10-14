@@ -51,11 +51,10 @@ impl AbiSpan<Sol> for OpenLeveragedTroveParams {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 416, input.len()) }
 }
 impl Decode<Sol> for OpenLeveragedTroveParams {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 416, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 416, input.len())
         d.set_pos(end)
-        let input = d.input()
         let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let owner_index = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
         let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -73,20 +72,20 @@ impl Decode<Sol> for OpenLeveragedTroveParams {
     }
 }
 impl Encode<Sol> for OpenLeveragedTroveParams {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.owner_index, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.coll_amount, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.flash_loan_amount, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.bold_amount, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.upper_hint, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.lower_hint, core::ptr::offset_bytes(ptr, 192))
-        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 224))
-        <Address as Encode<Sol>>::encode(self.batch_manager, core::ptr::offset_bytes(ptr, 256))
-        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, core::ptr::offset_bytes(ptr, 288))
-        <Address as Encode<Sol>>::encode(self.add_manager, core::ptr::offset_bytes(ptr, 320))
-        <Address as Encode<Sol>>::encode(self.remove_manager, core::ptr::offset_bytes(ptr, 352))
-        <Address as Encode<Sol>>::encode(self.receiver, core::ptr::offset_bytes(ptr, 384))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.owner_index, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.coll_amount, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.flash_loan_amount, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.bold_amount, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.upper_hint, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.lower_hint, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.batch_manager, out.slice(offset: 256, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.add_manager, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.remove_manager, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.receiver, out.slice(offset: 384, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 pub struct OpenTroveParams {
@@ -109,11 +108,10 @@ impl AbiSpan<Sol> for OpenTroveParams {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 384, input.len()) }
 }
 impl Decode<Sol> for OpenTroveParams {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 384, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 384, input.len())
         d.set_pos(end)
-        let input = d.input()
         let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let owner_index = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
         let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
@@ -130,18 +128,18 @@ impl Decode<Sol> for OpenTroveParams {
     }
 }
 impl Encode<Sol> for OpenTroveParams {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.owner, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.owner_index, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.coll_amount, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.bold_amount, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.upper_hint, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.lower_hint, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 192))
-        <Address as Encode<Sol>>::encode(self.batch_manager, core::ptr::offset_bytes(ptr, 224))
-        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, core::ptr::offset_bytes(ptr, 256))
-        <Address as Encode<Sol>>::encode(self.add_manager, core::ptr::offset_bytes(ptr, 288))
-        <Address as Encode<Sol>>::encode(self.remove_manager, core::ptr::offset_bytes(ptr, 320))
-        <Address as Encode<Sol>>::encode(self.receiver, core::ptr::offset_bytes(ptr, 352))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.owner_index, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.coll_amount, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.bold_amount, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.upper_hint, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.lower_hint, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.batch_manager, out.slice(offset: 224, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.max_upfront_fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.add_manager, out.slice(offset: 288, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.remove_manager, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.receiver, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
     }
 }

@@ -25,6 +25,6 @@ impl AbiSpan<Sol> for TroveId {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 32, input.len()) }
 }
 impl Decode<Sol> for TroveId {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self { Self { value: d.read_word() } }
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self { Self { value: d.read_word(input) } }
 }
-impl Encode<Sol> for TroveId { fn encode(own self, _ ptr: *u8) { <u256 as Encode<Sol>>::encode(self.value, ptr) } }
+impl Encode<Sol> for TroveId { fn encode(own self, _ out: core::abi::AbiFrame) { <u256 as Encode<Sol>>::encode(self.value, out) } }

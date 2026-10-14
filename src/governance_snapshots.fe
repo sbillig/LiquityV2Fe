@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log}
+use std::evm::{Address, Ctx, RawStorage, Call, Log, StorageMap, storage_at_mut}
 use std::evm::packed::keccak_packed
 use super::governance_math::{lqty_to_votes, max}
 use super::leftovers_sweep::BalanceMsg
@@ -17,31 +17,70 @@ pub struct SnapshotVotesForInitiative {
     pub initiative: Address,
     pub votes: u256, pub vetos: u256, pub for_epoch: u256,
 }
-pub fn map(_ address: Address, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((address.inner, root)) }
+pub fn map(_ address: Address, _ root: u256) -> u256 { keccak_packed((address.inner, root)) }
+
+// Governance storage region (guard, owner, accrual and snapshot state).
+// Write paths reinterpret it with one unsafe storage_at_mut; the read helpers
+// above stay raw so view getters keep read-only storage effects. The two
+// roots at 8/10 are declared only to keep numbering; their entries are
+// owned by the staking/allocation modules.
+pub struct VotesSnapshot {
+    pub votes: u256,
+    pub for_epoch: u256,
+}
+impl Copy for VotesSnapshot {}
+pub struct InitiativeSnapshot {
+    pub votes: u256,
+    pub for_epoch: u256,
+    pub accrued: u256,
+    pub vetos: u256,
+}
+impl Copy for InitiativeSnapshot {}
+pub struct InitiativeState {
+    pub vote_qty: u256,
+    pub vote_offset: u256,
+    pub veto_qty: u256,
+    pub veto_offset: u256,
+    pub last_epoch_claim: u256,
+}
+impl Copy for InitiativeState {}
+pub struct GovernanceLayout {
+    pub guard_status: u256,
+    pub owner_word: u256,
+    pub bold_accrued: u256,
+    pub votes_snapshot: VotesSnapshot,
+    pub initiative_snapshots: StorageMap<Address, InitiativeSnapshot>,
+    pub staked_qty: u256,
+    pub staked_offset: u256,
+    pub user_stakes: StorageMap<Address, u256>,
+    pub initiative_states: StorageMap<Address, InitiativeState>,
+    pub allocations: StorageMap<Address, u256>,
+    pub registered: StorageMap<Address, u256>,
+}
 pub fn epoch(_ cfg: SnapshotConfig) -> u256 uses (ctx: Ctx) { (ctx.timestamp() - cfg.start) / cfg.duration + 1 }
 pub fn epoch_start(_ cfg: SnapshotConfig) -> u256 uses (ctx: Ctx) { cfg.start + (epoch(cfg) - 1) * cfg.duration }
 pub fn threshold(_ cfg: SnapshotConfig, _ votes: u256) -> u256 uses (storage: RawStorage) {
     if votes == 0 { return 0 }
-    let payout = storage.sload(2) * 1000000000000000000 / votes
+    let payout = unsafe { storage.sload(2) } * 1000000000000000000 / votes
     let min_votes = if payout != 0 { cfg.min_claim * 1000000000000000000 / payout } else { 0 }
     max(votes * cfg.voting_factor / 1000000000000000000, min_votes)
 }
 pub fn total(_ cfg: SnapshotConfig) -> ((u256, u256), (u256, u256), bool) uses (ctx: Ctx, storage: RawStorage) {
     let current = epoch(cfg)
-    let votes = storage.sload(3)
-    let at = storage.sload(4)
-    let qty = storage.sload(6)
-    let offset = storage.sload(7)
+    let votes = unsafe { storage.sload(3) }
+    let at = unsafe { storage.sload(4) }
+    let qty = unsafe { storage.sload(6) }
+    let offset = unsafe { storage.sload(7) }
     if at < current - 1 { ((lqty_to_votes(qty, epoch_start(cfg), offset), current - 1), (qty, offset), true) }
     else { ((votes, at), (qty, offset), false) }
 }
 pub fn initiative(_ cfg: SnapshotConfig, _ target: Address) -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool)
-uses (ctx: Ctx, storage: RawStorage, mem: mut RawMem) {
+uses (ctx: Ctx, storage: RawStorage) {
     let current = epoch(cfg)
     let s = map(target, 5)
-    let snapshot = (storage.sload(s), storage.sload(s + 1), storage.sload(s + 2), storage.sload(s + 3))
+    let snapshot = (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
     let t = map(target, 9)
-    let state = (storage.sload(t), storage.sload(t + 1), storage.sload(t + 2), storage.sload(t + 3), storage.sload(t + 4))
+    let state = (unsafe { storage.sload(t) }, unsafe { storage.sload(t + 1) }, unsafe { storage.sload(t + 2) }, unsafe { storage.sload(t + 3) }, unsafe { storage.sload(t + 4) })
     if snapshot.1 < current - 1 {
         let start = epoch_start(cfg)
         let votes = lqty_to_votes(state.0, start, state.1)
@@ -54,42 +93,39 @@ pub fn snapshot_total(_ cfg: SnapshotConfig) -> ((u256, u256), (u256, u256))
 uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     let (snapshot, state, update) = total(cfg)
     if update {
-        storage.sstore(slot: 3, value: snapshot.0)
-        storage.sstore(slot: 4, value: snapshot.1)
         let balance = cfg.bold.static(BalanceMsg::Balance { account: ctx.address() })
         let accrued = if balance < cfg.min_accrual { 0 } else { balance }
-        storage.sstore(slot: 2, value: accrued)
+        let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+        gov.votes_snapshot = VotesSnapshot { votes: snapshot.0, for_epoch: snapshot.1 }
+        gov.bold_accrued = accrued
         log.emit(SnapshotVotes { votes: snapshot.0, for_epoch: snapshot.1, bold_accrued: accrued })
     }
     (snapshot, state)
 }
 #[inline(never)]
 pub fn snapshot_initiative(_ cfg: SnapshotConfig, _ target: Address) -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256))
-uses (ctx: Ctx, storage: mut RawStorage, mem: mut RawMem, log: mut Log) {
+uses (ctx: Ctx, storage: mut RawStorage, log: mut Log) {
     let (snapshot, state, update) = initiative(cfg, target)
     if update {
-        let s = map(target, 5)
-        storage.sstore(slot: s, value: snapshot.0)
-        storage.sstore(slot: s + 1, value: snapshot.1)
-        storage.sstore(slot: s + 2, value: snapshot.2)
-        storage.sstore(slot: s + 3, value: snapshot.3)
+        let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
+        gov.initiative_snapshots[target] = InitiativeSnapshot { votes: snapshot.0, for_epoch: snapshot.1, accrued: snapshot.2, vetos: snapshot.3 }
         log.emit(SnapshotVotesForInitiative { initiative: target, votes: snapshot.0, vetos: snapshot.3, for_epoch: snapshot.1 })
     }
     (snapshot, state)
 }
 #[inline(never)]
 pub fn status(_ cfg: SnapshotConfig, _ target: Address, _ votes: (u256, u256), _ ivotes: (u256, u256, u256, u256), _ istate: (u256, u256, u256, u256, u256)) -> (u8, u256, u256)
-uses (ctx: Ctx, storage: RawStorage, mem: mut RawMem) {
-    let registered = storage.sload(map(target, 11))
+uses (ctx: Ctx, storage: RawStorage) {
+    let registered = unsafe { storage.sload(map(target, 11)) }
     if registered == 0 { return (0, 0, 0) }
     let current = epoch(cfg)
     if registered == current { return (1, 0, 0) }
-    let last = storage.sload(map(target, 9) + 4)
+    let last = unsafe { storage.sload(map(target, 9) + 4) }
     if registered == ~0 { return (6, last, 0) }
     if last >= current - 1 { return (4, last, 0) }
     let cutoff = threshold(cfg, votes.0)
     if ivotes.0 > cutoff && ivotes.0 > ivotes.3 {
-        return (3, last, ivotes.0 * storage.sload(2) / votes.0)
+        return (3, last, ivotes.0 * unsafe { storage.sload(2) } / votes.0)
     }
     if istate.4 + cfg.unregister_epochs < current - 1 || (ivotes.3 > ivotes.0 && ivotes.3 > cutoff * cfg.unregister_factor / 1000000000000000000) {
         return (5, last, 0)

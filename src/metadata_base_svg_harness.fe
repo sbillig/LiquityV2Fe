@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, DynString}
-use std::evm::{Address, Call, RawMem}
+use std::evm::{Address, Call}
 use super::metadata_base_svg as base
 pub msg BaseSvgMsg {
  #[selector = sol("svgProps()")]
@@ -28,16 +28,16 @@ pub msg BaseSvgMsg {
 }
 pub contract MetadataBaseSvgHarness {
  recv BaseSvgMsg {
-  M0 {  } -> DynString uses (mem: mut RawMem) { base::svg_props() }
-  M1 { reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::base_elements(reader) }
-  M2 {  } -> DynString uses (mem: mut RawMem) { base::leverage_logo() }
-  M3 { reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::bold_logo(reader) }
-  M4 {  } -> DynString uses (mem: mut RawMem) { base::static_text_els() }
-  M5 { value, x, y } -> DynString uses (mem: mut RawMem) { base::formatted_dynamic_el(value,x,y) }
-  M6 { id } -> DynString uses (mem: mut RawMem) { base::formatted_id_el(id) }
-  M7 { value } -> DynString uses (mem: mut RawMem) { base::formatted_address_el(value) }
-  M8 { name, reader } -> DynString uses (mem: mut RawMem, call: mut Call) { base::coll_logo(name,reader) }
-  M9 { value } -> DynString uses (mem: mut RawMem) { base::status_el(value) }
-  M10 { debt, coll, interest } -> DynString uses (mem: mut RawMem) { base::dynamic_text_els(debt,coll,interest) }
+  M0 {  } -> DynString { base::svg_props() }
+  M1 { reader } -> DynString uses ( call: mut Call) { base::base_elements(reader) }
+  M2 {  } -> DynString { base::leverage_logo() }
+  M3 { reader } -> DynString uses ( call: mut Call) { base::bold_logo(reader) }
+  M4 {  } -> DynString { base::static_text_els() }
+  M5 { value, x, y } -> DynString { base::formatted_dynamic_el(value,x,y) }
+  M6 { id } -> DynString { base::formatted_id_el(id) }
+  M7 { value } -> DynString { base::formatted_address_el(value) }
+  M8 { name, reader } -> DynString uses ( call: mut Call) { base::coll_logo(name,reader) }
+  M9 { value } -> DynString { base::status_el(value) }
+  M10 { debt, coll, interest } -> DynString { base::dynamic_text_els(debt,coll,interest) }
  }
 }

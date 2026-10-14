@@ -1,5 +1,5 @@
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, RawMem}
+use std::evm::{Address, Ctx, Call}
 use super::governance_token as token
 pub msg TokenHarnessMsg {
     #[selector = sol("transfer(address,address,uint256)")]
@@ -9,7 +9,7 @@ pub msg TokenHarnessMsg {
 }
 pub contract GovernanceTokenHarness {
     recv TokenHarnessMsg {
-        Transfer { token, to, amount } uses (ctx: Ctx, call: mut Call, mem: mut RawMem) { token::safe_transfer(token, to, amount) }
-        TransferFrom { token, from, to, amount } uses (ctx: Ctx, call: mut Call, mem: mut RawMem) { token::safe_transfer_from(token, from, to, amount) }
+        Transfer { token, to, amount } uses (ctx: Ctx, call: mut Call) { token::safe_transfer(token, to, amount) }
+        TransferFrom { token, from, to, amount } uses (ctx: Ctx, call: mut Call) { token::safe_transfer_from(token, from, to, amount) }
     }
 }

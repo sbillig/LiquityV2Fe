@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, Bytes}
-use std::evm::{Address, Ctx, Create, Call, Log, RawMem, RawOps, RawStorage, encode_abi_payload}
+use std::evm::{Address, Ctx, Create, Call, Log, RawOps, RawStorage, encode_abi_payload}
 use std::evm::packed::keccak_packed
 use super::zapper_calls::*
 use super::leverage_lst_zapper_module::LeverageLSTZapperLeverage
@@ -69,8 +69,8 @@ pub msg LeverageLSTZapperMsg {
 fn balances(_ cfg: Config, _ token: Address, _ receiver: Address) -> InitialBalances uses (ctx: Ctx, call: mut Call) {
     snapshot([token, cfg.bold, Address::zero(), Address::zero()], receiver)
 }
-fn send_eth(_ receiver: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
-    let mut out = core::ptr::MemBuffer::empty()
+fn send_eth(_ receiver: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
+    var out = core::ptr::MemBuffer::empty()
     let result = call.raw_call(addr: receiver, gas: ctx.gas(), value: amount, args: core::ptr::MemSpan::empty(), ret: mut out)
     require(result.success(), error::send_failed())
 }
@@ -82,7 +82,7 @@ fn deposit(_ weth: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
     call.call(addr: weth, gas: ctx.gas(), value: amount, message: ZapperCalls::Deposit {})
 }
 fn pre(_ cfg: Config, _ token: Address, _ id: u256, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool) -> (Address, InitialBalances)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
     let receiver = check_adjust(cfg, id, coll, coll_increase, debt_increase)
     let initial = balances(cfg, token, ctx.caller())
     if coll_increase { safe_transfer_from(token, ctx.caller(), ctx.address(), coll) }
@@ -90,7 +90,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
     (receiver, initial)
 }
 fn post(_ cfg: Config, _ token: Address, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool, _ receiver: Address, _ initial: InitialBalances)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     if !coll_increase { safe_transfer(token, receiver, coll) }
     if debt_increase { let ignored = cfg.bold.call(TokenMsg::Transfer { receiver, amount: debt }) }
     return_leftovers(initial)
@@ -99,7 +99,7 @@ pub contract LeverageLSTZapper {
     leverage_module: Address,
     cfg: Config,
     coll_token: Address,
-    init(registry: Address, flash: Address, exchange: Address) uses (mut leverage_module, create: mut Create, mut cfg, mut coll_token, call: mut Call, log: mut Log, mem: mut RawMem) {
+    init(registry: Address, flash: Address, exchange: Address) uses (mut leverage_module, create: mut Create, mut cfg, mut coll_token, call: mut Call, log: mut Log) {
         let config = initialize(registry, flash, exchange)
         let collateral = registry.static(RegistryMsg::GetcollToken {})
         require(config.weth != collateral, error::wrong_branch())
@@ -120,7 +120,7 @@ pub contract LeverageLSTZapper {
         LeverageLSTZapperMsg::FlashProvider {} -> Address uses (cfg) { cfg.flash }
         LeverageLSTZapperMsg::Exchange {} -> Address uses (cfg) { cfg.exchange }
         #[payable]
-        LeverageLSTZapperMsg::Open { p } -> u256 uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::Open { p } -> u256 uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             require(ctx.value() == ETH_GAS_COMPENSATION, error::wrong_eth())
             require(checked_address(p.batch) == Address::zero() || p.rate == 0, error::batch_rate())
             deposit(cfg.weth, ctx.value())
@@ -137,26 +137,26 @@ pub contract LeverageLSTZapper {
             managers::set_remove(slots(), id, checked_address(p.remove), checked_address(p.receiver))
             id
         }
-        LeverageLSTZapperMsg::Add { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::Add { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
             managers::require_owner_or_add(slots(), id, owner)
             safe_transfer_from(coll_token, ctx.caller(), ctx.address(), amount)
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::Add { id, amount })
         }
-        LeverageLSTZapperMsg::WithdrawColl { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::WithdrawColl { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::WithdrawColl { id, amount })
             safe_transfer(coll_token, receiver, amount)
         }
-        LeverageLSTZapperMsg::WithdrawBold { id, amount, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::WithdrawBold { id, amount, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::WithdrawBold { id, amount, fee })
             let ignored = cfg.bold.call(TokenMsg::Transfer { receiver, amount })
         }
-        LeverageLSTZapperMsg::Repay { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::Repay { id, amount } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let owner = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
             managers::require_owner_or_add(slots(), id, owner)
             let initial = balances(cfg, coll_token, ctx.caller())
@@ -165,19 +165,19 @@ pub contract LeverageLSTZapper {
             cfg.bo.call(ZapperCalls::Repay { id, amount })
             return_leftovers(initial)
         }
-        LeverageLSTZapperMsg::Adjust { id, coll, coll_increase, debt, debt_increase, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::Adjust { id, coll, coll_increase, debt, debt_increase, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let (receiver, initial) = pre(cfg, coll_token, id, coll, coll_increase, debt, debt_increase)
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::Adjust { id, coll, coll_increase, debt, debt_increase, fee })
             post(cfg, coll_token, coll, coll_increase, debt, debt_increase, receiver, initial)
         }
-        LeverageLSTZapperMsg::AdjustZombie { id, coll, coll_increase, debt, debt_increase, upper, lower, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::AdjustZombie { id, coll, coll_increase, debt, debt_increase, upper, lower, fee } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let (receiver, initial) = pre(cfg, coll_token, id, coll, coll_increase, debt, debt_increase)
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::AdjustZombie { id, coll, coll_increase, debt, debt_increase, upper, lower, fee })
             post(cfg, coll_token, coll, coll_increase, debt, debt_increase, receiver, initial)
         }
-        LeverageLSTZapperMsg::Close { id } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::Close { id } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
             let trove = cfg.manager.static(ZapperCalls::Trove { id })
             let ignored = cfg.bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount: trove.entire_debt })
@@ -189,7 +189,7 @@ pub contract LeverageLSTZapper {
             cfg.weth.call(ZapperCalls::Withdraw { amount })
             send_eth(receiver, amount)
         }
-        LeverageLSTZapperMsg::CloseFromColl { id, amount, minimum } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+        LeverageLSTZapperMsg::CloseFromColl { id, amount, minimum } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
             let p = CloseParams { id, amount, minimum, receiver }
             let initial = balances(cfg, coll_token, receiver)
@@ -198,7 +198,7 @@ pub contract LeverageLSTZapper {
             cfg.flash.call(ZapperCalls::Flash { token: coll_token, amount, operation: 1, data: Bytes::from_payload(source: encoded.span()) })
             return_leftovers(initial)
         }
-        LeverageLSTZapperMsg::FlashClose { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        LeverageLSTZapperMsg::FlashClose { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call) {
             require(ctx.caller() == cfg.flash, error::flash_caller())
             let trove = cfg.manager.static(ZapperCalls::Trove { id: p.id })
             let left = trove.entire_coll - p.amount
@@ -221,18 +221,18 @@ pub contract LeverageLSTZapper {
         LeverageLSTZapperMsg::FlashUp { p, effective } uses (leverage_module, ctx: Ctx, ops: mut RawOps, call: mut Call) { forward(leverage_module) }
         LeverageLSTZapperMsg::FlashDown { p, effective } uses (leverage_module, ctx: Ctx, ops: mut RawOps, call: mut Call) { forward(leverage_module) }
         LeverageLSTZapperMsg::LeverageRatio { ratio } -> u256 { ratio * 1000000000000000000 / (ratio - 1000000000000000000) }
-        AddRemoveManagersMsg::AddManagerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) { managers::get_add(slots(), id) }
-        AddRemoveManagersMsg::RemoveManagerReceiverOf { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) { managers::get_remove(slots(), id) }
-        AddRemoveManagersMsg::SetAddManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        AddRemoveManagersMsg::AddManagerOf { id } -> Address uses ( storage: RawStorage) { managers::get_add(slots(), id) }
+        AddRemoveManagersMsg::RemoveManagerReceiverOf { id } -> (Address, Address) uses ( storage: RawStorage) { managers::get_remove(slots(), id) }
+        AddRemoveManagersMsg::SetAddManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             managers::require_borrower(cfg.nft, id)
             managers::set_add(slots(), id, manager)
         }
-        AddRemoveManagersMsg::SetRemoveManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        AddRemoveManagersMsg::SetRemoveManager { id, manager } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let receiver = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
             managers::require_borrower(cfg.nft, id)
             managers::set_remove(slots(), id, manager, receiver)
         }
-        AddRemoveManagersMsg::SetRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        AddRemoveManagersMsg::SetRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             managers::require_borrower(cfg.nft, id)
             managers::set_remove(slots(), id, manager, receiver)
         }

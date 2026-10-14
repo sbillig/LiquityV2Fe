@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
-use core::abi::{AbiSize, AbiSpan, ByteInput, store_word}
+use core::abi::{AbiSize, AbiSpan, ByteInput}
 use core::num::IntDowncast
 use std::abi::{sol, Sol, DynArray, DynString}
-use std::evm::{Address, Call, RawMem, RawOps, encode_abi_payload, revert_error}
+use std::evm::{Address, Call, RawOps, encode_abi_payload, revert_error}
 use std::evm::panic::Panic
+use super::bytes_builder::BytesBuilder
 use super::helper_calls::*
 pub struct CombinedTroveData {
     pub id: u256, pub entire_debt: u256, pub entire_coll: u256,
@@ -26,46 +27,40 @@ impl AbiSpan<Sol> for DebtPerInterestRate {
 }
 #[error]
 pub struct Error { pub reason: DynString }
-pub fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: mut Call, mem: mut RawMem) {
+pub fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: mut Call) {
     let manager = registry.static(HelperRegistryMsg::Manager { index })
     if manager == Address::zero() {
-        let p = core::ptr::alloc_bytes(32)
-        mem.mstore(addr: p, value: 0x496e76616c696420636f6c6c61746572616c20696e6465780000000000000000)
-        revert_error(Error { reason: DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 24)) })
+        revert_error(Error { reason: "Invalid collateral index" })
     }
     let sorted = manager.static(HelperManagerMsg::Sorted {})
     assert(sorted != Address::zero())
     (manager, sorted)
 }
-fn allocate(_ count: u256, _ stride: u256) -> (*u8, u256) {
+fn allocate(_ count: u256, _ stride: u256) -> BytesBuilder {
     // Solidity rejects memory-array lengths larger than uint64 before allocation.
     if count > 0xffffffffffffffff { revert_error(Panic { code: 0x41 }) }
-    let size = 32 + count * stride
-    let p = core::ptr::alloc_bytes(size)
-    core::ptr::zero_bytes(p, size)
-    store_word(ptr: p, value: count)
-    (p, size)
+    BytesBuilder::zeroed(count * stride)
 }
-fn one(_ manager: Address, _ id: u256, _ out: *u8) uses (call: mut Call) {
-    store_word(ptr: out, value: id)
+fn one(_ manager: Address, _ id: u256, _ out: mut BytesBuilder, _ base: u256) uses (call: mut Call) {
+    out.write_word(at: base, value: id)
     let t = manager.static(HelperManagerMsg::Trove { id })
-    store_word(ptr: core::ptr::offset_bytes(out, 32), value: t.entire_debt)
-    store_word(ptr: core::ptr::offset_bytes(out, 64), value: t.entire_coll)
-    store_word(ptr: core::ptr::offset_bytes(out, 96), value: t.redist_bold_debt_gain)
-    store_word(ptr: core::ptr::offset_bytes(out, 128), value: t.redist_coll_gain)
-    store_word(ptr: core::ptr::offset_bytes(out, 160), value: t.accrued_interest)
-    store_word(ptr: core::ptr::offset_bytes(out, 192), value: t.recorded_debt)
-    store_word(ptr: core::ptr::offset_bytes(out, 224), value: t.annual_interest_rate)
-    store_word(ptr: core::ptr::offset_bytes(out, 256), value: t.accrued_batch_management_fee)
-    store_word(ptr: core::ptr::offset_bytes(out, 288), value: t.last_interest_rate_adj_time)
+    out.write_word(at: base + 32, value: t.entire_debt)
+    out.write_word(at: base + 64, value: t.entire_coll)
+    out.write_word(at: base + 96, value: t.redist_bold_debt_gain)
+    out.write_word(at: base + 128, value: t.redist_coll_gain)
+    out.write_word(at: base + 160, value: t.accrued_interest)
+    out.write_word(at: base + 192, value: t.recorded_debt)
+    out.write_word(at: base + 224, value: t.annual_interest_rate)
+    out.write_word(at: base + 256, value: t.accrued_batch_management_fee)
+    out.write_word(at: base + 288, value: t.last_interest_rate_adj_time)
     let stored = manager.static(HelperManagerMsg::Stored { id })
-    store_word(ptr: core::ptr::offset_bytes(out, 320), value: stored.2)
-    store_word(ptr: core::ptr::offset_bytes(out, 352), value: stored.5 as u256)
-    store_word(ptr: core::ptr::offset_bytes(out, 384), value: stored.8.inner)
-    store_word(ptr: core::ptr::offset_bytes(out, 416), value: stored.9)
+    out.write_word(at: base + 320, value: stored.2)
+    out.write_word(at: base + 352, value: stored.5 as u256)
+    out.write_word(at: base + 384, value: stored.8.inner)
+    out.write_word(at: base + 416, value: stored.9)
     let snapshot = manager.static(HelperManagerMsg::Snapshot { id })
-    store_word(ptr: core::ptr::offset_bytes(out, 448), value: snapshot.0)
-    store_word(ptr: core::ptr::offset_bytes(out, 480), value: snapshot.1)
+    out.write_word(at: base + 448, value: snapshot.0)
+    out.write_word(at: base + 480, value: snapshot.1)
 }
 pub msg MultiTroveGetterMsg {
     #[selector = sol("collateralRegistry()")]
@@ -80,7 +75,7 @@ pub contract MultiTroveGetter {
     init(collateral_registry: Address) uses (mut registry) { registry = collateral_registry }
     recv MultiTroveGetterMsg {
         Registry -> Address uses (registry) { registry }
-        Multiple { index, start, count } -> DynArray<CombinedTroveData> uses (registry, call: mut Call, mem: mut RawMem) {
+        Multiple { index, start, count } -> DynArray<CombinedTroveData> uses (registry, call: mut Call) {
             let (manager, sorted) = resolve(registry, index)
             let descend = start >= 0
             let offset: u256 = if descend { start.downcast_truncate() } else { (-(start + 1)).downcast_truncate() }
@@ -88,38 +83,37 @@ pub contract MultiTroveGetter {
             if offset >= total { return DynArray::empty() }
             let limit = total - offset
             let count = if count > limit { limit } else { count }
-            let mut current = if descend { sorted.static(HelperSortedMsg::First {}) } else { sorted.static(HelperSortedMsg::Last {}) }
-            let mut i = 0
+            var current = if descend { sorted.static(HelperSortedMsg::First {}) } else { sorted.static(HelperSortedMsg::Last {}) }
+            var i = 0
             while i < offset {
                 current = if descend { sorted.static(HelperSortedMsg::Next { id: current }) } else { sorted.static(HelperSortedMsg::Prev { id: current }) }
                 i += 1
             }
-            let (p, size) = allocate(count, 512)
+            var out = allocate(count, 512)
             i = 0
             while i < count {
-                one(manager, current, core::ptr::offset_bytes(p, 32 + i * 512))
+                one(manager, current, mut out, i * 512)
                 current = if descend { sorted.static(HelperSortedMsg::Next { id: current }) } else { sorted.static(HelperSortedMsg::Prev { id: current }) }
                 i += 1
             }
-            DynArray::from_abi_tail(data: p, len: count, size)
+            out.into_dyn_array(count)
         }
-        Ascending { index, start, count } -> (DynArray<DebtPerInterestRate>, u256) uses (registry, call: mut Call, mem: mut RawMem, ops: mut RawOps) {
+        Ascending { index, start, count } -> (DynArray<DebtPerInterestRate>, u256) uses (registry, call: mut Call, ops: mut RawOps) {
             let (manager, sorted) = resolve(registry, index)
-            let (p, size) = allocate(count, 96)
-            let mut current = if start == 0 { sorted.static(HelperSortedMsg::Last {}) } else { start }
-            let mut i = 0
+            var out = allocate(count, 96)
+            var current = if start == 0 { sorted.static(HelperSortedMsg::Last {}) } else { start }
+            var i = 0
             while i < count {
                 if current == 0 { break }
                 let node = sorted.static(HelperSortedMsg::Node { id: current })
                 let t = manager.static(HelperManagerMsg::Trove { id: current })
-                let out = core::ptr::offset_bytes(p, 32 + i * 96)
-                store_word(ptr: out, value: node.2.inner)
-                store_word(ptr: core::ptr::offset_bytes(out, 32), value: t.annual_interest_rate)
-                store_word(ptr: core::ptr::offset_bytes(out, 64), value: t.entire_debt)
+                out.write_word(at: i * 96, value: node.2.inner)
+                out.write_word(at: i * 96 + 32, value: t.annual_interest_rate)
+                out.write_word(at: i * 96 + 64, value: t.entire_debt)
                 current = node.1
                 i += 1
             }
-            let values: DynArray<DebtPerInterestRate> = DynArray::from_abi_tail(data: p, len: count, size)
+            let values: DynArray<DebtPerInterestRate> = out.into_dyn_array(count)
             // Solidity returns two top-level values, not one dynamic tuple value.
             let output = encode_abi_payload((values, current))
             ops.return_data(data: output.span())

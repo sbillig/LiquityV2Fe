@@ -107,11 +107,10 @@ impl AbiSpan<Sol> for AddressVars {
     fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 576, input.len()) }
 }
 impl Decode<Sol> for AddressVars {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 576, d.input().len())
+        let end = checked_frame_end<Sol>(pos, 576, input.len())
         d.set_pos(end)
-        let input = d.input()
         let coll_token = <Address as Decode<Sol>>::decode_from(input, pos + 0)
         let borrower_operations = <Address as Decode<Sol>>::decode_from(input, pos + 32)
         let trove_manager = <Address as Decode<Sol>>::decode_from(input, pos + 64)
@@ -134,24 +133,24 @@ impl Decode<Sol> for AddressVars {
     }
 }
 impl Encode<Sol> for AddressVars {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.coll_token, core::ptr::offset_bytes(ptr, 0))
-        <Address as Encode<Sol>>::encode(self.borrower_operations, core::ptr::offset_bytes(ptr, 32))
-        <Address as Encode<Sol>>::encode(self.trove_manager, core::ptr::offset_bytes(ptr, 64))
-        <Address as Encode<Sol>>::encode(self.trove_n_f_t, core::ptr::offset_bytes(ptr, 96))
-        <Address as Encode<Sol>>::encode(self.metadata_n_f_t, core::ptr::offset_bytes(ptr, 128))
-        <Address as Encode<Sol>>::encode(self.stability_pool, core::ptr::offset_bytes(ptr, 160))
-        <Address as Encode<Sol>>::encode(self.price_feed, core::ptr::offset_bytes(ptr, 192))
-        <Address as Encode<Sol>>::encode(self.active_pool, core::ptr::offset_bytes(ptr, 224))
-        <Address as Encode<Sol>>::encode(self.default_pool, core::ptr::offset_bytes(ptr, 256))
-        <Address as Encode<Sol>>::encode(self.gas_pool_address, core::ptr::offset_bytes(ptr, 288))
-        <Address as Encode<Sol>>::encode(self.coll_surplus_pool, core::ptr::offset_bytes(ptr, 320))
-        <Address as Encode<Sol>>::encode(self.sorted_troves, core::ptr::offset_bytes(ptr, 352))
-        <Address as Encode<Sol>>::encode(self.interest_router, core::ptr::offset_bytes(ptr, 384))
-        <Address as Encode<Sol>>::encode(self.hint_helpers, core::ptr::offset_bytes(ptr, 416))
-        <Address as Encode<Sol>>::encode(self.multi_trove_getter, core::ptr::offset_bytes(ptr, 448))
-        <Address as Encode<Sol>>::encode(self.collateral_registry, core::ptr::offset_bytes(ptr, 480))
-        <Address as Encode<Sol>>::encode(self.bold_token, core::ptr::offset_bytes(ptr, 512))
-        <Address as Encode<Sol>>::encode(self.w_e_t_h, core::ptr::offset_bytes(ptr, 544))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.coll_token, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.borrower_operations, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.trove_manager, out.slice(offset: 64, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.trove_n_f_t, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.metadata_n_f_t, out.slice(offset: 128, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.stability_pool, out.slice(offset: 160, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.price_feed, out.slice(offset: 192, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.active_pool, out.slice(offset: 224, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.default_pool, out.slice(offset: 256, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.gas_pool_address, out.slice(offset: 288, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.coll_surplus_pool, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.sorted_troves, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.interest_router, out.slice(offset: 384, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.hint_helpers, out.slice(offset: 416, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.multi_trove_getter, out.slice(offset: 448, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.collateral_registry, out.slice(offset: 480, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.bold_token, out.slice(offset: 512, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.w_e_t_h, out.slice(offset: 544, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
     }
 }

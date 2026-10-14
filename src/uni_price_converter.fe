@@ -3,8 +3,8 @@ use std::abi::{sol, Uint160}
 pub fn sqrt(_ n: u256) -> u256 {
     if n == 0 { return 0 }
     // Start above the true square root, including odd bit lengths.
-    let mut bits = n
-    let mut x: u256 = 1
+    var bits = n
+    var x: u256 = 1
     while bits > 0 { bits = bits >> 2
         x = x << 1 }
     while true {

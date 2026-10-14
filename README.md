@@ -2,7 +2,7 @@
 
 The Fe implementation now includes the complete pinned contract/interface inventory
 and a runnable local deployment. The final integrated suite passes **353 EVM tests
-and 64 Fe tests**, including the ABI/size audit.
+and 66 Fe tests**, including the ABI/size audit.
 
 The target is the complete Liquity V2 contract system, preserving the behavior of
 [liquity/bold](https://github.com/liquity/bold), including interest and batch
@@ -11,10 +11,12 @@ collateral branches, authorization, token/NFT behavior, oracle shutdowns, helper
 and zappers. Source mappings and their verification scope are in `port_status.json` and
 `governance_status.json`. Governance and connected initiative lifecycles are included.
 
-`reference_manifest.json` pins the Solidity reference and the Fe upstream/master
-revision used for the local compiler build. Compiler work is isolated in
-`toolchain/fe`; fixes, if needed, will each receive a separate branch, regression
-tests and a newsfragment, and be listed in `COMPILER_FIXES.md`.
+`reference_manifest.json` pins the Solidity reference and the Fe compiler from
+[`sbillig/fe`'s `mvs` branch](https://github.com/sbillig/fe/tree/mvs), currently
+`1b4e287c65a0981b385a18c9d49195c92f8f2197`. The compiler lives in
+`toolchain/fe` at that exact revision;
+bootstrap and the test suite reject compiler source or binary drift.
+Historical compiler investigations are recorded in `COMPILER_FIXES.md`.
 
 Initialize pinned sources and build the local compiler:
 
@@ -54,7 +56,7 @@ Business Source License is in `LICENSE-BUSL-1.1`.
 Current verified implementations: LiquityMath, AddressesRegistry, GasPool,
 DefaultPool, CollSurplusPool, ActivePool, BoldToken (including ERC20Permit and
 EIP712), SortedTroves (including batch operations), TroveNFT, FixedAssetReader, MetadataNFT, AddRemoveManagers, LiquityBase, CollateralRegistry, StabilityPool, TroveManager, BorrowerOperations, the WETH/rETH/wstETH price feeds, HintHelpers, MultiTroveGetter, DebtInFrontHelper and the legacy Constants query contract. The current suite
-passes 353 EVM tests plus 64 Fe tests. `PoolSystem.t.sol`
+passes 353 EVM tests plus 66 Fe tests. `PoolSystem.t.sol`
 deploys and connects the actual Fe registry, token and pools, and compares
 collateral redistribution, surplus claims and interest minting with Solidity.
 TroveManagerSystem additionally connects the real manager, pools, token, NFT and
@@ -86,14 +88,14 @@ all image/status variants and pinned production font/logo assets. MetadataNFT cr
 a stateless rendering companion in its constructor to satisfy EIP-170; constructor
 arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes are checked.
 
-The local compiler is based on upstream/master `f1f89a9dd` with the remaining
-pinned fixes documented in [COMPILER_FIXES.md](COMPILER_FIXES.md). The latest
-complete protocol checkpoint is `tests/results/complete-port.log` and
-`tests/results/complete-port.json` (353 EVM tests and 64 Fe tests).
-The packaged deployment smoke passes, and all 150 recorded bytecode files match
-the final build exactly; see `tests/results/local-deployment.json` and
-[COMPLETION_AUDIT.md](COMPLETION_AUDIT.md). After a successful logged full test run, record its
-provenance with `python3 scripts/record_validation.py <log-path>` before edits.
+The MVS protocol checkpoint is `tests/results/mvs-refresh.log` and
+`tests/results/mvs-refresh.json` (353 EVM tests and 66 Fe tests). The suite also
+checks compiler provenance, seven toolchain drift regressions, and ABI/size
+limits for all 41 protocol contracts and their implementation companions.
+The packaged deployment smoke evidence in `tests/results/local-deployment.json`
+and [COMPLETION_AUDIT.md](COMPLETION_AUDIT.md) describes the earlier pre-MVS build.
+After a successful logged full test run, record its provenance with
+`python3 scripts/record_validation.py <log-path>` before edits.
 
 CollateralRegistry tests cover branch allocation, rounding remainders, fallback
 to branch debt, partial redemptions, fee decay, malformed constructor arrays and

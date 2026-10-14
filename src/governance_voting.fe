@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 use core::num::IntDowncast
 use std::abi::{DynArray, DynArrayAccess, MemVec}
-use std::evm::{Address, Ctx, RawMem, RawStorage, Call, Log}
+use std::evm::{Address, Ctx, RawStorage, Call, Log}
 use super::governance_actions::ActionConfig
 use super::governance_allocation as allocation
 use super::governance_guard as guard
 use super::governance_allocation_errors as error
 use super::revert_texts::require
-fn no_duplicates(_ values: DynArray<Address>) uses (mem: mut RawMem) {
-    let mut i = 0
+fn no_duplicates(_ values: DynArray<Address>) {
+    var i = 0
     while i + 1 < values.len() {
-        let mut j = i + 1
+        var j = i + 1
         while j < values.len() {
             require(values.get(i) != values.get(j), error::duplicate())
             j += 1
@@ -18,21 +18,21 @@ fn no_duplicates(_ values: DynArray<Address>) uses (mem: mut RawMem) {
         i += 1
     }
 }
-fn no_negatives(_ values: DynArray<i256>) uses (mem: mut RawMem) {
-    let mut i = 0
+fn no_negatives(_ values: DynArray<i256>) {
+    var i = 0
     while i < values.len() { require(values.get(i) >= 0, error::negative())
         i += 1 }
 }
 #[inline(never)]
 fn reset_inner(_ cfg: ActionConfig, _ targets: DynArray<Address>) -> DynArray<i256>
-uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     let n = targets.len()
-    let mut cached: MemVec<i256> = MemVec::zeroed(n)
-    let mut votes: MemVec<i256> = MemVec::zeroed(n)
-    let mut vetos: MemVec<i256> = MemVec::zeroed(n)
-    let mut vote_offsets: MemVec<i256> = MemVec::zeroed(n)
-    let mut veto_offsets: MemVec<i256> = MemVec::zeroed(n)
-    let mut i = 0
+    var cached: MemVec<i256> = MemVec::zeroed(n)
+    var votes: MemVec<i256> = MemVec::zeroed(n)
+    var vetos: MemVec<i256> = MemVec::zeroed(n)
+    var vote_offsets: MemVec<i256> = MemVec::zeroed(n)
+    var veto_offsets: MemVec<i256> = MemVec::zeroed(n)
+    var i = 0
     while i < n {
         let old = allocation::read_allocation(ctx.caller(), targets.get(i))
         require(old.0 > 0 || old.2 > 0, error::nothing())
@@ -51,7 +51,7 @@ uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: m
     cached.to_dyn_array()
 }
 pub fn reset(_ cfg: ActionConfig, _ targets: DynArray<Address>, _ check_all: bool)
-uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     guard::enter()
     no_duplicates(targets)
     let ignored = reset_inner(cfg, targets)
@@ -59,28 +59,28 @@ uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: m
     guard::exit()
 }
 pub fn allocate(_ cfg: ActionConfig, _ cutoff: u256, _ reset_targets: DynArray<Address>, _ targets: DynArray<Address>, _ votes: DynArray<i256>, _ vetos: DynArray<i256>)
-uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) {
+uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     guard::enter()
     require(targets.len() == votes.len() && votes.len() == vetos.len(), error::length())
     no_duplicates(reset_targets)
     no_duplicates(targets)
     no_negatives(votes)
     no_negatives(vetos)
-    let mut i = 0
+    var i = 0
     while i < votes.len() { require(votes.get(i) > 0 || vetos.get(i) > 0, error::nop())
         i += 1 }
     i = 0
     while i < votes.len() { require(votes.get(i) == 0 || vetos.get(i) == 0, error::simultaneous())
         i += 1 }
     let cached = reset_inner(cfg, reset_targets)
-    let mut user = allocation::read_user(ctx.caller())
+    var user = allocation::read_user(ctx.caller())
     require(user.2 == 0, error::reset())
     require(user.0 != 0, error::insufficient())
     if (ctx.timestamp() - cfg.snapshots.start) % cfg.snapshots.duration > cutoff {
         i = 0
         while i < targets.len() {
-            let mut found = false
-            let mut j = 0
+            var found = false
+            var j = 0
             while j < reset_targets.len() {
                 if reset_targets.get(j) == targets.get(i) {
                     found = true
@@ -93,8 +93,8 @@ uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: m
             i += 1
         }
     }
-    let mut offsets_v: MemVec<i256> = MemVec::zeroed(targets.len())
-    let mut offsets_t: MemVec<i256> = MemVec::zeroed(targets.len())
+    var offsets_v: MemVec<i256> = MemVec::zeroed(targets.len())
+    var offsets_t: MemVec<i256> = MemVec::zeroed(targets.len())
     i = 0
     while i < targets.len() {
         let is_vote = votes.get(i) > 0

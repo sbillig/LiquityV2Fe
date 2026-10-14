@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 // StabilityPool.sol: exact P/S/B accounting, scale transitions and depositor flows.
+// Storage fields are declared in Solidity order, so default numbering already
+// reproduces the reference layout (addresses 0..2, balances 3..6, maps 7..9,
+// P/scale 10..11, S/B maps 12..13) with no #[slot] annotations.
 use core::num::IntDowncast
 use std::abi::{sol, DynString}
-use std::evm::{Address, Call, Ctx, Log, RawMem, RawStorage}
-use std::evm::packed::keccak_packed
+use std::evm::{Address, Call, Ctx, Log, StorageMap}
 use super::addresses_registry::{RegistryMsg, ActivePoolAddressChanged, DefaultPoolAddressChanged, PriceFeedAddressChanged, TroveManagerAddressChanged, BoldTokenAddressChanged}
 use super::active_pool::ActivePoolMsg
 use super::bold_token::BoldTokenMsg
@@ -16,62 +18,65 @@ const P_PRECISION: u256 = 1000000000000000000000000000000000000
 const SCALE_FACTOR: u256 = 1000000000
 const MAX_SCALE_FACTOR_EXPONENT: u256 = 8
 const SCALE_SPAN: u256 = 2
-// Solidity layout: inherited pool addresses 0..2; coll/total/owed/pending 3..6;
-// deposits/snapshots/stash maps 7..9; P/scale 10..11; S/B maps 12..13.
-fn map_slot(_ key: u256, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((key, root)) }
-fn deposit(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(map_slot(user.inner, 7)) }
-fn stash(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(map_slot(user.inner, 9)) }
-fn sum(_ scale: u256, _ root: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) { storage.sload(map_slot(scale, root)) }
+
+pub struct Snapshot {
+    pub s: u256,
+    pub p: u256,
+    pub b: u256,
+    pub scale: u256,
+}
+impl Copy for Snapshot {}
+
+fn deposit(_ user: Address) -> u256 uses (deposits: StorageMap<Address, u256>) { deposits[user] }
+fn stash(_ user: Address) -> u256 uses (stashed_coll: StorageMap<Address, u256>) { stashed_coll[user] }
+fn s_sum(_ scale: u256) -> u256 uses (scale_s: StorageMap<u256, u256>) { scale_s[scale] }
+fn b_sum(_ scale: u256) -> u256 uses (scale_b: StorageMap<u256, u256>) { scale_b[scale] }
 fn scale_power(_ exponent: u256) -> u256 {
-    let mut output: u256 = 1
-    let mut i: u256 = 0
+    var output: u256 = 1
+    var i: u256 = 0
     while i < exponent { output *= SCALE_FACTOR
         i += 1
     }
     output
 }
-fn normalized_gain(_ snapshot: u256, _ root: u256, _ snapshot_sum: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
-    let scale = storage.sload(snapshot + 3)
-    let mut result = sum(scale, root) - storage.sload(snapshot + snapshot_sum)
-    let mut i: u256 = 1
-    while i <= SCALE_SPAN { result += sum(scale + i, root) / scale_power(i)
+fn normalized_gain(_ snap: Snapshot, _ is_yield: bool) -> u256 uses (scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>) {
+    var result = if is_yield { b_sum(snap.scale) - snap.b } else { s_sum(snap.scale) - snap.s }
+    var i: u256 = 1
+    while i <= SCALE_SPAN { result += (if is_yield { b_sum(snap.scale + i) } else { s_sum(snap.scale + i) }) / scale_power(i)
         i += 1
     }
     result
 }
-fn gain(_ user: Address, _ root: u256, _ snapshot_sum: u256, _ cap_slot: u256) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+fn gain(_ user: Address, _ is_yield: bool) -> u256 uses (deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, yield_owed: u256) {
     let initial = deposit(user)
     if initial == 0 { return 0 }
-    let snapshot = map_slot(user.inner, 8)
-    let normalized = normalized_gain(snapshot, root, snapshot_sum)
-    math::min(initial * normalized / storage.sload(snapshot + 1), storage.sload(cap_slot))
+    let snap = snapshots[user]
+    let cap = if is_yield { yield_owed } else { coll_balance }
+    math::min(initial * normalized_gain(snap, is_yield) / snap.p, cap)
 }
-fn coll_gain(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { gain(user, 12, 0, 3) }
-fn yield_gain(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) { gain(user, 13, 2, 5) }
-fn compounded(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage) {
+fn coll_gain(_ user: Address) -> u256 uses (deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, yield_owed: u256) { gain(user, false) }
+fn yield_gain(_ user: Address) -> u256 uses (deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, yield_owed: u256) { gain(user, true) }
+fn compounded(_ user: Address) -> u256 uses (deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, product: u256, current_scale: u256) {
     let initial = deposit(user)
     if initial == 0 { return 0 }
-    let snapshot = map_slot(user.inner, 8)
-    let diff = storage.sload(11) - storage.sload(snapshot + 3)
+    let snap = snapshots[user]
+    let diff = current_scale - snap.scale
     if diff > MAX_SCALE_FACTOR_EXPONENT { return 0 }
-    initial * storage.sload(10) / storage.sload(snapshot + 1) / scale_power(diff)
+    initial * product / snap.p / scale_power(diff)
 }
-fn yield_with_pending(_ user: Address) -> u256 uses (mem: mut RawMem, storage: RawStorage, call: mut Call) {
-    if storage.sload(4) < MIN_BOLD_IN_SP { return 0 }
+fn yield_with_pending(_ user: Address) -> u256 uses (active_pool: Address, total_bold: u256, yield_owed: u256, deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, product: u256, current_scale: u256, call: mut Call) {
+    if total_bold < MIN_BOLD_IN_SP { return 0 }
     let initial = deposit(user)
     if initial == 0 { return 0 }
-    let snapshot = map_slot(user.inner, 8)
-    let mut owed = storage.sload(5)
-    let mut normalized = normalized_gain(snapshot, 13, 2)
-    let active = Address { inner: storage.sload(0) }
-    let pending = active.static(ActivePoolMsg::PendingSPYield {})
+    let snap = snapshots[user]
+    var owed = yield_owed
+    var normalized = normalized_gain(snap, true)
+    let pending = active_pool.static(ActivePoolMsg::PendingSPYield {})
     owed += pending
-    let scale = storage.sload(11)
-    let snapshot_scale = storage.sload(snapshot + 3)
-    if scale <= snapshot_scale + SCALE_SPAN {
-        normalized += storage.sload(10) * pending / storage.sload(4) / scale_power(scale - snapshot_scale)
+    if current_scale <= snap.scale + SCALE_SPAN {
+        normalized += product * pending / total_bold / scale_power(current_scale - snap.scale)
     }
-    math::min(initial * normalized / storage.sload(snapshot + 1), owed)
+    math::min(initial * normalized / snap.p, owed)
 }
 #[event]
 pub struct StabilityPoolCollBalanceUpdated { pub value: u256 }
@@ -98,69 +103,57 @@ pub struct DepositOperation {
     pub operation: u8, pub loss: u256, pub change: i256,
     pub yield_gain: u256, pub yield_claimed: u256, pub coll_gain: u256, pub coll_claimed: u256,
 }
-fn update_yield(_ amount: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
-    let accumulated = storage.sload(6) + amount
+fn update_yield(_ amount: u256) uses (yield_pending: mut u256, total_bold: u256, yield_owed: mut u256, current_scale: u256, scale_b: mut StorageMap<u256, u256>, product: u256, log: mut Log) {
+    let accumulated = yield_pending + amount
     if accumulated == 0 { return }
-    let total = storage.sload(4)
-    if total < MIN_BOLD_IN_SP { storage.sstore(slot: 6, value: accumulated)
+    if total_bold < MIN_BOLD_IN_SP { yield_pending = accumulated
         return
     }
-    storage.sstore(slot: 5, value: storage.sload(5) + accumulated)
-    storage.sstore(slot: 6, value: 0)
-    let scale = storage.sload(11)
-    let slot = map_slot(scale, 13)
-    let value = storage.sload(slot) + storage.sload(10) * accumulated / total
-    storage.sstore(slot: slot, value: value)
+    yield_owed += accumulated
+    yield_pending = 0
+    let scale = current_scale
+    let value = scale_b[scale] + product * accumulated / total_bold
+    scale_b[scale] = value
     log.emit(B_Updated { value, scale })
 }
-fn update_total(_ increase: u256, _ decrease: u256) -> u256 uses (storage: mut RawStorage, log: mut Log) {
-    let total = storage.sload(4)
-    if increase == 0 && decrease == 0 { return total }
-    let value = total + increase - decrease
-    storage.sstore(slot: 4, value: value)
-    log.emit(StabilityPoolBoldBalanceUpdated { value })
-    value
+fn update_total(_ increase: u256, _ decrease: u256) -> u256 uses (total_bold: mut u256, log: mut Log) {
+    if increase == 0 && decrease == 0 { return total_bold }
+    total_bold = total_bold + increase - decrease
+    log.emit(StabilityPoolBoldBalanceUpdated { value: total_bold })
+    total_bold
 }
-fn decrease_owed(_ amount: u256) uses (storage: mut RawStorage) {
+fn decrease_owed(_ amount: u256) uses (yield_owed: mut u256) {
     if amount == 0 { return }
-    storage.sstore(slot: 5, value: storage.sload(5) - amount)
+    yield_owed -= amount
 }
-fn update_deposit(_ user: Address, _ amount: u256, _ stashed: u256) uses (mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
-    storage.sstore(slot: map_slot(user.inner, 7), value: amount)
-    storage.sstore(slot: map_slot(user.inner, 9), value: stashed)
-    let snapshot = map_slot(user.inner, 8)
+fn update_deposit(_ user: Address, _ amount: u256, _ stashed: u256) uses (deposits: mut StorageMap<Address, u256>, stashed_coll: mut StorageMap<Address, u256>, snapshots: mut StorageMap<Address, Snapshot>, current_scale: u256, product: u256, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, log: mut Log) {
+    deposits[user] = amount
+    stashed_coll[user] = stashed
     if amount == 0 {
-        storage.sstore(slot: snapshot, value: 0)
-        storage.sstore(slot: snapshot + 1, value: 0)
-        storage.sstore(slot: snapshot + 2, value: 0)
-        storage.sstore(slot: snapshot + 3, value: 0)
+        snapshots[user] = Snapshot { s: 0, p: 0, b: 0, scale: 0 }
         log.emit(DepositUpdated { user, deposit: 0, stash: stashed, p: 0, s: 0, b: 0, scale: 0 })
         return
     }
-    let scale = storage.sload(11)
-    let p = storage.sload(10)
-    let s = sum(scale, 12)
-    let b = sum(scale, 13)
-    storage.sstore(slot: snapshot + 1, value: p)
-    storage.sstore(slot: snapshot, value: s)
-    storage.sstore(slot: snapshot + 2, value: b)
-    storage.sstore(slot: snapshot + 3, value: scale)
+    let scale = current_scale
+    let p = product
+    let s = s_sum(scale)
+    let b = b_sum(scale)
+    snapshots[user] = Snapshot { s, p, b, scale }
     log.emit(DepositUpdated { user, deposit: amount, stash: stashed, p, s, b, scale })
 }
 fn send_bold(_ token: Address, _ user: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
     if amount == 0 { return }
     token.call(BoldTokenMsg::ReturnFromPool { pool: ctx.address(), receiver: user, amount })
 }
-fn send_coll(_ token: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+fn send_coll(_ token: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call, coll_balance: mut u256, log: mut Log) {
     if amount == 0 { return }
-    let value = storage.sload(3) - amount
-    storage.sstore(slot: 3, value: value)
-    log.emit(StabilityPoolCollBalanceUpdated { value })
+    coll_balance -= amount
+    log.emit(StabilityPoolCollBalanceUpdated { value: coll_balance })
     safe_transfer(token, ctx.caller(), amount)
 }
-fn provide(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+fn provide(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) uses (ctx: Ctx, call: mut Call, active_pool: Address, deposits: mut StorageMap<Address, u256>, snapshots: mut StorageMap<Address, Snapshot>, stashed_coll: mut StorageMap<Address, u256>, scale_s: StorageMap<u256, u256>, scale_b: mut StorageMap<u256, u256>, coll_balance: mut u256, total_bold: mut u256, yield_owed: mut u256, yield_pending: mut u256, product: u256, current_scale: u256, log: mut Log) {
     text::require(amount > 0, text::stability_nonzero())
-    Address { inner: storage.sload(0) }.call(ActivePoolMsg::MintAggInterest {})
+    active_pool.call(ActivePoolMsg::MintAggInterest {})
     let user = ctx.caller()
     let initial = deposit(user)
     let coll_reward = coll_gain(user)
@@ -181,11 +174,11 @@ fn provide(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) uses
     send_coll(coll, coll_sent)
     update_yield(0)
 }
-fn withdraw(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+fn withdraw(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) uses (ctx: Ctx, call: mut Call, active_pool: Address, deposits: mut StorageMap<Address, u256>, snapshots: mut StorageMap<Address, Snapshot>, stashed_coll: mut StorageMap<Address, u256>, scale_s: StorageMap<u256, u256>, scale_b: mut StorageMap<u256, u256>, coll_balance: mut u256, total_bold: mut u256, yield_owed: mut u256, yield_pending: mut u256, product: u256, current_scale: u256, log: mut Log) {
     let user = ctx.caller()
     let initial = deposit(user)
     text::require(initial > 0, text::stability_has_deposit())
-    Address { inner: storage.sload(0) }.call(ActivePoolMsg::MintAggInterest {})
+    active_pool.call(ActivePoolMsg::MintAggInterest {})
     let coll_reward = coll_gain(user)
     let yield_reward = yield_gain(user)
     let compounded_deposit = compounded(user)
@@ -205,41 +198,38 @@ fn withdraw(_ bold: Address, _ coll: Address, _ amount: u256, _ claim: bool) use
     send_coll(coll, coll_sent)
     text::require(new_total >= MIN_BOLD_IN_SP, text::stability_minimum())
 }
-fn claim_coll(_ coll: Address) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+fn claim_coll(_ coll: Address) uses (ctx: Ctx, call: mut Call, active_pool: Address, deposits: StorageMap<Address, u256>, stashed_coll: mut StorageMap<Address, u256>, coll_balance: mut u256, log: mut Log) {
     let user = ctx.caller()
     text::require(deposit(user) == 0, text::stability_no_deposit())
-    Address { inner: storage.sload(0) }.call(ActivePoolMsg::MintAggInterest {})
+    active_pool.call(ActivePoolMsg::MintAggInterest {})
     let amount = stash(user)
     text::require(amount > 0, text::stability_nonzero())
-    storage.sstore(slot: map_slot(user.inner, 9), value: 0)
+    stashed_coll[user] = 0
     log.emit(DepositOperation { user, operation: 2, loss: 0, change: 0, yield_gain: 0, yield_claimed: 0, coll_gain: 0, coll_claimed: amount })
     log.emit(DepositUpdated { user, deposit: 0, stash: 0, p: 0, s: 0, b: 0, scale: 0 })
     send_coll(coll, amount)
 }
-fn offset(_ bold: Address, _ debt: u256, _ coll: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
-    let scale = storage.sload(11)
-    let slot = map_slot(scale, 12)
-    let value = storage.sload(slot) + storage.sload(10) * coll / storage.sload(4)
-    storage.sstore(slot: slot, value: value)
+fn offset(_ bold: Address, _ debt: u256, _ coll: u256) uses (ctx: Ctx, call: mut Call, active_pool: Address, current_scale: mut u256, scale_s: mut StorageMap<u256, u256>, product: mut u256, total_bold: mut u256, coll_balance: mut u256, log: mut Log) {
+    let scale = current_scale
+    let value = scale_s[scale] + product * coll / total_bold
+    scale_s[scale] = value
     log.emit(S_Updated { value, scale })
-    let mut numerator = storage.sload(10) * (storage.sload(4) - debt)
-    let mut new_p = numerator / storage.sload(4)
+    var numerator = product * (total_bold - debt)
+    var new_p = numerator / total_bold
     text::require(new_p > 0, text::stability_nonzero_p())
     while new_p < P_PRECISION / SCALE_FACTOR {
         numerator *= SCALE_FACTOR
-        new_p = numerator / storage.sload(4)
-        let value = storage.sload(11) + 1
-        storage.sstore(slot: 11, value: value)
-        log.emit(ScaleUpdated { value })
+        new_p = numerator / total_bold
+        current_scale += 1
+        log.emit(ScaleUpdated { value: current_scale })
     }
     log.emit(P_Updated { value: new_p })
-    storage.sstore(slot: 10, value: new_p)
+    product = new_p
     update_total(0, debt)
     bold.call(BoldTokenMsg::Burn { account: ctx.address(), amount: debt })
-    let new_coll = storage.sload(3) + coll
-    storage.sstore(slot: 3, value: new_coll)
-    Address { inner: storage.sload(0) }.call(ActivePoolMsg::SendColl { account: ctx.address(), amount: coll })
-    log.emit(StabilityPoolCollBalanceUpdated { value: new_coll })
+    coll_balance += coll
+    active_pool.call(ActivePoolMsg::SendColl { account: ctx.address(), amount: coll })
+    log.emit(StabilityPoolCollBalanceUpdated { value: coll_balance })
 }
 
 pub msg StabilityPoolMsg {
@@ -310,17 +300,31 @@ pub contract StabilityPool {
     coll: Address,
     manager: Address,
     bold: Address,
-    init(registry: Address) uses (mut coll, mut manager, mut bold, storage: mut RawStorage, call: mut Call, log: mut Log) {
+    mut active_pool: Address,
+    mut default_pool: Address,
+    mut price_feed: Address,
+    mut coll_balance: u256,
+    mut total_bold: u256,
+    mut yield_owed: u256,
+    mut yield_pending: u256,
+    mut deposits: StorageMap<Address, u256>,
+    mut snapshots: StorageMap<Address, Snapshot>,
+    mut stashed_coll: StorageMap<Address, u256>,
+    mut product: u256,
+    mut current_scale: u256,
+    mut scale_s: StorageMap<u256, u256>,
+    mut scale_b: StorageMap<u256, u256>,
+    init(registry: Address) uses (mut coll, mut manager, mut bold, mut active_pool, mut default_pool, mut price_feed, mut product, call: mut Call, log: mut Log) {
         let active = registry.static(RegistryMsg::GetactivePool {})
-        storage.sstore(slot: 0, value: active.inner)
+        active_pool = active
         let default = registry.static(RegistryMsg::GetdefaultPool {})
-        storage.sstore(slot: 1, value: default.inner)
+        default_pool = default
         let feed = registry.static(RegistryMsg::GetpriceFeed {})
-        storage.sstore(slot: 2, value: feed.inner)
+        price_feed = feed
         log.emit(ActivePoolAddressChanged { value: active })
         log.emit(DefaultPoolAddressChanged { value: default })
         log.emit(PriceFeedAddressChanged { value: feed })
-        storage.sstore(slot: 10, value: P_PRECISION)
+        product = P_PRECISION
         coll = registry.static(RegistryMsg::GetcollToken {})
         manager = registry.static(RegistryMsg::GettroveManager {})
         bold = registry.static(RegistryMsg::GetboldToken {})
@@ -328,41 +332,41 @@ pub contract StabilityPool {
         log.emit(BoldTokenAddressChanged { value: bold })
     }
     recv StabilityPoolMsg {
-        Name -> DynString uses (mem: mut RawMem) { text::stability_name() }
+        Name -> DynString { text::stability_name() }
         CollToken -> Address uses (coll) { coll }
         TroveManager -> Address uses (manager) { manager }
         BoldToken -> Address uses (bold) { bold }
-        ActivePool -> Address uses (storage: RawStorage) { Address { inner: storage.sload(0) } }
-        CollBalance -> u256 uses (storage: RawStorage) { storage.sload(3) }
-        TotalBoldDeposits -> u256 uses (storage: RawStorage) { storage.sload(4) }
-        YieldGainsOwed -> u256 uses (storage: RawStorage) { storage.sload(5) }
-        YieldGainsPending -> u256 uses (storage: RawStorage) { storage.sload(6) }
-        Product -> u256 uses (storage: RawStorage) { storage.sload(10) }
-        CurrentScale -> u256 uses (storage: RawStorage) { storage.sload(11) }
+        ActivePool -> Address uses (active_pool) { active_pool }
+        CollBalance -> u256 uses (coll_balance) { coll_balance }
+        TotalBoldDeposits -> u256 uses (total_bold) { total_bold }
+        YieldGainsOwed -> u256 uses (yield_owed) { yield_owed }
+        YieldGainsPending -> u256 uses (yield_pending) { yield_pending }
+        Product -> u256 uses (product) { product }
+        CurrentScale -> u256 uses (current_scale) { current_scale }
         PPrecision -> u256  { P_PRECISION }
         ScaleFactor -> u256  { SCALE_FACTOR }
         MaxScaleFactorExponent -> u256  { MAX_SCALE_FACTOR_EXPONENT }
         ScaleSpan -> u256  { SCALE_SPAN }
-        EntireBranchColl -> u256 uses (storage: RawStorage, call: mut Call) { entire_coll(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) }) }
-        EntireBranchDebt -> u256 uses (storage: RawStorage, call: mut Call) { entire_debt(Address { inner: storage.sload(0) }, Address { inner: storage.sload(1) }) }
-        Deposits { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { deposit(user) }
-        StashedColl { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { stash(user) }
-        DepositorCollGain { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { coll_gain(user) }
-        DepositorYieldGain { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { yield_gain(user) }
-        CompoundedBoldDeposit { user } -> u256 uses (mem: mut RawMem, storage: RawStorage) { compounded(user) }
-        DepositorYieldGainWithPending { user } -> u256 uses (mem: mut RawMem, storage: RawStorage, call: mut Call) { yield_with_pending(user) }
-        DepositSnapshots { user } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { let slot = map_slot(user.inner, 8)
-            (storage.sload(slot), storage.sload(slot + 1), storage.sload(slot + 2), storage.sload(slot + 3)) }
-        ScaleToS { scale } -> u256 uses (mem: mut RawMem, storage: RawStorage) { sum(scale, 12) }
-        ScaleToB { scale } -> u256 uses (mem: mut RawMem, storage: RawStorage) { sum(scale, 13) }
-        Provide { amount, claim } uses (bold, coll, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { provide(bold, coll, amount, claim) }
-        Withdraw { amount, claim } uses (bold, coll, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { withdraw(bold, coll, amount, claim) }
-        Claim { } uses (coll, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) { claim_coll(coll) }
-        TriggerRewards { amount } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
-            text::require(ctx.caller().inner == storage.sload(0), text::stability_active_only())
+        EntireBranchColl -> u256 uses (active_pool, default_pool, call: mut Call) { entire_coll(active_pool, default_pool) }
+        EntireBranchDebt -> u256 uses (active_pool, default_pool, call: mut Call) { entire_debt(active_pool, default_pool) }
+        Deposits { user } -> u256 uses (deposits) { deposit(user) }
+        StashedColl { user } -> u256 uses (stashed_coll) { stash(user) }
+        DepositorCollGain { user } -> u256 uses (deposits, snapshots, scale_s, scale_b, coll_balance, yield_owed) { coll_gain(user) }
+        DepositorYieldGain { user } -> u256 uses (deposits, snapshots, scale_s, scale_b, coll_balance, yield_owed) { yield_gain(user) }
+        CompoundedBoldDeposit { user } -> u256 uses (deposits, snapshots, product, current_scale) { compounded(user) }
+        DepositorYieldGainWithPending { user } -> u256 uses (active_pool, total_bold, yield_owed, deposits, snapshots, scale_s, scale_b, coll_balance, product, current_scale, call: mut Call) { yield_with_pending(user) }
+        DepositSnapshots { user } -> (u256, u256, u256, u256) uses (snapshots) { let snap = snapshots[user]
+            (snap.s, snap.p, snap.b, snap.scale) }
+        ScaleToS { scale } -> u256 uses (scale_s) { s_sum(scale) }
+        ScaleToB { scale } -> u256 uses (scale_b) { b_sum(scale) }
+        Provide { amount, claim } uses (bold, coll, ctx: Ctx, call: mut Call, active_pool, mut deposits, mut snapshots, mut stashed_coll, scale_s, mut scale_b, mut coll_balance, mut total_bold, mut yield_owed, mut yield_pending, product, current_scale, log: mut Log) { provide(bold, coll, amount, claim) }
+        Withdraw { amount, claim } uses (bold, coll, ctx: Ctx, call: mut Call, active_pool, mut deposits, mut snapshots, mut stashed_coll, scale_s, mut scale_b, mut coll_balance, mut total_bold, mut yield_owed, mut yield_pending, product, current_scale, log: mut Log) { withdraw(bold, coll, amount, claim) }
+        Claim { } uses (coll, ctx: Ctx, call: mut Call, active_pool, deposits, mut stashed_coll, mut coll_balance, log: mut Log) { claim_coll(coll) }
+        TriggerRewards { amount } uses (ctx: Ctx, active_pool, mut yield_pending, total_bold, mut yield_owed, current_scale, mut scale_b, product, log: mut Log) {
+            text::require(ctx.caller() == active_pool, text::stability_active_only())
             update_yield(amount)
         }
-        Offset { debt, amount } uses (bold, manager, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        Offset { debt, amount } uses (bold, manager, ctx: Ctx, call: mut Call, active_pool, mut current_scale, mut scale_s, mut product, mut total_bold, mut coll_balance, log: mut Log) {
             text::require(ctx.caller() == manager, text::stability_manager_only())
             offset(bold, debt, amount)
         }

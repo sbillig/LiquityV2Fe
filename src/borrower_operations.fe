@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage, RawOps, revert_error}
+use std::evm::{Address, Ctx, Call, Log, RawStorage, RawOps, revert_error}
 use super::borrower_open as opening
 use super::borrower_open::Config
 use super::borrower_data as data
@@ -22,15 +22,15 @@ use super::addresses_registry::*
 #[inline(never)]
 fn forward(_ target: Address) -> ! uses (ctx: Ctx, ops: mut RawOps, call: mut Call) {
     let len = ops.calldatasize()
-    let mut args = core::ptr::MemBuffer::with_capacity(len)
+    var args = core::ptr::MemBuffer::with_capacity(len)
     ops.calldatacopy(dest: mut args, dest_offset: 0, src_offset: 0, len: len)
-    args.set_len(len)
-    let mut output = core::ptr::MemBuffer::empty()
+    unsafe { args.set_len(len) }
+    var output = core::ptr::MemBuffer::empty()
     let result = call.raw_delegatecall(addr: target, gas: ctx.gas(), args: args.span(), ret: mut output)
     let size = result.returndata_len()
-    let mut returned = core::ptr::MemBuffer::with_capacity(size)
+    var returned = core::ptr::MemBuffer::with_capacity(size)
     ops.returndatacopy(dest: mut returned, dest_offset: 0, src_offset: 0, len: size)
-    returned.set_len(size)
+    unsafe { returned.set_len(size) }
     if result.success() { ops.return_data(data: returned.span()) }
     else { ops.revert(data: returned.span()) }
 }
@@ -128,11 +128,11 @@ pub contract BorrowerOperations {
         adjustments_module = adjustments
         batches_module = batches
         let active = registry.static(RegistryMsg::GetactivePool {})
-        storage.sstore(slot: 0, value: active.inner)
+        unsafe { storage.sstore(slot: 0, value: active.inner) }
         let default = registry.static(RegistryMsg::GetdefaultPool {})
-        storage.sstore(slot: 1, value: default.inner)
+        unsafe { storage.sstore(slot: 1, value: default.inner) }
         let price = registry.static(RegistryMsg::GetpriceFeed {})
-        storage.sstore(slot: 2, value: price.inner)
+        unsafe { storage.sstore(slot: 2, value: price.inner) }
         log.emit(ActivePoolAddressChanged { value: active })
         log.emit(DefaultPoolAddressChanged { value: default })
         log.emit(PriceFeedAddressChanged { value: price })
@@ -146,15 +146,15 @@ pub contract BorrowerOperations {
         let bcr = registry.static(RegistryMsg::GetBCR {})
         cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
         let manager = registry.static(RegistryMsg::GettroveManager {})
-        storage.sstore(slot: 5, value: manager.inner)
+        unsafe { storage.sstore(slot: 5, value: manager.inner) }
         let gas = registry.static(RegistryMsg::GetgasPoolAddress {})
-        storage.sstore(slot: 6, value: gas.inner)
+        unsafe { storage.sstore(slot: 6, value: gas.inner) }
         let surplus = registry.static(RegistryMsg::GetcollSurplusPool {})
-        storage.sstore(slot: 7, value: surplus.inner)
+        unsafe { storage.sstore(slot: 7, value: surplus.inner) }
         let sorted = registry.static(RegistryMsg::GetsortedTroves {})
-        storage.sstore(slot: 9, value: sorted.inner)
+        unsafe { storage.sstore(slot: 9, value: sorted.inner) }
         let bold = registry.static(RegistryMsg::GetboldToken {})
-        storage.sstore(slot: 8, value: bold.inner)
+        unsafe { storage.sstore(slot: 8, value: bold.inner) }
         log.emit(TroveManagerAddressChanged { value: manager })
         log.emit(GasPoolAddressChanged { value: gas })
         log.emit(CollSurplusPoolAddressChanged { value: surplus })
@@ -187,36 +187,36 @@ pub contract BorrowerOperations {
         HasBeenShutDown -> bool uses (storage: RawStorage) {
             data::is_shutdown()
         }
-        BatchOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) {
+        BatchOf { id } -> Address uses ( storage: mut RawStorage) {
             data::batch_of(id)
         }
-        Delegate { id } -> (Address, u128, u128, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        Delegate { id } -> (Address, u128, u128, u256) uses ( storage: mut RawStorage) {
             let d = data::delegate(id)
             (d.account, d.min_rate, d.max_rate, d.min_period)
         }
-        BatchManager { account } -> (u128, u128, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        BatchManager { account } -> (u128, u128, u256) uses ( storage: mut RawStorage) {
             let b = data::batch_manager(account)
             (b.min_rate, b.max_rate, b.min_period)
         }
-        BatchExists { account } -> bool uses (mem: mut RawMem, storage: RawStorage) {
+        BatchExists { account } -> bool uses ( storage: mut RawStorage) {
             data::batch_manager(account).max_rate > 0
         }
-        AddManagerOf { id } -> Address uses (mem: mut RawMem, storage: RawStorage) {
+        AddManagerOf { id } -> Address uses ( storage: RawStorage) {
             managers::get_add(data::managers(), id)
         }
-        RemoveManagerReceiverOf { id } -> (Address, Address) uses (mem: mut RawMem, storage: RawStorage) {
+        RemoveManagerReceiverOf { id } -> (Address, Address) uses ( storage: RawStorage) {
             managers::get_remove(data::managers(), id)
         }
-        setAddManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        setAddManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             managers::require_borrower(cfg.nft, id)
             managers::set_add(data::managers(), id, manager)
         }
-        setRemoveManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        setRemoveManager { id, manager } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let receiver = cfg.nft.static(TroveNFTMsg::OwnerOf { id })
             managers::require_borrower(cfg.nft, id)
             managers::set_remove(data::managers(), id, manager, receiver)
         }
-        setRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        setRemoveManagerWithReceiver { id, manager, receiver } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             managers::require_borrower(cfg.nft, id)
             managers::set_remove(data::managers(), id, manager, receiver)
         }
@@ -229,25 +229,25 @@ pub contract BorrowerOperations {
         adjustTrove { id, coll, coll_inc, debt, debt_inc, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
         adjustZombieTrove { id, coll, coll_inc, debt, debt_inc, upper, lower, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
         AdjustRate { id, rate, upper, lower, max_fee } uses (adjustments_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(adjustments_module) }
-        Close { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        Close { id } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             life::close(cfg, id)
         }
-        ApplyPending { id, lower, upper } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        ApplyPending { id, lower, upper } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             life::pending(id, lower, upper)
         }
-        Liquidate { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        Liquidate { id } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             if ctx.caller() != data::address_at(5) { revert_error(CallerNotTroveManager {}) }
             life::wipe(id)
         }
-        Claim uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        Claim uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let surplus = data::address_at(7)
             require_code(surplus)
             surplus.call(CollSurplusPoolMsg::ClaimColl { account: ctx.caller() })
         }
-        Shutdown uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        Shutdown uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             life::shutdown(cfg.scr)
         }
-        OracleShutdown uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        OracleShutdown uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             if ctx.caller() != data::address_at(2) { revert_error(CallerNotPriceFeed {}) }
             if !data::is_shutdown() { life::apply_shutdown() }
         }
@@ -258,7 +258,7 @@ pub contract BorrowerOperations {
         RemoveBatch { id, rate, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
         KickBatch { id, upper, lower } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
         SwitchBatch { id, remove_upper, remove_lower, manager, upper, lower, max_fee } uses (batches_module, ctx: Ctx, call: mut Call, ops: mut RawOps) { forward(batches_module) }
-        RemoveDelegate { id } uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        RemoveDelegate { id } uses (cfg, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             managers::require_borrower(cfg.nft, id)
             data::clear_delegate(id)
         }

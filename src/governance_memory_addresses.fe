@@ -18,12 +18,11 @@ impl AbiSpan<Sol> for RegisterAddresses {
     }
 }
 impl Decode<Sol> for RegisterAddresses {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let input = d.input()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
         let end = <Self as AbiSpan<Sol>>::payload_end(input, base: 0, pos: pos)
         let values = <DynArray<Address> as Decode<Sol>>::decode_from(input, pos)
-        let mut i = 0
+        var i = 0
         while i < values.len() { let checked = values.get(i)
             i += 1 }
         Self { values }
@@ -50,20 +49,19 @@ impl AbiSpan<Sol> for InitialAddresses {
     }
 }
 impl Decode<Sol> for InitialAddresses {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let input = d.input()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let pos = d.pos()
         let end = <Self as AbiSpan<Sol>>::payload_end(input, base: 0, pos: pos)
         let values = <DynArray<Address> as Decode<Sol>>::decode_from(input, pos)
-        let mut i = 0
+        var i = 0
         while i < values.len() { let checked = values.get(i)
             i += 1 }
         Self { values }
     }
 }
 impl Encode<Sol> for RegisterAddresses {
-    fn encode(own self, _ p: *u8) { <DynArray<Address> as Encode<Sol>>::encode(self.values, p) }
+    fn encode(own self, _ out: core::abi::AbiFrame) { <DynArray<Address> as Encode<Sol>>::encode(self.values, out) }
 }
 impl Encode<Sol> for InitialAddresses {
-    fn encode(own self, _ p: *u8) { <DynArray<Address> as Encode<Sol>>::encode(self.values, p) }
+    fn encode(own self, _ out: core::abi::AbiFrame) { <DynArray<Address> as Encode<Sol>>::encode(self.values, out) }
 }

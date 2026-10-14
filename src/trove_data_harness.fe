@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Test-only access to shared TroveManager arithmetic; not a protocol manager.
 use std::abi::sol
-use std::evm::{Address, Ctx, RawMem, RawStorage}
+use std::evm::{Address, Ctx, RawStorage}
 use super::trove_data as data
 use super::trove_state as state
 use super::types::{LatestTroveData, LatestBatchData, TroveChange}
@@ -40,33 +40,33 @@ pub msg TroveDataHarnessMsg {
 pub contract TroveDataHarness {
     init() {}
     recv TroveDataHarnessMsg {
-        UpdateBatch { id, manager, change, new_debt, batch_coll, batch_debt, check_ratio } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+        UpdateBatch { id, manager, change, new_debt, batch_coll, batch_debt, check_ratio } uses (ctx: Ctx, storage: mut RawStorage) {
             state::update_batch_shares(id, manager, change, new_debt, batch_coll, batch_debt, check_ratio)
         }
-        RemoveShares { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage) {
+        RemoveShares { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, storage: mut RawStorage) {
             state::remove_batch_shares(id, coll, debt, change, manager, batch_coll, batch_debt)
         }
-        RemoveId { id, len } uses (mem: mut RawMem, storage: mut RawStorage) { state::remove_trove_id(id, len) }
+        RemoveId { id, len } uses ( storage: mut RawStorage) { state::remove_trove_id(id, len) }
 
-        LatestTrove { id } -> LatestTroveData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_trove(id) }
-        LatestBatch { manager } -> LatestBatchData uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) { data::latest_batch(manager) }
-        AnnualRate { id } -> u256 uses (mem: mut RawMem, storage: RawStorage) { data::annual_rate(id) }
-        CurrentICR { id, price } -> u256 uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+        LatestTrove { id } -> LatestTroveData uses (ctx: Ctx, storage: mut RawStorage) { data::latest_trove(id) }
+        LatestBatch { manager } -> LatestBatchData uses (ctx: Ctx, storage: mut RawStorage) { data::latest_batch(manager) }
+        AnnualRate { id } -> u256 uses ( storage: mut RawStorage) { data::annual_rate(id) }
+        CurrentICR { id, price } -> u256 uses (ctx: Ctx, storage: mut RawStorage) {
             let t = data::latest_trove(id)
             math::compute_cr(t.entire_coll, t.entire_debt, price)
         }
-        Status { id } -> u8 uses (mem: mut RawMem, storage: RawStorage) { data::load_trove(id).status }
-        Troves { id } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        Status { id } -> u8 uses ( storage: mut RawStorage) { data::load_trove(id).status }
+        Troves { id } -> (u256, u256, u256, u8, u64, u64, u64, u256, Address, u256) uses ( storage: mut RawStorage) {
             let t = data::load_trove(id)
             (t.debt, t.coll, t.stake, t.status, t.array_index, t.last_debt_update, t.last_rate_adjustment, t.annual_rate, t.batch_manager, t.batch_shares)
         }
-        RewardSnapshots { id } -> (u256, u256) uses (mem: mut RawMem, storage: RawStorage) {
+        RewardSnapshots { id } -> (u256, u256) uses ( storage: mut RawStorage) {
             let slot = data::reward_slot(id)
-            (storage.sload(slot), storage.sload(slot + 1))
+            (unsafe { storage.sload(slot) }, unsafe { storage.sload(slot + 1) })
         }
-        NewStake { coll } -> u256 uses (storage: RawStorage) { data::new_stake(coll) }
-        UpdateStake { id, coll } -> u256 uses (mem: mut RawMem, storage: mut RawStorage) { data::update_stake(id, coll) }
-        UpdateRewards { id } uses (mem: mut RawMem, storage: mut RawStorage) { data::update_rewards(id) }
-        InterestPeriod { last } -> u256 uses (ctx: Ctx, storage: RawStorage) { data::interest_period(last) }
+        NewStake { coll } -> u256 uses (storage: mut RawStorage) { data::new_stake(coll) }
+        UpdateStake { id, coll } -> u256 uses ( storage: mut RawStorage) { data::update_stake(id, coll) }
+        UpdateRewards { id } uses ( storage: mut RawStorage) { data::update_rewards(id) }
+        InterestPeriod { last } -> u256 uses (ctx: Ctx, storage: mut RawStorage) { data::interest_period(last) }
     }
 }

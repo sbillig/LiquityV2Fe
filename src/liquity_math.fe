@@ -12,10 +12,10 @@ pub fn dec_mul(_ x: u256, _ y: u256) -> u256 {
     (x * y + DECIMAL_PRECISION / 2) / DECIMAL_PRECISION
 }
 pub fn dec_pow(_ base: u256, _ minutes: u256) -> u256 {
-    let mut n = min(minutes, 525600000)
+    var n = min(minutes, 525600000)
     if n == 0 { return DECIMAL_PRECISION }
-    let mut y = DECIMAL_PRECISION
-    let mut x = base
+    var y = DECIMAL_PRECISION
+    var x = base
     while n > 1 {
         if n % 2 == 0 {
             x = dec_mul(x, x)

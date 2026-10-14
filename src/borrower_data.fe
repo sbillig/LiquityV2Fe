@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 // BorrowerOperations layout verified with solc 0.8.24 storage-layout output.
-use core::num::IntDowncast
-use std::evm::{Address, RawMem, RawStorage}
+// The delegate/batch maps are read and written as typed entries through one
+// raw projection per function; readers use `storage_at`, writers use the
+// map's mutable `at` projection. Scalar BO slots stay raw words.
+use std::evm::{Address, RawStorage, StorageMap, storage_at}
 use std::evm::packed::keccak_packed
 use super::add_remove_managers::ManagerSlots
 pub const DELEGATES: u256 = 10
@@ -10,14 +12,17 @@ pub const BATCH_MANAGERS: u256 = 12
 pub const MASK128: u256 = 0xffffffffffffffffffffffffffffffff
 pub const MASK160: u256 = 0xffffffffffffffffffffffffffffffffffffffff
 pub fn managers() -> ManagerSlots { ManagerSlots { add: 3, remove: 4 } }
-pub fn map_slot(_ key: u256, _ root: u256) -> u256 uses (mem: mut RawMem) { keccak_packed((key, root)) }
-pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) { Address { inner: storage.sload(slot) & MASK160 } }
-pub fn is_shutdown() -> bool uses (storage: RawStorage) { ((storage.sload(9) >> 160) & 255) != 0 }
-pub fn shutdown() uses (storage: mut RawStorage) { storage.sstore(slot: 9, value: (storage.sload(9) & ~(255 << 160)) | (1 << 160)) }
-pub fn batch_of(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) { address_at(map_slot(id, BATCH_OF)) }
-pub fn set_batch(_ id: u256, _ manager: Address) uses (mem: mut RawMem, storage: mut RawStorage) {
-    let slot = map_slot(id, BATCH_OF)
-    storage.sstore(slot: slot, value: (storage.sload(slot) & ~MASK160) | manager.inner)
+pub fn map_slot(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
+pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(slot) } & MASK160 } }
+pub fn is_shutdown() -> bool uses (storage: RawStorage) { ((unsafe { storage.sload(9) } >> 160) & 255) != 0 }
+pub fn shutdown() uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 9, value: (unsafe { storage.sload(9) } & ~(255 << 160)) | (1 << 160)) } }
+pub fn batch_of(_ id: u256) -> Address uses (storage: RawStorage) {
+    let batches = unsafe { ref storage_at<StorageMap<u256, u256>>(BATCH_OF) }
+    Address { inner: batches[id] & MASK160 }
+}
+pub fn set_batch(_ id: u256, _ manager: Address) uses (storage: mut RawStorage) {
+    let batches = unsafe { StorageMap<u256, u256>::at(BATCH_OF) }
+    batches[id] = (batches[id] & ~MASK160) | manager.inner
 }
 pub struct IndividualDelegate {
     pub account: Address, pub min_rate: u128, pub max_rate: u128, pub min_period: u256,
@@ -27,27 +32,39 @@ pub struct BatchManager {
     pub min_rate: u128, pub max_rate: u128, pub min_period: u256,
 }
 impl Copy for BatchManager {}
-pub fn delegate(_ id: u256) -> IndividualDelegate uses (mem: mut RawMem, storage: RawStorage) {
-    let slot = map_slot(id, DELEGATES)
-    let packed = storage.sload(slot + 1)
-    IndividualDelegate { account: address_at(slot), min_rate: packed.downcast_truncate(), max_rate: (packed >> 128).downcast_truncate(), min_period: storage.sload(slot + 2) }
+
+// `account_word` keeps the Solidity padding above the address; the rate pair
+// packs into one word as typed `u128` fields.
+struct DelegateEntry {
+    pub account_word: u256, pub min_rate: u128, pub max_rate: u128, pub min_period: u256,
 }
-pub fn set_delegate(_ id: u256, _ value: IndividualDelegate) uses (mem: mut RawMem, storage: mut RawStorage) {
-    let slot = map_slot(id, DELEGATES)
-    storage.sstore(slot: slot, value: (storage.sload(slot) & ~MASK160) | value.account.inner)
-    storage.sstore(slot: slot + 1, value: (value.min_rate as u256) | ((value.max_rate as u256) << 128))
-    storage.sstore(slot: slot + 2, value: value.min_period)
+impl Copy for DelegateEntry {}
+struct BatchManagerEntry {
+    pub min_rate: u128, pub max_rate: u128, pub min_period: u256,
 }
-pub fn clear_delegate(_ id: u256) uses (mem: mut RawMem, storage: mut RawStorage) {
+impl Copy for BatchManagerEntry {}
+
+pub fn delegate(_ id: u256) -> IndividualDelegate uses (storage: RawStorage) {
+    let delegates = unsafe { ref storage_at<StorageMap<u256, DelegateEntry>>(DELEGATES) }
+    let e = delegates[id]
+    IndividualDelegate { account: Address { inner: e.account_word & MASK160 }, min_rate: e.min_rate, max_rate: e.max_rate, min_period: e.min_period }
+}
+pub fn set_delegate(_ id: u256, _ value: IndividualDelegate) uses (storage: mut RawStorage) {
+    let delegates = unsafe { StorageMap<u256, DelegateEntry>::at(DELEGATES) }
+    delegates[id].account_word = (delegates[id].account_word & ~MASK160) | value.account.inner
+    delegates[id].min_rate = value.min_rate
+    delegates[id].max_rate = value.max_rate
+    delegates[id].min_period = value.min_period
+}
+pub fn clear_delegate(_ id: u256) uses (storage: mut RawStorage) {
     set_delegate(id, IndividualDelegate { account: Address::zero(), min_rate: 0, max_rate: 0, min_period: 0 })
 }
-pub fn batch_manager(_ manager: Address) -> BatchManager uses (mem: mut RawMem, storage: RawStorage) {
-    let slot = map_slot(manager.inner, BATCH_MANAGERS)
-    let packed = storage.sload(slot)
-    BatchManager { min_rate: packed.downcast_truncate(), max_rate: (packed >> 128).downcast_truncate(), min_period: storage.sload(slot + 1) }
+pub fn batch_manager(_ manager: Address) -> BatchManager uses (storage: RawStorage) {
+    let managers = unsafe { ref storage_at<StorageMap<Address, BatchManagerEntry>>(BATCH_MANAGERS) }
+    let e = managers[manager]
+    BatchManager { min_rate: e.min_rate, max_rate: e.max_rate, min_period: e.min_period }
 }
-pub fn set_batch_manager(_ manager: Address, _ value: BatchManager) uses (mem: mut RawMem, storage: mut RawStorage) {
-    let slot = map_slot(manager.inner, BATCH_MANAGERS)
-    storage.sstore(slot: slot, value: (value.min_rate as u256) | ((value.max_rate as u256) << 128))
-    storage.sstore(slot: slot + 1, value: value.min_period)
+pub fn set_batch_manager(_ manager: Address, _ value: BatchManager) uses (storage: mut RawStorage) {
+    let managers = unsafe { StorageMap<Address, BatchManagerEntry>::at(BATCH_MANAGERS) }
+    managers[manager] = BatchManagerEntry { min_rate: value.min_rate, max_rate: value.max_rate, min_period: value.min_period }
 }

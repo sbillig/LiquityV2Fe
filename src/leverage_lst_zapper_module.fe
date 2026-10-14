@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, Bytes}
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawOps, RawStorage, encode_abi_payload}
+use std::evm::{Address, Ctx, Call, Log, RawOps, RawStorage, encode_abi_payload}
 use std::evm::packed::keccak_packed
 use super::zapper_calls::*
 use super::leverage_errors as leverage_error
@@ -18,8 +18,8 @@ use super::leverage_lst_zapper::LeverageLSTZapperMsg
 fn balances(_ cfg: Config, _ token: Address, _ receiver: Address) -> InitialBalances uses (ctx: Ctx, call: mut Call) {
     snapshot([token, cfg.bold, Address::zero(), Address::zero()], receiver)
 }
-fn send_eth(_ receiver: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
-    let mut out = core::ptr::MemBuffer::empty()
+fn send_eth(_ receiver: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
+    var out = core::ptr::MemBuffer::empty()
     let result = call.raw_call(addr: receiver, gas: ctx.gas(), value: amount, args: core::ptr::MemSpan::empty(), ret: mut out)
     require(result.success(), error::send_failed())
 }
@@ -31,7 +31,7 @@ fn deposit(_ weth: Address, _ amount: u256) uses (ctx: Ctx, call: mut Call) {
     call.call(addr: weth, gas: ctx.gas(), value: amount, message: ZapperCalls::Deposit {})
 }
 fn pre(_ cfg: Config, _ token: Address, _ id: u256, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool) -> (Address, InitialBalances)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
+uses (ctx: Ctx, call: mut Call, storage: RawStorage) {
     let receiver = check_adjust(cfg, id, coll, coll_increase, debt_increase)
     let initial = balances(cfg, token, ctx.caller())
     if coll_increase { safe_transfer_from(token, ctx.caller(), ctx.address(), coll) }
@@ -39,7 +39,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: RawStorage) {
     (receiver, initial)
 }
 fn post(_ cfg: Config, _ token: Address, _ coll: u256, _ coll_increase: bool, _ debt: u256, _ debt_increase: bool, _ receiver: Address, _ initial: InitialBalances)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     if !coll_increase { safe_transfer(token, receiver, coll) }
     if debt_increase { let ignored = cfg.bold.call(TokenMsg::Transfer { receiver, amount: debt }) }
     return_leftovers(initial)
@@ -53,7 +53,7 @@ pub contract LeverageLSTZapperLeverage {
     }
     recv {
         #[payable]
-        LeverageLSTZapperMsg::LeveragedOpen { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::LeveragedOpen { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             // Solidity memory-struct decoding validates all addresses before executing the body.
             let owner = checked_address(p.owner)
             let batch = checked_address(p.batch)
@@ -72,7 +72,7 @@ pub contract LeverageLSTZapperLeverage {
             cfg.flash.call(ZapperCalls::Flash { token: coll_token, amount: p.flash, operation: 0, data: Bytes::from_payload(source: encoded.span()) })
             return_leftovers(initial)
         }
-        LeverageLSTZapperMsg::FlashOpen { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::FlashOpen { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             require(ctx.caller() == cfg.flash, leverage_error::flash_caller())
             let coll = p.coll + effective
             let this = ctx.address()
@@ -87,7 +87,7 @@ pub contract LeverageLSTZapperLeverage {
             cfg.exchange.call(ZapperCalls::SwapFrom { amount: p.bold, minimum: p.flash })
             safe_transfer(coll_token, cfg.flash, p.flash)
         }
-        LeverageLSTZapperMsg::LeverUp { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::LeverUp { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let receiver = remove_receiver(cfg, p.0)
             let initial = balances(cfg, coll_token, receiver)
             let encoded = encode_abi_payload(p)
@@ -95,7 +95,7 @@ pub contract LeverageLSTZapperLeverage {
             cfg.flash.call(ZapperCalls::Flash { token: coll_token, amount: p.1, operation: 2, data: Bytes::from_payload(source: encoded.span()) })
             return_leftovers(initial)
         }
-        LeverageLSTZapperMsg::LeverDown { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::LeverDown { p } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let receiver = remove_receiver(cfg, p.0)
             let initial = balances(cfg, coll_token, receiver)
             let encoded = encode_abi_payload(p)
@@ -103,7 +103,7 @@ pub contract LeverageLSTZapperLeverage {
             cfg.flash.call(ZapperCalls::Flash { token: coll_token, amount: p.1, operation: 3, data: Bytes::from_payload(source: encoded.span()) })
             return_leftovers(initial)
         }
-        LeverageLSTZapperMsg::FlashUp { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::FlashUp { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             require(ctx.caller() == cfg.flash, leverage_error::flash_caller())
             require_code(cfg.bo)
             cfg.bo.call(ZapperCalls::Adjust { id: p.0, coll: effective, coll_increase: true, debt: p.2, debt_increase: true, fee: p.3 })
@@ -111,7 +111,7 @@ pub contract LeverageLSTZapperLeverage {
             cfg.exchange.call(ZapperCalls::SwapFrom { amount: p.2, minimum: p.1 })
             safe_transfer(coll_token, cfg.flash, p.1)
         }
-        LeverageLSTZapperMsg::FlashDown { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+        LeverageLSTZapperMsg::FlashDown { p, effective } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             require(ctx.caller() == cfg.flash, leverage_error::flash_caller())
             let received = cfg.exchange.call(ZapperCalls::Swap { amount: effective, minimum: p.2 })
             require_code(cfg.bo)

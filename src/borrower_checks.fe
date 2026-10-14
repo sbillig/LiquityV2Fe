@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-use std::evm::{Address, Ctx, Call, RawMem, RawStorage, revert_error}
+use std::evm::{Address, Ctx, Call, RawStorage, revert_error}
 use super::borrower_errors::*
 use super::borrower_data as data
 use super::constants::*
@@ -60,18 +60,18 @@ pub fn open(_ manager: Address, _ id: u256) uses (call: mut Call) {
 pub fn zombie(_ manager: Address, _ id: u256) uses (call: mut Call) {
     if manager.static(TroveManagerMsg::Status { id }) != 4 { revert_error(TroveNotZombie {}) }
 }
-pub fn valid_batch(_ manager: Address) uses (mem: mut RawMem, storage: RawStorage) {
+pub fn valid_batch(_ manager: Address) uses ( storage: mut RawStorage) {
     if data::batch_manager(manager).max_rate == 0 { revert_error(InvalidInterestBatchManager {}) }
 }
-pub fn not_in_batch(_ id: u256) uses (mem: mut RawMem, storage: RawStorage) {
+pub fn not_in_batch(_ id: u256) uses ( storage: mut RawStorage) {
     if data::batch_of(id) != Address::zero() { revert_error(TroveInBatch {}) }
 }
-pub fn in_batch(_ id: u256) -> Address uses (mem: mut RawMem, storage: RawStorage) {
+pub fn in_batch(_ id: u256) -> Address uses ( storage: mut RawStorage) {
     let manager = data::batch_of(id)
     if manager == Address::zero() { revert_error(TroveNotInBatch {}) }
     manager
 }
-pub fn delegate_adjustment(_ id: u256, _ last_adjustment: u256, _ new_rate: u256) uses (ctx: Ctx, mem: mut RawMem, storage: RawStorage) {
+pub fn delegate_adjustment(_ id: u256, _ last_adjustment: u256, _ new_rate: u256) uses (ctx: Ctx, storage: mut RawStorage) {
     let delegate = data::delegate(id)
     if delegate.account == ctx.caller() {
         range(new_rate, delegate.min_rate as u256, delegate.max_rate as u256)

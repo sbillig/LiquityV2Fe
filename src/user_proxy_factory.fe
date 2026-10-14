@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::sol
-use std::evm::{Address, Ctx, Create, RawMem, Log, revert_error}
+use std::evm::{Address, Ctx, Create, Log, revert_error}
 use std::evm::packed::keccak_packed
 use super::user_proxy::UserProxy
 #[event]
@@ -20,22 +20,22 @@ pub msg UserProxyFactoryMsg {
     #[selector = sol("deployUserProxy()")]
     Deploy -> Address,
 }
-pub fn clone_code(_ implementation: Address) -> core::ptr::MemSpan uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: p, value: (implementation.inner << 96 >> 232) | 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: (implementation.inner << 120) | 0x5af43d82803e903d91602b57fd5bf3)
-    core::ptr::MemSpan::from_raw_parts(ptr: core::ptr::offset_bytes(p, 9), len: 55)
+pub fn clone_code(_ implementation: Address) -> core::ptr::MemBuffer {
+    var out = super::bytes_builder::BytesBuilder::zeroed(64)
+    out.write_word(at: 0, value: (implementation.inner << 96 >> 232) | 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000)
+    out.write_word(at: 32, value: (implementation.inner << 120) | 0x5af43d82803e903d91602b57fd5bf3)
+    core::ptr::MemBuffer::from_span(out.span().slice(offset: 9, len: 55))
 }
-pub fn derive(_ implementation: Address, _ user: Address) -> Address uses (ctx: Ctx, mem: mut RawMem) {
+pub fn derive(_ implementation: Address, _ user: Address) -> Address uses (ctx: Ctx) {
     let code = clone_code(implementation)
-    let code_hash = std::evm::crypto::keccak256(code)
+    let code_hash = std::evm::crypto::keccak256(code.span())
     let prefix: u8 = 255
     let digest = keccak_packed((prefix, ctx.address(), user.inner, code_hash))
     Address { inner: digest & ((1 << 160) - 1) }
 }
-pub fn deploy(_ implementation: Address) -> Address uses (ctx: Ctx, mem: mut RawMem, create: mut Create, log: mut Log) {
+pub fn deploy(_ implementation: Address) -> Address uses (ctx: Ctx, create: mut Create, log: mut Log) {
     let code = clone_code(implementation)
-    let proxy = create.create2_raw(value: 0, init_code: code, salt: ctx.caller().inner)
+    let proxy = create.create2_raw(value: 0, init_code: code.span(), salt: ctx.caller().inner)
     if proxy == Address::zero() { revert_error(ERC1167FailedCreateClone {}) }
     log.emit(DeployUserProxy { user: ctx.caller(), user_proxy: proxy })
     proxy
@@ -47,7 +47,7 @@ pub contract UserProxyFactory {
     }
     recv UserProxyFactoryMsg {
         Implementation -> Address uses (implementation) { implementation }
-        Derive { user } -> Address uses (implementation, ctx: Ctx, mem: mut RawMem) { derive(implementation, user) }
-        Deploy -> Address uses (implementation, ctx: Ctx, mem: mut RawMem, create: mut Create, log: mut Log) { deploy(implementation) }
+        Derive { user } -> Address uses (implementation, ctx: Ctx) { derive(implementation, user) }
+        Deploy -> Address uses (implementation, ctx: Ctx, create: mut Create, log: mut Log) { deploy(implementation) }
     }
 }

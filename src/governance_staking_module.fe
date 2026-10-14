@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
-use std::evm::{Address, Ctx, Call, Create, RawMem, RawStorage, Log}
+use std::evm::{Address, Ctx, Call, Create, RawStorage, Log}
 use super::governance_staking_harness::StakingMsg
 use super::governance_staking as staking
 use super::governance_module_config::{self as config, ConfigCalls}
 pub contract GovernanceStakingModule {
     recv {
-        StakingMsg::Deposit { amount } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::Deposit { amount } uses ( ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::deposit(implementation, amount, false, ctx.caller()) }
-        StakingMsg::DepositTo { amount, send, recipient } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::DepositTo { amount, send, recipient } uses ( ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::deposit(implementation, amount, send, recipient) }
-        StakingMsg::DepositPermit { amount, p } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::DepositPermit { amount, p } uses ( ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::deposit_permit(implementation, amount, p, false, ctx.caller()) }
-        StakingMsg::DepositPermitTo { amount, p, send, recipient } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::DepositPermitTo { amount, p, send, recipient } uses ( ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::deposit_permit(implementation, amount, p, send, recipient) }
-        StakingMsg::Withdraw { amount } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::Withdraw { amount } uses ( ctx: Ctx, storage: mut RawStorage, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::withdraw(implementation, amount, true, ctx.caller()) }
-        StakingMsg::WithdrawTo { amount, send, recipient } uses ( ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::WithdrawTo { amount, send, recipient } uses ( ctx: Ctx, storage: mut RawStorage, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::withdraw(implementation, amount, send, recipient) }
-        StakingMsg::Rewards { recipient } -> (u256, u256) uses ( ctx: Ctx, mem: mut RawMem, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
+        StakingMsg::Rewards { recipient } -> (u256, u256) uses ( ctx: Ctx, log: mut Log, call: mut Call) { let implementation = ctx.address().static(ConfigCalls::Implementation {})
             staking::rewards(implementation, recipient) }
     }
 }

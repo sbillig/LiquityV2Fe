@@ -1,5 +1,5 @@
 use std::abi::sol
-use std::evm::{RawMem, RawStorage}
+use std::evm::{RawStorage}
 use super::governance_list as list
 pub msg ListMsg {
     #[selector = sol("item(uint256)")]
@@ -13,9 +13,9 @@ pub msg ListMsg {
 }
 pub contract GovernanceListHarness {
     recv ListMsg {
-        Item { id } -> (u256, u256, u256, u256) uses (mem: mut RawMem, storage: RawStorage) { list::item(0, id) }
-        Ends -> (u256, u256) uses (mem: mut RawMem, storage: RawStorage) { (list::head(0), list::tail(0)) }
-        Contains { id } -> bool uses (mem: mut RawMem, storage: RawStorage) { list::contains(0, id) }
-        Insert { id, lqty, offset, after } uses (mem: mut RawMem, storage: mut RawStorage) { list::insert(0, id, lqty, offset, after) }
+        Item { id } -> (u256, u256, u256, u256) uses ( storage: RawStorage) { list::item(0, id) }
+        Ends -> (u256, u256) uses ( storage: RawStorage) { (list::head(0), list::tail(0)) }
+        Contains { id } -> bool uses ( storage: RawStorage) { list::contains(0, id) }
+        Insert { id, lqty, offset, after } uses ( storage: mut RawStorage) { list::insert(0, id, lqty, offset, after) }
     }
 }

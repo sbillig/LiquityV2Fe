@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, Uint24, Uint160}
-use std::evm::{Address, Call, Ctx, RawMem}
+use std::evm::{Address, Call, Ctx}
 use super::token_calls::{TokenMsg, safe_transfer_from}
 use super::leftovers_sweep::{snapshot, return_leftovers}
 use super::curve_exchange::CurveCalls
@@ -44,14 +44,14 @@ pub contract UniV3Exchange {
         UniExchangeMsg::Bold {} -> Address uses (bold) { bold }
         UniExchangeMsg::Router {} -> Address uses (router) { router }
         UniExchangeMsg::Fee {} -> Uint24 uses (fee) { fee }
-        UniExchangeMsg::FromBold { amount, minimum } uses (coll, bold, fee, router, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        UniExchangeMsg::FromBold { amount, minimum } uses (coll, bold, fee, router, ctx: Ctx, call: mut Call) {
             let initial = snapshot([coll, bold, Address::zero(), Address::zero()], ctx.caller())
             let ignored_transfer = bold.call(TokenMsg::TransferFrom { owner: ctx.caller(), receiver: ctx.address(), amount })
             let ignored_approval = bold.call(CurveCalls::Approve { spender: router, amount })
             let ignored_swap = router.call(UniCalls::Output { p: (bold, coll, fee, ctx.caller(), ctx.timestamp(), minimum, amount, Uint160 { val: 0 }) })
             return_leftovers(initial)
         }
-        UniExchangeMsg::ToBold { amount, minimum } -> u256 uses (coll, bold, fee, router, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+        UniExchangeMsg::ToBold { amount, minimum } -> u256 uses (coll, bold, fee, router, ctx: Ctx, call: mut Call) {
             let initial = snapshot([coll, bold, Address::zero(), Address::zero()], ctx.caller())
             safe_transfer_from(coll, ctx.caller(), ctx.address(), amount)
             let ignored_approval = coll.call(CurveCalls::Approve { spender: router, amount })

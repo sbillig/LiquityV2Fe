@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use core::num::IntDowncast
 use std::abi::{sol, Bytes, Bytes32}
-use std::evm::{Address, Ctx, Call, Log, RawMem, revert_error}
+use std::evm::{Address, Ctx, Call, Log, revert_error}
 use super::bribe_initiative::GovernanceCalls
 use super::curve_gauge_rewards::GaugeCalls
 use super::leftovers_sweep::BalanceMsg
@@ -58,19 +58,19 @@ pub msg MerklMsg {
     #[selector = sol("claimForInitiative()")]
     Claim,
 }
-pub fn campaign_data(_ cfg: Config) -> Bytes uses (mem: mut RawMem) {
+pub fn campaign_data(_ cfg: Config) -> Bytes {
     let p = core::ptr::alloc_bytes(640)
     let words: [u256; 20] = [416, 0, cfg.fees as u256, cfg.weight0 as u256, cfg.weight1 as u256, 480, 512, 576, 0, 0, 0, 0, 608, 32, cfg.pool.val, 0, 1, SAFE.inner, 0, 0]
-    let mut i: usize = 0
+    var i: usize = 0
     while i < 20 {
-        mem.mstore(addr: core::ptr::offset_bytes(p, (i as u256) * 32), value: words[i])
+        unsafe { core::abi::store_word(ptr: core::ptr::offset_bytes(p, (i as u256) * 32), value: words[i]) }
         i += 1
     }
-    Bytes::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 640))
+    Bytes::from_payload(source: unsafe { core::ptr::MemSpan::from_raw_parts(ptr: p, len: 640) })
 }
 pub contract UniV4MerklRewards {
     cfg: Config,
-    init(governance: Address, bold: Address, threshold: u256, pool: Bytes32, fees: u32, weight0: u32, weight1: u32) uses (mut cfg, ctx: Ctx, call: mut Call, mem: mut RawMem) {
+    init(governance: Address, bold: Address, threshold: u256, pool: Bytes32, fees: u32, weight0: u32, weight1: u32) uses (mut cfg, ctx: Ctx, call: mut Call) {
         require(fees + weight0 + weight1 == 10000, error::weights())
         let start = governance.static(GovernanceCalls::Start {})
         let duration = governance.static(GovernanceCalls::Duration {})
@@ -89,12 +89,12 @@ pub contract UniV4MerklRewards {
         Fees -> u32 uses (cfg) { cfg.fees }
         Weight0 -> u32 uses (cfg) { cfg.weight0 }
         Weight1 -> u32 uses (cfg) { cfg.weight1 }
-        Data -> Bytes uses (cfg, mem: mut RawMem) { campaign_data(cfg) }
+        Data -> Bytes uses (cfg) { campaign_data(cfg) }
         Register { epoch } {}
         Unregister { epoch } {}
         Allocate { epoch, user, user_state, allocation, initiative } {}
-        OnClaim { epoch, amount } uses (cfg, ctx: Ctx, mem: mut RawMem) { require(ctx.caller() == cfg.governance, error::sender()) }
-        Claim uses (cfg, ctx: Ctx, call: mut Call, mem: mut RawMem, log: mut Log) {
+        OnClaim { epoch, amount } uses (cfg, ctx: Ctx) { require(ctx.caller() == cfg.governance, error::sender()) }
+        Claim uses (cfg, ctx: Ctx, call: mut Call, log: mut Log) {
             let claimable = cfg.governance.call(MerklCalls::Claim { initiative: ctx.address() })
             let amount = cfg.bold.static(BalanceMsg::Balance { account: ctx.address() })
             if amount < claimable { revert_error(std::evm::panic::Panic::from(1)) }

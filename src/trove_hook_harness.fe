@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Temporary test harness for permissioned manager hooks.
 use std::abi::sol
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use super::trove_hooks as hooks
 use super::types::TroveChange
 pub msg TroveHookMsg {
@@ -34,49 +34,49 @@ pub msg TroveHookMsg {
 }
 pub contract TroveHookHarness {
     init(bo: Address, default_pool: Address, nft: Address, sorted: Address) uses (storage: mut RawStorage) {
-        storage.sstore(slot: 4, value: bo.inner)
-        storage.sstore(slot: 1, value: default_pool.inner)
-        storage.sstore(slot: 3, value: nft.inner)
-        storage.sstore(slot: 9, value: sorted.inner)
+        unsafe { storage.sstore(slot: 4, value: bo.inner) }
+        unsafe { storage.sstore(slot: 1, value: default_pool.inner) }
+        unsafe { storage.sstore(slot: 3, value: nft.inner) }
+        unsafe { storage.sstore(slot: 9, value: sorted.inner) }
     }
     recv TroveHookMsg {
-        SetBatch { params } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        SetBatch { params } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::set_batch(params.0, params.1, params.2, params.3, params.4, params.5, params.6)
         }
-        HookOnOpenTrove { owner, id, change, rate } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnOpenTrove { owner, id, change, rate } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::open(owner, id, change, rate)
         }
-        HookOnOpenTroveAndJoinBatch { owner, id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnOpenTroveAndJoinBatch { owner, id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::open_batch(owner, id, change, manager, batch_coll, batch_debt)
         }
-        HookSetTroveStatusToActive { id } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookSetTroveStatusToActive { id } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::activate(id)
         }
-        HookOnAdjustTroveInterestRate { id, coll, debt, rate, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnAdjustTroveInterestRate { id, coll, debt, rate, change } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::adjust_rate(id, coll, debt, rate, change)
         }
-        HookOnAdjustTrove { id, coll, debt, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnAdjustTrove { id, coll, debt, change } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::adjust(id, coll, debt, change)
         }
-        HookOnCloseTrove { id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnCloseTrove { id, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::on_close(id, change, manager, batch_coll, batch_debt)
         }
-        HookOnAdjustTroveInsideBatch { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnAdjustTroveInsideBatch { id, coll, debt, change, manager, batch_coll, batch_debt } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::adjust_batch(id, coll, debt, change, manager, batch_coll, batch_debt)
         }
-        HookOnApplyTroveInterest { id, coll, debt, manager, batch_coll, batch_debt, change } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnApplyTroveInterest { id, coll, debt, manager, batch_coll, batch_debt, change } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::apply_interest(id, coll, debt, manager, batch_coll, batch_debt, change)
         }
-        HookOnRegisterBatchManager { manager, rate, fee } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnRegisterBatchManager { manager, rate, fee } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::register_batch(manager, rate, fee)
         }
-        HookOnLowerBatchManagerAnnualFee { manager, coll, debt, fee } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnLowerBatchManagerAnnualFee { manager, coll, debt, fee } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::lower_fee(manager, coll, debt, fee)
         }
-        HookOnSetBatchManagerAnnualInterestRate { manager, coll, debt, rate, upfront } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnSetBatchManagerAnnualInterestRate { manager, coll, debt, rate, upfront } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::set_batch_rate(manager, coll, debt, rate, upfront)
         }
-        HookOnRemoveFromBatch { id, coll, debt, change, manager, batch_coll, batch_debt, rate } uses (ctx: Ctx, mem: mut RawMem, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
+        HookOnRemoveFromBatch { id, coll, debt, change, manager, batch_coll, batch_debt, rate } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()
             hooks::remove_batch(id, coll, debt, change, manager, batch_coll, batch_debt, rate)
         }
     }

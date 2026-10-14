@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use core::abi::{ByteInput, Decode}
 use std::abi::{sol, Sol, Bytes, DynArray, DynArrayAccess, MemVec}
-use std::evm::{Address, Ctx, Call, RawMem, RawStorage, encode_abi_payload}
+use std::evm::{Address, Ctx, Call, RawStorage, encode_abi_payload}
 use super::zapper_calls::{LeveragedOpenParams, CloseParams, checked_address}
 use super::token_calls::safe_transfer
 use super::revert_texts::require
@@ -29,9 +29,9 @@ pub msg BalancerMsg {
     #[selector = sol("receiveFlashLoan(address[],uint256[],uint256[],bytes)")]
     Receive { tokens: DynArray<Address>, amounts: DynArray<u256>, fees: DynArray<u256>, data: Bytes },
 }
-fn receiver() -> Address uses (storage: RawStorage) { Address { inner: storage.sload(0) & ((1 << 160) - 1) } }
+fn receiver() -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(0) } & ((1 << 160) - 1) } }
 fn set_receiver(_ value: Address) uses (storage: mut RawStorage) {
-    storage.sstore(slot: 0, value: (storage.sload(0) >> 160 << 160) | value.inner)
+    unsafe { storage.sstore(slot: 0, value: (unsafe { storage.sload(0) } >> 160 << 160) | value.inner) }
 }
 fn require_code(_ target: Address) uses (ctx: Ctx) {
     if ctx.extcodesize(target) == 0 { std::evm::revert(()) }
@@ -74,16 +74,16 @@ pub contract BalancerFlashLoan {
         Receiver -> Address uses (storage: RawStorage) { receiver() }
         Make { token, amount, operation, data } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
             if operation > 3 { std::evm::revert(()) }
-            let mut tokens: MemVec<Address> = MemVec::zeroed(1)
+            var tokens: MemVec<Address> = MemVec::zeroed(1)
             tokens.set(index: 0, value: token)
-            let mut amounts: MemVec<u256> = MemVec::zeroed(1)
+            var amounts: MemVec<u256> = MemVec::zeroed(1)
             amounts.set(index: 0, value: amount)
             let user_data = encode_data(operation, data)
             set_receiver(ctx.caller())
             require_code(VAULT)
             VAULT.call(VaultCalls::Flash { receiver: ctx.address(), tokens: tokens.to_dyn_array(), amounts: amounts.to_dyn_array(), data: user_data })
         }
-        Receive { tokens, amounts, fees, data } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, mem: mut RawMem) {
+        Receive { tokens, amounts, fees, data } uses (ctx: Ctx, call: mut Call, storage: mut RawStorage) {
             require(ctx.caller() == VAULT, error::vault())
             let cached = receiver()
             require(cached != Address::zero(), error::initiated())

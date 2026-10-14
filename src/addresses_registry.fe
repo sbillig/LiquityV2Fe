@@ -2,7 +2,7 @@
 // Port of AddressesRegistry.sol and its Ownable base.
 use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
 use std::abi::{Sol, sol, DynString}
-use std::evm::{Address, Ctx, Log, RawMem, revert_error}
+use std::evm::{Address, Ctx, Log, revert_error}
 
 pub struct AddressVars {
     pub collToken: Address,
@@ -26,25 +26,25 @@ pub struct AddressVars {
 }
 impl Copy for AddressVars {}
 impl Encode<Sol> for AddressVars {
-    fn encode(own self, _ ptr: *u8) {
-        <Address as Encode<Sol>>::encode(self.collToken, core::ptr::offset_bytes(ptr, 0))
-        <Address as Encode<Sol>>::encode(self.borrowerOperations, core::ptr::offset_bytes(ptr, 32))
-        <Address as Encode<Sol>>::encode(self.troveManager, core::ptr::offset_bytes(ptr, 64))
-        <Address as Encode<Sol>>::encode(self.troveNFT, core::ptr::offset_bytes(ptr, 96))
-        <Address as Encode<Sol>>::encode(self.metadataNFT, core::ptr::offset_bytes(ptr, 128))
-        <Address as Encode<Sol>>::encode(self.stabilityPool, core::ptr::offset_bytes(ptr, 160))
-        <Address as Encode<Sol>>::encode(self.priceFeed, core::ptr::offset_bytes(ptr, 192))
-        <Address as Encode<Sol>>::encode(self.activePool, core::ptr::offset_bytes(ptr, 224))
-        <Address as Encode<Sol>>::encode(self.defaultPool, core::ptr::offset_bytes(ptr, 256))
-        <Address as Encode<Sol>>::encode(self.gasPoolAddress, core::ptr::offset_bytes(ptr, 288))
-        <Address as Encode<Sol>>::encode(self.collSurplusPool, core::ptr::offset_bytes(ptr, 320))
-        <Address as Encode<Sol>>::encode(self.sortedTroves, core::ptr::offset_bytes(ptr, 352))
-        <Address as Encode<Sol>>::encode(self.interestRouter, core::ptr::offset_bytes(ptr, 384))
-        <Address as Encode<Sol>>::encode(self.hintHelpers, core::ptr::offset_bytes(ptr, 416))
-        <Address as Encode<Sol>>::encode(self.multiTroveGetter, core::ptr::offset_bytes(ptr, 448))
-        <Address as Encode<Sol>>::encode(self.collateralRegistry, core::ptr::offset_bytes(ptr, 480))
-        <Address as Encode<Sol>>::encode(self.boldToken, core::ptr::offset_bytes(ptr, 512))
-        <Address as Encode<Sol>>::encode(self.WETH, core::ptr::offset_bytes(ptr, 544))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <Address as Encode<Sol>>::encode(self.collToken, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.borrowerOperations, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.troveManager, out.slice(offset: 64, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.troveNFT, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.metadataNFT, out.slice(offset: 128, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.stabilityPool, out.slice(offset: 160, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.priceFeed, out.slice(offset: 192, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.activePool, out.slice(offset: 224, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.defaultPool, out.slice(offset: 256, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.gasPoolAddress, out.slice(offset: 288, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.collSurplusPool, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.sortedTroves, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.interestRouter, out.slice(offset: 384, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.hintHelpers, out.slice(offset: 416, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.multiTroveGetter, out.slice(offset: 448, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.collateralRegistry, out.slice(offset: 480, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.boldToken, out.slice(offset: 512, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
+        <Address as Encode<Sol>>::encode(self.WETH, out.slice(offset: 544, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 
@@ -56,59 +56,59 @@ impl AbiSpan<Sol> for AddressVars {
     fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 576 }
 }
 impl Decode<Sol> for AddressVars {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let collToken_word = d.read_word()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let collToken_word = d.read_word(input)
         if collToken_word >> 160 != 0 { std::evm::revert(()) }
         let collToken = Address { inner: collToken_word }
-        let borrowerOperations_word = d.read_word()
+        let borrowerOperations_word = d.read_word(input)
         if borrowerOperations_word >> 160 != 0 { std::evm::revert(()) }
         let borrowerOperations = Address { inner: borrowerOperations_word }
-        let troveManager_word = d.read_word()
+        let troveManager_word = d.read_word(input)
         if troveManager_word >> 160 != 0 { std::evm::revert(()) }
         let troveManager = Address { inner: troveManager_word }
-        let troveNFT_word = d.read_word()
+        let troveNFT_word = d.read_word(input)
         if troveNFT_word >> 160 != 0 { std::evm::revert(()) }
         let troveNFT = Address { inner: troveNFT_word }
-        let metadataNFT_word = d.read_word()
+        let metadataNFT_word = d.read_word(input)
         if metadataNFT_word >> 160 != 0 { std::evm::revert(()) }
         let metadataNFT = Address { inner: metadataNFT_word }
-        let stabilityPool_word = d.read_word()
+        let stabilityPool_word = d.read_word(input)
         if stabilityPool_word >> 160 != 0 { std::evm::revert(()) }
         let stabilityPool = Address { inner: stabilityPool_word }
-        let priceFeed_word = d.read_word()
+        let priceFeed_word = d.read_word(input)
         if priceFeed_word >> 160 != 0 { std::evm::revert(()) }
         let priceFeed = Address { inner: priceFeed_word }
-        let activePool_word = d.read_word()
+        let activePool_word = d.read_word(input)
         if activePool_word >> 160 != 0 { std::evm::revert(()) }
         let activePool = Address { inner: activePool_word }
-        let defaultPool_word = d.read_word()
+        let defaultPool_word = d.read_word(input)
         if defaultPool_word >> 160 != 0 { std::evm::revert(()) }
         let defaultPool = Address { inner: defaultPool_word }
-        let gasPoolAddress_word = d.read_word()
+        let gasPoolAddress_word = d.read_word(input)
         if gasPoolAddress_word >> 160 != 0 { std::evm::revert(()) }
         let gasPoolAddress = Address { inner: gasPoolAddress_word }
-        let collSurplusPool_word = d.read_word()
+        let collSurplusPool_word = d.read_word(input)
         if collSurplusPool_word >> 160 != 0 { std::evm::revert(()) }
         let collSurplusPool = Address { inner: collSurplusPool_word }
-        let sortedTroves_word = d.read_word()
+        let sortedTroves_word = d.read_word(input)
         if sortedTroves_word >> 160 != 0 { std::evm::revert(()) }
         let sortedTroves = Address { inner: sortedTroves_word }
-        let interestRouter_word = d.read_word()
+        let interestRouter_word = d.read_word(input)
         if interestRouter_word >> 160 != 0 { std::evm::revert(()) }
         let interestRouter = Address { inner: interestRouter_word }
-        let hintHelpers_word = d.read_word()
+        let hintHelpers_word = d.read_word(input)
         if hintHelpers_word >> 160 != 0 { std::evm::revert(()) }
         let hintHelpers = Address { inner: hintHelpers_word }
-        let multiTroveGetter_word = d.read_word()
+        let multiTroveGetter_word = d.read_word(input)
         if multiTroveGetter_word >> 160 != 0 { std::evm::revert(()) }
         let multiTroveGetter = Address { inner: multiTroveGetter_word }
-        let collateralRegistry_word = d.read_word()
+        let collateralRegistry_word = d.read_word(input)
         if collateralRegistry_word >> 160 != 0 { std::evm::revert(()) }
         let collateralRegistry = Address { inner: collateralRegistry_word }
-        let boldToken_word = d.read_word()
+        let boldToken_word = d.read_word(input)
         if boldToken_word >> 160 != 0 { std::evm::revert(()) }
         let boldToken = Address { inner: boldToken_word }
-        let WETH_word = d.read_word()
+        let WETH_word = d.read_word(input)
         if WETH_word >> 160 != 0 { std::evm::revert(()) }
         let WETH = Address { inner: WETH_word }
         Self { collToken, borrowerOperations, troveManager, troveNFT, metadataNFT, stabilityPool, priceFeed, activePool, defaultPool, gasPoolAddress, collSurplusPool, sortedTroves, interestRouter, hintHelpers, multiTroveGetter, collateralRegistry, boldToken, WETH }
@@ -229,7 +229,7 @@ pub msg RegistryMsg {
     #[selector = sol("setAddresses((address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address))")]
     SetAddresses { vars: AddressVars },
 }
-pub contract AddressesRegistry uses (ctx: Ctx, log: mut Log, mem: mut RawMem) {
+pub contract AddressesRegistry uses (ctx: Ctx, log: mut Log) {
     mut owner_address: Address,
     mut collToken: Address,
     mut borrowerOperations: Address,
@@ -300,7 +300,7 @@ pub contract AddressesRegistry uses (ctx: Ctx, log: mut Log, mem: mut RawMem) {
         GetLIQUIDATION_PENALTY_REDISTRIBUTION -> u256 uses (LIQUIDATION_PENALTY_REDISTRIBUTION) { LIQUIDATION_PENALTY_REDISTRIBUTION }
         Owner -> Address uses (owner_address) { owner_address }
         IsOwner -> bool uses (owner_address, ctx) { ctx.caller() == owner_address }
-        SetAddresses { vars } uses (mut owner_address, ctx, mut log, mut mem, mut collToken, mut borrowerOperations, mut troveManager, mut troveNFT, mut metadataNFT, mut stabilityPool, mut priceFeed, mut activePool, mut defaultPool, mut gasPoolAddress, mut collSurplusPool, mut sortedTroves, mut interestRouter, mut hintHelpers, mut multiTroveGetter, mut collateralRegistry, mut boldToken, mut WETH) {
+        SetAddresses { vars } uses (mut owner_address, ctx, mut log, mut collToken, mut borrowerOperations, mut troveManager, mut troveNFT, mut metadataNFT, mut stabilityPool, mut priceFeed, mut activePool, mut defaultPool, mut gasPoolAddress, mut collSurplusPool, mut sortedTroves, mut interestRouter, mut hintHelpers, mut multiTroveGetter, mut collateralRegistry, mut boldToken, mut WETH) {
             if ctx.caller() != owner_address { revert_error(Error { reason: owner_error_text() }) }
             collToken = vars.collToken
             borrowerOperations = vars.borrowerOperations
@@ -344,8 +344,4 @@ pub contract AddressesRegistry uses (ctx: Ctx, log: mut Log, mem: mut RawMem) {
     }
 }
 
-fn owner_error_text() -> DynString uses (mem: mut RawMem) {
-    let data = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: data, value: 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: data, len: 32))
-}
+fn owner_error_text() -> DynString { "Ownable: caller is not the owner" }

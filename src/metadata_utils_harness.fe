@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 use std::abi::{sol, DynString, DynArray}
-use std::evm::RawMem
 use super::metadata_utils as utils
 pub msg UtilsMsg {
     #[selector = sol("toLocale(string)")]
@@ -36,20 +35,20 @@ pub msg UtilsMsg {
 }
 pub contract MetadataUtilsHarness {
     recv UtilsMsg {
-        M0 { value } -> DynString uses (mem: mut RawMem) { utils::to_locale(value) }
-        M1 { value, divisor, precision } -> DynString uses (mem: mut RawMem) { super::metadata_string::locale(value, divisor, precision) }
-        M2 { key, value } -> DynString uses (mem: mut RawMem) { utils::set_css_var(key, value) }
-        M3 { key } -> DynString uses (mem: mut RawMem) { utils::get_css_var(key) }
-        M4 { key } -> DynString uses (mem: mut RawMem) { utils::get_def_url(key) }
-        M5 { alpha } -> DynString uses (mem: mut RawMem) { utils::white_a(alpha) }
-        M6 { alpha } -> DynString uses (mem: mut RawMem) { utils::black_a(alpha) }
-        M7 { r, g, b, a } -> DynString uses (mem: mut RawMem) { utils::rgba(r,g,b,a) }
-        M8 { key, value } -> DynString uses (mem: mut RawMem) { utils::css_braces(key,value) }
-        M9 { keys, values } -> DynString uses (mem: mut RawMem) { utils::css_braces_many(keys,values) }
-        M10 { values } -> DynString uses (mem: mut RawMem) { utils::points(values,false,0) }
-        M11 { values, precision } -> DynString uses (mem: mut RawMem) { utils::points(values,true,precision) }
-        M12 { a, b } -> bool uses (mem: mut RawMem) { utils::strings_equal(a,b) }
-        M13 { value } -> u256 uses (mem: mut RawMem) { utils::utf_string_length(value) }
-        M14 { value, precision } -> DynString uses (mem: mut RawMem) { utils::to_string(value,precision) }
+        M0 { value } -> DynString { utils::to_locale(value) }
+        M1 { value, divisor, precision } -> DynString { super::metadata_string::locale(value, divisor, precision) }
+        M2 { key, value } -> DynString { utils::set_css_var(key, value) }
+        M3 { key } -> DynString { utils::get_css_var(key) }
+        M4 { key } -> DynString { utils::get_def_url(key) }
+        M5 { alpha } -> DynString { utils::white_a(alpha) }
+        M6 { alpha } -> DynString { utils::black_a(alpha) }
+        M7 { r, g, b, a } -> DynString { utils::rgba(r,g,b,a) }
+        M8 { key, value } -> DynString { utils::css_braces(key,value) }
+        M9 { keys, values } -> DynString { utils::css_braces_many(keys,values) }
+        M10 { values } -> DynString { utils::points(values,false,0) }
+        M11 { values, precision } -> DynString { utils::points(values,true,precision) }
+        M12 { a, b } -> bool { utils::strings_equal(a,b) }
+        M13 { value } -> u256 { utils::utf_string_length(value) }
+        M14 { value, precision } -> DynString { utils::to_string(value,precision) }
     }
 }

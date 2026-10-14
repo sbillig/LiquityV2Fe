@@ -1,44 +1,10 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
-pub fn owner() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 32))
-}
-pub fn min_claim() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a206d696e2d636c61696d2d67742d6d696e2d6163637275616c000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 29))
-}
-pub fn registration() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a20726567697374726174696f6e2d636f6e6669670000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 24))
-}
-pub fn unregistration() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a20756e726567697374726174696f6e2d636f6e666967000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 26))
-}
-pub fn voting() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a20766f74696e672d636f6e6669670000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 18))
-}
-pub fn future() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a2063616e6e6f742d73746172742d696e2d6675747572650000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 27))
-}
-pub fn duration() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a2065706f63682d6475726174696f6e2d7a65726f0000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 24))
-}
-pub fn cutoff() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x476f763a2065706f63682d766f74696e672d6375746f66662d67742d65706f63)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x682d6475726174696f6e00000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 42))
-}
+pub fn owner() -> DynString { "Ownable: caller is not the owner" }
+pub fn min_claim() -> DynString { "Gov: min-claim-gt-min-accrual" }
+pub fn registration() -> DynString { "Gov: registration-config" }
+pub fn unregistration() -> DynString { "Gov: unregistration-config" }
+pub fn voting() -> DynString { "Gov: voting-config" }
+pub fn future() -> DynString { "Gov: cannot-start-in-future" }
+pub fn duration() -> DynString { "Gov: epoch-duration-zero" }
+pub fn cutoff() -> DynString { "Gov: epoch-voting-cutoff-gt-epoch-duration" }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-use std::evm::{Address, Ctx, Call, Log, RawMem, RawStorage}
+use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use std::evm::packed::keccak_packed
 use super::borrower_data as data
 use super::borrower_checks as checks
@@ -25,7 +25,7 @@ pub struct Open {
 }
 impl Copy for Open {}
 pub fn common(_ cfg: Config, _ p: Open, _ rate: u256, _ batch: Address, _ batch_debt: u256, _ batch_fee: u256, _ initial: TroveChange) -> (u256, TroveChange)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     checks::not_shutdown()
     let manager = data::address_at(5)
     let active = data::address_at(0)
@@ -33,7 +33,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     let price = checks::live_price()
     let id = keccak_packed((ctx.caller().inner, p.owner.inner, p.index))
     checks::nonexistent(manager, id)
-    let mut change = initial
+    var change = initial
     change.coll_increase = p.coll
     change.debt_increase = p.bold
     change.new_weighted_recorded_debt = (batch_debt + p.bold) * rate
@@ -64,7 +64,7 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     (id, change)
 }
 pub fn individual(_ cfg: Config, _ p: Open, _ rate: u256) -> u256
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     checks::rate(rate)
     let (id, change) = common(cfg, p, rate, Address::zero(), 0, 0, TroveChange::zero())
     let manager = data::address_at(5)
@@ -76,11 +76,11 @@ uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: m
     id
 }
 pub fn batched(_ cfg: Config, _ p: Open, _ batch: Address) -> u256
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem, storage: mut RawStorage, log: mut Log) {
+uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     checks::valid_batch(batch)
     let manager = data::address_at(5)
     let b = manager.static(TroveManagerMsg::LatestBatch { manager: batch })
-    let mut initial = TroveChange::zero()
+    var initial = TroveChange::zero()
     initial.batch_accrued_management_fee = b.accrued_management_fee
     initial.old_weighted_recorded_debt = b.weighted_recorded_debt
     initial.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee

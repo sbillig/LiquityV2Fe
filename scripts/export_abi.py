@@ -40,8 +40,8 @@ READ_ONLY_CAPABILITIES = {
         'predictRemoveFromBatchUpfrontFee(uint256,uint256,uint256)',
     }),
     'MultiTroveGetter': ('STATICCALL', {'getMultipleSortedTroves(uint256,int256,uint256)', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'}),
-    'BorrowerOperations': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
-    'TroveManager': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
+    'BorrowerOperations': ('STATICCALL and SLOAD', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'interestBatchManagerOf(uint256)', 'getInterestIndividualDelegateOf(uint256)', 'getInterestBatchManager(address)', 'checkBatchManagerExists(address)'}),
+    'TroveManager': ('STATICCALL and SLOAD', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getLatestTroveData(uint256)', 'getLatestBatchData(address)', 'getTroveAnnualInterestRate(uint256)', 'getCurrentICR(uint256,uint256)', 'getTroveStatus(uint256)', 'Troves(uint256)'}),
     'StabilityPool': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getDepositorYieldGainWithPending(address)'}),
     'CollateralRegistry': ('STATICCALL', {'getRedemptionRateForRedeemedAmount(uint256)', 'getEffectiveRedemptionFeeInBold(uint256)'}),
     'LiquityBase': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
@@ -185,21 +185,25 @@ for contract in CONTRACTS:
             refinements.append('receive: payable fallback accepts only empty calldata; non-empty unknown calldata reverts, matching Solidity receive-only behavior')
         if contract == 'RedemptionHelper' and entry.get('name') in {'simulateRedemption', 'truncateRedemption'}:
             outputs = entry['outputs']
-            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
             expected = ['tuple[]', 'uint256'] if entry['name'] == 'simulateRedemption' else ['uint256', 'uint256', 'tuple[]']
-            assert [c['type'] for c in outputs[0]['components']] == expected
-            entry['outputs'] = outputs[0]['components']
+            if len(outputs) == 1 and outputs[0]['type'] == 'tuple':
+                assert [c['type'] for c in outputs[0]['components']] == expected
+                entry['outputs'] = outputs[0]['components']
+            else:
+                assert [o['type'] for o in outputs] == expected
             refinements.append(entry['name'] + ': explicit flat runtime return with dynamic array')
         if contract == 'MultiTroveGetter' and key(entry) == ('function', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'):
             outputs = entry['outputs']
-            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
-            assert [c['type'] for c in outputs[0]['components']] == ['tuple[]', 'uint256']
-            entry['outputs'] = outputs[0]['components']
+            if len(outputs) == 1 and outputs[0]['type'] == 'tuple':
+                assert [c['type'] for c in outputs[0]['components']] == ['tuple[]', 'uint256']
+                entry['outputs'] = outputs[0]['components']
+            else:
+                assert [o['type'] for o in outputs] == ['tuple[]', 'uint256']
             refinements.append('getDebtPerInterestRateAscending: explicit flat dynamic-array and cursor runtime return')
         if contract == 'BoldToken' and key(entry) == ('function', 'eip712Domain()'):
             outputs = entry['outputs']
-            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
-            entry['outputs'] = outputs[0]['components']
+            if len(outputs) == 1 and outputs[0]['type'] == 'tuple':
+                entry['outputs'] = outputs[0]['components']
             refinements.append('eip712Domain: explicit flat runtime return')
         operation, view_signatures = READ_ONLY_CAPABILITIES.get(contract, ('', set()))
         if key(entry)[0] == 'function' and key(entry)[1] in view_signatures:
@@ -208,9 +212,11 @@ for contract in CONTRACTS:
             refinements.append(entry['name'] + ': read-only ' + operation + '; Fe capability conservatively implies nonpayable')
         if entry.get('name') in STATIC_TUPLE_OUTPUTS.get(contract, set()):
             outputs = entry['outputs']
-            assert len(outputs) == 1 and outputs[0]['type'] == 'tuple'
-            assert all(c['type'] in ('uint256', 'uint128', 'uint64', 'uint8', 'address', 'bool') for c in outputs[0]['components'])
-            entry['outputs'] = outputs[0]['components']
+            if len(outputs) == 1 and outputs[0]['type'] == 'tuple':
+                assert all(c['type'] in ('uint256', 'uint128', 'uint64', 'uint8', 'address', 'bool') for c in outputs[0]['components'])
+                entry['outputs'] = outputs[0]['components']
+            else:
+                assert all(o['type'] in ('uint256', 'uint128', 'uint64', 'uint8', 'address', 'bool') for o in outputs)
             refinements.append(entry['name'] + ': static tuple has identical flat runtime encoding')
     fe = {key(e): e for e in normalized}
     sol = {key(e): e for e in reference}
@@ -219,9 +225,17 @@ for contract in CONTRACTS:
     assert missing <= DECLARATION_ONLY.get(contract, set()), (contract, 'missing ABI entries', missing)
     # Solidity omits its implicit standard errors from ABI metadata.
     assert extra <= {('error', 'Error(string)'), ('error', 'Panic(uint256)')}, (contract, 'extra ABI entries', extra)
+    def flat(outputs):
+        def is_static(f):
+            if f['type'].startswith('tuple'):
+                return all(is_static(c) for c in f.get('components', []))
+            return f['type'] in ('uint256', 'uint128', 'uint64', 'uint8', 'address', 'bool', 'bytes1', 'bytes32') or (f['type'].startswith('bytes') and f['type'] not in ('bytes',)) 
+        if len(outputs) == 1 and outputs[0].get('type') == 'tuple' and is_static(outputs[0]):
+            return outputs[0].get('components', [])
+        return outputs
     for k in sorted(set(sol) & set(fe)):
         x, y = fe[k], sol[k]
-        assert [typ(f) for f in x.get('outputs', [])] == [typ(f) for f in y.get('outputs', [])], (contract, k, 'return shape')
+        assert [typ(f) for f in flat(x.get('outputs', []))] == [typ(f) for f in flat(y.get('outputs', []))], (contract, k, 'return shape')
         if k[0] in ('constructor', 'function'):
             fm, sm = x.get('stateMutability'), y.get('stateMutability')
             assert fm == sm or (fm, sm) == ('pure', 'view'), (contract, k, fm, sm)

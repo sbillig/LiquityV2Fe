@@ -1,60 +1,12 @@
 // SPDX-License-Identifier: MIT
 use std::abi::DynString
-use std::evm::RawMem
-pub fn current() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a2063616e6e6f742d636c61696d2d666f)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x722d63757272656e742d65706f63680000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 47))
-}
-pub fn claimed() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a20616c72656164792d636c61696d6564)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 32))
-}
-pub fn empty() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a206e6f2d627269626500000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 25))
-}
-pub fn user_epoch() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a20696e76616c69642d707265762d6c71)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x74792d616c6c6f636174696f6e2d65706f636800000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 51))
-}
-pub fn total_epoch() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a20696e76616c69642d707265762d746f)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x74616c2d6c7174792d616c6c6f636174696f6e2d65706f636800000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 57))
-}
-pub fn total_zero() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a20746f74616c2d6c7174792d616c6c6f)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x636174696f6e2d7a65726f000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 43))
-}
-pub fn user_zero() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a206c7174792d616c6c6f636174696f6e)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x2d7a65726f000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 37))
-}
-pub fn same_token() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a2062726962652d746f6b656e2d63616e)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x6e6f742d62652d626f6c64000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 43))
-}
-pub fn sender() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(32)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a20696e76616c69642d73656e64657200)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 31))
-}
-pub fn past() -> DynString uses (mem: mut RawMem) {
-    let p = core::ptr::alloc_bytes(64)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 0), value: 0x4272696265496e69746961746976653a206e6f772d6f722d6675747572652d65)
-    mem.mstore(addr: core::ptr::offset_bytes(p, 32), value: 0x706f636873000000000000000000000000000000000000000000000000000000)
-    DynString::from_payload(source: core::ptr::MemSpan::from_raw_parts(ptr: p, len: 37))
-}
+pub fn current() -> DynString { "BribeInitiative: cannot-claim-for-current-epoch" }
+pub fn claimed() -> DynString { "BribeInitiative: already-claimed" }
+pub fn empty() -> DynString { "BribeInitiative: no-bribe" }
+pub fn user_epoch() -> DynString { "BribeInitiative: invalid-prev-lqty-allocation-epoch" }
+pub fn total_epoch() -> DynString { "BribeInitiative: invalid-prev-total-lqty-allocation-epoch" }
+pub fn total_zero() -> DynString { "BribeInitiative: total-lqty-allocation-zero" }
+pub fn user_zero() -> DynString { "BribeInitiative: lqty-allocation-zero" }
+pub fn same_token() -> DynString { "BribeInitiative: bribe-token-cannot-be-bold" }
+pub fn sender() -> DynString { "BribeInitiative: invalid-sender" }
+pub fn past() -> DynString { "BribeInitiative: now-or-future-epochs" }

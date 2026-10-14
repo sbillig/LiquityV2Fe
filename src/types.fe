@@ -52,36 +52,36 @@ impl AbiSpan<Sol> for TroveChange {
     fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 384 }
 }
 impl Decode<Sol> for TroveChange {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let applied_redist_bold_debt_gain = d.read_word()
-        let applied_redist_coll_gain = d.read_word()
-        let coll_increase = d.read_word()
-        let coll_decrease = d.read_word()
-        let debt_increase = d.read_word()
-        let debt_decrease = d.read_word()
-        let new_weighted_recorded_debt = d.read_word()
-        let old_weighted_recorded_debt = d.read_word()
-        let upfront_fee = d.read_word()
-        let batch_accrued_management_fee = d.read_word()
-        let new_weighted_recorded_batch_management_fee = d.read_word()
-        let old_weighted_recorded_batch_management_fee = d.read_word()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let applied_redist_bold_debt_gain = d.read_word(input)
+        let applied_redist_coll_gain = d.read_word(input)
+        let coll_increase = d.read_word(input)
+        let coll_decrease = d.read_word(input)
+        let debt_increase = d.read_word(input)
+        let debt_decrease = d.read_word(input)
+        let new_weighted_recorded_debt = d.read_word(input)
+        let old_weighted_recorded_debt = d.read_word(input)
+        let upfront_fee = d.read_word(input)
+        let batch_accrued_management_fee = d.read_word(input)
+        let new_weighted_recorded_batch_management_fee = d.read_word(input)
+        let old_weighted_recorded_batch_management_fee = d.read_word(input)
         Self { applied_redist_bold_debt_gain, applied_redist_coll_gain, coll_increase, coll_decrease, debt_increase, debt_decrease, new_weighted_recorded_debt, old_weighted_recorded_debt, upfront_fee, batch_accrued_management_fee, new_weighted_recorded_batch_management_fee, old_weighted_recorded_batch_management_fee }
     }
 }
 impl Encode<Sol> for TroveChange {
-    fn encode(own self, _ ptr: *u8) {
-        <u256 as Encode<Sol>>::encode(self.applied_redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.applied_redist_coll_gain, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.coll_increase, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.coll_decrease, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.debt_increase, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.debt_decrease, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 192))
-        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_debt, core::ptr::offset_bytes(ptr, 224))
-        <u256 as Encode<Sol>>::encode(self.upfront_fee, core::ptr::offset_bytes(ptr, 256))
-        <u256 as Encode<Sol>>::encode(self.batch_accrued_management_fee, core::ptr::offset_bytes(ptr, 288))
-        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 320))
-        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 352))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.applied_redist_bold_debt_gain, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.applied_redist_coll_gain, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.coll_increase, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.coll_decrease, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.debt_increase, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.debt_decrease, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_debt, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_debt, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.upfront_fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.batch_accrued_management_fee, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_batch_management_fee, out.slice(offset: 320, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_batch_management_fee, out.slice(offset: 352, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 
@@ -97,32 +97,32 @@ impl AbiSpan<Sol> for LatestTroveData {
     fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 320 }
 }
 impl Decode<Sol> for LatestTroveData {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let entire_debt = d.read_word()
-        let entire_coll = d.read_word()
-        let redist_bold_debt_gain = d.read_word()
-        let redist_coll_gain = d.read_word()
-        let accrued_interest = d.read_word()
-        let recorded_debt = d.read_word()
-        let annual_interest_rate = d.read_word()
-        let weighted_recorded_debt = d.read_word()
-        let accrued_batch_management_fee = d.read_word()
-        let last_interest_rate_adj_time = d.read_word()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let entire_debt = d.read_word(input)
+        let entire_coll = d.read_word(input)
+        let redist_bold_debt_gain = d.read_word(input)
+        let redist_coll_gain = d.read_word(input)
+        let accrued_interest = d.read_word(input)
+        let recorded_debt = d.read_word(input)
+        let annual_interest_rate = d.read_word(input)
+        let weighted_recorded_debt = d.read_word(input)
+        let accrued_batch_management_fee = d.read_word(input)
+        let last_interest_rate_adj_time = d.read_word(input)
         Self { entire_debt, entire_coll, redist_bold_debt_gain, redist_coll_gain, accrued_interest, recorded_debt, annual_interest_rate, weighted_recorded_debt, accrued_batch_management_fee, last_interest_rate_adj_time }
     }
 }
 impl Encode<Sol> for LatestTroveData {
-    fn encode(own self, _ ptr: *u8) {
-        <u256 as Encode<Sol>>::encode(self.entire_debt, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.entire_coll, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.redist_bold_debt_gain, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.redist_coll_gain, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.accrued_interest, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.recorded_debt, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 192))
-        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, core::ptr::offset_bytes(ptr, 224))
-        <u256 as Encode<Sol>>::encode(self.accrued_batch_management_fee, core::ptr::offset_bytes(ptr, 256))
-        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, core::ptr::offset_bytes(ptr, 288))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.entire_debt, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.entire_coll, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.redist_bold_debt_gain, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.redist_coll_gain, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.accrued_interest, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.recorded_debt, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.accrued_batch_management_fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 
@@ -137,36 +137,36 @@ impl AbiSpan<Sol> for LatestBatchData {
     fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 384 }
 }
 impl Decode<Sol> for LatestBatchData {
-    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {
-        let total_debt_shares = d.read_word()
-        let entire_debt_without_redistribution = d.read_word()
-        let entire_coll_without_redistribution = d.read_word()
-        let accrued_interest = d.read_word()
-        let recorded_debt = d.read_word()
-        let annual_interest_rate = d.read_word()
-        let weighted_recorded_debt = d.read_word()
-        let annual_management_fee = d.read_word()
-        let accrued_management_fee = d.read_word()
-        let weighted_recorded_batch_management_fee = d.read_word()
-        let last_debt_update_time = d.read_word()
-        let last_interest_rate_adj_time = d.read_word()
+    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
+        let total_debt_shares = d.read_word(input)
+        let entire_debt_without_redistribution = d.read_word(input)
+        let entire_coll_without_redistribution = d.read_word(input)
+        let accrued_interest = d.read_word(input)
+        let recorded_debt = d.read_word(input)
+        let annual_interest_rate = d.read_word(input)
+        let weighted_recorded_debt = d.read_word(input)
+        let annual_management_fee = d.read_word(input)
+        let accrued_management_fee = d.read_word(input)
+        let weighted_recorded_batch_management_fee = d.read_word(input)
+        let last_debt_update_time = d.read_word(input)
+        let last_interest_rate_adj_time = d.read_word(input)
         Self { total_debt_shares, entire_debt_without_redistribution, entire_coll_without_redistribution, accrued_interest, recorded_debt, annual_interest_rate, weighted_recorded_debt, annual_management_fee, accrued_management_fee, weighted_recorded_batch_management_fee, last_debt_update_time, last_interest_rate_adj_time }
     }
 }
 impl Encode<Sol> for LatestBatchData {
-    fn encode(own self, _ ptr: *u8) {
-        <u256 as Encode<Sol>>::encode(self.total_debt_shares, core::ptr::offset_bytes(ptr, 0))
-        <u256 as Encode<Sol>>::encode(self.entire_debt_without_redistribution, core::ptr::offset_bytes(ptr, 32))
-        <u256 as Encode<Sol>>::encode(self.entire_coll_without_redistribution, core::ptr::offset_bytes(ptr, 64))
-        <u256 as Encode<Sol>>::encode(self.accrued_interest, core::ptr::offset_bytes(ptr, 96))
-        <u256 as Encode<Sol>>::encode(self.recorded_debt, core::ptr::offset_bytes(ptr, 128))
-        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, core::ptr::offset_bytes(ptr, 160))
-        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, core::ptr::offset_bytes(ptr, 192))
-        <u256 as Encode<Sol>>::encode(self.annual_management_fee, core::ptr::offset_bytes(ptr, 224))
-        <u256 as Encode<Sol>>::encode(self.accrued_management_fee, core::ptr::offset_bytes(ptr, 256))
-        <u256 as Encode<Sol>>::encode(self.weighted_recorded_batch_management_fee, core::ptr::offset_bytes(ptr, 288))
-        <u256 as Encode<Sol>>::encode(self.last_debt_update_time, core::ptr::offset_bytes(ptr, 320))
-        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, core::ptr::offset_bytes(ptr, 352))
+    fn encode(own self, _ out: core::abi::AbiFrame) {
+        <u256 as Encode<Sol>>::encode(self.total_debt_shares, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.entire_debt_without_redistribution, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.entire_coll_without_redistribution, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.accrued_interest, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.recorded_debt, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.annual_interest_rate, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_debt, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.annual_management_fee, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.accrued_management_fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.weighted_recorded_batch_management_fee, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.last_debt_update_time, out.slice(offset: 320, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
+        <u256 as Encode<Sol>>::encode(self.last_interest_rate_adj_time, out.slice(offset: 352, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
     }
 }
 

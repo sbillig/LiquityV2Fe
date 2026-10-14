@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin 4.9 SafeERC20 optional-return behavior, including revert strings.
 use std::abi::sol
-use std::evm::{Address, Call, CallOutcome, Ctx, RawMem}
+use std::evm::{Address, Call, CallOutcome, Ctx}
 use super::revert_texts as text
 pub msg TokenMsg {
     #[selector = sol("transfer(address,uint256)")]
@@ -9,7 +9,7 @@ pub msg TokenMsg {
     #[selector = sol("transferFrom(address,address,uint256)")]
     TransferFrom { owner: Address, receiver: Address, amount: u256 } -> bool,
 }
-fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx, mem: mut RawMem) {
+fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx) {
     if !result.success() && result.returndata_len() == 0 {
         text::require(false, text::safe_low_level())
     }
@@ -21,12 +21,12 @@ fn check(_ token: Address, _ result: own CallOutcome) uses (ctx: Ctx, mem: mut R
     text::require(ok, text::safe_failed())
 }
 pub fn safe_transfer_from(_ token: Address, _ owner: Address, _ receiver: Address, _ amount: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     let result = token.try_call(TokenMsg::TransferFrom { owner, receiver, amount })
     check(token, result)
 }
 pub fn safe_transfer(_ token: Address, _ receiver: Address, _ amount: u256)
-uses (ctx: Ctx, call: mut Call, mem: mut RawMem) {
+uses (ctx: Ctx, call: mut Call) {
     let result = token.try_call(TokenMsg::Transfer { receiver, amount })
     check(token, result)
 }
