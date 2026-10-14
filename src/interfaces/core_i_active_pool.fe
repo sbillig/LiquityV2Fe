@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Generated from pinned Solidity interface contracts/src/Interfaces/IActivePool.sol.
 // Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
-use std::abi::{Sol, sol}
+use std::abi::{sol}
 use std::evm::Address
-use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
 pub msg IActivePool {
     // Solidity: nonpayable
     #[selector = sol("accountForReceivedColl(uint256)")]
@@ -84,6 +83,7 @@ pub msg IActivePool {
     #[selector = sol("troveManagerAddress()")]
     TroveManagerAddress {  } -> Address,
 }
+#[abi]
 pub struct TroveChange {
     pub applied_redist_bold_debt_gain: u256,
     pub applied_redist_coll_gain: u256,
@@ -97,45 +97,4 @@ pub struct TroveChange {
     pub batch_accrued_management_fee: u256,
     pub new_weighted_recorded_batch_management_fee: u256,
     pub old_weighted_recorded_batch_management_fee: u256,
-}
-impl AbiSize for TroveChange { const HEAD_SIZE: u256 = 384
-    const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for TroveChange {
-    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 384, input.len()) }
-}
-impl Decode<Sol> for TroveChange {
-    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-        let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 384, input.len())
-        d.set_pos(end)
-        let applied_redist_bold_debt_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
-        let applied_redist_coll_gain = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
-        let coll_increase = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
-        let coll_decrease = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
-        let debt_increase = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
-        let debt_decrease = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
-        let new_weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
-        let old_weighted_recorded_debt = <u256 as Decode<Sol>>::decode_from(input, pos + 224)
-        let upfront_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 256)
-        let batch_accrued_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 288)
-        let new_weighted_recorded_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 320)
-        let old_weighted_recorded_batch_management_fee = <u256 as Decode<Sol>>::decode_from(input, pos + 352)
-        Self { applied_redist_bold_debt_gain, applied_redist_coll_gain, coll_increase, coll_decrease, debt_increase, debt_decrease, new_weighted_recorded_debt, old_weighted_recorded_debt, upfront_fee, batch_accrued_management_fee, new_weighted_recorded_batch_management_fee, old_weighted_recorded_batch_management_fee }
-    }
-}
-impl Encode<Sol> for TroveChange {
-    fn encode(own self, _ out: core::abi::AbiFrame) {
-        <u256 as Encode<Sol>>::encode(self.applied_redist_bold_debt_gain, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.applied_redist_coll_gain, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.coll_increase, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.coll_decrease, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.debt_increase, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.debt_decrease, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_debt, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_debt, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.upfront_fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.batch_accrued_management_fee, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.new_weighted_recorded_batch_management_fee, out.slice(offset: 320, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.old_weighted_recorded_batch_management_fee, out.slice(offset: 352, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-    }
 }

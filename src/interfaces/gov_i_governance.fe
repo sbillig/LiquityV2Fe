@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Generated from pinned Solidity interface src/interfaces/IGovernance.sol.
 // Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
-use std::abi::{Bytes32, DynArray, Sol, sol}
+use std::abi::{Bytes32, DynArray, sol}
 use std::evm::Address
-use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
 pub msg IGovernance {
     // Solidity: view
     #[selector = sol("EPOCH_DURATION()")]
@@ -213,6 +212,7 @@ pub struct WithdrawLQTY {
     pub eth_received: u256,
     pub eth_sent: u256,
 }
+#[abi]
 pub struct PermitParams {
     pub owner: Address,
     pub spender: Address,
@@ -222,68 +222,11 @@ pub struct PermitParams {
     pub r: Bytes32,
     pub s: Bytes32,
 }
-impl AbiSize for PermitParams { const HEAD_SIZE: u256 = 224
-    const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for PermitParams {
-    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 224, input.len()) }
-}
-impl Decode<Sol> for PermitParams {
-    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-        let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 224, input.len())
-        d.set_pos(end)
-        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 0)
-        let spender = <Address as Decode<Sol>>::decode_from(input, pos + 32)
-        let value = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
-        let deadline = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
-        let v = <u8 as Decode<Sol>>::decode_from(input, pos + 128)
-        let r = <Bytes32 as Decode<Sol>>::decode_from(input, pos + 160)
-        let s = <Bytes32 as Decode<Sol>>::decode_from(input, pos + 192)
-        Self { owner, spender, value, deadline, v, r, s }
-    }
-}
-impl Encode<Sol> for PermitParams {
-    fn encode(own self, _ out: core::abi::AbiFrame) {
-        <Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.spender, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.value, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.deadline, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u8 as Encode<Sol>>::encode(self.v, out.slice(offset: 128, len: <u8 as core::abi::AbiSize>::HEAD_SIZE))
-        <Bytes32 as Encode<Sol>>::encode(self.r, out.slice(offset: 160, len: <Bytes32 as core::abi::AbiSize>::HEAD_SIZE))
-        <Bytes32 as Encode<Sol>>::encode(self.s, out.slice(offset: 192, len: <Bytes32 as core::abi::AbiSize>::HEAD_SIZE))
-    }
-}
+#[abi]
 pub struct InitiativeState {
     pub vote_l_q_t_y: u256,
     pub vote_offset: u256,
     pub veto_l_q_t_y: u256,
     pub veto_offset: u256,
     pub last_epoch_claim: u256,
-}
-impl AbiSize for InitiativeState { const HEAD_SIZE: u256 = 160
-    const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for InitiativeState {
-    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 160, input.len()) }
-}
-impl Decode<Sol> for InitiativeState {
-    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-        let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 160, input.len())
-        d.set_pos(end)
-        let vote_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
-        let vote_offset = <u256 as Decode<Sol>>::decode_from(input, pos + 32)
-        let veto_l_q_t_y = <u256 as Decode<Sol>>::decode_from(input, pos + 64)
-        let veto_offset = <u256 as Decode<Sol>>::decode_from(input, pos + 96)
-        let last_epoch_claim = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
-        Self { vote_l_q_t_y, vote_offset, veto_l_q_t_y, veto_offset, last_epoch_claim }
-    }
-}
-impl Encode<Sol> for InitiativeState {
-    fn encode(own self, _ out: core::abi::AbiFrame) {
-        <u256 as Encode<Sol>>::encode(self.vote_l_q_t_y, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.vote_offset, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.veto_l_q_t_y, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.veto_offset, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.last_epoch_claim, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-    }
 }

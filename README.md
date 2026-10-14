@@ -90,8 +90,9 @@ arguments and protocol ABI remain unchanged. Both runtimes and initcode sizes ar
 
 The MVS protocol checkpoint is `tests/results/mvs-refresh.log` and
 `tests/results/mvs-refresh.json` (353 EVM tests and 66 Fe tests). The suite also
-checks compiler provenance, seven toolchain drift regressions, and ABI/size
-limits for all 41 protocol contracts and their implementation companions.
+checks compiler provenance, ten toolchain and interface-generation regressions,
+and ABI/size limits for all 41 protocol contracts and their implementation
+companions.
 The packaged deployment smoke evidence in `tests/results/local-deployment.json`
 and [COMPLETION_AUDIT.md](COMPLETION_AUDIT.md) describes the earlier pre-MVS build.
 After a successful logged full test run, record its provenance with

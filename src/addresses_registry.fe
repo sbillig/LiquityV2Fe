@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Port of AddressesRegistry.sol and its Ownable base.
-use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
-use std::abi::{Sol, sol, DynString}
+use std::abi::{sol, DynString}
 use std::evm::{Address, Ctx, Log, revert_error}
 
+#[abi]
 pub struct AddressVars {
     pub collToken: Address,
     pub borrowerOperations: Address,
@@ -25,95 +25,7 @@ pub struct AddressVars {
     pub WETH: Address,
 }
 impl Copy for AddressVars {}
-impl Encode<Sol> for AddressVars {
-    fn encode(own self, _ out: core::abi::AbiFrame) {
-        <Address as Encode<Sol>>::encode(self.collToken, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.borrowerOperations, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.troveManager, out.slice(offset: 64, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.troveNFT, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.metadataNFT, out.slice(offset: 128, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.stabilityPool, out.slice(offset: 160, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.priceFeed, out.slice(offset: 192, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.activePool, out.slice(offset: 224, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.defaultPool, out.slice(offset: 256, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.gasPoolAddress, out.slice(offset: 288, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.collSurplusPool, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.sortedTroves, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.interestRouter, out.slice(offset: 384, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.hintHelpers, out.slice(offset: 416, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.multiTroveGetter, out.slice(offset: 448, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.collateralRegistry, out.slice(offset: 480, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.boldToken, out.slice(offset: 512, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.WETH, out.slice(offset: 544, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-    }
-}
 
-impl AbiSize for AddressVars {
-    const HEAD_SIZE: u256 = 576
-    const IS_DYNAMIC: bool = false
-}
-impl AbiSpan<Sol> for AddressVars {
-    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 576 }
-}
-impl Decode<Sol> for AddressVars {
-    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-        let collToken_word = d.read_word(input)
-        if collToken_word >> 160 != 0 { std::evm::revert(()) }
-        let collToken = Address { inner: collToken_word }
-        let borrowerOperations_word = d.read_word(input)
-        if borrowerOperations_word >> 160 != 0 { std::evm::revert(()) }
-        let borrowerOperations = Address { inner: borrowerOperations_word }
-        let troveManager_word = d.read_word(input)
-        if troveManager_word >> 160 != 0 { std::evm::revert(()) }
-        let troveManager = Address { inner: troveManager_word }
-        let troveNFT_word = d.read_word(input)
-        if troveNFT_word >> 160 != 0 { std::evm::revert(()) }
-        let troveNFT = Address { inner: troveNFT_word }
-        let metadataNFT_word = d.read_word(input)
-        if metadataNFT_word >> 160 != 0 { std::evm::revert(()) }
-        let metadataNFT = Address { inner: metadataNFT_word }
-        let stabilityPool_word = d.read_word(input)
-        if stabilityPool_word >> 160 != 0 { std::evm::revert(()) }
-        let stabilityPool = Address { inner: stabilityPool_word }
-        let priceFeed_word = d.read_word(input)
-        if priceFeed_word >> 160 != 0 { std::evm::revert(()) }
-        let priceFeed = Address { inner: priceFeed_word }
-        let activePool_word = d.read_word(input)
-        if activePool_word >> 160 != 0 { std::evm::revert(()) }
-        let activePool = Address { inner: activePool_word }
-        let defaultPool_word = d.read_word(input)
-        if defaultPool_word >> 160 != 0 { std::evm::revert(()) }
-        let defaultPool = Address { inner: defaultPool_word }
-        let gasPoolAddress_word = d.read_word(input)
-        if gasPoolAddress_word >> 160 != 0 { std::evm::revert(()) }
-        let gasPoolAddress = Address { inner: gasPoolAddress_word }
-        let collSurplusPool_word = d.read_word(input)
-        if collSurplusPool_word >> 160 != 0 { std::evm::revert(()) }
-        let collSurplusPool = Address { inner: collSurplusPool_word }
-        let sortedTroves_word = d.read_word(input)
-        if sortedTroves_word >> 160 != 0 { std::evm::revert(()) }
-        let sortedTroves = Address { inner: sortedTroves_word }
-        let interestRouter_word = d.read_word(input)
-        if interestRouter_word >> 160 != 0 { std::evm::revert(()) }
-        let interestRouter = Address { inner: interestRouter_word }
-        let hintHelpers_word = d.read_word(input)
-        if hintHelpers_word >> 160 != 0 { std::evm::revert(()) }
-        let hintHelpers = Address { inner: hintHelpers_word }
-        let multiTroveGetter_word = d.read_word(input)
-        if multiTroveGetter_word >> 160 != 0 { std::evm::revert(()) }
-        let multiTroveGetter = Address { inner: multiTroveGetter_word }
-        let collateralRegistry_word = d.read_word(input)
-        if collateralRegistry_word >> 160 != 0 { std::evm::revert(()) }
-        let collateralRegistry = Address { inner: collateralRegistry_word }
-        let boldToken_word = d.read_word(input)
-        if boldToken_word >> 160 != 0 { std::evm::revert(()) }
-        let boldToken = Address { inner: boldToken_word }
-        let WETH_word = d.read_word(input)
-        if WETH_word >> 160 != 0 { std::evm::revert(()) }
-        let WETH = Address { inner: WETH_word }
-        Self { collToken, borrowerOperations, troveManager, troveNFT, metadataNFT, stabilityPool, priceFeed, activePool, defaultPool, gasPoolAddress, collSurplusPool, sortedTroves, interestRouter, hintHelpers, multiTroveGetter, collateralRegistry, boldToken, WETH }
-    }
-}
 #[error]
 pub struct InvalidCCR {}
 #[error]

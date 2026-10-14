@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 // Generated from pinned Solidity interface contracts/src/NFTMetadata/MetadataNFT.sol.
 // Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.
-use std::abi::{DynString, Sol, sol}
+use std::abi::{DynString, sol}
 use std::evm::Address
-use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}
 pub msg IMetadataNFT {
     // Solidity: view
     #[selector = sol("uri((uint256,address,address,address,uint256,uint256,uint256,uint8))")]
     Uri { trove_data: TroveData } -> DynString,
 }
+#[abi]
 pub struct TroveData {
     pub token_id: u256,
     pub owner: Address,
@@ -18,37 +18,4 @@ pub struct TroveData {
     pub debt_amount: u256,
     pub interest_rate: u256,
     pub status: u8,
-}
-impl AbiSize for TroveData { const HEAD_SIZE: u256 = 256
-    const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for TroveData {
-    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 { checked_frame_end<Sol>(pos, 256, input.len()) }
-}
-impl Decode<Sol> for TroveData {
-    fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-        let pos = d.pos()
-        let end = checked_frame_end<Sol>(pos, 256, input.len())
-        d.set_pos(end)
-        let token_id = <u256 as Decode<Sol>>::decode_from(input, pos + 0)
-        let owner = <Address as Decode<Sol>>::decode_from(input, pos + 32)
-        let coll_token = <Address as Decode<Sol>>::decode_from(input, pos + 64)
-        let bold_token = <Address as Decode<Sol>>::decode_from(input, pos + 96)
-        let coll_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 128)
-        let debt_amount = <u256 as Decode<Sol>>::decode_from(input, pos + 160)
-        let interest_rate = <u256 as Decode<Sol>>::decode_from(input, pos + 192)
-        let status = <u8 as Decode<Sol>>::decode_from(input, pos + 224)
-        Self { token_id, owner, coll_token, bold_token, coll_amount, debt_amount, interest_rate, status }
-    }
-}
-impl Encode<Sol> for TroveData {
-    fn encode(own self, _ out: core::abi::AbiFrame) {
-        <u256 as Encode<Sol>>::encode(self.token_id, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 32, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.coll_token, out.slice(offset: 64, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <Address as Encode<Sol>>::encode(self.bold_token, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.coll_amount, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.debt_amount, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u256 as Encode<Sol>>::encode(self.interest_rate, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-        <u8 as Encode<Sol>>::encode(self.status, out.slice(offset: 224, len: <u8 as core::abi::AbiSize>::HEAD_SIZE))
-    }
 }

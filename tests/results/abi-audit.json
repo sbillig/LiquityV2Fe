@@ -1,7 +1,7 @@
 {
   "AddressesRegistry": {
-    "runtime_bytes": 2705,
-    "initcode_bytes_before_arguments": 3343,
+    "runtime_bytes": 2558,
+    "initcode_bytes_before_arguments": 3196,
     "compiler_abi_sha256": "d07e32e3c4d4daf825ff9f25ac0c4a0f6659af33a8eea87ad8c6fbd6c8045e29",
     "reference_artifact_sha256": "c8243c8d6acd915c05df31e58ef6d9fbb1d31d5120125afa313a742fb59c6bcc",
     "protocol_abi_sha256": "b05b188fe23ea77c434e90ea690e3bed9a89384d193715c00b850c3c11b1b863",
@@ -63,8 +63,8 @@
     "function_count": 8
   },
   "ActivePool": {
-    "runtime_bytes": 5567,
-    "initcode_bytes_before_arguments": 6959,
+    "runtime_bytes": 5486,
+    "initcode_bytes_before_arguments": 6878,
     "compiler_abi_sha256": "ef9b07157dd39598ba7dabcf6cb36de689053e3a9be12ac3c05b9512f00980b2",
     "reference_artifact_sha256": "eba58afe7649a833b21343a450ca8ff5f199a45f1cc8ec1aa73485a50e0a5561",
     "protocol_abi_sha256": "8791d999a080e1f39ef76ebde144fedc64d3a3db547c5f32ddabaf781cdaeb2d",
@@ -280,8 +280,8 @@
     "function_count": 31
   },
   "TroveManager": {
-    "runtime_bytes": 6437,
-    "initcode_bytes_before_arguments": 9023,
+    "runtime_bytes": 6360,
+    "initcode_bytes_before_arguments": 8946,
     "compiler_abi_sha256": "9be0d8dcd64ac83819f9ba57d76a5fff0531fd2bdcaa182505284db85b7ac95e",
     "reference_artifact_sha256": "04633f4b29b373a7d5e84c5aef06e05414bb4b6d0d3b6a5532a1f36f2b745da3",
     "protocol_abi_sha256": "fac9785f50292c35ec9983ae5308ee2c91cfc30e73308bc6fcfc9aa0ee366fa8",
@@ -310,8 +310,8 @@
     "function_count": 38
   },
   "BorrowerOperations": {
-    "runtime_bytes": 9343,
-    "initcode_bytes_before_arguments": 12041,
+    "runtime_bytes": 9971,
+    "initcode_bytes_before_arguments": 12669,
     "compiler_abi_sha256": "7ececbabf70f906f417abde058859c5ff3f3e8ae7eb1fbf606ac4acdf825ea3e",
     "reference_artifact_sha256": "dcb3f75ac0aa5f48fc4041e51e520d6cfa51977ad256109329605ee1426cd478",
     "protocol_abi_sha256": "77003ed3ac1a9163f370ff67584b6675048a6c289cbe307e2ac54418bb564871",
@@ -856,45 +856,45 @@
   },
   "TroveOperations": {
     "implementation_companion": true,
-    "runtime_bytes": 9756,
-    "initcode_bytes_before_arguments": 9776,
-    "runtime_sha256": "5905e68e0abbaef7f84bd77058956280cc3add94c262f9dd210d830044700556",
-    "initcode_sha256": "8e4d6157d0dc4a6c12d0d0be1604489bcda898a028ff721057c47c98c665894b"
+    "runtime_bytes": 9679,
+    "initcode_bytes_before_arguments": 9699,
+    "runtime_sha256": "0b901ea89c319e04afbe23c706b4084d1e0ef71a87d1343ed2b538c0d784a410",
+    "initcode_sha256": "f9dafcc2509355ecfd2070e3d14a84ddfd20edcbfbe2627aefdfe507cdc6377c"
   },
   "TroveRedemptions": {
     "implementation_companion": true,
-    "runtime_bytes": 11522,
-    "initcode_bytes_before_arguments": 11542,
-    "runtime_sha256": "1c99525b1197d3201672bac50cfb86ec2ccce373da80199bd8cb0c7f6b2faf80",
-    "initcode_sha256": "c871495dd30d44abf410a4fa92227f07516549203be1888b95e9c5f5d35c5bc4"
+    "runtime_bytes": 11812,
+    "initcode_bytes_before_arguments": 11832,
+    "runtime_sha256": "e2f8362d5f841d675c2297a123eded10c678084a8d1fb2778b405d0cae6e47e5",
+    "initcode_sha256": "884fb39296f9d0b130cba87e9902d67515d98d0b95bbd1e72eb5387d383a704f"
   },
   "TroveLiquidations": {
     "implementation_companion": true,
-    "runtime_bytes": 10735,
-    "initcode_bytes_before_arguments": 11410,
-    "runtime_sha256": "92a67d8490cfe884a4d65d006029274dd6438a6fce594a32708963cf6b59da0b",
-    "initcode_sha256": "6f859b4c5c8c75725d8febc7eb95b40447e1fe780e51378a31f9c7f69d766c21"
+    "runtime_bytes": 11122,
+    "initcode_bytes_before_arguments": 11797,
+    "runtime_sha256": "032c6681d685d3504ca913073ee774c66d2d0c95c7d1c4a24c47cd535a92cda3",
+    "initcode_sha256": "9b39b4f40ca83d7690b96a800a6f66bcddbc26041e54bdefc4d348b97525dd9f"
   },
   "BorrowerOpening": {
     "implementation_companion": true,
-    "runtime_bytes": 6765,
-    "initcode_bytes_before_arguments": 7745,
-    "runtime_sha256": "9c5826fe7380d2c70fbfe4990160e72629f0e0c9671a9ba029a0ae6a5a8ec839",
-    "initcode_sha256": "b2a9346825273c37dd1541d2dceb0f982e856157aad3c8a581d7824155f255bf"
+    "runtime_bytes": 7170,
+    "initcode_bytes_before_arguments": 8150,
+    "runtime_sha256": "635b32726a6ec8a71a2032b38aad565b8e8ff7624c97c86b2ed7dbf67b43b3f4",
+    "initcode_sha256": "7fdfcb4551148c3406c73783f95c8939bbc1e15a805e812c9507e5d174185c80"
   },
   "BorrowerAdjustments": {
     "implementation_companion": true,
-    "runtime_bytes": 10800,
-    "initcode_bytes_before_arguments": 11780,
-    "runtime_sha256": "824e5197cdc0174fe944a914e35a277566ff6f1d7ab6d5a07f775f6107694d9a",
-    "initcode_sha256": "bd47844c8f7f1892644cae541cb0a7d611ada1c53fc582de6303abfd32dcc9e2"
+    "runtime_bytes": 11637,
+    "initcode_bytes_before_arguments": 12617,
+    "runtime_sha256": "0ca5d0923754488f2866b8da20f5ddff8362c1476cb44d97673d6ee5fff0481f",
+    "initcode_sha256": "70879d234353b1cbd13ee9e0c300c106fd9b75f4346ebbf130d2a6630439c69a"
   },
   "BorrowerBatches": {
     "implementation_companion": true,
-    "runtime_bytes": 10740,
-    "initcode_bytes_before_arguments": 11720,
-    "runtime_sha256": "99bf2c58bc48407fd032648ab53875f3af6faf49df6f4addcac1d862c551a3e0",
-    "initcode_sha256": "c1c49b603eb64f928f67fc3a2fe4f8a2f2764868956fd3665c4f927137ff985c"
+    "runtime_bytes": 11240,
+    "initcode_bytes_before_arguments": 12220,
+    "runtime_sha256": "c9e6d1c37d503b9633959604c7219e1f17d7b8f99625d751ff6fc2949fc9af60",
+    "initcode_sha256": "faecc9e6525bdceadd5f633b2f9de3ad2b856d2f70fe962e14444ce20eba0873"
   },
   "GovernanceStakingModule": {
     "implementation_companion": true,

@@ -55,7 +55,7 @@ def typ(x,imports):
 def name(s,fallback):
  s=re.sub(r'(?<!^)(?=[A-Z])','_',s).lower().strip('_') or fallback
  s=re.sub('[^a-z0-9_]','_',s)
- if s in ['type','self','super','in','pub','fn','mod','use','const','let','mut','match','return','move','ref','own','contract','event','error','where','impl','trait','struct','enum','as','for','while','loop','if','else','true','false']:s+='_' 
+ if s in ['type','self','super','in','pub','fn','mod','use','const','let','mut','match','return','move','ref','own','contract','event','error','where','impl','trait','struct','enum','as','for','while','loop','if','else','true','false']:s+='_'
  return s
 
 for e in inputs:
@@ -87,19 +87,10 @@ for e in inputs:
     lines.append('    pub '+name(x.get('name',''),f'arg{j}')+': '+typ(x,imports)+',')
    lines.append('}')
   for record,fields in records.items():
-   imports.add('Sol');size=len(fields)*32
    fields=[(name(f.get('name',''),f'field{i}'),typ(f,imports)) for i,f in enumerate(fields)]
-   lines.extend(['pub struct '+record+' {']+['    pub '+n+': '+t+',' for n,t in fields]+['}'])
-   lines.extend([f'impl AbiSize for {record} {{ const HEAD_SIZE: u256 = {size}\n    const IS_DYNAMIC: bool = false }}',f'impl AbiSpan<Sol> for {record} {{',f'    fn payload_end<I: ByteInput>(_ input: I, base: u256, pos: u256) -> u256 {{ checked_frame_end<Sol>(pos, {size}, input.len()) }}','}'])
-   lines.extend([f'impl Decode<Sol> for {record} {{','    fn decode_payload<D: AbiDecoder<Sol>>(_ d: mut D) -> Self {'])
-   lines.extend(['        let pos = d.pos()',f'        let end = checked_frame_end<Sol>(pos, {size}, d.input().len())','        d.set_pos(end)','        let input = d.input()'])
-   lines.extend(f'        let {n} = <{t} as Decode<Sol>>::decode_from(input, pos + {i*32})' for i,(n,t) in enumerate(fields))
-   lines.extend(['        Self { '+', '.join(n for n,t in fields)+' }','    }','}'])
-   lines.extend([f'impl Encode<Sol> for {record} {{','    fn encode(own self, _ ptr: *u8) {'])
-   lines.extend(f'        <{t} as Encode<Sol>>::encode(self.{n}, core::ptr::offset_bytes(ptr, {i*32}))' for i,(n,t) in enumerate(fields))
-   lines.extend(['    }','}'])
+   lines.extend(['#[abi]', 'pub struct '+record+' {']+['    pub '+n+': '+t+',' for n,t in fields]+['}'])
   raw=Path(root,source).read_text();license=re.search(r'SPDX-License-Identifier:\s*(\S+)',raw)[1]
-  text=f'// SPDX-License-Identifier: {license}\n// Generated from pinned Solidity interface {e["inventory"]}.\n// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.\nuse std::abi::{{'+', '.join(sorted(imports))+'}\nuse std::evm::Address\n'+('use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, checked_frame_end}\n' if records else '')+'\n'.join(lines)+'\n'
+  text=f'// SPDX-License-Identifier: {license}\n// Generated from pinned Solidity interface {e["inventory"]}.\n// Solidity tuple fields are represented by Fe tuples; integer widths use std ABI wrappers.\nuse std::abi::{{'+', '.join(sorted(imports))+'}\nuse std::evm::Address\n'+'\n'.join(lines)+'\n'
   (out/f'{module}.fe').write_text(text)
   index.append(dict(e,contract=contract,module=module,functions=functions,abi=abi,reference_sha256=hashlib.sha256(raw.encode()).hexdigest()))
 (args.output/'interfaces.fe').write_text(''.join('pub use '+m+'\n' for m in modules))
