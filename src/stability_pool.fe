@@ -64,7 +64,7 @@ fn compounded(_ user: Address) -> u256 uses (deposits: StorageMap<Address, u256>
     if diff > MAX_SCALE_FACTOR_EXPONENT { return 0 }
     initial * product / snap.p / scale_power(diff)
 }
-fn yield_with_pending(_ user: Address) -> u256 uses (active_pool: Address, total_bold: u256, yield_owed: u256, deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, product: u256, current_scale: u256, call: mut Call) {
+fn yield_with_pending(_ user: Address) -> u256 uses (active_pool: Address, total_bold: u256, yield_owed: u256, deposits: StorageMap<Address, u256>, snapshots: StorageMap<Address, Snapshot>, scale_s: StorageMap<u256, u256>, scale_b: StorageMap<u256, u256>, coll_balance: u256, product: u256, current_scale: u256, call: Call) {
     if total_bold < MIN_BOLD_IN_SP { return 0 }
     let initial = deposit(user)
     if initial == 0 { return 0 }
@@ -347,14 +347,14 @@ pub contract StabilityPool {
         ScaleFactor -> u256  { SCALE_FACTOR }
         MaxScaleFactorExponent -> u256  { MAX_SCALE_FACTOR_EXPONENT }
         ScaleSpan -> u256  { SCALE_SPAN }
-        EntireBranchColl -> u256 uses (active_pool, default_pool, call: mut Call) { entire_coll(active_pool, default_pool) }
-        EntireBranchDebt -> u256 uses (active_pool, default_pool, call: mut Call) { entire_debt(active_pool, default_pool) }
+        EntireBranchColl -> u256 uses (active_pool, default_pool, call: Call) { entire_coll(active_pool, default_pool) }
+        EntireBranchDebt -> u256 uses (active_pool, default_pool, call: Call) { entire_debt(active_pool, default_pool) }
         Deposits { user } -> u256 uses (deposits) { deposit(user) }
         StashedColl { user } -> u256 uses (stashed_coll) { stash(user) }
         DepositorCollGain { user } -> u256 uses (deposits, snapshots, scale_s, scale_b, coll_balance, yield_owed) { coll_gain(user) }
         DepositorYieldGain { user } -> u256 uses (deposits, snapshots, scale_s, scale_b, coll_balance, yield_owed) { yield_gain(user) }
         CompoundedBoldDeposit { user } -> u256 uses (deposits, snapshots, product, current_scale) { compounded(user) }
-        DepositorYieldGainWithPending { user } -> u256 uses (active_pool, total_bold, yield_owed, deposits, snapshots, scale_s, scale_b, coll_balance, product, current_scale, call: mut Call) { yield_with_pending(user) }
+        DepositorYieldGainWithPending { user } -> u256 uses (active_pool, total_bold, yield_owed, deposits, snapshots, scale_s, scale_b, coll_balance, product, current_scale, call: Call) { yield_with_pending(user) }
         DepositSnapshots { user } -> (u256, u256, u256, u256) uses (snapshots) { let snap = snapshots[user]
             (snap.s, snap.p, snap.b, snap.scale) }
         ScaleToS { scale } -> u256 uses (scale_s) { s_sum(scale) }

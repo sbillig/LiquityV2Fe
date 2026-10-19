@@ -70,7 +70,7 @@ fn valid_recipient(_ recipient: Address) uses (ctx: Ctx) {
     text::require(recipient != Address::zero() && recipient != ctx.address(), text::bold_recipient())
 }
 fn domain_separator() -> u256 uses (ctx: Ctx) {
-    keccak_packed((DOMAIN_TYPEHASH, NAME_HASH, VERSION_HASH, ctx.chainid(), ctx.address().inner))
+    keccak_packed((DOMAIN_TYPEHASH, NAME_HASH, VERSION_HASH, ctx.chainid(), ctx.address().word()))
 }
 #[arithmetic(unchecked)]
 fn increment_nonce(_ nonce: u256) -> u256 { nonce + 1 }
@@ -82,7 +82,7 @@ fn recover(_ hash: u256, _ v: u8, _ r: u256, _ s: u256) -> Address {
         Result::Err(_) => { std::evm::revert(()) },
     }
     text::require(signer != 0, text::ecdsa_invalid())
-    Address { inner: signer }
+    Address::new(signer)
 }
 pub msg BoldTokenMsg {
     #[selector = sol("name()")]
@@ -238,7 +238,7 @@ pub contract BoldToken uses (ctx: Ctx, log: mut Log, ops: RawOps) {
             text::require(ctx.timestamp() <= deadline, text::permit_expired())
             let nonce = nonces.get(owner)
             nonces.set(key: owner, value: increment_nonce(nonce))
-            let struct_hash = keccak_packed((PERMIT_TYPEHASH, owner.inner, spender.inner, value, nonce, deadline))
+            let struct_hash = keccak_packed((PERMIT_TYPEHASH, owner.word(), spender.word(), value, nonce, deadline))
             let hash = keccak_packed((0x1901 as u16, domain_separator(), struct_hash))
             let signer = recover(hash, v, r.val, s.val)
             text::require(signer == owner, text::permit_invalid())

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, Call, Log, RawStorage}
 use super::price_feed_core as feeds
@@ -23,14 +24,14 @@ pub msg WSTETHPriceFeedMsg {
 pub contract WSTETHPriceFeed {
     init(eth: Address, lst: Address, provider: Address, eth_threshold: u256, lst_threshold: u256, borrower: Address) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
         feeds::init_base(eth, eth_threshold, borrower)
-        unsafe { storage.sstore(slot: 6, value: provider.inner) }
+        unsafe { storage.sstore(slot: 6, value: provider.word()) }
         feeds::init_oracle(7, lst, lst_threshold)
         let _initial = feeds::composite(false, false)
         assert(feeds::source() == 0)
     }
     recv WSTETHPriceFeedMsg {
         Source -> u8 uses (storage: RawStorage) { feeds::source() }
-        LastGood -> u256 uses (storage: RawStorage) { unsafe { storage.sload(1) } }
+        LastGood -> u256 uses (storage: RawStorage) { read_storage_word(1) }
         EthOracle -> (Address, u256, u8) uses (storage: RawStorage) { feeds::oracle(2) }
         Provider -> Address uses (storage: RawStorage) { feeds::address_at(6) }
         LstOracle -> (Address, u256, u8) uses (storage: RawStorage) { feeds::oracle(7) }

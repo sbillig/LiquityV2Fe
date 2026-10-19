@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Solidity-compatible string storage for ERC721 constructor metadata.
+use std::evm::read_storage_word
 use std::abi::{Bytes, DynString}
 use std::evm::{RawStorage}
 use std::evm::packed::keccak_packed
@@ -23,7 +24,7 @@ pub fn initialize(_ slot: u256, _ value: Bytes) uses (storage: mut RawStorage) {
 }
 
 pub fn load(_ slot: u256) -> DynString uses (storage: RawStorage) {
-    let head = unsafe { storage.sload(slot) }
+    let head = read_storage_word(slot)
     let short = head & 1 == 0
     let len = if short { (head & 0xff) / 2 } else { head / 2 }
     var out = BytesBuilder::zeroed(((len + 31) / 32) * 32)
@@ -33,7 +34,7 @@ pub fn load(_ slot: u256) -> DynString uses (storage: RawStorage) {
         let base = keccak_packed(slot)
         var offset: u256 = 0
         while offset < len {
-            out.write_word(at: offset, value: unsafe { storage.sload(base + offset / 32) })
+            out.write_word(at: offset, value: read_storage_word(base + offset / 32))
             offset += 32
         }
     }

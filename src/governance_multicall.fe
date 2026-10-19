@@ -30,7 +30,8 @@ pub fn multi() -> ! uses (ctx: Ctx, call: mut Call, ops: mut RawOps) {
     if count > 0xffffffffffffffff { ops.revert(data: MemSpan::empty()) }
     let base = pos + 32
     if count > (size - base) / 32 { ops.revert(data: MemSpan::empty()) }
-    var results: MemArray<MemBuffer> = MemArray::new_zeroed(count)
+    // Every element is initialized by the first loop before the second reads it.
+    var results: MemArray<MemBuffer> = unsafe { MemArray::new_uninit(count) }
     var output_size = 64 + count * 32
     var i: usize = 0
     while (i as u256) < count {

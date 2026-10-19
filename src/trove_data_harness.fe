@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Test-only access to shared TroveManager arithmetic; not a protocol manager.
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, RawStorage}
 use super::trove_data as data
@@ -62,7 +63,7 @@ pub contract TroveDataHarness {
         }
         RewardSnapshots { id } -> (u256, u256) uses ( storage: mut RawStorage) {
             let slot = data::reward_slot(id)
-            (unsafe { storage.sload(slot) }, unsafe { storage.sload(slot + 1) })
+            (read_storage_word(slot), read_storage_word(slot + 1))
         }
         NewStake { coll } -> u256 uses (storage: mut RawStorage) { data::new_stake(coll) }
         UpdateStake { id, coll } -> u256 uses ( storage: mut RawStorage) { data::update_stake(id, coll) }

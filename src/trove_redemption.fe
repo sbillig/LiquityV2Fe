@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
+use std::evm::read_storage_word
 use core::num::IntDowncast
 use std::abi::{sol, DynArray, DynArrayAccess}
 use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
@@ -69,7 +70,7 @@ pub fn apply_single(_ single: Single) -> Single uses (ctx: Ctx, storage: mut Raw
         change.applied_redist_coll_gain = t.redist_coll_gain
         change.old_weighted_recorded_batch_management_fee = b.weighted_recorded_batch_management_fee
         change.new_weighted_recorded_batch_management_fee = new_amount * b.annual_management_fee
-        let active = Address { inner: unsafe { storage.sload(0) } }
+        let active = Address::from_word_truncate(read_storage_word(0))
         require_code(active)
         active.call(ActivePoolMsg::BatchFee { change, batch: s.manager })
         unsafe { storage.sstore(slot: base + 1, value: coll) }
@@ -106,16 +107,16 @@ fn add_total(_ totals: TroveChange, _ s: Single) -> TroveChange {
     total
 }
 pub fn redeem(_ redeemer: Address, _ amount: u256, _ price: u256, _ rate: u256, _ max_iterations: u256) -> u256 uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
-    if ctx.caller().inner != unsafe { storage.sload(10) } { revert_error(CallerNotCollateralRegistry {}) }
-    let active = Address { inner: unsafe { storage.sload(0) } }
-    let sorted = Address { inner: unsafe { storage.sload(9) } }
+    if ctx.caller().word() != read_storage_word(10) { revert_error(CallerNotCollateralRegistry {}) }
+    let active = Address::from_word_truncate(read_storage_word(0))
+    let sorted = Address::from_word_truncate(read_storage_word(9))
     var total = TroveChange::zero()
     var remaining = amount
-    var id = unsafe { storage.sload(data::LAST_ZOMBIE) }
+    var id = read_storage_word(data::LAST_ZOMBIE)
     var zombie = id != 0
     if !zombie { id = sorted.static(SortedTrovesMsg::GetLast {}) }
     var last_batch = Address::zero()
-    let feed = Address { inner: unsafe { storage.sload(2) } }
+    let feed = Address::from_word_truncate(read_storage_word(2))
     let redemption_price = feed.call(PriceMsg::RedemptionPrice {}).0
     var iterations = if max_iterations == 0 { MAX_UINT256 } else { max_iterations }
     var fees: u256 = 0
@@ -141,7 +142,7 @@ pub fn redeem(_ redeemer: Address, _ amount: u256, _ price: u256, _ rate: u256, 
         if debt < MIN_DEBT {
             if !zombie {
                 state::set_status(id, 4)
-                let sorted_now = Address { inner: unsafe { storage.sload(9) } }
+                let sorted_now = Address::from_word_truncate(read_storage_word(9))
                 require_code(sorted_now)
                 if manager != Address::zero() { sorted_now.call(SortedTrovesMsg::RemoveFromBatch { id }) }
                 else { sorted_now.call(SortedTrovesMsg::Remove { id }) }
@@ -162,13 +163,13 @@ pub fn redeem(_ redeemer: Address, _ amount: u256, _ price: u256, _ rate: u256, 
     total.debt_decrease
 }
 pub fn urgent(_ amount: u256, _ ids: DynArray<u256>, _ min_coll: u256) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
-    if unsafe { storage.sload(data::SHUTDOWN) } == 0 { revert_error(NotShutDown {}) }
+    if read_storage_word(data::SHUTDOWN) == 0 { revert_error(NotShutDown {}) }
     if amount == 0 { revert_error(ZeroAmount {}) }
-    let bold_token = Address { inner: unsafe { storage.sload(8) } }
+    let bold_token = Address::from_word_truncate(read_storage_word(8))
     if bold_token.static(BoldTokenMsg::BalanceOf { account: ctx.caller() }) < amount { revert_error(NotEnoughBoldBalance {}) }
-    let active = Address { inner: unsafe { storage.sload(0) } }
+    let active = Address::from_word_truncate(read_storage_word(0))
     var total = TroveChange::zero()
-    let feed = Address { inner: unsafe { storage.sload(2) } }
+    let feed = Address::from_word_truncate(read_storage_word(2))
     let price = feed.call(PriceMsg::Price {}).0
     var remaining = amount
     var i: u256 = 0
@@ -197,7 +198,7 @@ pub fn urgent(_ amount: u256, _ ids: DynArray<u256>, _ min_coll: u256) uses (ctx
     active.call(ActivePoolMsg::AccountTroveChange { change: total, batch: Address::zero() })
     require_code(active)
     active.call(ActivePoolMsg::SendColl { account: ctx.caller(), amount: total.coll_decrease })
-    let token = Address { inner: unsafe { storage.sload(8) } }
+    let token = Address::from_word_truncate(read_storage_word(8))
     require_code(token)
     token.call(BoldTokenMsg::Burn { account: ctx.caller(), amount: total.debt_decrease })
 }

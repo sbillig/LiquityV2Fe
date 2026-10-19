@@ -1,3 +1,4 @@
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, Call, Create, RawStorage, Log}
 use super::user_proxy::{UserProxy, PermitParams}
@@ -40,7 +41,7 @@ pub contract GovernanceStakingHarness {
         Deploy -> Address uses (implementation, ctx: Ctx, create: mut Create, log: mut Log) { factory::deploy(implementation) }
         User { user } -> (u256, u256, u256, u256) uses ( storage: RawStorage) {
             let s = map(user, 8)
-            (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
+            (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2), read_storage_word(s + 3))
         }
         Deposit { amount } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, false, ctx.caller()) }
         DepositTo { amount, send, recipient } uses (implementation, ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call: mut Call) { staking::deposit(implementation, amount, send, recipient) }

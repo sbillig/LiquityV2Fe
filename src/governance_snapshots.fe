@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::evm::{Address, Ctx, RawStorage, Call, Log, StorageMap, storage_at_mut}
 use std::evm::packed::keccak_packed
 use super::governance_math::{lqty_to_votes, max}
@@ -17,7 +18,7 @@ pub struct SnapshotVotesForInitiative {
     pub initiative: Address,
     pub votes: u256, pub vetos: u256, pub for_epoch: u256,
 }
-pub fn map(_ address: Address, _ root: u256) -> u256 { keccak_packed((address.inner, root)) }
+pub fn map(_ address: Address, _ root: u256) -> u256 { keccak_packed((address.word(), root)) }
 
 // Governance storage region (guard, owner, accrual and snapshot state).
 // Write paths reinterpret it with one unsafe storage_at_mut; the read helpers
@@ -61,16 +62,16 @@ pub fn epoch(_ cfg: SnapshotConfig) -> u256 uses (ctx: Ctx) { (ctx.timestamp() -
 pub fn epoch_start(_ cfg: SnapshotConfig) -> u256 uses (ctx: Ctx) { cfg.start + (epoch(cfg) - 1) * cfg.duration }
 pub fn threshold(_ cfg: SnapshotConfig, _ votes: u256) -> u256 uses (storage: RawStorage) {
     if votes == 0 { return 0 }
-    let payout = unsafe { storage.sload(2) } * 1000000000000000000 / votes
+    let payout = read_storage_word(2) * 1000000000000000000 / votes
     let min_votes = if payout != 0 { cfg.min_claim * 1000000000000000000 / payout } else { 0 }
     max(votes * cfg.voting_factor / 1000000000000000000, min_votes)
 }
 pub fn total(_ cfg: SnapshotConfig) -> ((u256, u256), (u256, u256), bool) uses (ctx: Ctx, storage: RawStorage) {
     let current = epoch(cfg)
-    let votes = unsafe { storage.sload(3) }
-    let at = unsafe { storage.sload(4) }
-    let qty = unsafe { storage.sload(6) }
-    let offset = unsafe { storage.sload(7) }
+    let votes = read_storage_word(3)
+    let at = read_storage_word(4)
+    let qty = read_storage_word(6)
+    let offset = read_storage_word(7)
     if at < current - 1 { ((lqty_to_votes(qty, epoch_start(cfg), offset), current - 1), (qty, offset), true) }
     else { ((votes, at), (qty, offset), false) }
 }
@@ -78,9 +79,9 @@ pub fn initiative(_ cfg: SnapshotConfig, _ target: Address) -> ((u256, u256, u25
 uses (ctx: Ctx, storage: RawStorage) {
     let current = epoch(cfg)
     let s = map(target, 5)
-    let snapshot = (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
+    let snapshot = (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2), read_storage_word(s + 3))
     let t = map(target, 9)
-    let state = (unsafe { storage.sload(t) }, unsafe { storage.sload(t + 1) }, unsafe { storage.sload(t + 2) }, unsafe { storage.sload(t + 3) }, unsafe { storage.sload(t + 4) })
+    let state = (read_storage_word(t), read_storage_word(t + 1), read_storage_word(t + 2), read_storage_word(t + 3), read_storage_word(t + 4))
     if snapshot.1 < current - 1 {
         let start = epoch_start(cfg)
         let votes = lqty_to_votes(state.0, start, state.1)
@@ -116,16 +117,16 @@ uses (ctx: Ctx, storage: mut RawStorage, log: mut Log) {
 #[inline(never)]
 pub fn status(_ cfg: SnapshotConfig, _ target: Address, _ votes: (u256, u256), _ ivotes: (u256, u256, u256, u256), _ istate: (u256, u256, u256, u256, u256)) -> (u8, u256, u256)
 uses (ctx: Ctx, storage: RawStorage) {
-    let registered = unsafe { storage.sload(map(target, 11)) }
+    let registered = read_storage_word(map(target, 11))
     if registered == 0 { return (0, 0, 0) }
     let current = epoch(cfg)
     if registered == current { return (1, 0, 0) }
-    let last = unsafe { storage.sload(map(target, 9) + 4) }
+    let last = read_storage_word(map(target, 9) + 4)
     if registered == ~0 { return (6, last, 0) }
     if last >= current - 1 { return (4, last, 0) }
     let cutoff = threshold(cfg, votes.0)
     if ivotes.0 > cutoff && ivotes.0 > ivotes.3 {
-        return (3, last, ivotes.0 * unsafe { storage.sload(2) } / votes.0)
+        return (3, last, ivotes.0 * read_storage_word(2) / votes.0)
     }
     if istate.4 + cfg.unregister_epochs < current - 1 || (ivotes.3 > ivotes.0 && ivotes.3 > cutoff * cfg.unregister_factor / 1000000000000000000) {
         return (5, last, 0)

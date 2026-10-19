@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+// An unvalidated Solidity calldata address word. Keep the full ABI word until
+// Solidity would consume the field; std::evm::Address is always canonical.
+use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode, AbiFrame}
+use std::abi::{Sol, SolCompat}
+use std::evm::Address
+
+pub struct AddressWord { value: u256 }
+impl Copy for AddressWord {}
+impl AddressWord {
+    pub fn from_address(_ address: Address) -> Self { Self { value: address.word() } }
+    pub fn word(self) -> u256 { self.value }
+}
+impl SolCompat for AddressWord {
+    type S = String<7>
+    const SOL_TYPE: Self::S = "address"
+}
+impl AbiSize for AddressWord {
+    const HEAD_SIZE: u256 = 32
+    const IS_DYNAMIC: bool = false
+}
+impl AbiSpan<Sol> for AddressWord {
+    fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 32 }
+}
+impl Decode<Sol> for AddressWord {
+    fn decode_payload<D: AbiDecoder<Sol>, I: ByteInput>(_ d: mut D, _ input: I) -> Self {
+        Self { value: d.read_word(input) }
+    }
+}
+impl Encode<Sol> for AddressWord {
+    fn encode(own self, _ out: AbiFrame) { out.store_word(at: 0, value: self.value) }
+}
+pub fn checked_address(_ value: AddressWord) -> Address {
+    if value.word() >> 160 != 0 { std::evm::revert(()) }
+    Address::new(value.word())
+}

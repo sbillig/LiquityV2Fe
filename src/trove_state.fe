@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // TroveManager packed writes, indexed arrays and exact batch-share accounting.
+use std::evm::read_storage_word
 use core::num::IntDowncast
 use std::evm::{Address, Ctx, RawStorage, revert_error, storage_at_mut}
 use super::trove_data::TroveManagerLayout
@@ -40,13 +41,13 @@ pub fn set_batch_rate_time(_ manager: Address, _ time: u256) uses (storage: mut 
 }
 pub fn set_manager(_ id: u256, _ manager: Address) uses (storage: mut RawStorage) {
     let tm = unsafe { storage_at_mut<TroveManagerLayout>(0) }
-    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.inner
+    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.word()
 }
 #[arithmetic(unchecked)]
 fn array_slot(_ root: u256, _ index: u256) -> u256 { keccak_packed(root) + index }
 pub fn array_get(_ root: u256, _ index: u256) -> u256 uses ( storage: RawStorage) {
-    if index >= unsafe { storage.sload(root) } { revert_error(Panic::from(PANIC_INDEX_OUT_OF_BOUNDS)) }
-    unsafe { storage.sload(array_slot(root, index)) }
+    if index >= read_storage_word(root) { revert_error(Panic::from(PANIC_INDEX_OUT_OF_BOUNDS)) }
+    read_storage_word(array_slot(root, index))
 }
 pub fn push_trove_id(_ id: u256) uses (storage: mut RawStorage) {
     let tm = unsafe { storage_at_mut<TroveManagerLayout>(0) }

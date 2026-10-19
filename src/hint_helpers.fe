@@ -6,11 +6,11 @@ use super::helper_calls::*
 use super::types::{TroveChange, LatestTroveData}
 use super::liquity_math as math
 use super::constants::{INTEREST_RATE_ADJ_COOLDOWN, UPFRONT_INTEREST_PERIOD}
-pub fn fee(_ pool: Address, _ change: TroveChange, _ debt: u256) -> u256 uses (call: mut Call) {
+pub fn fee(_ pool: Address, _ change: TroveChange, _ debt: u256) -> u256 uses (call: Call) {
     let avg = pool.static(HelperPoolMsg::Average { change })
     math::calc_interest(debt * avg, UPFRONT_INTEREST_PERIOD)
 }
-pub fn individual_rate(_ pool: Address, _ trove: LatestTroveData, _ rate: u256) -> u256 uses (call: mut Call) {
+pub fn individual_rate(_ pool: Address, _ trove: LatestTroveData, _ rate: u256) -> u256 uses (call: Call) {
     var change = TroveChange::zero()
     change.applied_redist_bold_debt_gain = trove.redist_bold_debt_gain
     change.new_weighted_recorded_debt = trove.entire_debt * rate
@@ -51,7 +51,7 @@ pub contract HintHelpers {
             DynString::from_payload(source: unsafe { core::ptr::MemSpan::from_raw_parts(ptr: p, len: 11) })
         }
         Registry -> Address uses (registry) { registry }
-        Approx { index, rate, trials, seed } -> (u256, u256, u256) uses (registry, call: mut Call) {
+        Approx { index, rate, trials, seed } -> (u256, u256, u256) uses (registry, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let sorted = manager.static(HelperManagerMsg::Sorted {})
             let count = manager.static(HelperManagerMsg::Count {})
@@ -73,7 +73,7 @@ pub contract HintHelpers {
             }
             (hint, diff, random)
         }
-        Open { index, amount, rate } -> u256 uses (registry, call: mut Call) {
+        Open { index, amount, rate } -> u256 uses (registry, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             var change = TroveChange::zero()
@@ -81,20 +81,20 @@ pub contract HintHelpers {
             change.new_weighted_recorded_debt = amount * rate
             fee(pool, change, amount)
         }
-        AdjustRate { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+        AdjustRate { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })
             if rate == t.annual_interest_rate || ctx.timestamp() >= t.last_interest_rate_adj_time + INTEREST_RATE_ADJ_COOLDOWN { return 0 }
             individual_rate(pool, t, rate)
         }
-        ForceRate { index, id, rate } -> u256 uses (registry, call: mut Call) {
+        ForceRate { index, id, rate } -> u256 uses (registry, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })
             individual_rate(pool, t, rate)
         }
-        Adjust { index, id, amount } -> u256 uses (registry, call: mut Call) {
+        Adjust { index, id, amount } -> u256 uses (registry, call: Call) {
             if amount == 0 { return 0 }
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
@@ -114,7 +114,7 @@ pub contract HintHelpers {
             }
             fee(pool, change, amount)
         }
-        BatchRate { index, batch, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+        BatchRate { index, batch, rate } -> u256 uses (registry, ctx: Ctx, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
@@ -125,7 +125,7 @@ pub contract HintHelpers {
             change.old_weighted_recorded_debt = b.weighted_recorded_debt
             fee(pool, change, b.entire_debt_without_redistribution)
         }
-        OpenBatch { index, amount, batch } -> u256 uses (registry, call: mut Call) {
+        OpenBatch { index, amount, batch } -> u256 uses (registry, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let b = manager.static(HelperManagerMsg::Batch { manager: batch })
@@ -136,7 +136,7 @@ pub contract HintHelpers {
             change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + amount) * b.annual_interest_rate
             fee(pool, change, amount)
         }
-        JoinBatch { index, id, batch } -> u256 uses (registry, call: mut Call) {
+        JoinBatch { index, id, batch } -> u256 uses (registry, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })
@@ -148,7 +148,7 @@ pub contract HintHelpers {
             change.new_weighted_recorded_debt = (b.entire_debt_without_redistribution + t.entire_debt) * b.annual_interest_rate
             fee(pool, change, t.entire_debt)
         }
-        RemoveBatch { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: mut Call) {
+        RemoveBatch { index, id, rate } -> u256 uses (registry, ctx: Ctx, call: Call) {
             let manager = registry.static(HelperRegistryMsg::Manager { index })
             let pool = manager.static(HelperManagerMsg::Active {})
             let t = manager.static(HelperManagerMsg::Trove { id })

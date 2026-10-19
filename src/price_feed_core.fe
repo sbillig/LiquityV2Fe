@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use core::num::IntDowncast
 use std::abi::sol
 use std::evm::{Address, Ctx, Call, Log, RawStorage, revert_error}
@@ -19,23 +20,23 @@ pub msg OracleMsg {
     Shutdown,
 }
 pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) {
-    Address { inner: unsafe { storage.sload(slot) } & 0xffffffffffffffffffffffffffffffffffffffff }
+    Address::new(read_storage_word(slot) & 0xffffffffffffffffffffffffffffffffffffffff)
 }
-pub fn source() -> u8 uses (storage: RawStorage) { (unsafe { storage.sload(0) } & 255).downcast_truncate() }
-pub fn set_source(_ value: u256) uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 0, value: (unsafe { storage.sload(0) } & ~255) | value) } }
+pub fn source() -> u8 uses (storage: RawStorage) { (read_storage_word(0) & 255).downcast_truncate() }
+pub fn set_source(_ value: u256) uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 0, value: (read_storage_word(0) & ~255) | value) } }
 pub fn oracle(_ slot: u256) -> (Address, u256, u8) uses (storage: RawStorage) {
-    (address_at(slot), unsafe { storage.sload(slot + 1) }, (unsafe { storage.sload(slot + 2) } & 255).downcast_truncate())
+    (address_at(slot), read_storage_word(slot + 1), (read_storage_word(slot + 2) & 255).downcast_truncate())
 }
 pub fn init_oracle(_ slot: u256, _ aggregator: Address, _ threshold: u256) uses (storage: mut RawStorage, call: mut Call) {
-    unsafe { storage.sstore(slot: slot, value: aggregator.inner) }
+    unsafe { storage.sstore(slot: slot, value: aggregator.word()) }
     unsafe { storage.sstore(slot: slot + 1, value: threshold) }
     let decimals = aggregator.static(OracleMsg::Decimals {})
     unsafe { storage.sstore(slot: slot + 2, value: decimals as u256) }
 }
 pub fn init_base(_ aggregator: Address, _ threshold: u256, _ borrower: Address) uses (storage: mut RawStorage, call: mut Call) {
     init_oracle(2, aggregator, threshold)
-    unsafe { storage.sstore(slot: 5, value: borrower.inner) }
-    assert(unsafe { storage.sload(4) } == 8)
+    unsafe { storage.sstore(slot: 5, value: borrower.word()) }
+    assert(read_storage_word(4) == 8)
 }
 pub fn answer(_ slot: u256) -> (u256, bool) uses (ctx: Ctx, storage: RawStorage, call: mut Call) {
     let (aggregator, threshold, decimals) = oracle(slot)
@@ -85,9 +86,9 @@ pub fn fallback_price(_ eth: u256, _ reth: bool) -> u256 uses (ctx: Ctx, storage
     assert(source() == 1)
     let (rate, down) = canonical(reth)
     if down { set_source(2)
-return unsafe { storage.sload(1) } }
+return read_storage_word(1) }
     let price = eth * rate / 1000000000000000000
-    let best = min(price, unsafe { storage.sload(1) })
+    let best = min(price, read_storage_word(1))
     unsafe { storage.sstore(slot: 1, value: best) }
     best
 }
@@ -95,18 +96,18 @@ pub fn during_shutdown(_ reth: bool) -> (u256, bool) uses (ctx: Ctx, storage: mu
     if source() == 1 {
         let (eth, down) = answer(2)
         if down { set_source(2)
-return (unsafe { storage.sload(1) }, false) }
+return (read_storage_word(1), false) }
         return (fallback_price(eth, reth), false)
     }
     assert(source() == 2)
-    (unsafe { storage.sload(1) }, false)
+    (read_storage_word(1), false)
 }
 pub fn weth() -> (u256, bool) uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     if source() != 0 { assert(source() == 2)
-return (unsafe { storage.sload(1) }, false) }
+return (read_storage_word(1), false) }
     let (price, down) = answer(2)
     if down { shutdown(address_at(2), 2)
-return (unsafe { storage.sload(1) }, true) }
+return (read_storage_word(1), true) }
     unsafe { storage.sstore(slot: 1, value: price) }
     (price, false)
 }
@@ -129,9 +130,9 @@ market_down = d2
 rate = v3
 rate_down = d3
         if eth_down { shutdown(address_at(2), 2)
-return (unsafe { storage.sload(1) }, true) }
+return (read_storage_word(1), true) }
         if rate_down { shutdown(address_at(6), 2)
-return (unsafe { storage.sload(1) }, true) }
+return (read_storage_word(1), true) }
     } else {
         let (v, d) = answer(7)
 market = v
@@ -143,9 +144,9 @@ rate_down = d2
 eth = v3
 eth_down = d3
         if rate_down { shutdown(address_at(6), 2)
-return (unsafe { storage.sload(1) }, true) }
+return (read_storage_word(1), true) }
         if eth_down { shutdown(address_at(2), 2)
-return (unsafe { storage.sload(1) }, true) }
+return (read_storage_word(1), true) }
     }
     if market_down {
         shutdown(address_at(7), 1)

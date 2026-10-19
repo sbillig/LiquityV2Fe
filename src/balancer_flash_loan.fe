@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use core::abi::{ByteInput, Decode}
 use std::abi::{sol, Sol, Bytes, DynArray, DynArrayAccess, MemVec}
 use std::evm::{Address, Ctx, Call, RawStorage, encode_abi_payload}
@@ -6,7 +7,7 @@ use super::zapper_calls::{LeveragedOpenParams, CloseParams, checked_address}
 use super::token_calls::safe_transfer
 use super::revert_texts::require
 use super::balancer_errors as error
-const VAULT: Address = Address { inner: 0xba12222222228d8ba445958a75a0704d566bf2c8 }
+const VAULT: Address = Address::new(0xba12222222228d8ba445958a75a0704d566bf2c8)
 pub msg VaultCalls {
     #[selector = sol("flashLoan(address,address[],uint256[],bytes)")]
     Flash { receiver: Address, tokens: DynArray<Address>, amounts: DynArray<u256>, data: Bytes },
@@ -29,9 +30,9 @@ pub msg BalancerMsg {
     #[selector = sol("receiveFlashLoan(address[],uint256[],uint256[],bytes)")]
     Receive { tokens: DynArray<Address>, amounts: DynArray<u256>, fees: DynArray<u256>, data: Bytes },
 }
-fn receiver() -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(0) } & ((1 << 160) - 1) } }
+fn receiver() -> Address uses (storage: RawStorage) { Address::from_word_truncate(read_storage_word(0) & ((1 << 160) - 1)) }
 fn set_receiver(_ value: Address) uses (storage: mut RawStorage) {
-    unsafe { storage.sstore(slot: 0, value: (unsafe { storage.sload(0) } >> 160 << 160) | value.inner) }
+    unsafe { storage.sstore(slot: 0, value: (read_storage_word(0) >> 160 << 160) | value.word()) }
 }
 fn require_code(_ target: Address) uses (ctx: Ctx) {
     if ctx.extcodesize(target) == 0 { std::evm::revert(()) }

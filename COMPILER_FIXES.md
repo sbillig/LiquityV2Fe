@@ -1,7 +1,13 @@
 # Compiler fixes
 
-Current compiler: `toolchain/fe`, detached at `1b4e287c65a0981b385a18c9d49195c92f8f2197`
-from [`sbillig/fe`'s `mvs` branch](https://github.com/sbillig/fe/tree/mvs).
+Current compiler: `toolchain/fe` at `82742057924ba9474efb1e3574f0bf1ffd01ce08`
+on [`sbillig/fe`'s `liquity-master-refresh` branch](https://github.com/sbillig/fe/tree/liquity-master-refresh).
+It contains upstream master `f69b911ce` plus the separately published fixes
+[Fe #1827](https://github.com/argotorg/fe/pull/1827) (custom struct wire-type
+metadata) and [Fe #1828](https://github.com/argotorg/fe/pull/1828) (Snapshot views
+through capabilities). The former supports lazy calldata address words without
+violating the new canonical Address invariant; the latter fixes false storage
+access conflicts in StabilityPool external calls.
 `reference_manifest.json` pins its revision and source tree; no local compiler
 patches are applied. `scripts/verify_compiler.py --binary` checks both the
 checkout and the release CLI before protocol verification.

@@ -10,7 +10,7 @@ msg LiquityBaseHarnessMsg {
 }
 pub contract LiquityBaseHarness {
     recv LiquityBaseHarnessMsg {
-        Tcr { active, default, price } -> u256 uses (call: mut Call) { base::tcr(active, default, price) }
-        Below { active, default, price, ccr } -> bool uses (call: mut Call) { base::below_critical(active, default, price, ccr) }
+        Tcr { active, default, price } -> u256 uses (call: Call) { base::tcr(active, default, price) }
+        Below { active, default, price, ccr } -> bool uses (call: Call) { base::below_critical(active, default, price, ccr) }
     }
 }

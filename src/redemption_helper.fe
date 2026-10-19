@@ -97,8 +97,8 @@ uses (branch_list: SolArray<Address>, call: mut Call) {
         let registry = branch_address(i)
         let manager = registry.static(RedemptionHelperCalls::Manager {})
         let sorted = registry.static(RedemptionHelperCalls::Sorted {})
-        p.write_word(at: base, value: manager.inner)
-        p.write_word(at: base + 32, value: sorted.inner)
+        p.write_word(at: base, value: manager.word())
+        p.write_word(at: base + 32, value: sorted.word())
         let (proportion, price, active) = manager.call(RedemptionHelperCalls::Unbacked {})
         p.write_word(at: base + 64, value: if active { 1 } else { 0 })
         p.write_word(at: base + 96, value: price)
@@ -111,7 +111,7 @@ uses (branch_list: SolArray<Address>, call: mut Call) {
         i = 0
         while i < count {
             let base = 256 * i
-            let manager = Address { inner: p.read_word(at: base) }
+            let manager = Address::new(p.read_word(at: base))
             let debt = manager.static(RedemptionHelperCalls::Debt {})
             p.write_word(at: base + 128, value: debt)
             if p.read_word(at: base + 64) != 0 { total += debt }
@@ -127,8 +127,8 @@ uses (branch_list: SolArray<Address>, call: mut Call) {
         let attempted = bold * p.read_word(at: base + 128) / total
         p.write_word(at: base + 160, value: attempted)
         if attempted == 0 { continue }
-        let manager = Address { inner: p.read_word(at: base) }
-        let sorted = Address { inner: p.read_word(at: base + 32) }
+        let manager = Address::new(p.read_word(at: base))
+        let sorted = Address::new(p.read_word(at: base + 32))
         let zombie = manager.static(RedemptionHelperCalls::Zombie {})
         let last = sorted.static(RedemptionHelperCalls::Last {})
         var current = if zombie != 0 { zombie } else { last }
@@ -249,7 +249,7 @@ pub contract RedemptionHelper {
             var i = 0
             while i < count {
                 let token = registry.static(RedemptionHelperCalls::TokenAt { index: i })
-                p.write_word(at: 64 * i, value: token.inner)
+                p.write_word(at: 64 * i, value: token.word())
                 p.write_word(at: 64 * i + 32, value: token.static(RedemptionHelperCalls::Balance { account: ctx.address() }))
                 i += 1
             }
@@ -258,7 +258,7 @@ pub contract RedemptionHelper {
             registry.call(RedemptionHelperCalls::Redeem { amount, iterations, fee })
             i = 0
             while i < count {
-                let token = Address { inner: p.read_word(at: 64 * i) }
+                let token = Address::new(p.read_word(at: 64 * i))
                 let received = token.static(RedemptionHelperCalls::Balance { account: ctx.address() }) - p.read_word(at: 64 * i + 32)
                 require(received >= minimum.values.get(i), error_slippage())
                 if received > 0 { safe_transfer(token, ctx.caller(), received) }

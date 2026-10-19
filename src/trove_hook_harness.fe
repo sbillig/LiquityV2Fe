@@ -34,10 +34,10 @@ pub msg TroveHookMsg {
 }
 pub contract TroveHookHarness {
     init(bo: Address, default_pool: Address, nft: Address, sorted: Address) uses (storage: mut RawStorage) {
-        unsafe { storage.sstore(slot: 4, value: bo.inner) }
-        unsafe { storage.sstore(slot: 1, value: default_pool.inner) }
-        unsafe { storage.sstore(slot: 3, value: nft.inner) }
-        unsafe { storage.sstore(slot: 9, value: sorted.inner) }
+        unsafe { storage.sstore(slot: 4, value: bo.word()) }
+        unsafe { storage.sstore(slot: 1, value: default_pool.word()) }
+        unsafe { storage.sstore(slot: 3, value: nft.word()) }
+        unsafe { storage.sstore(slot: 9, value: sorted.word()) }
     }
     recv TroveHookMsg {
         SetBatch { params } uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) { hooks::require_bo()

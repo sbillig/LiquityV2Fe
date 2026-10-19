@@ -15,7 +15,7 @@ fn signed_abs(_ value: i256) -> u256 {
     if value < 0 { (-value).downcast_truncate() } else { value.downcast_truncate() }
 }
 fn debt_between(_ registry: Address, _ hints: Address, _ index: u256, _ lo: u256, _ hi: u256, _ excluded: u256, _ stop: bool, _ old_hint: u256, _ trials: u256) -> (u256, u256)
-uses (ctx: Ctx, call: mut Call) {
+uses (ctx: Ctx, call: Call) {
     let (manager, sorted) = resolve(registry, index)
     var hint = old_hint
     if trials > 0 {
@@ -59,10 +59,10 @@ pub contract DebtInFrontHelper {
     recv DebtInFrontHelperMsg {
         Registry -> Address uses (registry) { registry }
         Hints -> Address uses (hints) { hints }
-        Between { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: mut Call) {
+        Between { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: Call) {
             debt_between(registry, hints, index, lo, hi, excluded, false, hint, trials)
         }
-        Until { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: mut Call) {
+        Until { index, lo, hi, excluded, hint, trials } -> (u256, u256) uses (registry, hints, ctx: Ctx, call: Call) {
             debt_between(registry, hints, index, lo, hi, excluded, true, hint, trials)
         }
     }

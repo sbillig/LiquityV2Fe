@@ -1,3 +1,4 @@
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, RawStorage, Call, Log}
 use super::governance_snapshots as snap
@@ -34,7 +35,7 @@ pub contract GovernanceSnapshotHarness {
         Start -> u256 uses (cfg, ctx: Ctx) { snap::epoch_start(cfg) }
         Seconds -> u256 uses (cfg, ctx: Ctx) { (ctx.timestamp() - cfg.start) % cfg.duration }
         Threshold { votes } -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, votes) }
-        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, unsafe { storage.sload(3) }) }
+        Latest -> u256 uses (cfg, storage: RawStorage) { snap::threshold(cfg, read_storage_word(3)) }
         Total -> ((u256, u256), (u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::total(cfg) }
         Initiative { target } -> ((u256, u256, u256, u256), (u256, u256, u256, u256, u256), bool) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::initiative(cfg, target) }
         Status { target, votes, ivotes, state } -> (u8, u256, u256) uses (cfg, ctx: Ctx, storage: RawStorage) { snap::status(cfg, target, votes, ivotes, state) }

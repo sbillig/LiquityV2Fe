@@ -111,7 +111,7 @@ pub contract GasCompZapper {
             require(checked_address(p.batch) == Address::zero() || p.rate == 0, error::batch_rate())
             deposit(cfg.weth, ctx.value())
             safe_transfer_from(coll_token, ctx.caller(), ctx.address(), p.coll)
-            let index = keccak_packed((ctx.caller().inner, p.index))
+            let index = keccak_packed((ctx.caller().word(), p.index))
             let this = ctx.address()
             let id = if checked_address(p.batch) == Address::zero() {
                 cfg.bo.call(ZapperCalls::Open { owner: checked_address(p.owner), index, coll: p.coll, bold: p.bold, upper: p.upper, lower: p.lower, rate: p.rate, fee: p.fee, add: this, remove: this, receiver: this })
@@ -177,7 +177,7 @@ pub contract GasCompZapper {
         }
         GasCompZapperMsg::CloseFromColl { id, amount, minimum } uses (cfg, coll_token, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
-            let p = CloseParams { id, amount, minimum, receiver }
+            let p = CloseParams { id, amount, minimum, receiver: AddressWord::from_address(receiver) }
             let initial = balances(cfg, coll_token, receiver)
             let encoded = encode_abi_payload(p)
             require_code(cfg.flash)

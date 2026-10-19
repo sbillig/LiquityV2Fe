@@ -52,7 +52,7 @@ pub fn hex_number(_ value: u256) -> DynString {
 
 #[inline(never)]
 pub fn checksum(_ address: Address) -> DynString {
-    let lower = hex_fixed(address.inner, 20)
+    let lower = hex_fixed(address.word(), 20)
     let hash = keccak_packed(slice(lower, 2, 42).as_bytes())
     var out = BytesBuilder::with_capacity(42)
     out.append(lower.payload_span())

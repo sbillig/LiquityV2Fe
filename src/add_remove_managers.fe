@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, Call, RawStorage, Log, revert_error}
 use std::evm::packed::keccak_packed
@@ -33,24 +34,24 @@ fn map_slot(_ root: u256, _ id: u256) -> u256 { keccak_packed((id, root)) }
 #[arithmetic(unchecked)]
 fn second_slot(_ slot: u256) -> u256 { slot + 1 }
 pub fn get_add(_ slots: ManagerSlots, _ id: u256) -> Address uses ( storage: RawStorage) {
-    Address { inner: unsafe { storage.sload(map_slot(slots.add, id)) } }
+    Address::from_word_truncate(read_storage_word(map_slot(slots.add, id)))
 }
 pub fn get_remove(_ slots: ManagerSlots, _ id: u256) -> (Address, Address) uses ( storage: RawStorage) {
     let slot = map_slot(slots.remove, id)
-    (Address { inner: unsafe { storage.sload(slot) } }, Address { inner: unsafe { storage.sload(second_slot(slot)) } })
+    (Address::from_word_truncate(read_storage_word(slot)), Address::from_word_truncate(read_storage_word(second_slot(slot))))
 }
 pub fn require_borrower(_ nft: Address, _ id: u256) uses (ctx: Ctx, call: mut Call) {
     if ctx.caller() != nft.static(TroveNFTMsg::OwnerOf { id }) { revert_error(NotBorrower {}) }
 }
 pub fn set_add(_ slots: ManagerSlots, _ id: u256, _ manager: Address) uses ( storage: mut RawStorage, log: mut Log) {
-    unsafe { storage.sstore(slot: map_slot(slots.add, id), value: manager.inner) }
+    unsafe { storage.sstore(slot: map_slot(slots.add, id), value: manager.word()) }
     log.emit(AddManagerUpdated { id, manager })
 }
 pub fn set_remove(_ slots: ManagerSlots, _ id: u256, _ manager: Address, _ receiver: Address) uses ( storage: mut RawStorage, log: mut Log) {
     if manager == Address::zero() && receiver != Address::zero() { revert_error(EmptyManager {}) }
     let slot = map_slot(slots.remove, id)
-    unsafe { storage.sstore(slot, value: manager.inner) }
-    unsafe { storage.sstore(slot: second_slot(slot), value: receiver.inner) }
+    unsafe { storage.sstore(slot, value: manager.word()) }
+    unsafe { storage.sstore(slot: second_slot(slot), value: receiver.word()) }
     log.emit(RemoveManagerAndReceiverUpdated { id, manager, receiver })
 }
 pub fn wipe(_ slots: ManagerSlots, _ id: u256) uses ( storage: mut RawStorage, log: mut Log) {

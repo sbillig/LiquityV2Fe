@@ -27,7 +27,7 @@ impl AbiSpan<Sol> for DebtPerInterestRate {
 }
 #[error]
 pub struct Error { pub reason: DynString }
-pub fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: mut Call) {
+pub fn resolve(_ registry: Address, _ index: u256) -> (Address, Address) uses (call: Call) {
     let manager = registry.static(HelperRegistryMsg::Manager { index })
     if manager == Address::zero() {
         revert_error(Error { reason: "Invalid collateral index" })
@@ -41,7 +41,7 @@ fn allocate(_ count: u256, _ stride: u256) -> BytesBuilder {
     if count > 0xffffffffffffffff { revert_error(Panic { code: 0x41 }) }
     BytesBuilder::zeroed(count * stride)
 }
-fn one(_ manager: Address, _ id: u256, _ out: mut BytesBuilder, _ base: u256) uses (call: mut Call) {
+fn one(_ manager: Address, _ id: u256, _ out: mut BytesBuilder, _ base: u256) uses (call: Call) {
     out.write_word(at: base, value: id)
     let t = manager.static(HelperManagerMsg::Trove { id })
     out.write_word(at: base + 32, value: t.entire_debt)
@@ -56,7 +56,7 @@ fn one(_ manager: Address, _ id: u256, _ out: mut BytesBuilder, _ base: u256) us
     let stored = manager.static(HelperManagerMsg::Stored { id })
     out.write_word(at: base + 320, value: stored.2)
     out.write_word(at: base + 352, value: stored.5 as u256)
-    out.write_word(at: base + 384, value: stored.8.inner)
+    out.write_word(at: base + 384, value: stored.8.word())
     out.write_word(at: base + 416, value: stored.9)
     let snapshot = manager.static(HelperManagerMsg::Snapshot { id })
     out.write_word(at: base + 448, value: snapshot.0)
@@ -75,7 +75,7 @@ pub contract MultiTroveGetter {
     init(collateral_registry: Address) uses (mut registry) { registry = collateral_registry }
     recv MultiTroveGetterMsg {
         Registry -> Address uses (registry) { registry }
-        Multiple { index, start, count } -> DynArray<CombinedTroveData> uses (registry, call: mut Call) {
+        Multiple { index, start, count } -> DynArray<CombinedTroveData> uses (registry, call: Call) {
             let (manager, sorted) = resolve(registry, index)
             let descend = start >= 0
             let offset: u256 = if descend { start.downcast_truncate() } else { (-(start + 1)).downcast_truncate() }
@@ -98,7 +98,7 @@ pub contract MultiTroveGetter {
             }
             out.into_dyn_array(count)
         }
-        Ascending { index, start, count } -> (DynArray<DebtPerInterestRate>, u256) uses (registry, call: mut Call, ops: mut RawOps) {
+        Ascending { index, start, count } -> (DynArray<DebtPerInterestRate>, u256) uses (registry, call: Call, ops: mut RawOps) {
             let (manager, sorted) = resolve(registry, index)
             var out = allocate(count, 96)
             var current = if start == 0 { sorted.static(HelperSortedMsg::Last {}) } else { start }
@@ -107,7 +107,7 @@ pub contract MultiTroveGetter {
                 if current == 0 { break }
                 let node = sorted.static(HelperSortedMsg::Node { id: current })
                 let t = manager.static(HelperManagerMsg::Trove { id: current })
-                out.write_word(at: i * 96, value: node.2.inner)
+                out.write_word(at: i * 96, value: node.2.word())
                 out.write_word(at: i * 96 + 32, value: t.annual_interest_rate)
                 out.write_word(at: i * 96 + 64, value: t.entire_debt)
                 current = node.1

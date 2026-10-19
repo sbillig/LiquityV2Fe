@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::evm::{Address, Ctx, Call, Create, RawStorage, Log}
 use super::governance_snapshots::map
 use super::user_proxy_factory as factory
@@ -27,8 +28,8 @@ uses (ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log) {
     let proxy = factory::derive(implementation, ctx.caller())
     if ctx.extcodesize(proxy) == 0 { let deployed = factory::deploy(implementation) }
     let s = map(ctx.caller(), 8)
-    unsafe { storage.sstore(slot: s, value: unsafe { storage.sload(s) } + amount) }
-    unsafe { storage.sstore(slot: s + 1, value: unsafe { storage.sload(s + 1) } + ctx.timestamp() * amount) }
+    unsafe { storage.sstore(slot: s, value: read_storage_word(s) + amount) }
+    unsafe { storage.sstore(slot: s + 1, value: read_storage_word(s + 1) + ctx.timestamp() * amount) }
     proxy
 }
 fn deposit_event(_ amount: u256, _ recipient: Address, _ rewards: (u256, u256, u256, u256)) uses (ctx: Ctx, log: mut Log) {
@@ -56,7 +57,7 @@ uses (ctx: Ctx, storage: mut RawStorage, create: mut Create, log: mut Log, call:
     guard::enter()
     let proxy = increase(implementation, amount)
     // Solidity validates calldata tuple fields while encoding the outgoing call.
-    if p.owner.inner >> 160 != 0 || p.spender.inner >> 160 != 0 || p.v > 255 { std::evm::revert(()) }
+    if p.owner.word() >> 160 != 0 || p.spender.word() >> 160 != 0 || p.v > 255 { std::evm::revert(()) }
     let rewards = proxy.call(UserProxyMsg::StakePermit { amount, from: ctx.caller(), p, send, recipient })
     deposit_event(amount, recipient, rewards)
     guard::exit()
@@ -67,11 +68,11 @@ uses (ctx: Ctx, storage: mut RawStorage, log: mut Log, call: mut Call) {
     let s = map(ctx.caller(), 8)
     let proxy = factory::derive(implementation, ctx.caller())
     require(ctx.extcodesize(proxy) != 0, error::no_proxy())
-    let unallocated = unsafe { storage.sload(s) }
+    let unallocated = read_storage_word(s)
     require(amount <= unallocated, error::insufficient())
     if amount < unallocated {
-        let decrease = amount * unsafe { storage.sload(s + 1) } / unallocated
-        unsafe { storage.sstore(slot: s + 1, value: unsafe { storage.sload(s + 1) } - decrease) }
+        let decrease = amount * read_storage_word(s + 1) / unallocated
+        unsafe { storage.sstore(slot: s + 1, value: read_storage_word(s + 1) - decrease) }
     } else { unsafe { storage.sstore(slot: s + 1, value: 0) } }
     unsafe { storage.sstore(slot: s, value: unallocated - amount) }
     let ignored = withdrawal(proxy, amount, send, recipient)

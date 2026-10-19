@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // TroveNFT.sol and its OpenZeppelin 4.9 ERC721 behavior.
+use std::evm::read_storage_word
 use std::abi::{sol, Bytes, Bytes4, DynString}
 use std::evm::{Address, Ctx, Call, RawStorage, Log, revert}
 use std::evm::packed::{keccak_packed, encode_packed}
@@ -35,17 +36,17 @@ pub struct ApprovalForAll {
 }
 fn slot(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
 fn owner_raw(_ id: u256) -> Address uses ( storage: RawStorage) {
-    Address { inner: unsafe { storage.sload(slot(id, 2)) } }
+    Address::from_word_truncate(read_storage_word(slot(id, 2)))
 }
 fn owner_of(_ id: u256) -> Address uses ( storage: RawStorage) {
     let owner = owner_raw(id)
     text::require(owner != Address::zero(), text::nft_missing())
     owner
 }
-fn balance(_ owner: Address) -> u256 uses ( storage: RawStorage) { unsafe { storage.sload(slot(owner.inner, 3)) } }
-fn approval(_ id: u256) -> Address uses ( storage: RawStorage) { Address { inner: unsafe { storage.sload(slot(id, 4)) } } }
-fn operator_slot(_ owner: Address, _ operator: Address) -> u256 { slot(operator.inner, slot(owner.inner, 5)) }
-fn approved_all(_ owner: Address, _ operator: Address) -> bool uses ( storage: RawStorage) { unsafe { storage.sload(operator_slot(owner, operator)) } != 0 }
+fn balance(_ owner: Address) -> u256 uses ( storage: RawStorage) { read_storage_word(slot(owner.word(), 3)) }
+fn approval(_ id: u256) -> Address uses ( storage: RawStorage) { Address::from_word_truncate(read_storage_word(slot(id, 4))) }
+fn operator_slot(_ owner: Address, _ operator: Address) -> u256 { slot(operator.word(), slot(owner.word(), 5)) }
+fn approved_all(_ owner: Address, _ operator: Address) -> bool uses ( storage: RawStorage) { read_storage_word(operator_slot(owner, operator)) != 0 }
 fn authorize(_ id: u256) uses (ctx: Ctx, storage: RawStorage) {
     let owner = owner_of(id)
     let caller = ctx.caller()
@@ -56,24 +57,24 @@ fn transfer(_ from: Address, _ to: Address, _ id: u256) uses ( storage: mut RawS
     text::require(owner_of(id) == from, text::nft_wrong_from())
     text::require(to != Address::zero(), text::nft_zero_to())
     unsafe { storage.sstore(slot: slot(id, 4), value: 0) }
-    unsafe { storage.sstore(slot: slot(from.inner, 3), value: balance(from) - 1) }
-    unsafe { storage.sstore(slot: slot(to.inner, 3), value: balance(to) + 1) }
-    unsafe { storage.sstore(slot: slot(id, 2), value: to.inner) }
+    unsafe { storage.sstore(slot: slot(from.word(), 3), value: balance(from) - 1) }
+    unsafe { storage.sstore(slot: slot(to.word(), 3), value: balance(to) + 1) }
+    unsafe { storage.sstore(slot: slot(id, 2), value: to.word()) }
     log.emit(Transfer { from, to, token_id: id })
 }
 #[arithmetic(unchecked)]
 fn mint(_ to: Address, _ id: u256) uses ( storage: mut RawStorage, log: mut Log) {
     text::require(to != Address::zero(), text::nft_zero_mint())
     text::require(owner_raw(id) == Address::zero(), text::nft_duplicate())
-    unsafe { storage.sstore(slot: slot(to.inner, 3), value: balance(to) + 1) }
-    unsafe { storage.sstore(slot: slot(id, 2), value: to.inner) }
+    unsafe { storage.sstore(slot: slot(to.word(), 3), value: balance(to) + 1) }
+    unsafe { storage.sstore(slot: slot(id, 2), value: to.word()) }
     log.emit(Transfer { from: Address::zero(), to, token_id: id })
 }
 #[arithmetic(unchecked)]
 fn burn(_ id: u256) uses ( storage: mut RawStorage, log: mut Log) {
     let owner = owner_of(id)
     unsafe { storage.sstore(slot: slot(id, 4), value: 0) }
-    unsafe { storage.sstore(slot: slot(owner.inner, 3), value: balance(owner) - 1) }
+    unsafe { storage.sstore(slot: slot(owner.word(), 3), value: balance(owner) - 1) }
     unsafe { storage.sstore(slot: slot(id, 2), value: 0) }
     log.emit(Transfer { from: owner, to: Address::zero(), token_id: id })
 }
@@ -168,7 +169,7 @@ pub contract TroveNFT {
         Symbol -> DynString uses ( storage: RawStorage) { storage_string::load(1) }
         TroveManager -> Address uses (manager) { manager }
         MetadataNFT -> Address uses (metadata) { metadata }
-        TokenURI { id } -> DynString uses (manager, collateral, bold, metadata, call: mut Call, storage: RawStorage) {
+        TokenURI { id } -> DynString uses (manager, collateral, bold, metadata, call: Call, storage: RawStorage) {
             let latest = manager.static(NftDependencyMsg::Latest { id })
             let owner = owner_of(id)
             let status = manager.static(NftDependencyMsg::Status { id })
@@ -179,7 +180,7 @@ pub contract TroveNFT {
             let owner = owner_of(id)
             text::require(to != owner, text::nft_approval_owner())
             text::require(ctx.caller() == owner || approved_all(owner, ctx.caller()), text::nft_approval_auth())
-            unsafe { storage.sstore(slot: slot(id, 4), value: to.inner) }
+            unsafe { storage.sstore(slot: slot(id, 4), value: to.word()) }
             log.emit(Approval { owner, approved: to, token_id: id })
         }
         GetApproved { id } -> Address uses ( storage: RawStorage) { owner_of(id)

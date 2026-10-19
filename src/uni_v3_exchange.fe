@@ -60,7 +60,7 @@ pub contract UniV3Exchange {
             output
         }
         UniExchangeMsg::PriceToSqrt { bold, coll, price } -> Uint160 {
-            let adjusted = if bold.inner < coll.inner { 1000000000000000000000000000000000000 / price } else { price }
+            let adjusted = if bold.word() < coll.word() { 1000000000000000000000000000000000000 / price } else { price }
             Uint160 { val: to_sqrt(adjusted) }
         }
         PriceConverterMsg::ToSqrt { price } -> Uint160 { Uint160 { val: to_sqrt(price) } }

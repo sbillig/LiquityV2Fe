@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use core::num::IntDowncast
 use std::evm::{Address, Log, RawStorage}
 use super::trove_data as data
@@ -38,10 +39,10 @@ pub struct BatchedTroveUpdated {
     pub manager: Address, pub shares: u256, pub coll: u256, pub stake: u256, pub l_coll: u256, pub l_debt: u256,
 }
 pub fn updated(_ id: u256, _ debt: u256, _ coll: u256, _ stake: u256, _ rate: u256) uses (storage: mut RawStorage, log: mut Log) {
-    log.emit(TroveUpdated { id, debt, coll, stake, rate, l_coll: unsafe { storage.sload(data::L_COLL) }, l_debt: unsafe { storage.sload(data::L_DEBT) } })
+    log.emit(TroveUpdated { id, debt, coll, stake, rate, l_coll: read_storage_word(data::L_COLL), l_debt: read_storage_word(data::L_DEBT) })
 }
 pub fn batched(_ id: u256, _ manager: Address, _ coll: u256, _ stake: u256) uses ( storage: mut RawStorage, log: mut Log) {
-    log.emit(BatchedTroveUpdated { id, manager, shares: data::load_trove(id).batch_shares, coll, stake, l_coll: unsafe { storage.sload(data::L_COLL) }, l_debt: unsafe { storage.sload(data::L_DEBT) } })
+    log.emit(BatchedTroveUpdated { id, manager, shares: data::load_trove(id).batch_shares, coll, stake, l_coll: read_storage_word(data::L_COLL), l_debt: read_storage_word(data::L_DEBT) })
 }
 pub fn batch(_ manager: Address, _ operation: u8, _ debt: u256, _ coll: u256, _ upfront: u256) uses ( storage: mut RawStorage, log: mut Log) {
     let b = data::load_batch(manager)

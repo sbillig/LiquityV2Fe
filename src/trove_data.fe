@@ -24,7 +24,7 @@ pub const MASK64: u256 = 0xffffffffffffffff
 pub const MASK160: u256 = 0xffffffffffffffffffffffffffffffffffffffff
 pub fn map_slot(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
 pub fn trove_slot(_ id: u256) -> u256 { map_slot(id, TROVES) }
-pub fn batch_slot(_ manager: Address) -> u256 { map_slot(manager.inner, BATCHES) }
+pub fn batch_slot(_ manager: Address) -> u256 { map_slot(manager.word(), BATCHES) }
 pub fn reward_slot(_ id: u256) -> u256 { map_slot(id, REWARDS) }
 
 // The TroveManager storage region reinterpreted as typed places. One
@@ -114,7 +114,7 @@ pub fn load_trove(_ id: u256) -> TroveRecord uses (storage: RawStorage) {
     TroveRecord { debt: e.debt, coll: e.coll, stake: e.stake,
         status: e.status, array_index: e.array_index,
         last_debt_update: e.last_debt_update, last_rate_adjustment: e.last_rate_adjustment,
-        annual_rate: e.annual_rate, batch_manager: Address { inner: e.batch_word & MASK160 }, batch_shares: e.batch_shares }
+        annual_rate: e.annual_rate, batch_manager: Address::new(e.batch_word & MASK160), batch_shares: e.batch_shares }
 }
 pub fn load_batch(_ manager: Address) -> BatchRecord uses (storage: RawStorage) {
     let tm = unsafe { ref storage_at<TroveManagerLayout>(0) }

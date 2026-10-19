@@ -24,34 +24,11 @@ DECLARATION_ONLY = {
                   ('error', 'StringTooLong(string)'), ('error', 'InvalidShortString()')},
 }
 
+# Remaining raw effects have no shared equivalent for these operations.
 READ_ONLY_CAPABILITIES = {
-    'UserProxy': ('STATICCALL', {'staked()'}),
     'RedemptionHelper': ('SLOAD and empty revert', {'addresses(uint256)'}),
-    'DebtInFrontHelper': ('STATICCALL', {'getDebtBetweenInterestRates(uint256,uint256,uint256,uint256,uint256,uint256)', 'getDebtBetweenInterestRateAndTrove(uint256,uint256,uint256,uint256,uint256,uint256)'}),
-    'HintHelpers': ('STATICCALL', {
-        'getApproxHint(uint256,uint256,uint256,uint256)',
-        'predictOpenTroveUpfrontFee(uint256,uint256,uint256)',
-        'predictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)',
-        'forcePredictAdjustInterestRateUpfrontFee(uint256,uint256,uint256)',
-        'predictAdjustTroveUpfrontFee(uint256,uint256,uint256)',
-        'predictAdjustBatchInterestRateUpfrontFee(uint256,address,uint256)',
-        'predictOpenTroveAndJoinBatchUpfrontFee(uint256,uint256,address)',
-        'predictJoinBatchInterestRateUpfrontFee(uint256,uint256,address)',
-        'predictRemoveFromBatchUpfrontFee(uint256,uint256,uint256)',
-    }),
-    'MultiTroveGetter': ('STATICCALL', {'getMultipleSortedTroves(uint256,int256,uint256)', 'getDebtPerInterestRateAscending(uint256,uint256,uint256)'}),
-    'BorrowerOperations': ('STATICCALL and SLOAD', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'interestBatchManagerOf(uint256)', 'getInterestIndividualDelegateOf(uint256)', 'getInterestBatchManager(address)', 'checkBatchManagerExists(address)'}),
-    'TroveManager': ('STATICCALL and SLOAD', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getLatestTroveData(uint256)', 'getLatestBatchData(address)', 'getTroveAnnualInterestRate(uint256)', 'getCurrentICR(uint256,uint256)', 'getTroveStatus(uint256)', 'Troves(uint256)'}),
-    'StabilityPool': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()', 'getDepositorYieldGainWithPending(address)'}),
-    'CollateralRegistry': ('STATICCALL', {'getRedemptionRateForRedeemedAmount(uint256)', 'getEffectiveRedemptionFeeInBold(uint256)'}),
-    'LiquityBase': ('STATICCALL', {'getEntireBranchColl()', 'getEntireBranchDebt()'}),
-    'SortedTroves': ('STATICCALL', {'validInsertPosition(uint256,uint256,uint256)', 'findInsertPosition(uint256,uint256,uint256)'}),
-    'TroveNFT': ('STATICCALL', {'tokenURI(uint256)'}),
+    'MultiTroveGetter': ('STATICCALL and explicit returndata', {'getDebtPerInterestRateAscending(uint256,uint256,uint256)'}),
     'FixedAssetReader': ('EXTCODECOPY', {'readAsset(bytes4)'}),
-    'MetadataNFT': ('STATICCALL', {
-        'uri((uint256,address,address,address,uint256,uint256,uint256,uint8))',
-        'dynamicTextComponents((uint256,address,address,address,uint256,uint256,uint256,uint8))',
-    }),
 }
 STATIC_TUPLE_OUTPUTS = {
     'BribeInitiative': {'bribeByEpoch', 'totalLQTYAllocatedByEpoch', 'lqtyAllocatedByUserAtEpoch', 'claimBribes'},

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::abi::sol
 use std::evm::{Address, Ctx, RawStorage, Call, Log, encode_msg_calldata, revert_error}
 use super::governance_snapshots::{self as snap, SnapshotConfig, map}
@@ -44,8 +45,8 @@ uses (ctx: Ctx, storage: mut RawStorage, call: mut Call, log: mut Log) {
     let proxy = derive(cfg.implementation, ctx.caller())
     let (snapshot, ignored) = snap::snapshot_total(cfg.snapshots)
     let user = map(ctx.caller(), 8)
-    let unallocated_offset = unsafe { storage.sload(user + 1) }
-    let allocated_offset = unsafe { storage.sload(user + 3) }
+    let unallocated_offset = read_storage_word(user + 1)
+    let allocated_offset = read_storage_word(user + 3)
     safe_transfer_from(cfg.snapshots.bold, ctx.caller(), ctx.address(), cfg.fee)
     let total_offset = allocated_offset + unallocated_offset
     let stakes = cfg.staking.static(ProxyCalls::Stakes { account: proxy })

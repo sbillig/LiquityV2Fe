@@ -31,7 +31,7 @@ uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
     let active = data::address_at(0)
     let bold = data::address_at(8)
     let price = checks::live_price()
-    let id = keccak_packed((ctx.caller().inner, p.owner.inner, p.index))
+    let id = keccak_packed((ctx.caller().word(), p.owner.word(), p.index))
     checks::nonexistent(manager, id)
     var change = initial
     change.coll_increase = p.coll

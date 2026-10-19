@@ -1,3 +1,4 @@
+pub use address_word
 pub use bytes_builder
 pub use constants
 pub use liquity_math

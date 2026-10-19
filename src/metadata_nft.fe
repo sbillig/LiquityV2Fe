@@ -19,20 +19,20 @@ fn status(_ value: u8) -> DynString {
     else { DynString::empty() }
 }
 #[inline(never)]
-fn asset(_ reader: Address, _ name: DynString) -> DynString uses (call: mut Call) {
+fn asset(_ reader: Address, _ name: DynString) -> DynString uses (call: Call) {
     let sig = Bytes4 { val: keccak_packed(name.as_bytes()) >> 224 }
     reader.static(FixedAssetReaderMsg::ReadAsset { sig })
 }
 #[inline(never)]
 fn attributes(_ data: TroveMetadata) -> DynString {
-    cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(lit::attr_open().as_bytes(), hex_fixed(data.2.inner, 20).as_bytes()).as_bytes(), lit::attr_coll().as_bytes()).as_bytes(), decimal(data.4).as_bytes()).as_bytes(), lit::attr_bold().as_bytes()).as_bytes(), hex_fixed(data.3.inner, 20).as_bytes()).as_bytes(), lit::attr_debt().as_bytes()).as_bytes(), decimal(data.5).as_bytes()).as_bytes(), lit::attr_interest().as_bytes()).as_bytes(), decimal(data.6).as_bytes()).as_bytes(), lit::attr_status().as_bytes()).as_bytes(), status(data.7).as_bytes()).as_bytes(), fragment("\"} ]"))
+    cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(cat(lit::attr_open().as_bytes(), hex_fixed(data.2.word(), 20).as_bytes()).as_bytes(), lit::attr_coll().as_bytes()).as_bytes(), decimal(data.4).as_bytes()).as_bytes(), lit::attr_bold().as_bytes()).as_bytes(), hex_fixed(data.3.word(), 20).as_bytes()).as_bytes(), lit::attr_debt().as_bytes()).as_bytes(), decimal(data.5).as_bytes()).as_bytes(), lit::attr_interest().as_bytes()).as_bytes(), decimal(data.6).as_bytes()).as_bytes(), lit::attr_status().as_bytes()).as_bytes(), status(data.7).as_bytes()).as_bytes(), fragment("\"} ]"))
 }
 #[inline(never)]
 fn number_el(_ value: u256, _ divisor: u8, _ precision: u8, _ y: u256) -> DynString {
     cat(cat(cat(cat(lit::dynamic_open().as_bytes(), decimal(y).as_bytes()).as_bytes(), lit::dynamic_middle().as_bytes()).as_bytes(), locale(value, divisor, precision).as_bytes()).as_bytes(), fragment("</text>"))
 }
 #[inline(never)]
-fn dynamic(_ reader: Address, _ data: TroveMetadata) -> DynString uses (call: mut Call) {
+fn dynamic(_ reader: Address, _ data: TroveMetadata) -> DynString uses (call: Call) {
     let full_id = hex_number(data.0)
     let id = cat(cat(slice(full_id, 0, 6).as_bytes(), fragment("...")).as_bytes(), slice(full_id, 38, 42).as_bytes())
     let address = checksum(data.1)
@@ -43,13 +43,13 @@ fn dynamic(_ reader: Address, _ data: TroveMetadata) -> DynString uses (call: mu
     cat(cat(cat(top.as_bytes(), number_el(data.4, 18, 4, 360).as_bytes()).as_bytes(), number_el(data.5, 18, 2, 391).as_bytes()).as_bytes(), number_el(data.6, 16, 2, 422).as_bytes())
 }
 #[inline(never)]
-fn base_elements(_ reader: Address, _ geometry: Address) -> DynString uses (call: mut Call) {
+fn base_elements(_ reader: Address, _ geometry: Address) -> DynString uses (call: Call) {
     let font = asset(reader, text(fragment("geist")))
     let bold_logo = asset(reader, text(fragment("BOLD")))
     geometry.static(MetadataGeometryMsg::Base { font, bold_logo })
 }
 #[inline(never)]
-fn render(_ reader: Address, _ geometry: Address, _ data: TroveMetadata) -> DynString uses (call: mut Call) {
+fn render(_ reader: Address, _ geometry: Address, _ data: TroveMetadata) -> DynString uses (call: Call) {
     let base = base_elements(reader, geometry)
     let symbol = data.2.static(NftDependencyMsg::Symbol {})
     let image = geometry.static(MetadataGeometryMsg::Image { symbol, id: data.0 })
@@ -77,10 +77,10 @@ pub contract MetadataNFT {
         Attributes { data } -> DynString { validate(data)
             attributes(data)
         }
-        DynamicTextComponents { data } -> DynString uses (reader, call: mut Call) { validate(data)
+        DynamicTextComponents { data } -> DynString uses (reader, call: Call) { validate(data)
             dynamic(reader, data)
         }
-        Uri { data } -> DynString uses (reader, geometry, call: mut Call) {
+        Uri { data } -> DynString uses (reader, geometry, call: Call) {
             validate(data)
             let attr = attributes(data)
             let name = data.2.static(NftDependencyMsg::Name {})

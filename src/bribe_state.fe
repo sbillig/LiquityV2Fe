@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::evm::{Address, RawStorage, Log}
 use std::evm::packed::keccak_packed
 use super::governance_list as list
@@ -14,12 +15,12 @@ pub struct ModifyTotalLQTYAllocation { pub epoch: u256, pub total_lqty_allocated
 #[event]
 pub struct ClaimBribe { pub user: Address, pub epoch: u256, pub bold_amount: u256, pub bribe_token_amount: u256 }
 pub fn map(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
-pub fn user_root(_ user: Address) -> u256 { map(user.inner, 3) }
+pub fn user_root(_ user: Address) -> u256 { map(user.word(), 3) }
 pub fn bribe(_ epoch: u256) -> (u256, u256, u256) uses ( storage: RawStorage) {
     let s = map(epoch, 0)
-    (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) })
+    (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2))
 }
-pub fn claimed(_ user: Address, _ epoch: u256) -> bool uses ( storage: RawStorage) { unsafe { storage.sload(map(epoch, map(user.inner, 1))) } & 255 != 0 }
+pub fn claimed(_ user: Address, _ epoch: u256) -> bool uses ( storage: RawStorage) { read_storage_word(map(epoch, map(user.word(), 1))) & 255 != 0 }
 pub fn allocate(_ epoch: u256, _ user: Address, _ lqty: u256, _ offset: u256, _ total: u256, _ total_offset: u256)
 uses ( storage: mut RawStorage, log: mut Log) {
     let ur = user_root(user)
@@ -65,8 +66,8 @@ uses ( storage: mut RawStorage, log: mut Log) {
     unsafe { storage.sstore(slot: s, value: remaining_bold) }
     unsafe { storage.sstore(slot: s + 1, value: remaining_token) }
     unsafe { storage.sstore(slot: s + 2, value: new_votes) }
-    let c = map(epoch, map(user.inner, 1))
-    unsafe { storage.sstore(slot: c, value: (unsafe { storage.sload(c) } & ~255) | 1) }
+    let c = map(epoch, map(user.word(), 1))
+    unsafe { storage.sstore(slot: c, value: (read_storage_word(c) & ~255) | 1) }
     log.emit(ClaimBribe { user, epoch, bold_amount, bribe_token_amount: token_amount })
     (bold_amount, token_amount)
 }

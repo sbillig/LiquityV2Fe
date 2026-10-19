@@ -25,7 +25,7 @@ use super::governance_allocation::read_user
 pub contract GovernanceVotingHarness {
     cfg: ActionConfig,
     init(bold: Address, staking: Address, fee: u256, factor: u256) uses (mut cfg, create: mut Create, storage: mut RawStorage) {
-        let implementation = create.create<UserProxy>(value: 0, args: (Address { inner: 1 }, Address { inner: 2 }, staking))
+        let implementation = create.create<UserProxy>(value: 0, args: (Address::new(1), Address::new(2), staking))
         cfg = ActionConfig { snapshots: SnapshotConfig { bold, start: 1000, duration: 100, min_claim: 1000000000000000000, min_accrual: 5000000000000000000, voting_factor: 10000000000000000, unregister_factor: 2000000000000000000, unregister_epochs: 4 }, implementation, staking, fee, factor }
         unsafe { storage.sstore(slot: 0, value: 1) }
     }

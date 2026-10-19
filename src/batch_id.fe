@@ -7,7 +7,7 @@ use std::evm::Address
 pub struct BatchId { pub value: Address }
 impl Copy for BatchId {}
 impl Eq for BatchId { fn eq(self, _ other: BatchId) -> bool { self.value == other.value } }
-pub const BATCH_ID_ZERO: BatchId = BatchId { value: Address { inner: 0 } }
+pub const BATCH_ID_ZERO: BatchId = BatchId { value: Address::new(0) }
 impl BatchId {
     pub fn wrap(_ value: Address) -> Self { Self { value } }
     pub fn unwrap(self) -> Address { self.value }
@@ -27,7 +27,7 @@ impl Decode<Sol> for BatchId {
     fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
         let value = d.read_word(input)
         if value >> 160 != 0 { std::evm::revert(()) }
-        Self { value: Address { inner: value } }
+        Self { value: Address::new(value) }
     }
 }
 impl Encode<Sol> for BatchId { fn encode(own self, _ out: core::abi::AbiFrame) { <Address as Encode<Sol>>::encode(self.value, out) } }

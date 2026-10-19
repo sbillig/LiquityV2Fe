@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::abi::{sol, DynArray, DynArrayAccess}
 use std::evm::{Address, Ctx, RawStorage, Call, Log, encode_msg_calldata, revert_error}
 use std::evm::packed::keccak_packed
@@ -22,14 +23,14 @@ pub msg AllocationHook {
     #[selector = sol("onAfterAllocateLQTY(uint256,address,(uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256))")]
     After { epoch: u256, user: Address, user_state: (u256, u256, u256, u256), allocation: (u256, u256, u256, u256, u256), state: (u256, u256, u256, u256, u256) },
 }
-pub fn allocation_slot(_ user: Address, _ target: Address) -> u256 { keccak_packed((target.inner, map(user, 10))) }
+pub fn allocation_slot(_ user: Address, _ target: Address) -> u256 { keccak_packed((target.word(), map(user, 10))) }
 pub fn read_user(_ user: Address) -> (u256, u256, u256, u256) uses ( storage: RawStorage) {
     let s = map(user, 8)
-    (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
+    (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2), read_storage_word(s + 3))
 }
 pub fn read_allocation(_ user: Address, _ target: Address) -> (u256, u256, u256, u256, u256) uses ( storage: RawStorage) {
     let s = allocation_slot(user, target)
-    (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) }, unsafe { storage.sload(s + 4) })
+    (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2), read_storage_word(s + 3), read_storage_word(s + 4))
 }
 fn assert_true(_ condition: bool) { if !condition { revert_error(std::evm::panic::Panic::from(1)) } }
 // All arrays here are memory copies. Global/user states stay cached until every

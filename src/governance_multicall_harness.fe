@@ -1,3 +1,4 @@
+use std::evm::read_storage_word
 use std::abi::{sol, Bytes}
 use std::evm::{Address, Ctx, Call, RawOps, RawStorage}
 pub msg MultiTest {
@@ -15,10 +16,10 @@ pub msg MultiTest {
 pub contract GovernanceMulticallHarness {
     recv MultiTest {
         Multi uses (ctx: Ctx, call: mut Call, ops: mut RawOps) { super::governance_multicall::multi() }
-        Add { amount } -> (Address, u256) uses (ctx: Ctx, storage: mut RawStorage) { let value = unsafe { storage.sload(0) } + amount
+        Add { amount } -> (Address, u256) uses (ctx: Ctx, storage: mut RawStorage) { let value = read_storage_word(0) + amount
             unsafe { storage.sstore(slot: 0, value) }
             (ctx.caller(), value) }
-        Value -> u256 uses (storage: RawStorage) { unsafe { storage.sload(0) } }
+        Value -> u256 uses (storage: RawStorage) { read_storage_word(0) }
         Echo { data } -> Bytes { data }
         Fail { data } uses (ops: mut RawOps) { ops.revert(data: data.payload_span()) }
     }

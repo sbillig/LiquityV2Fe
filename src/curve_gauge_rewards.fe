@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::abi::{sol, DynArray}
 use std::evm::{Address, Ctx, Call, RawStorage, Log}
 use super::bribe_state as state
@@ -69,7 +70,7 @@ pub contract CurveV2GaugeRewards {
     recv GaugeMsg {
         Gauge -> Address uses (gauge) { gauge }
         Duration -> u256 uses (duration) { duration }
-        Remainder -> u256 uses (storage: RawStorage) { unsafe { storage.sload(4) } }
+        Remainder -> u256 uses (storage: RawStorage) { read_storage_word(4) }
         Governance -> Address uses (cfg) { cfg.governance }
         Bold -> Address uses (cfg) { cfg.bold }
         Token -> Address uses (cfg) { cfg.token }
@@ -83,7 +84,7 @@ pub contract CurveV2GaugeRewards {
         Unregister { epoch } uses (cfg, ctx: Ctx) { auth(cfg) }
         OnClaim { epoch, amount } uses (cfg, gauge, duration, ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             auth(cfg)
-            let remainder = unsafe { storage.sload(4) }
+            let remainder = read_storage_word(4)
             var total = amount + remainder
             if total < duration * 1000 {
                 unsafe { storage.sstore(slot: 4, value: remainder + amount) }

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::abi::{DynArray, DynArrayAccess}
 use std::evm::{Address, Ctx, RawStorage, Call, Log, encode_msg_calldata, storage_at_mut}
 use super::governance_snapshots::{map, GovernanceLayout}
@@ -14,10 +15,10 @@ pub struct OwnershipTransferred {
     #[indexed]
     pub new_owner: Address,
 }
-pub fn owner() -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(1) } & MASK } }
+pub fn owner() -> Address uses (storage: RawStorage) { Address::new(read_storage_word(1) & MASK) }
 pub fn initialize(_ initial: Address) uses (storage: mut RawStorage, log: mut Log) {
     let gov = unsafe { storage_at_mut<GovernanceLayout>(0) }
-    gov.owner_word = (gov.owner_word & ~MASK) | initial.inner
+    gov.owner_word = (gov.owner_word & ~MASK) | initial.word()
     log.emit(OwnershipTransferred { previous_owner: Address::zero(), new_owner: initial })
 }
 pub fn register_initial(_ targets: DynArray<Address>)

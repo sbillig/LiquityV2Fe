@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Port of Dependencies/Constants.sol.
 use std::evm::Address
-pub const ZERO_ADDRESS: Address = Address { inner: 0 }
+pub const ZERO_ADDRESS: Address = Address::new(0)
 pub const MAX_UINT256: u256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 pub const DECIMAL_PRECISION: u256 = 1000000000000000000
 pub const PCT_100: u256 = DECIMAL_PRECISION

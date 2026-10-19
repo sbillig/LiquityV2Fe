@@ -124,7 +124,7 @@ pub contract LeverageWETHZapper {
             require(ctx.value() > ETH_GAS_COMPENSATION, error::insufficient_eth())
             require(checked_address(p.batch) == Address::zero() || p.rate == 0, error::batch_rate())
             deposit(cfg.weth, ctx.value())
-            let index = keccak_packed((ctx.caller().inner, p.index))
+            let index = keccak_packed((ctx.caller().word(), p.index))
             let this = ctx.address()
             let id = if checked_address(p.batch) == Address::zero() {
                 cfg.bo.call(ZapperCalls::Open { owner: checked_address(p.owner), index, coll: ctx.value() - ETH_GAS_COMPENSATION, bold: p.bold, upper: p.upper, lower: p.lower, rate: p.rate, fee: p.fee, add: this, remove: this, receiver: this })
@@ -194,7 +194,7 @@ pub contract LeverageWETHZapper {
         }
         LeverageWETHZapperMsg::CloseFromColl { id, amount, minimum } uses (cfg, ctx: Ctx, call: mut Call, storage: RawStorage) {
             let receiver = remove_receiver(cfg, id)
-            let p = CloseParams { id, amount, minimum, receiver }
+            let p = CloseParams { id, amount, minimum, receiver: AddressWord::from_address(receiver) }
             let initial = balances(cfg, receiver)
             let encoded = encode_abi_payload(p)
             require_code(cfg.flash)

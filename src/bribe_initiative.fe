@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use core::abi::Decode
 use std::abi::{sol, Sol, DynArray}
 use std::evm::{Address, Ctx, Call, RawStorage, Log}
@@ -55,8 +56,8 @@ uses (ctx: Ctx, call: mut Call, storage: mut RawStorage, log: mut Log) {
             let current = cfg.governance.static(GovernanceCalls::Epoch {})
             require(epoch >= current, error::past())
             let s = state::map(epoch, 0)
-            unsafe { storage.sstore(slot: s, value: unsafe { storage.sload(s) } + bold) }
-            unsafe { storage.sstore(slot: s + 1, value: unsafe { storage.sload(s + 1) } + token) }
+            unsafe { storage.sstore(slot: s, value: read_storage_word(s) + bold) }
+            unsafe { storage.sstore(slot: s + 1, value: read_storage_word(s + 1) + token) }
             log.emit(state::DepositBribe { depositor: ctx.caller(), bold_amount: bold, bribe_token_amount: token, epoch })
             safe_transfer_from(cfg.bold, ctx.caller(), ctx.address(), bold)
             safe_transfer_from(cfg.token, ctx.caller(), ctx.address(), token)

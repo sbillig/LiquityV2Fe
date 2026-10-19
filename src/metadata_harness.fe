@@ -25,7 +25,7 @@ pub contract MetadataPrimitivesHarness {
         Bauhaus { symbol, id } -> DynString { super::metadata_bauhaus::bauhaus(symbol, id) }
         Decimal { value } -> DynString { strings::decimal(value) }
         HexNumber { value } -> DynString { strings::hex_number(value) }
-        HexAddress { value } -> DynString { strings::hex_fixed(value.inner, 20) }
+        HexAddress { value } -> DynString { strings::hex_fixed(value.word(), 20) }
         Checksum { value } -> DynString { strings::checksum(value) }
         Slice { value, start, end } -> DynString { strings::slice(value, start, end) }
         Base64 { value } -> DynString { strings::base64(value) }

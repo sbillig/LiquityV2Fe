@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
+use std::evm::read_storage_word
 // BorrowerOperations layout verified with solc 0.8.24 storage-layout output.
 // The delegate/batch maps are read and written as typed entries through one
 // raw projection per function; readers use `storage_at`, writers use the
@@ -13,16 +14,16 @@ pub const MASK128: u256 = 0xffffffffffffffffffffffffffffffff
 pub const MASK160: u256 = 0xffffffffffffffffffffffffffffffffffffffff
 pub fn managers() -> ManagerSlots { ManagerSlots { add: 3, remove: 4 } }
 pub fn map_slot(_ key: u256, _ root: u256) -> u256 { keccak_packed((key, root)) }
-pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) { Address { inner: unsafe { storage.sload(slot) } & MASK160 } }
-pub fn is_shutdown() -> bool uses (storage: RawStorage) { ((unsafe { storage.sload(9) } >> 160) & 255) != 0 }
-pub fn shutdown() uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 9, value: (unsafe { storage.sload(9) } & ~(255 << 160)) | (1 << 160)) } }
+pub fn address_at(_ slot: u256) -> Address uses (storage: RawStorage) { Address::new(read_storage_word(slot) & MASK160) }
+pub fn is_shutdown() -> bool uses (storage: RawStorage) { ((read_storage_word(9) >> 160) & 255) != 0 }
+pub fn shutdown() uses (storage: mut RawStorage) { unsafe { storage.sstore(slot: 9, value: (read_storage_word(9) & ~(255 << 160)) | (1 << 160)) } }
 pub fn batch_of(_ id: u256) -> Address uses (storage: RawStorage) {
     let batches = unsafe { ref storage_at<StorageMap<u256, u256>>(BATCH_OF) }
-    Address { inner: batches[id] & MASK160 }
+    Address::new(batches[id] & MASK160)
 }
 pub fn set_batch(_ id: u256, _ manager: Address) uses (storage: mut RawStorage) {
     let batches = unsafe { StorageMap<u256, u256>::at(BATCH_OF) }
-    batches[id] = (batches[id] & ~MASK160) | manager.inner
+    batches[id] = (batches[id] & ~MASK160) | manager.word()
 }
 pub struct IndividualDelegate {
     pub account: Address, pub min_rate: u128, pub max_rate: u128, pub min_period: u256,
@@ -47,11 +48,11 @@ impl Copy for BatchManagerEntry {}
 pub fn delegate(_ id: u256) -> IndividualDelegate uses (storage: RawStorage) {
     let delegates = unsafe { ref storage_at<StorageMap<u256, DelegateEntry>>(DELEGATES) }
     let e = delegates[id]
-    IndividualDelegate { account: Address { inner: e.account_word & MASK160 }, min_rate: e.min_rate, max_rate: e.max_rate, min_period: e.min_period }
+    IndividualDelegate { account: Address::new(e.account_word & MASK160), min_rate: e.min_rate, max_rate: e.max_rate, min_period: e.min_period }
 }
 pub fn set_delegate(_ id: u256, _ value: IndividualDelegate) uses (storage: mut RawStorage) {
     let delegates = unsafe { StorageMap<u256, DelegateEntry>::at(DELEGATES) }
-    delegates[id].account_word = (delegates[id].account_word & ~MASK160) | value.account.inner
+    delegates[id].account_word = (delegates[id].account_word & ~MASK160) | value.account.word()
     delegates[id].min_rate = value.min_rate
     delegates[id].max_rate = value.max_rate
     delegates[id].min_period = value.min_period

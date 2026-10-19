@@ -5,9 +5,9 @@
   },
   "compiler": {
     "url": "https://github.com/sbillig/fe",
-    "branch": "mvs",
-    "revision": "1b4e287c65a0981b385a18c9d49195c92f8f2197",
-    "tree": "3e962275d12efe0d454d7c9507e96a483831e480"
+    "branch": "liquity-master-refresh",
+    "revision": "82742057924ba9474efb1e3574f0bf1ffd01ce08",
+    "tree": "4351fe131427c59fa114e087076988ee61219187"
   },
   "sources": {
     "contracts/src/ActivePool.sol": "61db32fda189278a0e13b68dbfa5c3e4d2a2445dd8415ca7e044517723567e0b",

@@ -32,7 +32,7 @@ pub msg TroveRateMsg {
 }
 fn next(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>) { nodes[id].next_id }
 fn prev(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>) { nodes[id].prev_id }
-fn batch_of(_ id: u256) -> Address uses (nodes: StorageMap<u256, Node>) { Address { inner: nodes[id].packed & ADDRESS_MASK } }
+fn batch_of(_ id: u256) -> Address uses (nodes: StorageMap<u256, Node>) { Address::new(nodes[id].packed & ADDRESS_MASK) }
 fn contains(_ id: u256) -> bool uses (nodes: StorageMap<u256, Node>) { nodes[id].packed & EXISTS_BIT != 0 }
 fn batch_head(_ id: Address) -> u256 uses (batches: StorageMap<Address, Batch>) { batches[id].head }
 fn batch_tail(_ id: Address) -> u256 uses (batches: StorageMap<Address, Batch>) { batches[id].tail }
@@ -40,7 +40,7 @@ fn set_next(_ id: u256, _ value: u256) uses (nodes: mut StorageMap<u256, Node>) 
 fn set_prev(_ id: u256, _ value: u256) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].prev_id = value }
 fn set_head(_ id: Address, _ value: u256) uses (batches: mut StorageMap<Address, Batch>) { batches[id].head = value }
 fn set_tail(_ id: Address, _ value: u256) uses (batches: mut StorageMap<Address, Batch>) { batches[id].tail = value }
-fn mark_node(_ id: u256, _ batch: Address) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].packed = batch.inner | EXISTS_BIT }
+fn mark_node(_ id: u256, _ batch: Address) uses (nodes: mut StorageMap<u256, Node>) { nodes[id].packed = batch.word() | EXISTS_BIT }
 fn delete_node(_ id: u256) uses (nodes: mut StorageMap<u256, Node>) {
     nodes[id] = Node { next_id: 0, prev_id: 0, packed: 0 }
 }
@@ -55,9 +55,9 @@ fn remove_slice(_ head: u256, _ tail: u256) uses (nodes: mut StorageMap<u256, No
     set_next(prev(head), next(tail))
     set_prev(next(tail), prev(head))
 }
-fn rate(_ manager: Address, _ id: u256) -> u256 uses (call: mut Call) { manager.static(TroveRateMsg::Rate { id }) }
+fn rate(_ manager: Address, _ id: u256) -> u256 uses (call: Call) { manager.static(TroveRateMsg::Rate { id }) }
 fn valid(_ manager: Address, _ interest: u256, _ prev_id: u256, _ next_id: u256) -> bool
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     let batch = batch_of(prev_id)
     next(prev_id) == next_id && prev(next_id) == prev_id
         && (batch != batch_of(next_id) || batch == Address::zero())
@@ -75,19 +75,19 @@ fn skip_head(_ id: u256) -> u256 uses (nodes: StorageMap<u256, Node>, batches: S
 struct Position { prev: u256, next: u256 }
 impl Copy for Position {}
 fn descend_one(_ manager: Address, _ interest: u256, _ pos: own Position) -> (bool, Position)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     if pos.next == 0 || interest > rate(manager, pos.next) { return (true, pos) }
     let prev_id = skip_tail(pos.next)
     (false, Position { prev: prev_id, next: next(prev_id) })
 }
 fn ascend_one(_ manager: Address, _ interest: u256, _ pos: own Position) -> (bool, Position)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     if pos.prev == 0 || rate(manager, pos.prev) >= interest { return (true, pos) }
     let next_id = skip_head(pos.prev)
     (false, Position { prev: prev(next_id), next: next_id })
 }
 fn descend(_ manager: Address, _ interest: u256, _ start: u256) -> (u256, u256)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var pos = Position { prev: start, next: next(start) }
     while true {
         let (found, updated) = descend_one(manager, interest, pos)
@@ -97,7 +97,7 @@ uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: 
     core::panic()
 }
 fn ascend(_ manager: Address, _ interest: u256, _ start: u256) -> (u256, u256)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var pos = Position { prev: prev(start), next: start }
     while true {
         let (found, updated) = ascend_one(manager, interest, pos)
@@ -107,7 +107,7 @@ uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: 
     core::panic()
 }
 fn search_both(_ manager: Address, _ interest: u256, _ descent_start: u256, _ ascent_start: u256) -> (u256, u256)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var down = Position { prev: descent_start, next: next(descent_start) }
     var up = Position { prev: prev(ascent_start), next: ascent_start }
     while true {
@@ -121,7 +121,7 @@ uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: 
     core::panic()
 }
 fn find(_ manager: Address, _ interest: u256, _ prev_hint: u256, _ next_hint: u256) -> (u256, u256)
-uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var prev_id = prev_hint
     var next_id = next_hint
     if prev_id == 0 { return descend(manager, interest, 0) }
@@ -134,7 +134,7 @@ uses (nodes: StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: 
     search_both(manager, interest, skip_tail(prev_id), skip_head(next_id))
 }
 fn insert_slice(_ manager: Address, _ head: u256, _ tail: u256, _ interest: u256, _ prev_hint: u256, _ next_hint: u256)
-uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var prev_id = prev_hint
     var next_id = next_hint
     if !valid(manager, interest, prev_id, next_id) {
@@ -145,7 +145,7 @@ uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, ca
     insert_verified(head, tail, prev_id, next_id)
 }
 fn reinsert_slice(_ manager: Address, _ head: u256, _ tail: u256, _ interest: u256, _ prev_hint: u256, _ next_hint: u256)
-uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: mut Call) {
+uses (nodes: mut StorageMap<u256, Node>, batches: StorageMap<Address, Batch>, call: Call) {
     var prev_id = prev_hint
     var next_id = next_hint
     if !valid(manager, interest, prev_id, next_id) {
@@ -207,7 +207,7 @@ pub msg SortedTrovesMsg {
     #[selector = sol("reInsertBatch(address,uint256,uint256,uint256)")]
     ReInsertBatch { id: Address, interest: u256, prev_id: u256, next_id: u256 },
 }
-pub contract SortedTroves uses (ctx: Ctx, call: mut Call, log: mut Log) {
+pub contract SortedTroves uses (ctx: Ctx, call: Call, log: mut Log) {
     manager: Address,
     borrower_operations: Address,
     mut size: u256,

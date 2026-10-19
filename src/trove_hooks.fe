@@ -55,7 +55,7 @@ pub fn open_batch(_ owner: Address, _ id: u256, _ change: TroveChange, _ manager
     tm.troves[id].stake = stake
     tm.troves[id].status = 1
     tm.troves[id].array_index = tm.trove_ids.len().downcast_truncate()
-    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.inner
+    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.word()
     tm.troves[id].last_rate_adjustment = ctx.timestamp().downcast_truncate()
     data::update_rewards(id)
     state::push_trove_id(id)
@@ -213,7 +213,7 @@ pub fn set_batch(_ id: u256, _ coll: u256, _ debt: u256, _ change: TroveChange, 
     tm.troves[id].annual_rate = 0
     tm.troves[id].last_debt_update = 0
     tm.troves[id].coll = coll
-    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.inner
+    tm.troves[id].batch_word = (tm.troves[id].batch_word & ~data::MASK160) | manager.word()
     tm.troves[id].last_rate_adjustment = ctx.timestamp().downcast_truncate()
     change.coll_increase = coll - change.applied_redist_coll_gain
     change.debt_increase = debt - change.applied_redist_bold_debt_gain - change.upfront_fee

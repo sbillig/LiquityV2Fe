@@ -9,22 +9,22 @@ pub msg BranchPoolMsg {
     #[selector = sol("getBoldDebt()")]
     BoldDebt -> u256,
 }
-pub fn entire_coll(_ active: Address, _ default: Address) -> u256 uses (call: mut Call) {
+pub fn entire_coll(_ active: Address, _ default: Address) -> u256 uses (call: Call) {
     let active_coll = active.static(BranchPoolMsg::CollBalance {})
     let liquidated_coll = default.static(BranchPoolMsg::CollBalance {})
     active_coll + liquidated_coll
 }
-pub fn entire_debt(_ active: Address, _ default: Address) -> u256 uses (call: mut Call) {
+pub fn entire_debt(_ active: Address, _ default: Address) -> u256 uses (call: Call) {
     let active_debt = active.static(BranchPoolMsg::BoldDebt {})
     let closed_debt = default.static(BranchPoolMsg::BoldDebt {})
     active_debt + closed_debt
 }
-pub fn tcr(_ active: Address, _ default: Address, _ price: u256) -> u256 uses (call: mut Call) {
+pub fn tcr(_ active: Address, _ default: Address, _ price: u256) -> u256 uses (call: Call) {
     let coll = entire_coll(active, default)
     let debt = entire_debt(active, default)
     math::compute_cr(coll, debt, price)
 }
-pub fn below_critical(_ active: Address, _ default: Address, _ price: u256, _ ccr: u256) -> bool uses (call: mut Call) {
+pub fn below_critical(_ active: Address, _ default: Address, _ price: u256, _ ccr: u256) -> bool uses (call: Call) {
     tcr(active, default, price) < ccr
 }
 pub msg LiquityBaseMsg {
@@ -39,7 +39,7 @@ pub contract LiquityBase {
     mut active: Address,
     mut default: Address,
     mut price_feed: Address,
-    init(registry: Address) uses (mut active, mut default, mut price_feed, call: mut Call, log: mut Log) {
+    init(registry: Address) uses (mut active, mut default, mut price_feed, call: Call, log: mut Log) {
         active = registry.static(RegistryMsg::GetactivePool {})
         default = registry.static(RegistryMsg::GetdefaultPool {})
         price_feed = registry.static(RegistryMsg::GetpriceFeed {})
@@ -49,12 +49,12 @@ pub contract LiquityBase {
     }
     recv LiquityBaseMsg {
         ActivePool -> Address uses (active) { active }
-        EntireBranchColl -> u256 uses (active, default, call: mut Call) {
+        EntireBranchColl -> u256 uses (active, default, call: Call) {
             let a = active
             let d = default
             entire_coll(a, d)
         }
-        EntireBranchDebt -> u256 uses (active, default, call: mut Call) {
+        EntireBranchDebt -> u256 uses (active, default, call: Call) {
             let a = active
             let d = default
             entire_debt(a, d)

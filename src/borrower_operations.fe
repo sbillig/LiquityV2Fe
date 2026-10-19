@@ -128,11 +128,11 @@ pub contract BorrowerOperations {
         adjustments_module = adjustments
         batches_module = batches
         let active = registry.static(RegistryMsg::GetactivePool {})
-        unsafe { storage.sstore(slot: 0, value: active.inner) }
+        unsafe { storage.sstore(slot: 0, value: active.word()) }
         let default = registry.static(RegistryMsg::GetdefaultPool {})
-        unsafe { storage.sstore(slot: 1, value: default.inner) }
+        unsafe { storage.sstore(slot: 1, value: default.word()) }
         let price = registry.static(RegistryMsg::GetpriceFeed {})
-        unsafe { storage.sstore(slot: 2, value: price.inner) }
+        unsafe { storage.sstore(slot: 2, value: price.word()) }
         log.emit(ActivePoolAddressChanged { value: active })
         log.emit(DefaultPoolAddressChanged { value: default })
         log.emit(PriceFeedAddressChanged { value: price })
@@ -146,15 +146,15 @@ pub contract BorrowerOperations {
         let bcr = registry.static(RegistryMsg::GetBCR {})
         cfg = Config { nft, coll, weth, ccr, scr, mcr, bcr }
         let manager = registry.static(RegistryMsg::GettroveManager {})
-        unsafe { storage.sstore(slot: 5, value: manager.inner) }
+        unsafe { storage.sstore(slot: 5, value: manager.word()) }
         let gas = registry.static(RegistryMsg::GetgasPoolAddress {})
-        unsafe { storage.sstore(slot: 6, value: gas.inner) }
+        unsafe { storage.sstore(slot: 6, value: gas.word()) }
         let surplus = registry.static(RegistryMsg::GetcollSurplusPool {})
-        unsafe { storage.sstore(slot: 7, value: surplus.inner) }
+        unsafe { storage.sstore(slot: 7, value: surplus.word()) }
         let sorted = registry.static(RegistryMsg::GetsortedTroves {})
-        unsafe { storage.sstore(slot: 9, value: sorted.inner) }
+        unsafe { storage.sstore(slot: 9, value: sorted.word()) }
         let bold = registry.static(RegistryMsg::GetboldToken {})
-        unsafe { storage.sstore(slot: 8, value: bold.inner) }
+        unsafe { storage.sstore(slot: 8, value: bold.word()) }
         log.emit(TroveManagerAddressChanged { value: manager })
         log.emit(GasPoolAddressChanged { value: gas })
         log.emit(CollSurplusPoolAddressChanged { value: surplus })
@@ -178,27 +178,27 @@ pub contract BorrowerOperations {
         ActivePool -> Address uses (storage: RawStorage) {
             data::address_at(0)
         }
-        EntireColl -> u256 uses (call: mut Call, storage: RawStorage) {
+        EntireColl -> u256 uses (call: Call, storage: RawStorage) {
             base::entire_coll(data::address_at(0), data::address_at(1))
         }
-        EntireDebt -> u256 uses (call: mut Call, storage: RawStorage) {
+        EntireDebt -> u256 uses (call: Call, storage: RawStorage) {
             base::entire_debt(data::address_at(0), data::address_at(1))
         }
         HasBeenShutDown -> bool uses (storage: RawStorage) {
             data::is_shutdown()
         }
-        BatchOf { id } -> Address uses ( storage: mut RawStorage) {
+        BatchOf { id } -> Address uses ( storage: RawStorage) {
             data::batch_of(id)
         }
-        Delegate { id } -> (Address, u128, u128, u256) uses ( storage: mut RawStorage) {
+        Delegate { id } -> (Address, u128, u128, u256) uses ( storage: RawStorage) {
             let d = data::delegate(id)
             (d.account, d.min_rate, d.max_rate, d.min_period)
         }
-        BatchManager { account } -> (u128, u128, u256) uses ( storage: mut RawStorage) {
+        BatchManager { account } -> (u128, u128, u256) uses ( storage: RawStorage) {
             let b = data::batch_manager(account)
             (b.min_rate, b.max_rate, b.min_period)
         }
-        BatchExists { account } -> bool uses ( storage: mut RawStorage) {
+        BatchExists { account } -> bool uses ( storage: RawStorage) {
             data::batch_manager(account).max_rate > 0
         }
         AddManagerOf { id } -> Address uses ( storage: RawStorage) {

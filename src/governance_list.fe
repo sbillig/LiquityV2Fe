@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+use std::evm::read_storage_word
 use std::evm::{RawStorage, revert_error}
 use std::evm::packed::keccak_packed
 #[error]
@@ -10,10 +11,10 @@ pub struct ItemInList {}
 pub fn slot(_ root: u256, _ id: u256) -> u256 { keccak_packed((id, root)) }
 pub fn item(_ root: u256, _ id: u256) -> (u256, u256, u256, u256) uses ( storage: RawStorage) {
     let s = slot(root, id)
-    (unsafe { storage.sload(s) }, unsafe { storage.sload(s + 1) }, unsafe { storage.sload(s + 2) }, unsafe { storage.sload(s + 3) })
+    (read_storage_word(s), read_storage_word(s + 1), read_storage_word(s + 2), read_storage_word(s + 3))
 }
-pub fn prev(_ root: u256, _ id: u256) -> u256 uses ( storage: RawStorage) { unsafe { storage.sload(slot(root, id) + 2) } }
-pub fn next(_ root: u256, _ id: u256) -> u256 uses ( storage: RawStorage) { unsafe { storage.sload(slot(root, id) + 3) } }
+pub fn prev(_ root: u256, _ id: u256) -> u256 uses ( storage: RawStorage) { read_storage_word(slot(root, id) + 2) }
+pub fn next(_ root: u256, _ id: u256) -> u256 uses ( storage: RawStorage) { read_storage_word(slot(root, id) + 3) }
 pub fn head(_ root: u256) -> u256 uses ( storage: RawStorage) { prev(root, 0) }
 pub fn tail(_ root: u256) -> u256 uses ( storage: RawStorage) { next(root, 0) }
 pub fn contains(_ root: u256, _ id: u256) -> bool uses ( storage: RawStorage) {

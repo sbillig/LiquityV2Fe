@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Full multi-branch redemption allocation and fee accounting from CollateralRegistry.sol.
+use std::evm::read_storage_word
 use std::abi::{sol, DynArray, DynArrayAccess}
 use std::evm::{Address, Call, Ctx, Log, RawStorage}
 use super::constants::*
@@ -29,8 +30,8 @@ fn validate_addresses(_ values: DynArray<Address>) {
     }
 }
 fn decayed() -> u256 uses (ctx: Ctx, storage: RawStorage) {
-    let minutes = (ctx.timestamp() - unsafe { storage.sload(1) }) / ONE_MINUTE
-    unsafe { storage.sload(0) } * math::dec_pow(REDEMPTION_MINUTE_DECAY_FACTOR, minutes) / DECIMAL_PRECISION
+    let minutes = (ctx.timestamp() - read_storage_word(1)) / ONE_MINUTE
+    read_storage_word(0) * math::dec_pow(REDEMPTION_MINUTE_DECAY_FACTOR, minutes) / DECIMAL_PRECISION
 }
 fn updated(_ amount: u256, _ supply: u256) -> u256 uses (ctx: Ctx, storage: RawStorage) {
     let prior = decayed()
@@ -42,7 +43,7 @@ fn update_base(_ amount: u256, _ supply: u256) uses (ctx: Ctx, storage: mut RawS
     let rate = updated(amount, supply)
     unsafe { storage.sstore(slot: 0, value: rate) }
     log.emit(BaseRateUpdated { value: rate })
-    let last = unsafe { storage.sload(1) }
+    let last = read_storage_word(1)
     let minutes = (ctx.timestamp() - last) / ONE_MINUTE
     if minutes > 0 {
         let timestamp = last + ONE_MINUTE * minutes
@@ -107,8 +108,8 @@ pub contract CollateralRegistry {
         log.emit(BaseRateUpdated { value: INITIAL_BASE_RATE })
     }
     recv CollateralRegistryMsg {
-        BaseRate -> u256 uses (storage: RawStorage) { unsafe { storage.sload(0) } }
-        LastFeeOperationTime -> u256 uses (storage: RawStorage) { unsafe { storage.sload(1) } }
+        BaseRate -> u256 uses (storage: RawStorage) { read_storage_word(0) }
+        LastFeeOperationTime -> u256 uses (storage: RawStorage) { read_storage_word(1) }
         TotalCollaterals -> u256 uses (total) { total }
         BoldToken -> Address uses (bold) { bold }
         GetToken { index } -> Address uses (tokens) {
@@ -119,16 +120,16 @@ pub contract CollateralRegistry {
             text::require(index < 10, text::registry_invalid_index())
             managers[index as usize]
         }
-        RedemptionRate -> u256 uses (storage: RawStorage) { redemption_rate(unsafe { storage.sload(0) }) }
+        RedemptionRate -> u256 uses (storage: RawStorage) { redemption_rate(read_storage_word(0)) }
         RedemptionRateWithDecay -> u256 uses (ctx: Ctx, storage: RawStorage) { redemption_rate(decayed()) }
         RedemptionFeeWithDecay { amount } -> u256 uses (ctx: Ctx, storage: RawStorage) {
             redemption_rate(decayed()) * amount / DECIMAL_PRECISION
         }
-        RedemptionRateForRedeemedAmount { amount } -> u256 uses (bold, call: mut Call, ctx: Ctx, storage: RawStorage) {
+        RedemptionRateForRedeemedAmount { amount } -> u256 uses (bold, call: Call, ctx: Ctx, storage: RawStorage) {
             let supply = bold.static(BoldTokenMsg::TotalSupply {})
             redemption_rate(updated(amount, supply))
         }
-        EffectiveRedemptionFeeInBold { amount } -> u256 uses (bold, call: mut Call, ctx: Ctx, storage: RawStorage) {
+        EffectiveRedemptionFeeInBold { amount } -> u256 uses (bold, call: Call, ctx: Ctx, storage: RawStorage) {
             let supply = bold.static(BoldTokenMsg::TotalSupply {})
             redemption_rate(updated(amount, supply)) * amount / DECIMAL_PRECISION
         }

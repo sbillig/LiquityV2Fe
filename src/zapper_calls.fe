@@ -1,98 +1,18 @@
 // SPDX-License-Identifier: MIT
-use core::abi::{AbiSize, AbiSpan, AbiDecoder, ByteInput, Decode, Encode}
-use std::abi::{sol, Sol, Bytes}
+use std::abi::{sol, Bytes}
 use std::evm::Address
 use super::types::LatestTroveData
-pub struct OpenParams { pub owner: Address, pub index: u256, pub coll: u256, pub bold: u256, pub upper: u256, pub lower: u256, pub rate: u256, pub batch: Address, pub fee: u256, pub add: Address, pub remove: Address, pub receiver: Address }
-impl AbiSize for OpenParams { const HEAD_SIZE: u256 = 384
- const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for OpenParams { fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 384 } }
-impl Decode<Sol> for OpenParams { fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-let owner = Address { inner: d.read_word(input) }
-let index = d.read_word(input)
-let coll = d.read_word(input)
-let bold = d.read_word(input)
-let upper = d.read_word(input)
-let lower = d.read_word(input)
-let rate = d.read_word(input)
-let batch = Address { inner: d.read_word(input) }
-let fee = d.read_word(input)
-let add = Address { inner: d.read_word(input) }
-let remove = Address { inner: d.read_word(input) }
-let receiver = Address { inner: d.read_word(input) }
-Self { owner, index, coll, bold, upper, lower, rate, batch, fee, add, remove, receiver }
-} }
-impl Encode<Sol> for OpenParams { fn encode(own self, _ out: core::abi::AbiFrame) {
-<Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.index, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.coll, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.bold, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.upper, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.lower, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.rate, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.batch, out.slice(offset: 224, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.fee, out.slice(offset: 256, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.add, out.slice(offset: 288, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.remove, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.receiver, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-} }
-pub struct CloseParams { pub id: u256, pub amount: u256, pub minimum: u256, pub receiver: Address }
-impl AbiSize for CloseParams { const HEAD_SIZE: u256 = 128
- const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for CloseParams { fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 128 } }
-impl Decode<Sol> for CloseParams { fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-let id = d.read_word(input)
-let amount = d.read_word(input)
-let minimum = d.read_word(input)
-let receiver = Address { inner: d.read_word(input) }
-Self { id, amount, minimum, receiver }
-} }
-impl Encode<Sol> for CloseParams { fn encode(own self, _ out: core::abi::AbiFrame) {
-<u256 as Encode<Sol>>::encode(self.id, out.slice(offset: 0, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.amount, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.minimum, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.receiver, out.slice(offset: 96, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-} }
-pub struct LeveragedOpenParams { pub owner: Address, pub index: u256, pub coll: u256, pub flash: u256, pub bold: u256, pub upper: u256, pub lower: u256, pub rate: u256, pub batch: Address, pub fee: u256, pub add: Address, pub remove: Address, pub receiver: Address }
-impl AbiSize for LeveragedOpenParams { const HEAD_SIZE: u256 = 416
- const IS_DYNAMIC: bool = false }
-impl AbiSpan<Sol> for LeveragedOpenParams { fn payload_end<I: ByteInput>(_: I, base: u256, pos: u256) -> u256 { pos + 416 } }
-impl Decode<Sol> for LeveragedOpenParams { fn decode_payload<D: AbiDecoder<Sol>, I: core::abi::ByteInput>(_ d: mut D, _ input: I) -> Self {
-let owner_word = d.read_word(input)
-let owner = Address { inner: owner_word }
-let index = d.read_word(input)
-let coll = d.read_word(input)
-let flash = d.read_word(input)
-let bold = d.read_word(input)
-let upper = d.read_word(input)
-let lower = d.read_word(input)
-let rate = d.read_word(input)
-let batch_word = d.read_word(input)
-let batch = Address { inner: batch_word }
-let fee = d.read_word(input)
-let add_word = d.read_word(input)
-let add = Address { inner: add_word }
-let remove_word = d.read_word(input)
-let remove = Address { inner: remove_word }
-let receiver_word = d.read_word(input)
-let receiver = Address { inner: receiver_word }
-Self { owner, index, coll, flash, bold, upper, lower, rate, batch, fee, add, remove, receiver }
-} }
-impl Encode<Sol> for LeveragedOpenParams { fn encode(own self, _ out: core::abi::AbiFrame) {
-<Address as Encode<Sol>>::encode(self.owner, out.slice(offset: 0, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.index, out.slice(offset: 32, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.coll, out.slice(offset: 64, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.flash, out.slice(offset: 96, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.bold, out.slice(offset: 128, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.upper, out.slice(offset: 160, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.lower, out.slice(offset: 192, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.rate, out.slice(offset: 224, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.batch, out.slice(offset: 256, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<u256 as Encode<Sol>>::encode(self.fee, out.slice(offset: 288, len: <u256 as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.add, out.slice(offset: 320, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.remove, out.slice(offset: 352, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-<Address as Encode<Sol>>::encode(self.receiver, out.slice(offset: 384, len: <Address as core::abi::AbiSize>::HEAD_SIZE))
-} }
+pub use super::address_word::{AddressWord, checked_address}
+
+// These wire records deliberately defer address validation until consumption.
+#[abi]
+pub struct OpenParams { pub owner: AddressWord, pub index: u256, pub coll: u256, pub bold: u256, pub upper: u256, pub lower: u256, pub rate: u256, pub batch: AddressWord, pub fee: u256, pub add: AddressWord, pub remove: AddressWord, pub receiver: AddressWord }
+
+#[abi]
+pub struct CloseParams { pub id: u256, pub amount: u256, pub minimum: u256, pub receiver: AddressWord }
+
+#[abi]
+pub struct LeveragedOpenParams { pub owner: AddressWord, pub index: u256, pub coll: u256, pub flash: u256, pub bold: u256, pub upper: u256, pub lower: u256, pub rate: u256, pub batch: AddressWord, pub fee: u256, pub add: AddressWord, pub remove: AddressWord, pub receiver: AddressWord }
 
 pub msg ZapperCalls {
     #[selector = sol("swapFromBold(uint256,uint256)")]
@@ -127,11 +47,4 @@ pub msg ZapperCalls {
     Swap { amount: u256, minimum: u256 } -> u256,
     #[selector = sol("makeFlashLoan(address,uint256,uint8,bytes)")]
     Flash { token: Address, amount: u256, operation: u8, data: Bytes },
-}
-
-// Solidity calldata-struct addresses are validated when consumed, not eagerly.
-// The no-op leverage callbacks therefore accept unused noncanonical fields.
-pub fn checked_address(_ value: Address) -> Address {
-    if value.inner >> 160 != 0 { std::evm::revert(()) }
-    value
 }

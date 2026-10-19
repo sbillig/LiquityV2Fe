@@ -7,8 +7,8 @@ use super::curve_gauge_rewards::GaugeCalls
 use super::leftovers_sweep::BalanceMsg
 use super::revert_texts::require
 use super::merkl_errors as error
-const CREATOR: Address = Address { inner: 0x8bb4c975ff3c250e0ceea271728547f3802b36fd }
-const SAFE: Address = Address { inner: 0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8 }
+const CREATOR: Address = Address::new(0x8bb4c975ff3c250e0ceea271728547f3802b36fd)
+const SAFE: Address = Address::new(0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8)
 pub struct Config { pub governance: Address, pub bold: Address, pub threshold: u256, pub pool: Bytes32, pub fees: u32, pub weight0: u32, pub weight1: u32, pub start: u256, pub duration: u256 }
 impl Copy for Config {}
 pub msg MerklCalls {
@@ -60,7 +60,7 @@ pub msg MerklMsg {
 }
 pub fn campaign_data(_ cfg: Config) -> Bytes {
     let p = core::ptr::alloc_bytes(640)
-    let words: [u256; 20] = [416, 0, cfg.fees as u256, cfg.weight0 as u256, cfg.weight1 as u256, 480, 512, 576, 0, 0, 0, 0, 608, 32, cfg.pool.val, 0, 1, SAFE.inner, 0, 0]
+    let words: [u256; 20] = [416, 0, cfg.fees as u256, cfg.weight0 as u256, cfg.weight1 as u256, 480, 512, 576, 0, 0, 0, 0, 608, 32, cfg.pool.val, 0, 1, SAFE.word(), 0, 0]
     var i: usize = 0
     while i < 20 {
         unsafe { core::abi::store_word(ptr: core::ptr::offset_bytes(p, (i as u256) * 32), value: words[i]) }
